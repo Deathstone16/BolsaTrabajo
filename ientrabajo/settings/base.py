@@ -28,9 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-AUTH_USER_MODEL = 'usuarios.Usuario'
-
-# Application definition
+AAUTH_USER_MODEL = 'usuarios.Usuario'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -39,8 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'apps.usuarios',
-    'apps.cursos',
+    'usuarios',
+    'cursos',
 ]
 
 MIDDLEWARE = [
