@@ -16,3 +16,10 @@ class RegistroForm(UserCreationForm):
             raise forms.ValidationError('El campo CUIT es obligatorio para oferentes.')
         
         return cleanded_data
+
+class LoginForm(forms.Form):
+    email = forms.EmailField(label='Email')
+    password = forms.CharField(
+        label='Password',
+        widget=forms.PasswordInput()
+    )
