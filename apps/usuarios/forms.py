@@ -5,7 +5,7 @@ from .models import Usuario
 class RegistroForm(UserCreationForm):
     class Meta:
         model = Usuario
-        fields = ['nombre_completo', 'tipo', 'email', 'password1', 'password2','cuit']
+        fields = ['first_name','last_name','username','tipo', 'email', 'password1', 'password2','cuit']
 
     def clean(self):
         cleanded_data = super().clean()
