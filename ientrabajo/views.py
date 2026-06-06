@@ -1,6 +1,7 @@
 from django.shortcuts import render
 
 
+
 def home(request):
     featured_jobs = [
         {
@@ -25,4 +26,4 @@ def home(request):
             "modality": "Presencial"
         },
     ]
-    return render(request, 'base.html', {'featured_jobs': featured_jobs})
+    return render(request, 'home.html', {'featured_jobs': featured_jobs})
