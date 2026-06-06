@@ -1,15 +1,53 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login</title>
-</head>
-<body>
-    <h1>Login</h1>
-    {{form.errors}}
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Iniciar sesion</button>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-accent px-4">
+<div class="bg-white rounded-xl shadow-sm border border-border w-full max-w-md p-8 space-y-6">
+    
+    <div class="text-center space-y-2">
+    <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto">
+        <i data-lucide="briefcase" class="w-6 h-6 text-primary"></i>
+    </div>
+    <h1 class="text-2xl font-medium">IEN Empleo</h1>
+    <p class="text-muted-foreground text-sm">Inicia sesion en tu cuenta</p>
+    </div>
+
+    {% if form.non_field_errors %}
+    <div class="bg-destructive/10 text-destructive text-sm rounded-lg px-4 py-3">
+        {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <form method="POST" class="space-y-4">
+    {% csrf_token %}
+    
+    <div class=" space-y-1">
+        <label class="text-sm font-medium">Email</label>
+        <input  type="email" name="email" 
+            class="w-full px-4 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+            placeholder="tu@email.com">
+    </div>
+
+    <div class="space-y-1">
+        <div class="flex justify-between items-center">
+        <label class="text-sm font-medium">Password</label>
+        <a href="#" class="text-xs text-primary hover:underline">Olvidaste tu contrasena?</a>
+        </div>
+        <input type="password" name="password"
+            class="w-full px-4 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/30">
+    </div>
+
+    <button type="submit"
+            class="w-full py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">
+        Iniciar sesion
+    </button>
     </form>
-</body>
-</html>
+
+    <p class="text-center text-sm text-muted-foreground">
+    No tienes cuenta? 
+    <a href="{% url 'registro' %}" class="text-primary hover:underline">Registrate</a>
+    </p>
+
+</div>
+</div>
+{% endblock %}
