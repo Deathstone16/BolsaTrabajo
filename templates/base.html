@@ -12,47 +12,36 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-background text-foreground min-h-screen flex flex-col">
-  <div id="navbar-container"></div>
-  <script src="js/data.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/saved-jobs.js"></script>
-  <script src="js/utils.js"></script>
-  <script src="js/components.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const role = getRole();
-      if (role === "empresa") { window.location.href = "empresa/perfil.html?id=1"; return; }
-
-      const navbar = document.getElementById("navbar-container");
-      const isAuthed = isAuth();
-      const profileLink = getProfileLink();
-      const isEmpresa = role === "empresa";
-
-      navbar.innerHTML = `
-        <nav class="border-b border-border bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-              <a href="/" class="flex items-center gap-2">
-                <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center"><i data-lucide="briefcase" class="w-6 h-6 text-white"></i></div>
-                <span class="font-medium text-lg text-foreground">IEN Empleo</span>
-              </a>
-              <div class="hidden md:flex items-center gap-8">
-                ${!isEmpresa ? `<a href="/" class="text-muted-foreground hover:text-foreground transition-colors">Inicio</a>` : ""}
-                ${!isEmpresa ? `<a href="buscar-empleo.html" class="text-muted-foreground hover:text-foreground transition-colors">Buscar empleo</a>` : ""}
-                ${isEmpresa ? `<a href="publicar-empleo.html" class="text-muted-foreground hover:text-foreground transition-colors">Publicar oferta</a>` : ""}
-                ${isAuthed ? `
-                  <a href="${profileLink}" class="text-muted-foreground hover:text-foreground transition-colors">Mi perfil</a>
-                  <button onclick="logout()" class="flex items-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors">Cerrar sesión</button>
-                ` : `
-                  <a href="login.html" class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"><i data-lucide="user" class="w-4 h-4"></i>Ingresar</a>
-                `}
-              </div>
-            </div>
+  
+  <nav class="border-b border-border bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <a href="/" class="flex items-center gap-2">
+          <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center">
+            <i data-lucide="briefcase" class="w-6 h-6 text-white"></i>
           </div>
-        </nav>`;
-      lucide.createIcons();
-    });
-  </script>
+          <span class="font-medium text-lg text-foreground">IEN Empleo</span>
+        </a>
+        <div class="hidden md:flex items-center gap-8">
+          <a href="/" class="text-muted-foreground hover:text-foreground transition-colors">Inicio</a>
+          <a href="buscar-empleo.html" class="text-muted-foreground hover:text-foreground transition-colors">Buscar empleo</a>
+          {% if user.is_authenticated %}
+            <a href="#" class="text-muted-foreground hover:text-foreground transition-colors">Mi perfil</a>
+            <form method="post" action="{% url 'logout' %}" style="display:inline">
+              {% csrf_token %}
+              <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors">
+                Cerrar sesión
+              </button>
+            </form>
+          {% else %}
+            <a href="{% url 'login' %}" class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+              <i data-lucide="user" class="w-4 h-4"></i>Ingresar
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
 
   <main class="flex-1">
     <!-- Hero Section -->
@@ -79,7 +68,24 @@
           </div>
           <a href="buscar-empleo.html" class="text-primary hover:underline flex items-center gap-1">Ver todas<i data-lucide="arrow-right" class="w-4 h-4"></i></a>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="featured-jobs"></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {% for job in featured_jobs %}
+          <a href="empleo.html?id={{ job.id }}" class="bg-muted border border-border rounded-xl p-6 hover:shadow-md transition-all hover:border-primary/50 block">
+            <div class="space-y-3">
+              <h3 class="font-medium text-lg">{{ job.title }}</h3>
+              <div class="space-y-1 text-sm text-muted-foreground">
+                <p class="flex items-center gap-2"><i data-lucide="building2" class="w-4 h-4"></i>{{ job.company }}</p>
+                <p>{{ job.location }} · {{ job.modality }}</p>
+              </div>
+              <div class="pt-2">
+                <span class="text-primary text-sm font-medium flex items-center gap-1">
+                  Ver detalles<i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </span>
+              </div>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
       </div>
     </section>
 
@@ -167,25 +173,6 @@
     </div>
   </footer>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const container = document.getElementById("featured-jobs");
-      const featured = JOBS.slice(0, 3);
-      featured.forEach(job => {
-        container.innerHTML += `
-          <a href="empleo.html?id=${job.id}" class="bg-muted border border-border rounded-xl p-6 hover:shadow-md transition-all hover:border-primary/50 block">
-            <div class="space-y-3">
-              <h3 class="font-medium text-lg">${job.title}</h3>
-              <div class="space-y-1 text-sm text-muted-foreground">
-                <p class="flex items-center gap-2"><i data-lucide="building2" class="w-4 h-4"></i>${job.company}</p>
-                <p>${job.location} &middot; ${job.modality}</p>
-              </div>
-              <div class="pt-2"><span class="text-primary text-sm font-medium flex items-center gap-1">Ver detalles<i data-lucide="arrow-right" class="w-4 h-4"></i></span></div>
-            </div>
-          </a>`;
-      });
-      lucide.createIcons();
-    });
-  </script>
+  <script>lucide.createIcons();</script>
 </body>
 </html>
