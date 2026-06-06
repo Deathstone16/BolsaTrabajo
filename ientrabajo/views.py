@@ -1,4 +1,6 @@
 from django.shortcuts import render
+
+
 def home(request):
     featured_jobs = [
         {
