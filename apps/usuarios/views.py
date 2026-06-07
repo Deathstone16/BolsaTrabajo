@@ -1,42 +1,46 @@
 from django.shortcuts import redirect, render
-from django.contrib.auth import login, authenticate
-from .forms import RegistroForm, LoginForm
-from django.contrib.auth import logout
+from django.contrib.auth import login, authenticate, logout
+from .forms import RegistroPostulanteForm, RegistroOferenteForm, LoginForm
 
 def registro(request):
-    if request.method == 'POST':
-        form = RegistroForm(request.POST)
-        if form.is_valid():
-            usuario = form.save()
-            login(request, usuario)
-            return redirect('/')
+    tipo = request.GET.get('tipo', 'postulante')
     
+    if tipo == 'oferente':
+        FormClass = RegistroOferenteForm
     else:
-        form = RegistroForm()
-    
-    return render(request, 'usuarios/registro.html', {'form': form})
+        FormClass = RegistroPostulanteForm
 
+    if request.method == 'POST':
+        form = FormClass(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('registro_exitoso')
+    else:
+        form = FormClass()
 
+    return render(request, 'usuarios/registro.html', {'form': form, 'tipo': tipo})
 
+def registro_exitoso(request):
+    return render(request, 'usuarios/registro_exitoso.html')
 
 def login_view(request):
-    form = LoginForm()
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-
             user = authenticate(request, username=email, password=password)
-
             if user is not None:
-                login(request,user)
-                return redirect('/')
+                login(request, user)
+                return redirect('home')
             else:
-                form.add_error(None,'Email o contraseña incorrectos')
-    return render(request,'usuarios/login.html',{'form': form})
-# Create your views here.
+                form.add_error(None, 'Email o contraseña incorrectos.')
+    else:
+        form = LoginForm()
+
+    return render(request, 'usuarios/login.html', {'form': form})
 
 def logout_view(request):
     logout(request)
-    return redirect('/')
+    return redirect('login')
