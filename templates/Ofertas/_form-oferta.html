@@ -1,0 +1,149 @@
+{% load static %}
+
+{{ form.non_field_errors }}
+
+{% if form.errors %}
+<div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6">
+  <p class="font-medium mb-1">Corregí los siguientes errores:</p>
+  <ul class="list-disc pl-5 text-sm">
+    {% for field, errors in form.errors.items %}
+      {% for error in errors %}
+        <li>{{ field|capfirst }}: {{ error }}</li>
+      {% endfor %}
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<!-- Información básica -->
+<div class="space-y-4">
+  <h3 class="font-medium flex items-center gap-2">
+    <i data-lucide="briefcase" class="w-5 h-5 text-primary"></i>Información básica
+  </h3>
+
+  <div class="space-y-2">
+    <label class="block text-sm font-medium">Título de la oferta</label>
+    <input type="text" name="titulo" value="{{ form.titulo.value|default:'' }}" placeholder="Ej. Buscamos desarrollador Full Stack"
+           class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" required>
+    {% if form.titulo.errors %}<p class="text-sm text-red-500">{{ form.titulo.errors.0 }}</p>{% endif %}
+  </div>
+
+  <div class="space-y-2">
+    <label class="block text-sm font-medium">Nombre del puesto</label>
+    <input type="text" name="nombre_puesto" value="{{ form.nombre_puesto.value|default:'' }}" placeholder="Ej. Desarrollador Full Stack"
+           class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" required>
+    {% if form.nombre_puesto.errors %}<p class="text-sm text-red-500">{{ form.nombre_puesto.errors.0 }}</p>{% endif %}
+  </div>
+
+  <div class="space-y-2">
+    <label class="block text-sm font-medium">Categoría</label>
+    <select name="categoria" class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+      <option value="">Seleccionar categoría</option>
+      {% for categoria in form.fields.categoria.queryset %}
+        <option value="{{ categoria.id }}" {% if form.categoria.value|stringformat:"s" == categoria.id|stringformat:"s" %}selected{% endif %}>
+          {{ categoria.nombre }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="space-y-2">
+      <label class="block text-sm font-medium"><i data-lucide="map-pin" class="w-4 h-4 inline"></i> Ubicación</label>
+      <input type="text" name="ubicacion" value="{{ form.ubicacion.value|default:'' }}" placeholder="Ej. Buenos Aires, Córdoba"
+             class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" required>
+      {% if form.ubicacion.errors %}<p class="text-sm text-red-500">{{ form.ubicacion.errors.0 }}</p>{% endif %}
+    </div>
+    <div class="space-y-2">
+      <label class="block text-sm font-medium">Modalidad</label>
+      <select name="modalidad" class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+        {% for value, label in form.fields.modalidad.choices %}
+          <option value="{{ value }}" {% if form.modalidad.value == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Descripción -->
+<div class="space-y-4 pt-6">
+  <h3 class="font-medium flex items-center gap-2">
+    <i data-lucide="file-text" class="w-5 h-5 text-primary"></i>Descripción del puesto
+  </h3>
+
+  <div class="space-y-2">
+    <label class="block text-sm font-medium">Descripción</label>
+    <textarea name="descripcion" rows="5" placeholder="Describe las responsabilidades y actividades del puesto..."
+              class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring resize-none" required>{{ form.descripcion.value|default:'' }}</textarea>
+    {% if form.descripcion.errors %}<p class="text-sm text-red-500">{{ form.descripcion.errors.0 }}</p>{% endif %}
+  </div>
+
+  <div class="space-y-2">
+    <label class="block text-sm font-medium">Requisitos</label>
+    <textarea name="requisitos" rows="4" placeholder="Lista los requisitos necesarios..."
+              class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring resize-none" required>{{ form.requisitos.value|default:'' }}</textarea>
+    {% if form.requisitos.errors %}<p class="text-sm text-red-500">{{ form.requisitos.errors.0 }}</p>{% endif %}
+  </div>
+
+  <div class="space-y-2">
+    <label class="block text-sm font-medium">Habilidades requeridas</label>
+    <textarea name="habilidades_requeridas" rows="3" placeholder="Ej. React, Python, SQL..."
+              class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring resize-none">{{ form.habilidades_requeridas.value|default:'' }}</textarea>
+  </div>
+</div>
+
+<!-- Experiencia y educación -->
+<div class="space-y-4 pt-6">
+  <h3 class="font-medium flex items-center gap-2">
+    <i data-lucide="graduation-cap" class="w-5 h-5 text-primary"></i>Experiencia y educación
+  </h3>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="space-y-2">
+      <label class="block text-sm font-medium"><i data-lucide="clock" class="w-4 h-4 inline"></i> Experiencia requerida</label>
+      <input type="text" name="experiencia_requerida" value="{{ form.experiencia_requerida.value|default:'' }}" placeholder="Ej. 2-3 años"
+             class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" required>
+      {% if form.experiencia_requerida.errors %}<p class="text-sm text-red-500">{{ form.experiencia_requerida.errors.0 }}</p>{% endif %}
+    </div>
+    <div class="space-y-2">
+      <label class="block text-sm font-medium">Nivel educativo</label>
+      <select name="nivel_educativo" class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+        {% for value, label in form.fields.nivel_educativo.choices %}
+          <option value="{{ value }}" {% if form.nivel_educativo.value == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      {% if form.nivel_educativo.errors %}<p class="text-sm text-red-500">{{ form.nivel_educativo.errors.0 }}</p>{% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Confidencial + Fecha cierre -->
+<div class="space-y-4 pt-6 border-t border-border">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="space-y-2">
+      <label class="block text-sm font-medium">📅 Fecha de cierre</label>
+      <input type="date" name="fecha_cierre" value="{% if form.fecha_cierre.value %}{{ form.fecha_cierre.value|date:'Y-m-d' }}{% endif %}"
+             class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+      
+      {% if form.fecha_cierre.errors %}<p class="text-sm text-red-500">{{ form.fecha_cierre.errors.0 }}</p>{% endif %}
+    </div>
+    <div class="flex items-center justify-between pt-6">
+      <div>
+        <label class="block text-sm font-medium">Publicación confidencial</label>
+        <p class="text-sm text-muted-foreground">Oculta el nombre de la empresa</p>
+      </div>
+      <label class="relative inline-flex items-center cursor-pointer">
+        <input type="checkbox" name="es_confidencial" class="sr-only peer"
+               {% if form.es_confidencial.value %}checked{% endif %}>
+        <div class="w-11 h-6 bg-switch-background peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+      </label>
+    </div>
+  </div>
+
+  <div class="flex gap-4 pt-4">
+    <button type="submit" class="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">
+      {{ submit_text|default:"Publicar oferta" }}
+    </button>
+    <a href="{% url 'home' %}" class="px-6 py-3 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors text-center">Cancelar</a>
+  </div>
+</div>

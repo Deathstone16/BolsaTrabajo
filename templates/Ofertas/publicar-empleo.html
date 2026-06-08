@@ -1,80 +1,25 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Publicar oferta - IEN Empleo</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:"#a69acf",foreground:"#ffffff"},secondary:{DEFAULT:"#f5e6a8",foreground:"#2d2d3a"},background:"#ffffff",foreground:"#2d2d3a",muted:{DEFAULT:"#f7f6fb",foreground:"#7a7a8a"},accent:{DEFAULT:"#faf8ff",foreground:"#2d2d3a"},destructive:{DEFAULT:"#d4183d",foreground:"#ffffff"},"input-background":"#fdfcff","switch-background":"#cbced4"},borderColor:{DEFAULT:"rgba(0,0,0,0.06)"},borderRadius:{lg:"0.75rem"}}}}</script>
-  <link rel="stylesheet" href="css/style.css" />
-  <script src="https://unpkg.com/lucide@latest"></script>
-</head>
-<body class="min-h-screen flex flex-col">
-  
-  <main class="flex-1 py-12 px-4 bg-muted">
-    <div class="max-w-3xl mx-auto">
-      <div class="bg-white rounded-2xl shadow-sm border border-border p-8">
-        <div class="mb-8">
-          <div class="flex items-center gap-3 mb-3"><div class="w-12 h-12 bg-secondary/20 rounded-xl flex items-center justify-center"><i data-lucide="building2" class="w-6 h-6 text-secondary-foreground"></i></div><h1 class="text-3xl font-medium">Publicar oferta laboral</h1></div>
-          <p class="text-muted-foreground">Empresas: completen el formulario para publicar su oferta de empleo de forma gratuita</p>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="flex-1 py-12 px-4 bg-muted min-h-screen">
+  <div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-2xl shadow-sm border border-border p-8">
+      <div class="mb-8">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-12 h-12 bg-secondary/20 rounded-xl flex items-center justify-center">
+            <i data-lucide="building2" class="w-6 h-6 text-secondary-foreground"></i>
+          </div>
+          <h1 class="text-3xl font-medium">Publicar oferta laboral</h1>
         </div>
-
-        <form id="publish-form" class="space-y-6">
-          <div class="space-y-4">
-            <h3 class="font-medium flex items-center gap-2"><i data-lucide="briefcase" class="w-5 h-5 text-primary"></i>Información básica</h3>
-            <div class="space-y-2"><label class="block text-sm">Nombre del puesto</label><input type="text" name="puesto" placeholder="Ej. Desarrollador Full Stack" class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" required /></div>
-            <div class="space-y-2"><label class="block text-sm">Empresa</label><input type="text" name="empresa" placeholder="Nombre de tu empresa" class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" required /></div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="space-y-2"><label class="block text-sm flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4"></i>Ubicación</label><input type="text" name="ubicacion" placeholder="Ej. Buenos Aires, Córdoba" class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" required /></div>
-              <div class="space-y-2"><label class="block text-sm">Modalidad</label><select name="modalidad" class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"><option value="presencial">Presencial</option><option value="remoto">Remoto</option><option value="hibrido">Híbrido</option></select></div>
-            </div>
-          </div>
-
-          <div class="space-y-4">
-            <h3 class="font-medium flex items-center gap-2"><i data-lucide="file-text" class="w-5 h-5 text-primary"></i>Descripción del puesto</h3>
-            <div class="space-y-2"><label class="block text-sm">Descripción</label><textarea name="descripcion" rows="5" placeholder="Describe las responsabilidades y actividades del puesto..." class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring resize-none" required></textarea></div>
-            <div class="space-y-2"><label class="block text-sm">Requisitos</label><textarea name="requisitos" rows="4" placeholder="Lista los requisitos necesarios..." class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring resize-none" required></textarea></div>
-            <div class="space-y-2">
-              <label class="block text-sm">Habilidades requeridas</label>
-              <div class="flex gap-2"><input type="text" id="skill-input" placeholder="Ej. React, Python..." class="flex-1 px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" /><button type="button" onclick="addSkill()" class="px-4 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i>Agregar</button></div>
-              <div id="skills-container" class="flex flex-wrap gap-2 mt-3"></div>
-            </div>
-          </div>
-
-          <div class="space-y-4">
-            <h3 class="font-medium flex items-center gap-2"><i data-lucide="graduation-cap" class="w-5 h-5 text-primary"></i>Experiencia y educación</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="space-y-2"><label class="block text-sm flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4"></i>Experiencia requerida</label><input type="text" name="experiencia" placeholder="Ej. 2-3 años" class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" required /></div>
-              <div class="space-y-2"><label class="block text-sm">Nivel educativo</label><select name="nivelEducativo" class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"><option value="secundaria">Secundaria</option><option value="bachillerato">Bachillerato</option><option value="licenciatura">Licenciatura</option><option value="maestria">Maestría</option></select></div>
-            </div>
-          </div>
-
-          <div class="space-y-4 pt-2 border-t border-border">
-            <div class="flex items-center justify-between">
-              <div class="space-y-1"><label class="block text-sm font-medium">Publicación confidencial</label><p class="text-sm text-muted-foreground">Oculta el nombre de la empresa en la publicación</p></div>
-              <label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" name="confidencial" class="sr-only peer" /><div class="w-11 h-6 bg-switch-background peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div></label>
-            </div>
-          </div>
-
-          <div class="flex gap-4 pt-4">
-            <button type="submit" class="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">Publicar oferta</button>
-            <button type="button" class="px-6 py-3 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors">Cancelar</button>
-          </div>
-        </form>
+        <p class="text-muted-foreground">Completá el formulario para publicar tu oferta de empleo de forma gratuita</p>
       </div>
-    </div>
-  </main>
 
-  <footer class="bg-muted border-t border-border mt-auto">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-        <div class="space-y-4"><div class="flex items-center gap-2"><div class="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center"><i data-lucide="briefcase" class="w-6 h-6 text-white"></i></div><span class="font-medium text-lg">IEN Empleo</span></div><p class="text-sm text-muted-foreground">Conectando talento con oportunidades laborales</p></div>
-        <div><h4 class="font-medium mb-4">Plataforma</h4><ul class="space-y-2"><li><a href="buscar-empleo.html" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Buscar empleo</a></li><li><a href="publicar-empleo.html" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Publicar oferta</a></li></ul></div>
-        <div><h4 class="font-medium mb-4">Instituto</h4><ul class="space-y-2"><li class="text-sm text-muted-foreground">Sobre el IEN</li><li class="text-sm text-muted-foreground">Programas educativos</li></ul></div>
-        <div><h4 class="font-medium mb-4">Contacto</h4><ul class="space-y-3"><li class="flex items-center gap-2 text-sm text-muted-foreground"><i data-lucide="mail" class="w-4 h-4"></i>contacto@ien.edu.ar</li><li class="flex items-center gap-2 text-sm text-muted-foreground"><i data-lucide="phone" class="w-4 h-4"></i>+54 11 1234 5678</li><li class="flex items-center gap-2 text-sm text-muted-foreground"><i data-lucide="map-pin" class="w-4 h-4"></i>Buenos Aires, Argentina</li></ul></div>
-      </div>
-      <div class="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">&copy; <span id="footer-year">2026</span> Instituto de Educación. Todos los derechos reservados.</div>
+      <form method="post" action="{% url 'crear_oferta' %}">
+        {% csrf_token %}
+        {% include 'Ofertas/_form-oferta.html' with submit_text="Publicar oferta" %}
+      </form>
     </div>
-  </footer>
-</body>
-</html>
+  </div>
+</div>
+{% endblock %}
