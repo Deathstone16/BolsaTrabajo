@@ -39,3 +39,36 @@ class LoginForm(forms.Form):
         label='Contraseña',
         widget=forms.PasswordInput()
     )
+
+class DatosPersonalesForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=150, label='Nombre')
+    last_name = forms.CharField(max_length=150, label='Apellido')
+    email = forms.EmailField(label="Email")
+    dni = forms.CharField(max_length=8, label='DNI')
+    fecha_nacimiento = forms.DateField(
+        label='Fecha de nacimiento',
+        widget=forms.DateInput(attrs={'type':'date'})
+    )
+    telefono=forms.CharField(max_length=20, label='Teléfono')
+    direccion=forms.CharField(max_length=200, label='Dirección')
+    
+    class Meta:
+        model = Postulante
+        fields = ['dni','fecha_nacimiento','telefono','direccion']
+        
+    def clean_dni(self):
+        dni = self.cleaned_data.get('dni')
+        if not dni.isdigit():
+            raise forms.ValidationError('El DNI solo puede contener números.')
+        if len(dni) != 8:
+            raise forms.ValidationError('El DNI debe tener 8 dígitos.')
+        return dni
+
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono')
+        if not telefono.isdigit():
+            raise forms.ValidationError('El teléfono solo puede contener números.')
+        return telefono
+    
+    
+    
