@@ -39,6 +39,15 @@ class LoginForm(forms.Form):
         label='Contraseña',
         widget=forms.PasswordInput()
     )
+    
+class OferenteForm(forms.ModelForm):
+    class Meta:
+        model = Oferente
+        fields = [
+            'nombre_empresa', 'cuit', 'descripcion', 'industria',
+            'tamano_empresa', 'ubicacion', 'anio_fundacion',
+            'sitio_web', 'telefono', 'logo', 'banner'
+        ]
 
 class DatosPersonalesForm(forms.ModelForm):
     first_name = forms.CharField(max_length=150, label='Nombre')

@@ -36,9 +36,27 @@ class Postulante(models.Model):
         return self.usuario.get_full_name() or self.usuario.email
 
 class Oferente(models.Model):
+    
+    TAMANO_CHOICES = [
+        ('1-10', '1-10 empleados'),
+        ('11-50', '11-50 empleados'),
+        ('51-200', '51-200 empleados'),
+        ('201-1000', '201-1000 empleados'),
+        ('1000+', 'Más de 1000 empleados'),
+    ]
+    
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
     nombre_empresa = models.CharField(max_length=200)
     cuit = models.CharField(max_length=13)
+    logo = models.ImageField(upload_to='empresas/logos/', null=True, blank=True)
+    banner = models.ImageField(upload_to='empresas/banners/', null=True, blank=True)
+    descripcion = models.TextField(null=True, blank=True)
+    industria = models.CharField(max_length=100, null=True, blank=True)
+    tamano_empresa = models.CharField(max_length=20, choices=TAMANO_CHOICES, null=True, blank=True)
+    ubicacion = models.CharField(max_length=200, null=True, blank=True)
+    anio_fundacion = models.IntegerField(null=True, blank=True)
+    sitio_web = models.URLField(max_length=300, null=True, blank=True)
+    telefono = models.CharField(max_length=50, null=True, blank=True)
     
     def __str__(self):
         return self.nombre_empresa

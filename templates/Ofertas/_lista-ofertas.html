@@ -1,0 +1,48 @@
+{% if ofertas %}
+  {% for oferta in ofertas %}
+    <div class="border border-border rounded-xl p-6 mb-4 hover:border-primary/30 transition-all">
+      <div class="flex items-start justify-between">
+        <div class="flex-1">
+          <h3 class="text-lg font-medium">{{ oferta.titulo }}</h3>
+          <p class="text-sm text-muted-foreground mt-1">
+            {{ oferta.nombre_puesto }} · {{ oferta.ubicacion }} · {{ oferta.get_modalidad_display }}
+          </p>
+        </div>
+        <div class="flex items-center gap-2 ml-4">
+          <span class="px-3 py-1 rounded-full text-xs font-medium
+            {% if oferta.estado == 'activa' %}bg-green-100 text-green-700
+            {% elif oferta.estado == 'pendiente' %}bg-yellow-100 text-yellow-700
+            {% else %}bg-gray-100 text-gray-700{% endif %}">
+            {{ oferta.get_estado_display }}
+          </span>
+          <button type="button" onclick="openEditModal({{ oferta.id }})"
+                  class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                  title="Editar oferta">
+            <i data-lucide="pencil" class="w-4 h-4"></i>
+          </button>
+          <button type="button" onclick="confirmDelete({{ oferta.id }})"
+                  class="p-2 text-muted-foreground hover:text-destructive hover:bg-red-50 rounded-lg transition-colors"
+                  title="Eliminar oferta">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+      <p class="text-xs text-muted-foreground mt-3">
+        Publicada: {{ oferta.fecha_publicacion|date:"d/m/Y" }}
+        {% if oferta.fecha_cierre %} · Cierre: {{ oferta.fecha_cierre|date:"d/m/Y" }}{% endif %}
+      </p>
+    </div>
+  {% endfor %}
+{% else %}
+  <div class="text-center py-12">
+    <div class="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
+      <i data-lucide="briefcase" class="w-8 h-8 text-muted-foreground"></i>
+    </div>
+    <h3 class="font-medium mb-2">No hay ofertas publicadas</h3>
+    <p class="text-sm text-muted-foreground mb-4">Publicá tu primera oferta para atraer talento</p>
+    <button onclick="openCreateModal()"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg">
+      Publicar primera oferta
+    </button>
+  </div>
+{% endif %}
