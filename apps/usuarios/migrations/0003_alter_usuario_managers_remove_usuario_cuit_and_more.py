@@ -42,10 +42,6 @@ class Migration(migrations.Migration):
             name='Postulante',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('dni', models.CharField(blank=True, max_length=8, null=True)),
-                ('fecha_nacimiento', models.DateField(blank=True, null=True)),
-                ('telefono', models.CharField(blank=True, max_length=20, null=True)),
-                ('direccion', models.CharField(blank=True, max_length=200, null=True)),
                 ('usuario', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
