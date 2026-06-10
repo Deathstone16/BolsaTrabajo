@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
-from apps.cursos.models import Curso, Categoria
-from apps.cursos.forms import CursoForm, CategoriaForm
-from apps.cursos import services as cursos_services
+from cursos.models import Curso, Categoria
+from cursos.forms import CursoForm, CategoriaForm
+from cursos import services as cursos_services
 
 @staff_member_required
 def listar_cursos(request):
