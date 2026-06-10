@@ -22,9 +22,18 @@ class Usuario(AbstractUser):
     REQUIRED_FIELDS = []
     username = None
     objects = UsuarioManager()
+    def __str__(self):
+        return self.email
 
 class Postulante(models.Model):
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
+    dni = models.CharField(max_length=8, blank=True, null=True)
+    fecha_nacimiento = models.DateField(blank=True, null=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+    direccion = models.CharField(max_length=200, blank=True, null=True)
+    
+    def __str__(self):
+        return self.usuario.get_full_name() or self.usuario.email
 
 class Oferente(models.Model):
     
@@ -48,3 +57,6 @@ class Oferente(models.Model):
     anio_fundacion = models.IntegerField(null=True, blank=True)
     sitio_web = models.URLField(max_length=300, null=True, blank=True)
     telefono = models.CharField(max_length=50, null=True, blank=True)
+    
+    def __str__(self):
+        return self.nombre_empresa

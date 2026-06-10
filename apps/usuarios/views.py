@@ -1,6 +1,6 @@
 from django.shortcuts import redirect, render
 from django.contrib.auth import login, authenticate, logout
-from .forms import RegistroPostulanteForm, RegistroOferenteForm, LoginForm, OferenteForm
+from .forms import RegistroPostulanteForm, RegistroOferenteForm, LoginForm, DatosPersonalesForm,OferenteForm
 from django.contrib.auth.decorators import login_required
 
 def registro(request):
@@ -31,7 +31,7 @@ def login_view(request):
         if form.is_valid():
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            user = authenticate(request, username=email, password=password)
+            user = authenticate(request, email=email, password=password)
             if user is not None:
                 login(request, user)
                 return redirect('home')
@@ -62,3 +62,30 @@ def editar_perfil_empresa(request):
         form = OferenteForm(instance=oferente)
     
     return render(request, 'ofertas/editar-perfil.html', {'form': form, 'oferente': oferente})
+
+
+@login_required
+def datos_personales(request):
+    postulante = request.user.postulante
+    
+    if request.method == 'POST':
+        form = DatosPersonalesForm(request.POST, instance=postulante)
+        if form.is_valid():
+            postulante = form.save(commit=False)
+            request.user.first_name = form.cleaned_data['first_name']
+            request.user.last_name = form.cleaned_data['last_name']
+            request.user.email = form.cleaned_data['email']
+            request.user.save()
+            postulante.save()
+            return redirect('datos_personales_exitoso')
+    else:
+        form = DatosPersonalesForm(instance=postulante, initial={
+            'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
+            'email': request.user.email,
+        })
+
+    return render(request, 'usuarios/datos_personales.html', {'form': form})
+
+def datos_personales_exitoso(request):
+    return render(request, 'usuarios/datos_personales_exitoso.html')
