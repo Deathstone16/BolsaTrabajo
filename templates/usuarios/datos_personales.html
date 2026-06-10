@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="flex items-center justify-center bg-accent px-4 py-8">
+  <div class="bg-white rounded-xl shadow-sm border border-border w-full max-w-lg p-8 space-y-5">
+
+    <div class="text-center space-y-1">
+      <h1 class="text-2xl font-medium">Mis datos personales</h1>
+      <p class="text-muted-foreground text-sm">Completá tu información personal</p>
+    </div>
+
+    {% if form.non_field_errors %}
+    <div class="bg-destructive/10 text-destructive text-sm rounded-lg px-4 py-3">
+      {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <form method="POST" class="space-y-3">
+      {% csrf_token %}
+      <div class="grid grid-cols-2 gap-3">
+        {% for field in form %}
+        <div class="space-y-1 {% if field.html_name == 'email' or field.html_name == 'direccion' %}col-span-2{% endif %}">
+          <label class="text-sm font-medium">{{ field.label }}</label>
+          <input type="{{ field.field.widget.input_type }}"
+                 name="{{ field.html_name }}"
+                 class="w-full px-3 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
+                 placeholder="{{ field.label }}"
+                 {% if field.value %}value="{{ field.value }}"{% endif %}>
+          {% if field.errors %}
+          <p class="text-destructive text-xs">{{ field.errors|join:", " }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <button type="submit"
+              class="w-full py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
+        Guardar
+      </button>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
