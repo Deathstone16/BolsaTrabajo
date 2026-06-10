@@ -1,6 +1,7 @@
 from django.shortcuts import redirect, render
 from django.contrib.auth import login, authenticate, logout
-from .forms import RegistroPostulanteForm, RegistroOferenteForm, LoginForm
+from .forms import RegistroPostulanteForm, RegistroOferenteForm, LoginForm, OferenteForm
+from django.contrib.auth.decorators import login_required
 
 def registro(request):
     tipo = request.GET.get('tipo', 'postulante')
@@ -44,3 +45,20 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('login')
+
+@login_required
+def editar_perfil_empresa(request):
+    if not hasattr(request.user, 'oferente'):
+        return redirect('home')
+    
+    oferente = request.user.oferente
+    
+    if request.method == 'POST':
+        form = OferenteForm(request.POST, request.FILES, instance=oferente)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard_empresa')
+    else:
+        form = OferenteForm(instance=oferente)
+    
+    return render(request, 'ofertas/editar-perfil.html', {'form': form, 'oferente': oferente})

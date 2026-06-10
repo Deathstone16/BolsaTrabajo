@@ -39,3 +39,12 @@ class LoginForm(forms.Form):
         label='Contraseña',
         widget=forms.PasswordInput()
     )
+    
+class OferenteForm(forms.ModelForm):
+    class Meta:
+        model = Oferente
+        fields = [
+            'nombre_empresa', 'cuit', 'descripcion', 'industria',
+            'tamano_empresa', 'ubicacion', 'anio_fundacion',
+            'sitio_web', 'telefono', 'logo', 'banner'
+        ]
