@@ -2,9 +2,16 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import Usuario, Postulante, Oferente
 
-class RegistroPostulanteForm(UserCreationForm):
+
+
+class RegistroBaseForm(UserCreationForm):
     class Meta:
         model = Usuario
+        fields = ['email', 'password1', 'password2']
+
+
+class RegistroPostulanteForm(RegistroBaseForm):
+    class Meta(RegistroBaseForm.Meta):
         fields = ['first_name', 'last_name', 'email', 'password1', 'password2']
         labels = {
             'first_name': 'Nombre',
@@ -16,13 +23,10 @@ class RegistroPostulanteForm(UserCreationForm):
         Postulante.objects.create(usuario=user)
         return user
 
-class RegistroOferenteForm(UserCreationForm):
+
+class RegistroOferenteForm(RegistroBaseForm):
     nombre_empresa = forms.CharField(max_length=200, label='Nombre de la empresa')
     cuit = forms.CharField(max_length=13, label='CUIT')
-
-    class Meta:
-        model = Usuario
-        fields = ['email', 'password1', 'password2']
 
     def save(self, commit=True):
         user = super().save(commit=True)
