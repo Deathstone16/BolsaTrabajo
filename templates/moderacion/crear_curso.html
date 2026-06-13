@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-8">
+
+  <div class="mb-8">
+    <h1 class="text-3xl font-medium mb-2">Crear Curso</h1>
+    <p class="text-muted-foreground">Completa los datos del nuevo curso</p>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-border p-6">
+    <form method="POST" enctype="multipart/form-data" class="space-y-4">
+      {% csrf_token %}
+    {% for field in form %}
+    <div class="space-y-1">
+        <label class="text-sm font-medium">{{ field.label }}</label>
+        {% if field.name == 'imagen' %}
+    <div class="flex items-center gap-3">
+        <label for="imagen-input"
+            class="cursor-pointer px-4 py-2 bg-muted text-foreground rounded-lg border border-border hover:bg-muted/80 transition-colors text-sm">
+            Elegir imagen
+        </label>
+        <span id="imagen-nombre" class="text-sm text-muted-foreground">Ninguna imagen seleccionada</span>
+    </div>
+    {{ field }}
+    {% if field.errors %}
+        <p class="text-destructive text-xs mt-1">La imagen es obligatoria.</p>
+    {% endif %}
+{% else %}
+    {{ field }}
+    {% if field.errors %}
+        <p class="text-destructive text-xs">{{ field.errors }}</p>
+    {% endif %}
+{% endif %}
+    </div>
+    {% endfor %}
+      
+
+      <div class="flex gap-3 pt-4 border-t border-border">
+        <button type="submit"
+                class="flex-1 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">
+            Crear curso
+        </button>
+        <a href="{% url 'mod_listar_cursos' %}"
+          class="px-6 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors">
+          Cancelar
+        </a>
+      </div>
+    </form>
+  </div>
+
+</div>
+<script>
+  document.getElementById('imagen-input').addEventListener('change', function() {
+    const nombre = this.files[0] ? this.files[0].name : 'Ninguna imagen seleccionada';
+    document.getElementById('imagen-nombre').textContent = nombre;
+  });
+</script>
+{% endblock %}
