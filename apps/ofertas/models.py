@@ -42,9 +42,8 @@ class Oferta(models.Model):
     ubicacion = models.CharField(max_length=100)
     modalidad = models.CharField(max_length=20, choices=MODALIDAD_CHOICES, default='presencial')
     descripcion = models.TextField()
-    requisitos = models.TextField()
     habilidades_requeridas = models.TextField()
-    experiencia_requerida = models.CharField(max_length=100) # Ej: "2-3 años"
+    experiencia_requerida = models.PositiveIntegerField(default=0)
     nivel_educativo = models.CharField(max_length=30, choices=NIVEL_EDUCATIVO_CHOICES)
     es_confidencial = models.BooleanField(default=False)
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')

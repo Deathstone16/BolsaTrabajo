@@ -4,7 +4,6 @@ from django.http import JsonResponse
 from .forms import OfertaForm
 from .services import crear_oferta_laboral, obtener_ofertas_por_empresa, obtener_oferta_por_id, eliminar_oferta_por_id
 from usuarios.forms import OferenteForm
-from django.http import JsonResponse
 
 
 @login_required
@@ -37,11 +36,13 @@ def dashboard_empresa(request):
     oferente = request.user.oferente
     ofertas = obtener_ofertas_por_empresa(request.user)
     form_perfil = OferenteForm(instance=oferente)
+    form = OfertaForm()
 
     return render(request, 'Ofertas/home_oferente.html', {
         'oferente': oferente,
         'ofertas': ofertas,
         'form_perfil': form_perfil,
+        'form': form,
     })
 
 
@@ -99,7 +100,6 @@ def datos_oferta(request, pk):
         'ubicacion': oferta.ubicacion,
         'modalidad': oferta.modalidad,
         'descripcion': oferta.descripcion,
-        'requisitos': oferta.requisitos,
         'habilidades_requeridas': oferta.habilidades_requeridas,
         'experiencia_requerida': oferta.experiencia_requerida,
         'nivel_educativo': oferta.nivel_educativo,

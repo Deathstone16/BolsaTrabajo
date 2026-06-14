@@ -15,7 +15,6 @@
 </div>
 {% endif %}
 
-<!-- Información básica -->
 <div class="space-y-4">
   <h3 class="font-medium flex items-center gap-2">
     <i data-lucide="briefcase" class="w-5 h-5 text-primary"></i>Información básica
@@ -65,7 +64,6 @@
   </div>
 </div>
 
-<!-- Descripción -->
 <div class="space-y-4 pt-6">
   <h3 class="font-medium flex items-center gap-2">
     <i data-lucide="file-text" class="w-5 h-5 text-primary"></i>Descripción del puesto
@@ -79,20 +77,27 @@
   </div>
 
   <div class="space-y-2">
-    <label class="block text-sm font-medium">Requisitos</label>
-    <textarea name="requisitos" rows="4" placeholder="Lista los requisitos necesarios..."
-              class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring resize-none" required>{{ form.requisitos.value|default:'' }}</textarea>
-    {% if form.requisitos.errors %}<p class="text-sm text-red-500">{{ form.requisitos.errors.0 }}</p>{% endif %}
-  </div>
-
-  <div class="space-y-2">
     <label class="block text-sm font-medium">Habilidades requeridas</label>
-    <textarea name="habilidades_requeridas" rows="3" placeholder="Ej. React, Python, SQL..."
-              class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring resize-none">{{ form.habilidades_requeridas.value|default:'' }}</textarea>
+
+    <div class="relative">
+      <input type="text" id="tags-input"
+            placeholder="Escribí una habilidad y seleccioná del listado..."
+            class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+            autocomplete="off">
+
+      <ul id="tags-dropdown"
+          class="absolute z-10 w-full bg-white border border-border rounded-lg mt-1 shadow-lg hidden max-h-48 overflow-y-auto">
+      </ul>
+    </div>
+
+    <div id="tags-container" class="flex flex-wrap gap-2 mt-2 min-h-0">
+    </div>
+
+    <input type="hidden" name="habilidades_requeridas" id="id_habilidades_requeridas"
+          value="{{ form.habilidades_requeridas.value|default:'' }}">
   </div>
 </div>
 
-<!-- Experiencia y educación -->
 <div class="space-y-4 pt-6">
   <h3 class="font-medium flex items-center gap-2">
     <i data-lucide="graduation-cap" class="w-5 h-5 text-primary"></i>Experiencia y educación
@@ -101,10 +106,17 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="space-y-2">
       <label class="block text-sm font-medium"><i data-lucide="clock" class="w-4 h-4 inline"></i> Experiencia requerida</label>
-      <input type="text" name="experiencia_requerida" value="{{ form.experiencia_requerida.value|default:'' }}" placeholder="Ej. 2-3 años"
-             class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" required>
+      <div class="flex items-center gap-2">
+        <input type="number" name="experiencia_requerida"
+              value="{{ form.experiencia_requerida.value|default:'' }}"
+              min="0" max="99"
+              class="w-24 px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-center"
+              required>
+        <span class="text-sm text-muted-foreground">años</span>
+      </div>
       {% if form.experiencia_requerida.errors %}<p class="text-sm text-red-500">{{ form.experiencia_requerida.errors.0 }}</p>{% endif %}
     </div>
+
     <div class="space-y-2">
       <label class="block text-sm font-medium">Nivel educativo</label>
       <select name="nivel_educativo" class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
@@ -117,8 +129,7 @@
   </div>
 </div>
 
-<!-- Confidencial + Fecha cierre -->
-<div class="space-y-4 pt-6 border-t border-border">
+<div class="space-y-4 pt-6">
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="space-y-2">
       <label class="block text-sm font-medium">📅 Fecha de cierre</label>
