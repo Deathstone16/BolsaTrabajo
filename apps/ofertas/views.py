@@ -1,16 +1,13 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .forms import OfertaForm
 from .services import crear_oferta_laboral, obtener_ofertas_por_empresa, obtener_oferta_por_id, eliminar_oferta_por_id
 from usuarios.forms import OferenteForm
+from usuarios.decorators import oferente_required
 
 
-@login_required
+@oferente_required
 def crear_oferta(request):
-    es_oferente = hasattr(request.user, 'oferente')
-    if not es_oferente:
-        return redirect('home')
 
     if request.method == 'POST':
         form = OfertaForm(request.POST)
@@ -28,11 +25,9 @@ def crear_oferta(request):
     return redirect('dashboard_empresa')
 
 
-@login_required
+@oferente_required
 def dashboard_empresa(request):
-    if not hasattr(request.user, 'oferente'):
-        return redirect('home')
-
+    
     oferente = request.user.oferente
     ofertas = obtener_ofertas_por_empresa(request.user)
     form_perfil = OferenteForm(instance=oferente)
@@ -46,7 +41,7 @@ def dashboard_empresa(request):
     })
 
 
-@login_required
+@oferente_required
 def editar_oferta(request, pk):
     oferta = obtener_oferta_por_id(pk)
 
@@ -69,7 +64,7 @@ def editar_oferta(request, pk):
     return redirect('dashboard_empresa')
 
 
-@login_required
+@oferente_required
 def eliminar_oferta(request, pk):
     oferta = obtener_oferta_por_id(pk)
 
@@ -86,7 +81,7 @@ def eliminar_oferta(request, pk):
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
 
-@login_required
+@oferente_required
 def datos_oferta(request, pk):
     oferta = obtener_oferta_por_id(pk)
 
@@ -108,10 +103,8 @@ def datos_oferta(request, pk):
     })
 
 
-@login_required
+@oferente_required
 def lista_ofertas_parcial(request):
-    if not hasattr(request.user, 'oferente'):
-        return JsonResponse({'error': 'No autorizado'}, status=403)
 
     ofertas = obtener_ofertas_por_empresa(request.user)
 
@@ -120,10 +113,8 @@ def lista_ofertas_parcial(request):
     })
 
 
-@login_required
+@oferente_required
 def editar_perfil_empresa(request):
-    if not hasattr(request.user, 'oferente'):
-        return redirect('home')
 
     oferente = request.user.oferente
 

@@ -23,8 +23,11 @@
           <span class="font-medium text-lg text-foreground">IEN Empleo</span>
         </a>
         <div class="hidden md:flex items-center gap-8">
-          <a href="/" class="text-muted-foreground hover:text-foreground transition-colors">Inicio</a>
-          <a href="buscar-empleo.html" class="text-muted-foreground hover:text-foreground transition-colors">Buscar empleo</a>
+          <a href="{% url 'home' %}" class="text-muted-foreground hover:text-foreground transition-colors">Inicio</a>
+
+          {% if not user.is_authenticated or user.postulante %}
+            <a href="#" class="text-muted-foreground hover:text-foreground transition-colors">Buscar empleo</a>
+          {% endif %}
           {% if user.is_authenticated and user.oferente %}
             <a href="{% url 'dashboard_empresa' %}" class="text-muted-foreground hover:text-foreground transition-colors">Mi panel</a>
           {% endif %}
@@ -60,7 +63,14 @@
           <div class="flex items-center gap-2"><div class="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center"><i data-lucide="briefcase" class="w-6 h-6 text-white"></i></div><span class="font-medium text-lg">IEN Empleo</span></div>
           <p class="text-sm text-muted-foreground">Conectando talento con oportunidades laborales</p>
         </div>
-        <div><h4 class="font-medium mb-4">Plataforma</h4><ul class="space-y-2"><li><a href="buscar-empleo.html" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Buscar empleo</a></li><li><a href="{% url 'crear_oferta' %}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Publicar oferta</a></li><li class="text-sm text-muted-foreground">Empresas</li></ul></div>
+        <div>
+          <h4 class="font-medium mb-4">Plataforma</h4>
+          <ul class="space-y-2">
+          <li><a href="#" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Buscar empleo</a></li>
+          {% comment %} <li><a href="{% url 'crear_oferta' %}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Publicar oferta</a></li> {% endcomment %}
+          <li class="text-sm text-muted-foreground">Empresas</li>
+        </ul>
+      </div>
         <div><h4 class="font-medium mb-4">Instituto</h4><ul class="space-y-2"><li class="text-sm text-muted-foreground">Sobre el IEN</li><li class="text-sm text-muted-foreground">Programas educativos</li></ul></div>
         <div><h4 class="font-medium mb-4">Contacto</h4><ul class="space-y-3"><li class="flex items-center gap-2 text-sm text-muted-foreground"><i data-lucide="mail" class="w-4 h-4"></i>contacto@ien.edu.ar</li><li class="flex items-center gap-2 text-sm text-muted-foreground"><i data-lucide="phone" class="w-4 h-4"></i>+54 11 1234 5678</li><li class="flex items-center gap-2 text-sm text-muted-foreground"><i data-lucide="map-pin" class="w-4 h-4"></i>Buenos Aires, Argentina</li></ul></div>
       </div>
