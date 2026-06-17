@@ -2,6 +2,7 @@ from django.shortcuts import redirect, render
 from django.contrib.auth import login, authenticate, logout
 from .forms import RegistroPostulanteForm, RegistroOferenteForm, LoginForm, DatosPersonalesForm,OferenteForm
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 
 def registro(request):
     tipo = request.GET.get('tipo', 'postulante')
@@ -15,7 +16,6 @@ def registro(request):
         form = FormClass(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
             return redirect('registro_exitoso')
     else:
         form = FormClass()
@@ -23,7 +23,12 @@ def registro(request):
     return render(request, 'usuarios/registro.html', {'form': form, 'tipo': tipo})
 
 def registro_exitoso(request):
-    return render(request, 'usuarios/registro_exitoso.html')
+    return render(request, 'usuarios/exito.html', {
+        'titulo': '¡Cuenta creada!',
+        'mensaje': 'Tu cuenta fue creada exitosamente. Ya podés iniciar sesión.',
+        'link_url': reverse('login'),
+        'link_texto': 'Iniciar sesión',
+    })
 
 def login_view(request):
     if request.method == 'POST':
@@ -47,9 +52,14 @@ def logout_view(request):
     return redirect('login')
 
 
+
 @login_required
 def datos_personales(request):
+    if not hasattr(request.user, 'postulante'):
+        return redirect('home')
+    
     postulante = request.user.postulante
+
     
     if request.method == 'POST':
         form = DatosPersonalesForm(request.POST, instance=postulante)
@@ -71,4 +81,9 @@ def datos_personales(request):
     return render(request, 'usuarios/datos_personales.html', {'form': form})
 
 def datos_personales_exitoso(request):
-    return render(request, 'usuarios/datos_personales_exitoso.html')
+    return render(request, 'usuarios/exito.html', {
+        'titulo': '¡Datos guardados!',
+        'mensaje': 'Tu información personal fue actualizada correctamente.',
+        'link_url': reverse('datos_personales'),
+        'link_texto': 'Volver a mis datos',
+    })
