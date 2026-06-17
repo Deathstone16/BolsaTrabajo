@@ -11,7 +11,13 @@ def listar_cursos():
 def dar_de_baja_curso(curso_id):
     curso = get_object_or_404(Curso, id=curso_id)
     curso.activo= False
-    curso.save(update_fields=['activo'])
+    curso.save()
+
+def modificar_curso(curso_id, datos):
+    curso= Curso.objects.get(id=curso_id)
+    curso.nombre = datos.get('nombre', curso.nombre)
+    curso.descripcion = datos.get('descripcion', curso.descripcion)
+    curso.save()
     return curso
 
 def modificar_curso(curso_id, form):
