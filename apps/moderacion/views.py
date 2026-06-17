@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from cursos.models import Curso, Categoria
 from cursos.forms import CursoForm, CategoriaForm
 from cursos import services as cursos_services
-
+from django.contrib import messages
 
 def es_staff(user):
     return user.is_authenticated and user.is_staff
@@ -12,13 +12,12 @@ staff_required = user_passes_test(es_staff, login_url= '/usuarios/login/')
 
 @staff_required
 def listar_cursos(request):
-    cursos = cursos_services.listar_cursos()
-    context = {
+    cursos, resumen = cursos_services.listar_cursos_con_resumen()
+    return render(request, 'moderacion/listar_cursos.html', {
         'cursos': cursos,
-        'cursos_presenciales': cursos.filter(tipo='Presencial').count(),
-        'cursos_virtuales': cursos.filter(tipo='Virtual').count(),
-    }
-    return render(request, 'moderacion/listar_cursos.html', context)
+        'cursos_presenciales': resumen['presenciales'],
+        'cursos_virtuales': resumen['virtuales'],
+    })
 
 @staff_required
 def crear_curso(request):
@@ -26,19 +25,25 @@ def crear_curso(request):
         form = CursoForm(request.POST, request.FILES)
         if form.is_valid():
             cursos_services.crear_curso(form)
+            messages.success(request, 'Curso creado correctamente')
             return redirect('mod_listar_cursos')
+        else:
+            messages.error(request, 'Corregí los errores del formulario')  
     else:
         form = CursoForm()
     return render(request, 'moderacion/crear_curso.html', {'form': form})
 
 @staff_required
 def modificar_curso(request, curso_id):
-    curso = get_object_or_404(Curso, id=curso_id)
+    curso = get_object_or_404(Curso, id=curso_id)    
     if request.method == 'POST':
-        form = CursoForm(request.POST, request.FILES, instance=curso)
+        form = CursoForm(request.POST, request.FILES, instance=curso)  
         if form.is_valid():
-            form.save()
+            cursos_services.modificar_curso(curso_id, form)
+            messages.success(request, 'Curso modificado correctamente')
             return redirect('mod_listar_cursos')
+        else:
+            messages.error(request, 'Corregí los errores del formulario')  
     else:
         form = CursoForm(instance=curso)
     return render(request, 'moderacion/modificar_curso.html', {'form': form, 'curso': curso})
@@ -47,6 +52,7 @@ def modificar_curso(request, curso_id):
 def dar_de_baja_curso(request, curso_id):
     if request.method == 'POST':
         cursos_services.dar_de_baja_curso(curso_id)
+        messages.success(request, 'Curso dado de baja correctamente')
         return redirect('mod_listar_cursos')
     curso = get_object_or_404(Curso, id=curso_id)
     return render(request, 'moderacion/confirmar_baja.html', {'curso': curso})
@@ -62,10 +68,14 @@ def crear_categoria(request):
         form = CategoriaForm(request.POST)
         if form.is_valid():
             cursos_services.crear_categoria(form)
+            messages.success(request, 'Categoría creada correctamente')
             return redirect('mod_listar_categorias')
+        else:
+            messages.error(request, 'Corregí los errores del formulario')
     else:
         form = CategoriaForm()
     return render(request, 'moderacion/crear_categoria.html', {'form': form})
+
 
 @staff_required
 def modificar_categoria(request, categoria_id):
@@ -74,7 +84,10 @@ def modificar_categoria(request, categoria_id):
         form = CategoriaForm(request.POST, instance=categoria)
         if form.is_valid():
             cursos_services.modificar_categoria(categoria_id, form)
+            messages.success(request, 'Categoría modificada correctamente')
             return redirect('mod_listar_categorias')
+        else:
+            messages.error(request, 'Corregí los errores del formulario') 
     else:
         form = CategoriaForm(instance=categoria)
     return render(request, 'moderacion/modificar_categoria.html', {'form': form, 'categoria': categoria})
@@ -83,6 +96,8 @@ def modificar_categoria(request, categoria_id):
 def dar_de_baja_categoria(request, categoria_id):
     if request.method == 'POST':
         cursos_services.dar_de_baja_categoria(categoria_id)
+        messages.success(request, 'Categoría dada de baja correctamente')
         return redirect('mod_listar_categorias')
     categoria = get_object_or_404(Categoria, id=categoria_id)
     return render(request, 'moderacion/confirmar_baja_categoria.html', {'categoria': categoria})
+

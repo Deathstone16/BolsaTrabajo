@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}  
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 lg:px-8 py-8">
 
@@ -112,26 +112,9 @@
   </div>
 
 </div>
+{% endblock %}
 
-<script>
-  lucide.createIcons();
+{% block extra_js %}
+<script src="{% static 'js/moderacion.js' %}"></script>
 
-  const searchInput = document.getElementById('course-search');
-  const typeFilter = document.getElementById('type-filter');
-
-  function filtrar() {
-    const search = searchInput.value.toLowerCase();
-    const tipo = typeFilter.value;
-    document.querySelectorAll('#courses-grid > div[data-nombre]').forEach(card => {
-      const nombre = card.dataset.nombre;
-      const cardTipo = card.dataset.tipo;
-      const matchSearch = nombre.includes(search);
-      const matchTipo = tipo === 'all' || cardTipo === tipo;
-      card.style.display = matchSearch && matchTipo ? '' : 'none';
-    });
-  }
-
-  searchInput.addEventListener('input', filtrar);
-  typeFilter.addEventListener('change', filtrar);
-</script>
 {% endblock %}
