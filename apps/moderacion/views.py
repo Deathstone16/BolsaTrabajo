@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import user_passes_test
 from django.http import JsonResponse ## agregacion temporal para listar ofertas pendientes en moderacion hasta que se implemente la HU del Template de moderacion de ofertas
 from cursos.models import Curso, Categoria
 from cursos.forms import CursoForm, CategoriaForm

@@ -42,6 +42,7 @@
             {% if user.postulante %}
               <a href="#" class="text-muted-foreground hover:text-foreground transition-colors">Mi perfil</a>
               <a href="{% url 'datos_personales' %}" class="text-muted-foreground hover:text-foreground transition-colors">Datos personales</a>
+              {% endif %}            
             {% if user.is_staff %}
               <a href="{% url 'mod_listar_cursos' %}" class="text-muted-foreground hover:text-foreground transition-colors">Moderación</a>
             {% endif %}
