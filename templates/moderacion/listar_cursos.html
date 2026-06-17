@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}  
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 lg:px-8 py-8">
 
@@ -9,7 +9,7 @@
       <p class="text-muted-foreground">Administra los cursos disponibles en la plataforma</p>
     </div>
     <a href="{% url 'mod_crear_curso' %}"
-       class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+      class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
       <i data-lucide="plus" class="w-5 h-5"></i>
       Crear curso
     </a>
@@ -21,7 +21,7 @@
       <div class="flex-1 relative">
         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground"></i>
         <input type="text" id="course-search" placeholder="Buscar cursos..."
-               class="w-full pl-10 pr-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              class="w-full pl-10 pr-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30" />
       </div>
       <div class="relative min-w-[200px]">
         <i data-lucide="filter" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none"></i>
@@ -112,26 +112,9 @@
   </div>
 
 </div>
+{% endblock %}
 
-<script>
-  lucide.createIcons();
+{% block extra_js %}
+<script src="{% static 'js/moderacion.js' %}"></script>
 
-  const searchInput = document.getElementById('course-search');
-  const typeFilter = document.getElementById('type-filter');
-
-  function filtrar() {
-    const search = searchInput.value.toLowerCase();
-    const tipo = typeFilter.value;
-    document.querySelectorAll('#courses-grid > div[data-nombre]').forEach(card => {
-      const nombre = card.dataset.nombre;
-      const cardTipo = card.dataset.tipo;
-      const matchSearch = nombre.includes(search);
-      const matchTipo = tipo === 'all' || cardTipo === tipo;
-      card.style.display = matchSearch && matchTipo ? '' : 'none';
-    });
-  }
-
-  searchInput.addEventListener('input', filtrar);
-  typeFilter.addEventListener('change', filtrar);
-</script>
 {% endblock %}
