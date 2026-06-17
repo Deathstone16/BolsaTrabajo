@@ -12,6 +12,7 @@ def dar_de_baja_curso(curso_id):
     curso = get_object_or_404(Curso, id=curso_id)
     curso.activo= False
     curso.save(update_fields=['activo'])
+    return curso
 
 def modificar_curso(curso_id, form):
     curso = get_object_or_404(Curso, id=curso_id) 
@@ -29,7 +30,9 @@ def modificar_categoria(categoria_id, form):
 
 def dar_de_baja_categoria(categoria_id):
     categoria = get_object_or_404(Categoria, id=categoria_id)
+    nombre = categoria.nombre
     categoria.delete()
+    return nombre
 
 def listar_cursos_con_resumen():
     """Devuelve cursos activos + resumen de tipos."""

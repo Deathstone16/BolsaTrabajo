@@ -52,7 +52,8 @@ def modificar_curso(request, curso_id):
 def dar_de_baja_curso(request, curso_id):
     if request.method == 'POST':
         cursos_services.dar_de_baja_curso(curso_id)
-        messages.success(request, 'Curso dado de baja correctamente')
+        curso = get_object_or_404(Curso, id=curso_id)
+        messages.success(request, f"Curso '{curso.nombre}' dado de baja correctamente")
         return redirect('mod_listar_cursos')
     curso = get_object_or_404(Curso, id=curso_id)
     return render(request, 'moderacion/confirmar_baja.html', {'curso': curso})
@@ -96,7 +97,7 @@ def modificar_categoria(request, categoria_id):
 def dar_de_baja_categoria(request, categoria_id):
     if request.method == 'POST':
         cursos_services.dar_de_baja_categoria(categoria_id)
-        messages.success(request, 'Categoría dada de baja correctamente')
+        messages.success(request, f"La categoría '{categoria.nombre}' fue dada de baja correctamente")
         return redirect('mod_listar_categorias')
     categoria = get_object_or_404(Categoria, id=categoria_id)
     return render(request, 'moderacion/confirmar_baja_categoria.html', {'categoria': categoria})
