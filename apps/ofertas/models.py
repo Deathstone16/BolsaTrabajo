@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from .state import ESTADOS
 
 class CategoriaOferta(models.Model):
 
@@ -57,3 +58,19 @@ class Oferta(models.Model):
 
     def __str__(self):
         return f"{self.titulo} - {self.nombre_puesto}"  
+    
+    def get_state(self):
+        
+        return ESTADOS[self.estado]
+
+    def aprobar(self):
+        self.get_state().aprobar(self)
+
+    def rechazar(self):
+        self.get_state().rechazar(self)
+
+    def finalizar(self):
+        self.get_state().finalizar(self)
+
+    def puede_editarse(self):
+        return self.get_state().puede_editarse()

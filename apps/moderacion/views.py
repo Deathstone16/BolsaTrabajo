@@ -1,8 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
+from django.http import JsonResponse ## agregacion temporal para listar ofertas pendientes en moderacion hasta que se implemente la HU del Template de moderacion de ofertas
 from cursos.models import Curso, Categoria
 from cursos.forms import CursoForm, CategoriaForm
 from cursos import services as cursos_services
+from ofertas.models import Oferta
+
 
 @staff_member_required
 def listar_cursos(request):
@@ -80,3 +83,22 @@ def dar_de_baja_categoria(request, categoria_id):
         return redirect('mod_listar_categorias')
     categoria = get_object_or_404(Categoria, id=categoria_id)
     return render(request, 'moderacion/confirmar_baja_categoria.html', {'categoria': categoria})
+
+@staff_member_required
+def listar_ofertas_pendientes(request):
+    ofertas = Oferta.objects.filter(estado='pendiente').values(
+        'id', 'titulo', 'fecha_publicacion'
+    )
+    return JsonResponse(list(ofertas), safe=False)
+
+@staff_member_required
+def aprobar_oferta(request, oferta_id):
+    oferta = get_object_or_404(Oferta, id=oferta_id, estado='pendiente')
+    oferta.aprobar()
+    return redirect('mod_listar_ofertas_pendientes')
+
+@staff_member_required
+def rechazar_oferta(request, oferta_id):
+    oferta = get_object_or_404(Oferta, id=oferta_id, estado='pendiente')
+    oferta.rechazar()
+    return redirect('mod_listar_ofertas_pendientes')

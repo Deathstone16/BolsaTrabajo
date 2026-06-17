@@ -4,6 +4,8 @@ from .forms import OfertaForm
 from .services import crear_oferta_laboral, obtener_ofertas_por_empresa, obtener_oferta_por_id, eliminar_oferta_por_id
 from usuarios.forms import OferenteForm
 from usuarios.decorators import oferente_required
+from .dtos import OfertaDTO
+from dataclasses import asdict
 
 
 @oferente_required
@@ -45,7 +47,7 @@ def dashboard_empresa(request):
 def editar_oferta(request, pk):
     oferta = obtener_oferta_por_id(pk)
 
-    if not oferta or oferta.empresa != request.user:
+    if not oferta or oferta.empresa != request.user or not oferta.puede_editarse():
         return redirect('dashboard_empresa')
 
     if request.method == 'POST':
@@ -80,7 +82,6 @@ def eliminar_oferta(request, pk):
 
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-
 @oferente_required
 def datos_oferta(request, pk):
     oferta = obtener_oferta_por_id(pk)
@@ -88,20 +89,8 @@ def datos_oferta(request, pk):
     if not oferta or oferta.empresa != request.user:
         return JsonResponse({'error': 'No encontrada'}, status=404)
 
-    return JsonResponse({
-        'titulo': oferta.titulo,
-        'nombre_puesto': oferta.nombre_puesto,
-        'categoria': oferta.categoria_id,
-        'ubicacion': oferta.ubicacion,
-        'modalidad': oferta.modalidad,
-        'descripcion': oferta.descripcion,
-        'habilidades_requeridas': oferta.habilidades_requeridas,
-        'experiencia_requerida': oferta.experiencia_requerida,
-        'nivel_educativo': oferta.nivel_educativo,
-        'es_confidencial': oferta.es_confidencial,
-        'fecha_cierre': oferta.fecha_cierre.strftime('%Y-%m-%d') if oferta.fecha_cierre else '',
-    })
-
+    dto = OfertaDTO.desde_modelo(oferta)
+    return JsonResponse(asdict(dto))
 
 @oferente_required
 def lista_ofertas_parcial(request):

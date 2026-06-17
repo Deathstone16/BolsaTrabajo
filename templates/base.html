@@ -25,20 +25,21 @@
         <div class="hidden md:flex items-center gap-8">
           <a href="{% url 'home' %}" class="text-muted-foreground hover:text-foreground transition-colors">Inicio</a>
 
-          {% if not user.is_authenticated or user.postulante %}
-            <a href="#" class="text-muted-foreground hover:text-foreground transition-colors">Buscar empleo</a>
-          {% endif %}
-          {% if user.is_authenticated and user.oferente %}
-            <a href="{% url 'dashboard_empresa' %}" class="text-muted-foreground hover:text-foreground transition-colors">Mi panel</a>
-          {% endif %}
           {% if user.is_authenticated %}
-            <a href="#" class="text-muted-foreground hover:text-foreground transition-colors">Mi perfil</a>
-            <a href="{% url 'datos_personales' %}" class="text-muted-foreground hover:text-foreground transition-colors">Datos personales</a> <!-- BOTON TEMPORAL PARA TESTEAR DATOS PERSONALES  -->
+            {% if user.oferente %}
+              <a href="{% url 'dashboard_empresa' %}" class="text-muted-foreground hover:text-foreground transition-colors">Mi panel</a>
+            {% endif %}
+            {% if user.postulante %}
+              <a href="#" class="text-muted-foreground hover:text-foreground transition-colors">Buscar empleo</a>
+              <a href="#" class="text-muted-foreground hover:text-foreground transition-colors">Mi perfil</a>
+              <a href="{% url 'datos_personales' %}" class="text-muted-foreground hover:text-foreground transition-colors">Datos personales</a>
+            {% endif %}
+            {% if user.is_staff %}
+              <a href="{% url 'mod_listar_ofertas_pendientes' %}" class="text-muted-foreground hover:text-foreground transition-colors">Moderar</a>
+            {% endif %}
             <form method="post" action="{% url 'logout' %}" style="display:inline">
               {% csrf_token %}
-              <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors">
-                Cerrar sesión
-              </button>
+              <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors">Cerrar sesión</button>
             </form>
           {% else %}
             <a href="{% url 'login' %}" class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
@@ -67,7 +68,6 @@
           <h4 class="font-medium mb-4">Plataforma</h4>
           <ul class="space-y-2">
           <li><a href="#" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Buscar empleo</a></li>
-          {% comment %} <li><a href="{% url 'crear_oferta' %}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Publicar oferta</a></li> {% endcomment %}
           <li class="text-sm text-muted-foreground">Empresas</li>
         </ul>
       </div>
