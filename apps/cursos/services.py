@@ -16,7 +16,7 @@ def dar_de_baja_curso(curso_id):
 def modificar_curso(curso_id, datos):
     curso= Curso.objects.get(id=curso_id)
     curso.nombre = datos.get('nombre', curso.nombre)
-    curso.descripcion = datos.get('descripcion', curso.categoria)
+    curso.descripcion = datos.get('descripcion', curso.descripcion)
     curso.save()
     return curso
 

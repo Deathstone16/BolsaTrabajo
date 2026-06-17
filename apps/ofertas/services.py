@@ -24,11 +24,3 @@ def eliminar_oferta_por_id(oferta_id):
         oferta.delete()
         return True
     return False
-
-def actualizar_estado_oferta(oferta_id, nuevo_estado):
-    oferta = obtener_oferta_por_id(oferta_id)
-    if oferta:
-        oferta.estado = nuevo_estado
-        oferta.save()
-        return True
-    return False
