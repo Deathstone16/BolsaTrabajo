@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
+from django.urls import reverse
 from .forms import OfertaForm
 from .services import crear_oferta_laboral, obtener_ofertas_por_empresa, obtener_oferta_por_id, eliminar_oferta_por_id
 from usuarios.forms import OferenteForm
 from usuarios.decorators import oferente_required
 from .dtos import OfertaDTO
 from dataclasses import asdict
+
 
 
 @oferente_required
@@ -111,6 +113,6 @@ def editar_perfil_empresa(request):
         form = OferenteForm(request.POST, request.FILES, instance=oferente)
         if form.is_valid():
             form.save()
-            return redirect('dashboard_empresa#empresa')
+            return redirect(reverse('dashboard_empresa') + '#empresa')
 
     return redirect('dashboard_empresa')
