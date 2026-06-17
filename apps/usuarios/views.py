@@ -1,12 +1,14 @@
 from django.shortcuts import redirect, render
-from django.contrib.auth import login, authenticate, logout
-from .forms import RegistroPostulanteForm, RegistroOferenteForm, LoginForm, DatosPersonalesForm,OferenteForm
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
+from .forms import RegistroPostulanteForm, RegistroOferenteForm, LoginForm, DatosPersonalesForm, OferenteForm
+from . import services
+
 
 def registro(request):
     tipo = request.GET.get('tipo', 'postulante')
-    
+
     if tipo == 'oferente':
         FormClass = RegistroOferenteForm
     else:
@@ -15,7 +17,7 @@ def registro(request):
     if request.method == 'POST':
         form = FormClass(request.POST)
         if form.is_valid():
-            user = form.save()
+            services.registrar_usuario(form)
             return redirect('registro_exitoso')
     else:
         form = FormClass()
@@ -36,9 +38,7 @@ def login_view(request):
         if form.is_valid():
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            user = authenticate(request, email=email, password=password)
-            if user is not None:
-                login(request, user)
+            if services.autenticar_usuario(request, email, password):
                 return redirect('home')
             else:
                 form.add_error(None, 'Email o contraseña incorrectos.')
@@ -55,38 +55,31 @@ def logout_view(request):
 def editar_perfil_empresa(request):
     if not hasattr(request.user, 'oferente'):
         return redirect('home')
-    
+
     oferente = request.user.oferente
-    
+
     if request.method == 'POST':
         form = OferenteForm(request.POST, request.FILES, instance=oferente)
         if form.is_valid():
-            form.save()
+            services.actualizar_perfil_oferente(form)
             return redirect('dashboard_empresa')
     else:
         form = OferenteForm(instance=oferente)
-    
-    return render(request, 'ofertas/editar-perfil.html', {'form': form, 'oferente': oferente})
 
+    return render(request, 'ofertas/editar-perfil.html', {'form': form, 'oferente': oferente})
 
 
 @login_required
 def datos_personales(request):
     if not hasattr(request.user, 'postulante'):
         return redirect('home')
-    
+
     postulante = request.user.postulante
 
-    
     if request.method == 'POST':
         form = DatosPersonalesForm(request.POST, instance=postulante)
         if form.is_valid():
-            postulante = form.save(commit=False)
-            request.user.first_name = form.cleaned_data['first_name']
-            request.user.last_name = form.cleaned_data['last_name']
-            request.user.email = form.cleaned_data['email']
-            request.user.save()
-            postulante.save()
+            services.actualizar_datos_postulante(request.user, form)
             return redirect('datos_personales_exitoso')
     else:
         form = DatosPersonalesForm(instance=postulante, initial={
