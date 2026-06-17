@@ -76,21 +76,6 @@ def logout_view(request):
     return redirect('login')
 
 
-@login_required
-@requiere_oferente
-def editar_perfil_empresa(request):
-    oferente = request.user.oferente
-
-    if request.method == 'POST':
-        form = OferenteForm(request.POST, request.FILES, instance=oferente)
-        if form.is_valid():
-            form.save()
-            return redirect('dashboard_empresa')
-    else:
-        form = OferenteForm(instance=oferente)
-
-    return render(request, 'ofertas/editar-perfil.html', {'form': form, 'oferente': oferente})
-
 
 @login_required
 @requiere_postulante

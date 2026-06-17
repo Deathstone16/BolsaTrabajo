@@ -14,9 +14,10 @@
 <body class="bg-background text-foreground min-h-screen flex flex-col">
   
   <nav class="border-b border-border bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+    
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
-        <a href="/" class="flex items-center gap-2">
+        <a href="{% url 'home' %}" class="flex items-center gap-2">
           <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center">
             <i data-lucide="briefcase" class="w-6 h-6 text-white"></i>
           </div>
@@ -29,18 +30,24 @@
           {% endif %}
           {% if user.is_authenticated and user.oferente %}
             <a href="{% url 'dashboard_empresa' %}" class="text-muted-foreground hover:text-foreground transition-colors">Mi panel</a>
+            <a href="{% url 'crear_oferta' %}" class="text-muted-foreground hover:text-foreground transition-colors">Publicar oferta</a>
+            <a href="{% url 'editar_perfil_empresa' %}" class="text-muted-foreground hover:text-foreground transition-colors">Mi empresa</a>
           {% endif %}
+
+          {% if user.postulante %}
+            <a href="{% url 'datos_personales' %}" class="text-muted-foreground hover:text-foreground transition-colors">Datos personales</a>
+          {% endif %}
+
           {% if user.is_authenticated %}
             {% if user.postulante %}
               <a href="#" class="text-muted-foreground hover:text-foreground transition-colors">Mi perfil</a>
               <a href="{% url 'datos_personales' %}" class="text-muted-foreground hover:text-foreground transition-colors">Datos personales</a>
+            {% if user.is_staff %}
+              <a href="{% url 'mod_listar_cursos' %}" class="text-muted-foreground hover:text-foreground transition-colors">Moderación</a>
             {% endif %}
-            
             <form method="post" action="{% url 'logout' %}" style="display:inline">
               {% csrf_token %}
-              <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors">
-                Cerrar sesión
-              </button>
+              <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors">Cerrar sesión</button>
             </form>
           {% else %}
             <a href="{% url 'login' %}" class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
@@ -51,7 +58,7 @@
       </div>
     </div>
   </nav>
-
+  {% include 'partials/messages.html' %}
   <main class="flex-1">
     {% block content %}
     {% endblock %}
@@ -65,7 +72,7 @@
           <div class="flex items-center gap-2"><div class="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center"><i data-lucide="briefcase" class="w-6 h-6 text-white"></i></div><span class="font-medium text-lg">IEN Empleo</span></div>
           <p class="text-sm text-muted-foreground">Conectando talento con oportunidades laborales</p>
         </div>
-        <div><h4 class="font-medium mb-4">Plataforma</h4><ul class="space-y-2"><li><a href="buscar-empleo.html" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Buscar empleo</a></li><li><a href="{% url 'crear_oferta' %}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Publicar oferta</a></li><li class="text-sm text-muted-foreground">Empresas</li></ul></div>
+        <div><h4 class="font-medium mb-4">Plataforma</h4><ul class="space-y-2"><li><a href="#" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Buscar empleo</a></li><li><a href="{% url 'crear_oferta' %}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Publicar oferta</a></li><li class="text-sm text-muted-foreground">Empresas</li></ul></div>
         <div><h4 class="font-medium mb-4">Instituto</h4><ul class="space-y-2"><li class="text-sm text-muted-foreground">Sobre el IEN</li><li class="text-sm text-muted-foreground">Programas educativos</li></ul></div>
         <div><h4 class="font-medium mb-4">Contacto</h4><ul class="space-y-3"><li class="flex items-center gap-2 text-sm text-muted-foreground"><i data-lucide="mail" class="w-4 h-4"></i>contacto@ien.edu.ar</li><li class="flex items-center gap-2 text-sm text-muted-foreground"><i data-lucide="phone" class="w-4 h-4"></i>+54 11 1234 5678</li><li class="flex items-center gap-2 text-sm text-muted-foreground"><i data-lucide="map-pin" class="w-4 h-4"></i>Buenos Aires, Argentina</li></ul></div>
       </div>
