@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 
 
 def autenticar_usuario(request, email, password):
@@ -7,10 +7,6 @@ def autenticar_usuario(request, email, password):
         auth_login(request, user)
         return True
     return False
-
-
-def registrar_usuario(form):
-    return form.save()
 
 
 def actualizar_datos_postulante(user, form):
@@ -22,5 +18,9 @@ def actualizar_datos_postulante(user, form):
     postulante.save()
 
 
-def actualizar_perfil_oferente(form):
-    form.save()
+def es_oferente(user):
+    return hasattr(user, 'oferente')
+
+
+def es_postulante(user):
+    return hasattr(user, 'postulante')

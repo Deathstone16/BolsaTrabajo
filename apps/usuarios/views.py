@@ -1,28 +1,50 @@
+from functools import wraps
+
 from django.shortcuts import redirect, render
-from django.contrib.auth import logout
+from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
-from .forms import RegistroPostulanteForm, RegistroOferenteForm, LoginForm, DatosPersonalesForm, OferenteForm
-from . import services
 
+from .forms import RegistroPostulanteForm, RegistroOferenteForm, LoginForm, DatosPersonalesForm, OferenteForm
+from . import service
+
+
+#decoradores 
+
+def requiere_oferente(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not service.es_oferente(request.user):
+            return redirect('home')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+def requiere_postulante(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not service.es_postulante(request.user):
+            return redirect('home')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+#vistas
 
 def registro(request):
     tipo = request.GET.get('tipo', 'postulante')
-
-    if tipo == 'oferente':
-        FormClass = RegistroOferenteForm
-    else:
-        FormClass = RegistroPostulanteForm
+    FormClass = RegistroOferenteForm if tipo == 'oferente' else RegistroPostulanteForm
 
     if request.method == 'POST':
         form = FormClass(request.POST)
         if form.is_valid():
-            services.registrar_usuario(form)
+            form.save()
             return redirect('registro_exitoso')
     else:
         form = FormClass()
 
     return render(request, 'usuarios/registro.html', {'form': form, 'tipo': tipo})
+
 
 def registro_exitoso(request):
     return render(request, 'usuarios/exito.html', {
@@ -32,13 +54,14 @@ def registro_exitoso(request):
         'link_texto': 'Iniciar sesión',
     })
 
+
 def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            if services.autenticar_usuario(request, email, password):
+            if service.autenticar_usuario(request, email, password):
                 return redirect('home')
             else:
                 form.add_error(None, 'Email o contraseña incorrectos.')
@@ -47,21 +70,21 @@ def login_view(request):
 
     return render(request, 'usuarios/login.html', {'form': form})
 
+
 def logout_view(request):
-    logout(request)
+    auth_logout(request)
     return redirect('login')
 
-@login_required
-def editar_perfil_empresa(request):
-    if not hasattr(request.user, 'oferente'):
-        return redirect('home')
 
+@login_required
+@requiere_oferente
+def editar_perfil_empresa(request):
     oferente = request.user.oferente
 
     if request.method == 'POST':
         form = OferenteForm(request.POST, request.FILES, instance=oferente)
         if form.is_valid():
-            services.actualizar_perfil_oferente(form)
+            form.save()
             return redirect('dashboard_empresa')
     else:
         form = OferenteForm(instance=oferente)
@@ -70,16 +93,14 @@ def editar_perfil_empresa(request):
 
 
 @login_required
+@requiere_postulante
 def datos_personales(request):
-    if not hasattr(request.user, 'postulante'):
-        return redirect('home')
-
     postulante = request.user.postulante
 
     if request.method == 'POST':
         form = DatosPersonalesForm(request.POST, instance=postulante)
         if form.is_valid():
-            services.actualizar_datos_postulante(request.user, form)
+            service.actualizar_datos_postulante(request.user, form)
             return redirect('datos_personales_exitoso')
     else:
         form = DatosPersonalesForm(instance=postulante, initial={
@@ -89,6 +110,7 @@ def datos_personales(request):
         })
 
     return render(request, 'usuarios/datos_personales.html', {'form': form})
+
 
 def datos_personales_exitoso(request):
     return render(request, 'usuarios/exito.html', {
