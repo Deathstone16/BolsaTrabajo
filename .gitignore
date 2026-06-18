@@ -494,3 +494,5 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/django,python,node,linux,macos,windows,visualstudiocode
 db.sqlite3
 *.sqlite3
+
+Recuperacion

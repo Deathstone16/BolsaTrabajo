@@ -1,0 +1,13 @@
+{% for field in form %}
+<div class="space-y-1 {% if field.html_name == 'email' or field.html_name == 'direccion' or field.html_name == 'nombre_empresa' %}col-span-2{% endif %}">
+  <label class="text-sm font-medium">{{ field.label }}</label>
+  <input type="{{ field.field.widget.input_type }}"
+         name="{{ field.html_name }}"
+         class="w-full px-3 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
+         placeholder="{{ field.label }}"
+         {% if field.value %}value="{{ field.value }}"{% endif %}>
+  {% if field.errors %}
+  <p class="text-destructive text-xs">{{ field.errors|join:", " }}</p>
+  {% endif %}
+</div>
+{% endfor %}
