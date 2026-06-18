@@ -5,8 +5,9 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 
-from .forms import RegistroPostulanteForm, RegistroOferenteForm, LoginForm, DatosPersonalesForm, OferenteForm
+from .forms import RegistroPostulanteForm, RegistroOferenteForm, LoginForm, DatosPersonalesForm, OferenteForm, PasswordResetRequestForm, SetPasswordForm
 from . import service
+from . import services
 
 
 #decoradores 
@@ -104,3 +105,53 @@ def datos_personales_exitoso(request):
         'link_url': reverse('datos_personales'),
         'link_texto': 'Volver a mis datos',
     })
+
+
+# ─── Recuperación de contraseña ───────────────────────────────────────────────
+
+def password_reset_request(request):
+    """Paso 1 — Solicitud (CA1-CA5). Vista delgada: delega en services."""
+    if request.method == 'POST':
+        form = PasswordResetRequestForm(request.POST)
+        if form.is_valid():
+            usuario = form.get_usuario()
+            if usuario is not None:
+                services.enviar_email_recuperacion(usuario, request)
+            # Siempre redirigir: no revelar si el email existe (CA3)
+            return redirect('recuperacion-enviada')
+    else:
+        form = PasswordResetRequestForm()
+
+    return render(request, 'usuarios/recuperar_contrasena.html', {'form': form})
+
+
+def recuperacion_enviada(request):
+    """Paso 2 — Confirmación de envío."""
+    return render(request, 'usuarios/recuperar_enviado.html')
+
+
+def password_reset_confirm(request, uidb64, token):
+    """Paso 3 — Nueva contraseña (CA6). Vista delgada: delega validación en services."""
+    usuario = services.validar_token_recuperacion(uidb64, token)
+
+    if usuario is None:
+        return render(request, 'usuarios/token_invalido.html')
+
+    if request.method == 'POST':
+        form = SetPasswordForm(user=usuario, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('contrasena-restablecida')
+    else:
+        form = SetPasswordForm(user=usuario)
+
+    return render(request, 'usuarios/restablecer_contrasena.html', {
+        'form':   form,
+        'uidb64': uidb64,
+        'token':  token,
+    })
+
+
+def contrasena_restablecida(request):
+    """Paso 4 — Éxito (CA6: redirigir al login)."""
+    return render(request, 'usuarios/contrasena_exitosa.html')

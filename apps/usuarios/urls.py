@@ -9,4 +9,9 @@ urlpatterns = [
     path('datos-personales/',views.datos_personales, name='datos_personales'),
     path('datos-personales-exitoso/', views.datos_personales_exitoso, name='datos_personales_exitoso'),
     
+    # ── Recuperación de contraseña ────────────────────────────────────────────
+    path('recuperar/',                              views.password_reset_request, name='recuperar-contrasena'),
+    path('recuperar/enviado/',                      views.recuperacion_enviada,   name='recuperacion-enviada'),
+    path('restablecer/<uidb64>/<token>/',           views.password_reset_confirm, name='restablecer-contrasena'),
+    path('recuperar/exitoso/',                      views.contrasena_restablecida,name='contrasena-restablecida'),
 ]

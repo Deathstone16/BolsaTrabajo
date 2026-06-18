@@ -120,3 +120,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 LOGIN_URL = '/usuarios/login/'
 LOGIN_REDIRECT_URL = '/'
+
+# -----------------------
+# EMAIL CONFIGURATION
+# -----------------------
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Development: prints to console
+DEFAULT_FROM_EMAIL = 'noreply@ienempleo.com'
+PASSWORD_RESET_TIMEOUT = 86400  # 24 horas en segundos
