@@ -108,13 +108,29 @@ function ocultarErroresModal() {
   document.getElementById('modal-errors').innerHTML = '';
 }
 
+const CAMPOS_ES = {
+  titulo: 'Título',
+  nombre_puesto: 'Nombre del puesto',
+  categoria: 'Categoría',
+  ubicacion: 'Ubicación',
+  modalidad: 'Modalidad',
+  descripcion: 'Descripción',
+  requisitos: 'Requisitos',
+  habilidades_requeridas: 'Habilidades requeridas',
+  experiencia_requerida: 'Experiencia requerida',
+  nivel_educativo: 'Nivel educativo',
+  fecha_cierre: 'Fecha de cierre',
+  es_confidencial: 'Publicación confidencial',
+};
+
 function mostrarErroresModal(errors) {
   const container = document.getElementById('modal-errors');
   container.classList.remove('hidden');
   let html = '<p class="font-medium mb-1">Corregí los siguientes errores:</p><ul class="list-disc pl-5 text-sm">';
   for (const campo in errors) {
+    const nombre = CAMPOS_ES[campo] || campo;
     for (const msg of errors[campo]) {
-      html += '<li>' + msg + '</li>';
+      html += '<li><strong>' + nombre + ':</strong> ' + msg + '</li>';
     }
   }
   html += '</ul>';

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+
+  {% include 'Ofertas/_perfil_oferente.html' %}
+
+  <div class="bg-white rounded-xl shadow-sm border border-border p-8">
+    <h2 class="text-2xl font-medium mb-6">Ofertas activas</h2>
+
+    {% if ofertas %}
+      {% for oferta in ofertas %}
+        <div class="border border-border rounded-xl p-6 mb-4 hover:border-primary/30 transition-all">
+          <h3 class="text-lg font-medium">{{ oferta.titulo }}</h3>
+          <p class="text-sm text-muted-foreground mt-1">
+            {{ oferta.nombre_puesto }} · {{ oferta.ubicacion }} · {{ oferta.get_modalidad_display }}
+          </p>
+          {% if oferta.descripcion %}
+            <p class="text-sm text-muted-foreground mt-3 line-clamp-2">{{ oferta.descripcion }}</p>
+          {% endif %}
+          <p class="text-xs text-muted-foreground mt-3">
+            Publicada: {{ oferta.fecha_publicacion|date:"d/m/Y" }}
+          </p>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="text-center py-12">
+        <div class="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <i data-lucide="briefcase" class="w-8 h-8 text-muted-foreground"></i>
+        </div>
+        <p class="text-sm text-muted-foreground">Esta empresa no tiene ofertas activas por el momento.</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

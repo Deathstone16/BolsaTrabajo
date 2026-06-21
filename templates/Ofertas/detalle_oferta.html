@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+  <div class="mb-4">
+    <a href="{% url 'buscar_empleo' %}" class="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+      <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver a búsqueda
+    </a>
+  </div>
+
+  <div class="flex flex-col lg:flex-row gap-6 items-start">
+
+    <!-- Columna principal -->
+    <div class="flex-1 space-y-4">
+
+      <!-- Header oferta -->
+      <div class="bg-white rounded-xl border border-border p-6">
+        <h1 class="text-2xl font-medium mb-1">{{ oferta.titulo }}</h1>
+
+        {% if oferta.es_confidencial %}
+          <p class="text-sm text-muted-foreground flex items-center gap-1.5 mb-4">
+            <i data-lucide="building2" class="w-4 h-4"></i> Empresa confidencial
+          </p>
+        {% else %}
+          <p class="text-sm text-muted-foreground flex items-center gap-1.5 mb-4">
+            <i data-lucide="building2" class="w-4 h-4"></i>
+            {% if oferta.empresa.oferente %}
+              <a href="{% url 'perfil_oferente' oferta.empresa.oferente.pk %}"
+                 class="hover:text-primary transition-colors">
+                {{ oferta.empresa.oferente.nombre_empresa }}
+              </a>
+            {% endif %}
+          </p>
+        {% endif %}
+
+        <div class="flex flex-wrap gap-2">
+          {% if oferta.ubicacion %}
+            <span class="flex items-center gap-1 px-3 py-1.5 bg-muted rounded-full text-sm text-muted-foreground">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> {{ oferta.ubicacion }}
+            </span>
+          {% endif %}
+          <span class="flex items-center gap-1 px-3 py-1.5 bg-muted rounded-full text-sm text-muted-foreground">
+            <i data-lucide="building2" class="w-3.5 h-3.5"></i> {{ oferta.get_modalidad_display }}
+          </span>
+          {% if oferta.experiencia_requerida %}
+            <span class="flex items-center gap-1 px-3 py-1.5 bg-muted rounded-full text-sm text-muted-foreground">
+              <i data-lucide="clock" class="w-3.5 h-3.5"></i> {{ oferta.experiencia_requerida }}
+            </span>
+          {% endif %}
+          {% if oferta.nivel_educativo %}
+            <span class="flex items-center gap-1 px-3 py-1.5 bg-muted rounded-full text-sm text-muted-foreground">
+              <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i> {{ oferta.get_nivel_educativo_display }}
+            </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Descripción -->
+      <div class="bg-white rounded-xl border border-border p-6">
+        <h2 class="font-medium text-lg mb-3">Descripción del puesto</h2>
+        <p class="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{{ oferta.descripcion }}</p>
+      </div>
+
+      <!-- Requisitos -->
+      {% if oferta.requisitos %}
+      <div class="bg-white rounded-xl border border-border p-6">
+        <h2 class="font-medium text-lg mb-3">Requisitos del puesto</h2>
+        <p class="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{{ oferta.requisitos }}</p>
+      </div>
+      {% endif %}
+
+      <!-- Habilidades -->
+      {% if oferta.habilidades_requeridas %}
+      <div class="bg-white rounded-xl border border-border p-6">
+        <h2 class="font-medium text-lg mb-3">Habilidades requeridas</h2>
+        <div class="flex flex-wrap gap-2">
+          {% for habilidad in habilidades %}
+            <span class="px-3 py-1.5 bg-muted rounded-full text-sm text-muted-foreground">{{ habilidad }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- Columna lateral -->
+    <div class="w-full lg:w-80 flex-shrink-0 space-y-4">
+
+      <!-- Match inteligente (placeholder para IA) -->
+      <div class="bg-white rounded-xl border border-border p-6 text-center opacity-40 select-none">
+        <p class="text-xs font-medium tracking-widest text-muted-foreground uppercase mb-4">Match inteligente</p>
+        <div class="relative w-28 h-28 mx-auto mb-4">
+          <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e5e7eb" stroke-width="3"/>
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#a69acf" stroke-width="3"
+                    stroke-dasharray="0 100" stroke-linecap="round"/>
+          </svg>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <span class="text-2xl font-medium text-foreground">0%</span>
+          </div>
+        </div>
+        <span class="px-3 py-1 bg-muted rounded-full text-xs text-muted-foreground">Próximamente</span>
+      </div>
+
+      <!-- Botón postularse -->
+      <button class="w-full px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">
+        Postularme
+      </button>
+
+      <!-- Información adicional -->
+      <div class="bg-white rounded-xl border border-border p-6 space-y-4">
+        <h3 class="font-medium">Información adicional</h3>
+        <div class="space-y-3 text-sm">
+          <div>
+            <p class="text-muted-foreground">Fecha de publicación</p>
+            <p class="font-medium mt-0.5">{{ oferta.fecha_publicacion|date:"d \d\e F, Y" }}</p>
+          </div>
+          {% if oferta.fecha_cierre %}
+          <div>
+            <p class="text-muted-foreground">Fecha de cierre</p>
+            <p class="font-medium mt-0.5">{{ oferta.fecha_cierre|date:"d \d\e F, Y" }}</p>
+          </div>
+          {% endif %}
+          {% if oferta.categoria %}
+          <div>
+            <p class="text-muted-foreground">Categoría</p>
+            <p class="font-medium mt-0.5">{{ oferta.categoria.nombre }}</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Ver empresa (solo si no es confidencial) -->
+      {% if not oferta.es_confidencial and oferta.empresa.oferente %}
+      <a href="{% url 'perfil_oferente' oferta.empresa.oferente.pk %}"
+         class="flex items-center gap-3 bg-white rounded-xl border border-border p-4 hover:border-primary/40 transition-colors">
+        <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-medium flex-shrink-0">
+          {% if oferta.empresa.oferente.logo %}
+            <img src="{{ oferta.empresa.oferente.logo.url }}" class="w-full h-full object-cover rounded-lg">
+          {% else %}
+            {{ oferta.empresa.oferente.nombre_empresa|first }}
+          {% endif %}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium">{{ oferta.empresa.oferente.nombre_empresa }}</p>
+          <p class="text-xs text-muted-foreground">Ver perfil de la empresa</p>
+        </div>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-muted-foreground flex-shrink-0"></i>
+      </a>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}
