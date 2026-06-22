@@ -62,7 +62,11 @@ def login_view(request):
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
             if service.autenticar_usuario(request, email, password):
+                
+                if hasattr(request.user, 'oferente'):
+                    return redirect('dashboard_empresa')
                 return redirect('home')
+                
             else:
                 form.add_error(None, 'Email o contraseña incorrectos.')
     else:

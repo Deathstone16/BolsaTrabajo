@@ -15,4 +15,5 @@ urlpatterns = [
     path('ofertas/', views.listar_ofertas_pendientes, name='mod_listar_ofertas_pendientes'),
     path('ofertas/<int:oferta_id>/aprobar/', views.aprobar_oferta, name='mod_aprobar_oferta'),
     path('ofertas/<int:oferta_id>/rechazar/', views.rechazar_oferta, name='mod_rechazar_oferta'),
+    
 ]

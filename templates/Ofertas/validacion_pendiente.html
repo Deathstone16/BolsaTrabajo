@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-muted flex items-center justify-center p-4">
+  <div class="bg-background rounded-2xl shadow-sm border border-border w-full max-w-lg px-12 py-12 flex flex-col items-center text-center gap-4">
+
+    <div class="bg-primary/10 rounded-xl p-3 w-fit">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
+      </svg>
+    </div>
+
+    <div class="bg-[#FEFCE8] rounded-full p-5 mt-1">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+        <circle cx="12" cy="12" r="10" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2" />
+      </svg>
+    </div>
+
+    <span class="inline-flex items-center gap-1.5 border border-border rounded-full px-3 py-1 text-sm text-muted-foreground mt-1">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+      </svg>
+      Pendiente de verificación
+    </span>
+
+    <h1 class="text-2xl font-bold text-foreground mt-1">Tu empresa está siendo revisada</h1>
+
+    <p class="text-muted-foreground text-sm leading-relaxed max-w-xs">
+      El equipo de IEN está verificando la identidad de tu empresa.<br />
+      Te notificaremos por <span class="text-primary">email</span> cuando esté aprobada.
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-3 mt-4 w-full justify-center">
+      <a href="{{ email_contacto_url }}"
+         class="inline-flex items-center gap-2 border border-border bg-muted hover:bg-muted/80 text-foreground text-sm font-medium px-6 py-2.5 rounded-lg transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        Contactar al IEN
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

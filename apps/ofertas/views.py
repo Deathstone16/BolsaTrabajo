@@ -4,13 +4,19 @@ from django.urls import reverse
 from .forms import OfertaForm
 from .services import crear_oferta_laboral, obtener_ofertas_por_empresa, obtener_oferta_por_id, eliminar_oferta_por_id
 from usuarios.forms import OferenteForm
-from usuarios.decorators import oferente_required
+from usuarios.service import obtener_url_contacto
+from usuarios.decorators import oferente_required, oferente_validado_required
 from .dtos import OfertaDTO
 from dataclasses import asdict
 
-
-
 @oferente_required
+def validacion_pendiente(request):
+    email_contacto_url = obtener_url_contacto(request.user.email)
+    return render(request, 'Ofertas/validacion_pendiente.html', {
+        'email_contacto_url': email_contacto_url,
+    })
+
+@oferente_validado_required
 def crear_oferta(request):
 
     if request.method == 'POST':
@@ -29,7 +35,7 @@ def crear_oferta(request):
     return redirect('dashboard_empresa')
 
 
-@oferente_required
+@oferente_validado_required
 def dashboard_empresa(request):
     
     oferente = request.user.oferente
@@ -45,7 +51,7 @@ def dashboard_empresa(request):
     })
 
 
-@oferente_required
+@oferente_validado_required
 def editar_oferta(request, pk):
     oferta = obtener_oferta_por_id(pk)
 
@@ -68,7 +74,7 @@ def editar_oferta(request, pk):
     return redirect('dashboard_empresa')
 
 
-@oferente_required
+@oferente_validado_required
 def eliminar_oferta(request, pk):
     oferta = obtener_oferta_por_id(pk)
 
@@ -84,7 +90,7 @@ def eliminar_oferta(request, pk):
 
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-@oferente_required
+@oferente_validado_required
 def datos_oferta(request, pk):
     oferta = obtener_oferta_por_id(pk)
 
@@ -94,7 +100,7 @@ def datos_oferta(request, pk):
     dto = OfertaDTO.desde_modelo(oferta)
     return JsonResponse(asdict(dto))
 
-@oferente_required
+@oferente_validado_required
 def lista_ofertas_parcial(request):
 
     ofertas = obtener_ofertas_por_empresa(request.user)
@@ -104,7 +110,7 @@ def lista_ofertas_parcial(request):
     })
 
 
-@oferente_required
+@oferente_validado_required
 def editar_perfil_empresa(request):
 
     oferente = request.user.oferente

@@ -1,5 +1,15 @@
 from django.shortcuts import redirect
 from functools import wraps
+from django.contrib import messages
+
+def oferente_validado_required(view_func):
+    @wraps(view_func)
+    @oferente_required
+    def wrapper(request, *args, **kwargs):
+        if request.user.oferente.estado_validacion != 'aprobado':
+            return redirect('validacion_pendiente')
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
 def oferente_required(view_func):
     """

@@ -40,9 +40,11 @@
     </div>
     <h3 class="font-medium mb-2">No hay ofertas publicadas</h3>
     <p class="text-sm text-muted-foreground mb-4">Publicá tu primera oferta para atraer talento</p>
-    <button onclick="openCreateModal()"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg">
-      Publicar primera oferta
-    </button>
+    {% if oferente.estado_validacion == 'aprobado' %}
+      <button onclick="openCreateModal()"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg">
+        Publicar primera oferta
+      </button>
+    {% endif %}
   </div>
 {% endif %}
