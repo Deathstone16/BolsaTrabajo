@@ -1,5 +1,4 @@
-from functools import wraps
-
+from .decorators import postulante_required
 from django.shortcuts import redirect, render
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
@@ -7,26 +6,6 @@ from django.urls import reverse
 
 from .forms import RegistroPostulanteForm, RegistroOferenteForm, LoginForm, DatosPersonalesForm, OferenteForm
 from . import service
-
-
-#decoradores 
-
-def requiere_oferente(view_func):
-    @wraps(view_func)
-    def wrapper(request, *args, **kwargs):
-        if not service.es_oferente(request.user):
-            return redirect('home')
-        return view_func(request, *args, **kwargs)
-    return wrapper
-
-
-def requiere_postulante(view_func):
-    @wraps(view_func)
-    def wrapper(request, *args, **kwargs):
-        if not service.es_postulante(request.user):
-            return redirect('home')
-        return view_func(request, *args, **kwargs)
-    return wrapper
 
 
 #vistas
@@ -82,7 +61,7 @@ def logout_view(request):
 
 
 @login_required
-@requiere_postulante
+@postulante_required
 def datos_personales(request):
     postulante = request.user.postulante
 
