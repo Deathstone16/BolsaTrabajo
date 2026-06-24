@@ -26,7 +26,6 @@ def oferente_required(view_func):
         if not hasattr(request.user, 'oferente'):
             
             return redirect('home')
-        
         return view_func(request, *args, **kwargs)
     
     return _wrapped

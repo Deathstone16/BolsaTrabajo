@@ -40,13 +40,6 @@ def actualizar_datos_postulante(user, form):
     postulante.save()
 
 
-def es_oferente(user):
-    return hasattr(user, 'oferente')
-
-
-def es_postulante(user):
-    return hasattr(user, 'postulante')
-
 def obtener_url_contacto(email_usuario):
     dominio = email_usuario.split('@')[1].lower()
     destino = 'contacto@ien.edu.ar'

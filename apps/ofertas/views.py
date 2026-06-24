@@ -107,6 +107,7 @@ def lista_ofertas_parcial(request):
 
     return render(request, 'Ofertas/_lista-ofertas.html', {
         'ofertas': ofertas,
+        'oferente': request.user.oferente, #temporalmente necesario para el template, se puede refactorizar para no necesitarlo
     })
 
 
