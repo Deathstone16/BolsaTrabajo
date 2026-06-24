@@ -1,0 +1,87 @@
+<div id="detalle-overlay" class="fixed inset-0 bg-black/50 z-50 hidden" onclick="event.stopPropagation()"></div>
+
+<div id="detalle-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-8 relative z-10"
+       onclick="event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="flex items-start justify-between mb-1">
+      <div>
+        <h2 id="modal-titulo" class="text-2xl font-medium"></h2>
+        <p class="text-sm text-muted-foreground mt-1">Revisa los detalles de la oferta para aprobarla o rechazarla</p>
+      </div>
+      <button id="btn-cerrar-modal" type="button" class="p-2 hover:bg-muted rounded-lg text-muted-foreground ml-4">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- Estado -->
+    <div class="flex items-center gap-2 mb-6 mt-3">
+      <span class="text-sm text-muted-foreground">Estado actual:</span>
+      <span id="modal-estado" class="px-3 py-1 rounded-full text-xs font-medium"></span>
+    </div>
+
+    <!-- Empresa -->
+    <div class="mb-6">
+      <h3 class="text-sm font-medium flex items-center gap-2 mb-3">
+        <i data-lucide="building2" class="w-4 h-4 text-primary"></i> Empresa
+      </h3>
+      <div class="flex items-center gap-3">
+        <div class="flex-1 flex items-center gap-3 border border-border rounded-xl p-3">
+          <div id="modal-empresa-logo" class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-medium text-lg flex-shrink-0"></div>
+          <div class="flex-1 min-w-0">
+            <p id="modal-empresa-nombre" class="font-medium text-sm"></p>
+            <p class="text-xs text-muted-foreground">Ver perfil dentro del modal</p>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-muted-foreground"></i>
+        </div>
+        <a id="modal-empresa-link" href="#" target="_blank"
+           class="flex flex-col items-center gap-1 px-4 py-3 border border-border rounded-xl hover:border-primary/40 transition-colors text-muted-foreground hover:text-primary">
+          <i data-lucide="building2" class="w-5 h-5"></i>
+          <span class="text-xs">Ir al perfil</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Detalles del puesto -->
+    <div class="mb-6">
+      <h3 class="text-sm font-medium mb-3">Detalles del puesto</h3>
+      <div class="flex flex-wrap gap-2 mb-3">
+        <span id="modal-ubicacion" class="flex items-center gap-1 px-3 py-1.5 bg-muted rounded-lg text-sm text-muted-foreground"></span>
+        <span id="modal-modalidad" class="flex items-center gap-1 px-3 py-1.5 bg-muted rounded-lg text-sm text-muted-foreground"></span>
+        <span id="modal-fecha-cierre" class="flex items-center gap-1 px-3 py-1.5 bg-muted rounded-lg text-sm text-muted-foreground"></span>
+      </div>
+    </div>
+
+    <!-- Descripción -->
+    <div class="mb-5">
+      <h3 class="text-sm font-medium flex items-center gap-2 mb-2">
+        <i data-lucide="file-text" class="w-4 h-4 text-primary"></i> Descripción del puesto
+      </h3>
+      <p id="modal-descripcion" class="text-sm text-muted-foreground leading-relaxed"></p>
+    </div>
+
+    <!-- Habilidades -->
+    <div class="mb-5">
+      <h3 class="text-sm font-medium mb-2">Habilidades requeridas</h3>
+      <div id="modal-habilidades" class="flex flex-wrap gap-2"></div>
+    </div>
+
+    <!-- Experiencia y educación -->
+    <div class="grid grid-cols-2 gap-4 mb-8">
+      <div>
+        <p class="text-xs text-muted-foreground flex items-center gap-1 mb-1">
+          <i data-lucide="clock" class="w-3.5 h-3.5"></i> Experiencia requerida
+        </p>
+        <p id="modal-experiencia" class="text-sm font-medium"></p>
+      </div>
+      <div>
+        <p class="text-xs text-muted-foreground flex items-center gap-1 mb-1">
+          <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i> Nivel educativo
+        </p>
+        <p id="modal-educativo" class="text-sm font-medium"></p>
+      </div>
+    </div>
+
+    <!-- Botones (renderizados por JS según estado) -->
+    <div id="modal-botones" class="flex gap-3"></div>

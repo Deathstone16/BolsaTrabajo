@@ -40,7 +40,7 @@
               <a href="{% url 'datos_personales' %}" class="text-muted-foreground hover:text-foreground transition-colors">Datos personales</a>
               {% endif %}            
             {% if user.is_staff %}
-              <a href="{% url 'mod_listar_cursos' %}" class="text-muted-foreground hover:text-foreground transition-colors">Moderación</a>
+              <a href="{% url 'mod_listar_ofertas' %}" class="text-muted-foreground hover:text-foreground transition-colors">Moderación</a>
             {% endif %}
             <form method="post" action="{% url 'logout' %}" style="display:inline">
               {% csrf_token %}
