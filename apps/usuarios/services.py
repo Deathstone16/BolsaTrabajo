@@ -47,12 +47,19 @@ def enviar_email_recuperacion(usuario, request):
         'rol_label': get_rol_label(usuario),
     })
 
+    cuerpo_html = render_to_string('emails/reset_email.html', {
+        'usuario':   usuario,
+        'link':      link,
+        'rol_label': get_rol_label(usuario),
+    })
+
     send_mail(
         subject='Recuperación de contraseña - IEN Empleo',
         message=cuerpo,
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[usuario.email],
-        fail_silently=True,
+        html_message=cuerpo_html,
+        fail_silently=False,
     )
 
 
