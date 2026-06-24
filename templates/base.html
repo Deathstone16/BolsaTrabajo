@@ -34,6 +34,10 @@
             {% if user.postulante %}
               <a href="{% url 'mi_perfil' %}" class="text-muted-foreground hover:text-foreground transition-colors">Mi perfil</a>
             {% endif %}
+            {% if user.is_staff %}
+              <a href="{% url 'mod_listar_empresas' %}" class="text-muted-foreground hover:text-foreground transition-colors">Empresas</a>
+              <a href="{% url 'mod_listar_cursos' %}" class="text-muted-foreground hover:text-foreground transition-colors">Cursos</a>
+            {% endif %}
             <form method="post" action="{% url 'logout' %}" style="display:inline">
               {% csrf_token %}
               <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors">

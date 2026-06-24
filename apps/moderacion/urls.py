@@ -11,4 +11,9 @@ urlpatterns = [
     path('categorias/crear/', views.crear_categoria, name='mod_crear_categoria'),
     path('categorias/<int:categoria_id>/modificar/', views.modificar_categoria, name='mod_modificar_categoria'),
     path('categorias/<int:categoria_id>/baja/', views.dar_de_baja_categoria, name='mod_dar_de_baja_categoria'),
+
+    path('empresas/', views.listar_empresas, name='mod_listar_empresas'),
+    path('empresas/<int:pk>/', views.detalle_empresa, name='mod_detalle_empresa'),
+    path('empresas/<int:pk>/aprobar/', views.aprobar_empresa, name='mod_aprobar_empresa'),
+    path('empresas/<int:pk>/rechazar/', views.rechazar_empresa, name='mod_rechazar_empresa'),
 ]
