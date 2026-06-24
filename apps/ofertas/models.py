@@ -25,7 +25,9 @@ class Oferta(models.Model):
     ESTADO_CHOICES = [
         ('pendiente', 'Pendiente de Aprobación'),
         ('activa', 'Activa'),
+        ('rechazada', 'Rechazada'),
         ('finalizada', 'Finalizada'),
+        
     ]
 
     NIVEL_EDUCATIVO_CHOICES = [
@@ -50,6 +52,8 @@ class Oferta(models.Model):
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
     fecha_publicacion = models.DateTimeField(default=timezone.now)
     fecha_cierre = models.DateTimeField()
+    motivo_rechazo = models.TextField(null=True, blank=True)
+    
     
     class Meta:
         verbose_name = "Oferta"
