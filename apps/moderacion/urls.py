@@ -12,7 +12,9 @@ urlpatterns = [
     path('categorias/<int:categoria_id>/modificar/', views.modificar_categoria, name='mod_modificar_categoria'),
     path('categorias/<int:categoria_id>/baja/', views.dar_de_baja_categoria, name='mod_dar_de_baja_categoria'),
     
-    path('ofertas/', views.listar_ofertas_pendientes, name='mod_listar_ofertas_pendientes'),
-    path('ofertas/<int:oferta_id>/aprobar/', views.aprobar_oferta, name='mod_aprobar_oferta'),
-    path('ofertas/<int:oferta_id>/rechazar/', views.rechazar_oferta, name='mod_rechazar_oferta'),
+    path('ofertas/', views.listar_ofertas, name='mod_listar_ofertas'),
+    path('oferta/<int:pk>/detalle/', views.detalle_oferta_json, name='mod_detalle_oferta'),
+    path('oferta/<int:pk>/aprobar/', views.aprobar_oferta, name='mod_aprobar_oferta'),
+    path('oferta/<int:pk>/rechazar/', views.rechazar_oferta, name='mod_rechazar_oferta'),
+        path('oferta/<int:pk>/finalizar/', views.finalizar_oferta, name='mod_finalizar_oferta'),
 ]

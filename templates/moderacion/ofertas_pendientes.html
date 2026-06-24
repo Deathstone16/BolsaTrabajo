@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+
+<div class="mb-6">
+    <h1 class="text-3xl font-medium">Panel de Moderación</h1>
+    <p class="text-muted-foreground mt-1">Administra y modera las ofertas laborales publicadas. Haz clic en una fila para ver detalles completos.</p>
+</div>
+
+<!-- Búsqueda y filtro -->
+<div class="bg-white rounded-xl border border-border p-4 mb-6 flex flex-col sm:flex-row gap-3">
+    <div class="relative flex-1">
+      <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"></i>
+      <input type="text" id="buscar" placeholder="Buscar por puesto o empresa..."
+            class="w-full pl-9 pr-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
+    </div>
+    <div class="relative">
+    <i data-lucide="filter" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"></i>
+    <select id="filtro-estado" onchange="window.location.href=this.value"
+            class="pl-9 pr-8 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none">
+        <option value="{% url 'mod_listar_ofertas' %}" {% if not filtro_actual %}selected{% endif %}>Todos los estados</option>
+        <option value="{% url 'mod_listar_ofertas' %}?estado=pendiente" {% if filtro_actual == 'pendiente' %}selected{% endif %}>Pendiente</option>
+        <option value="{% url 'mod_listar_ofertas' %}?estado=activa" {% if filtro_actual == 'activa' %}selected{% endif %}>Aprobada</option>
+        <option value="{% url 'mod_listar_ofertas' %}?estado=rechazada" {% if filtro_actual == 'rechazada' %}selected{% endif %}>Rechazada</option>
+    </select>
+    </div>
+</div>
+
+<!-- Tabla -->
+  <div class="bg-white rounded-xl border border-border overflow-hidden mb-6">
+    <table class="w-full">
+    <thead>
+        <tr class="border-b border-border text-sm text-muted-foreground">
+            <th class="text-left px-6 py-4 font-medium">Fecha</th>
+            <th class="text-left px-6 py-4 font-medium">Puesto</th>
+            <th class="text-left px-6 py-4 font-medium">Empresa</th>
+            <th class="text-left px-6 py-4 font-medium">Estado</th>
+            <th class="text-left px-6 py-4 font-medium">Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="tabla-ofertas">
+        {% for oferta in ofertas %}
+        <tr class="fila-oferta border-b border-border last:border-0 hover:bg-muted/40 cursor-pointer transition-colors"
+            data-oferta-id="{{ oferta.id }}"
+            onclick="abrirDetalle({{oferta.id}})">
+            <td class="px-6 py-4 text-sm text-muted-foreground">{{ oferta.fecha_publicacion|date:"d/m/Y" }}</td>
+            <td class="px-6 py-4 text-sm font-medium">{{ oferta.nombre_puesto }}</td>
+            <td class="px-6 py-4 text-sm text-muted-foreground">{{ oferta.empresa.oferente.nombre_empresa }}</td>
+            <td class="px-6 py-4">
+            <span class="px-3 py-1 rounded-full text-xs font-medium
+                {% if oferta.estado == 'activa' %}bg-green-100 text-green-700
+                {% elif oferta.estado == 'pendiente' %}bg-yellow-100 text-yellow-700
+                {% elif oferta.estado == 'rechazada' %}bg-red-100 text-red-700
+                {% else %}bg-gray-100 text-gray-700{% endif %}">
+                {{ oferta.get_estado_display }}
+            </span>
+            </td>
+                <td class="px-6 py-4" onclick="event.stopPropagation()">
+            <div class="flex items-center gap-2">
+                {% if oferta.estado == 'pendiente' %}
+                <button type="button" onclick="aprobarOferta({{oferta.id}})"
+                        class="btn-accion-rapida p-1.5 rounded-lg border border-green-200 text-green-600 hover:bg-green-50 transition-colors"
+                        title="Aprobar">
+                <i data-lucide="check" class="w-4 h-4"></i>
+                </button>
+                <button type="button" onclick="rechazarOferta({{oferta.id}})"
+                        class="btn-accion-rapida p-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition-colors"
+                        title="Rechazar">
+                <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+                {% elif oferta.estado == 'activa' %}
+                <button type="button" onclick="finalizarOferta({{oferta.id}})"
+                        class="btn-accion-rapida px-3 py-1.5 rounded-lg border border-orange-200 text-orange-600 hover:bg-orange-50 transition-colors text-xs font-medium"
+                        title="Dar de baja">
+                <i data-lucide="archive" class="w-4 h-4 inline"></i> Dar de baja
+                </button>
+                {% else %}
+                <span class="text-xs text-muted-foreground">—</span>
+            {% endif %}
+            </div>
+        </td>
+        </tr>
+        {% empty %}
+        <tr>
+        <td colspan="5" class="px-6 py-12 text-center text-muted-foreground text-sm">No hay ofertas para moderar.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="bg-white rounded-xl border border-border p-6">
+      <p class="text-sm text-muted-foreground mb-1">Total de ofertas</p>
+      <p class="text-3xl font-medium">{{ total }}</p>
+    </div>
+    <div class="bg-white rounded-xl border border-border p-6">
+      <p class="text-sm text-muted-foreground mb-1">Pendientes</p>
+      <p class="text-3xl font-medium">{{ pendientes }}</p>
+    </div>
+    <div class="bg-white rounded-xl border border-border p-6">
+      <p class="text-sm text-muted-foreground mb-1">Aprobadas</p>
+      <p class="text-3xl font-medium">{{ aprobadas }}</p>
+    </div>
+  </div>
+
+</div>
+
+{% include 'moderacion/_detalle_oferta_modal.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/ofertas_moderacion.js' %}"></script>
+{% endblock %}
