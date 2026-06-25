@@ -44,6 +44,7 @@
             {% if user.is_staff %}
               <a href="{% url 'mod_listar_empresas' %}" class="text-muted-foreground hover:text-foreground transition-colors">Empresas</a>
               <a href="{% url 'mod_listar_cursos' %}" class="text-muted-foreground hover:text-foreground transition-colors">Cursos</a>
+              <a href="{% url 'mod_listar_tipos_oferta' %}" class="text-muted-foreground hover:text-foreground transition-colors">Tipos de Oferta</a>
             {% endif %}
             <form method="post" action="{% url 'logout' %}" style="display:inline">
               {% csrf_token %}

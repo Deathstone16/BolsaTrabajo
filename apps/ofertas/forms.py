@@ -1,13 +1,15 @@
 from django import forms
 from django.utils import timezone
-from .models import Oferta
+from .models import Oferta, TipoOferta
+
+INPUT_CLASS = "w-full px-4 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/30"
 
 
 class OfertaForm(forms.ModelForm):
     class Meta:
         model = Oferta
         fields = [
-            'titulo', 'nombre_puesto', 'categoria', 'ubicacion', 'modalidad', 
+            'titulo', 'nombre_puesto', 'tipo_oferta', 'categoria', 'ubicacion', 'modalidad', 
             'descripcion', 'habilidades_requeridas', 
             'experiencia_requerida', 'nivel_educativo', 'es_confidencial', 'fecha_cierre'
         ]
@@ -34,3 +36,22 @@ class OfertaForm(forms.ModelForm):
         if valor is not None and valor < 0:
             raise forms.ValidationError("Los años de experiencia no pueden ser negativos.")
         return valor
+
+
+class TipoOfertaForm(forms.ModelForm):
+    class Meta:
+        model = TipoOferta
+        fields = ['nombre']
+        labels = {'nombre': 'Nombre'}
+        widgets = {
+            'nombre': forms.TextInput(attrs={
+                'class': INPUT_CLASS,
+                'placeholder': 'Ej. Tecnología'
+            }),
+        }
+
+    def clean_nombre(self):
+        nombre = self.cleaned_data.get('nombre')
+        if nombre and len(nombre) < 3:
+            raise forms.ValidationError("El nombre debe tener al menos 3 caracteres.")
+        return nombre

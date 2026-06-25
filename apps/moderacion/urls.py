@@ -22,4 +22,9 @@ urlpatterns = [
     path('oferta/<int:pk>/aprobar/', views.aprobar_oferta, name='mod_aprobar_oferta'),
     path('oferta/<int:pk>/rechazar/', views.rechazar_oferta, name='mod_rechazar_oferta'),
     path('oferta/<int:pk>/finalizar/', views.finalizar_oferta, name='mod_finalizar_oferta'),
+
+    path('tipos-oferta/', views.listar_tipos_oferta, name='mod_listar_tipos_oferta'),
+    path('tipos-oferta/crear/', views.crear_tipo_oferta, name='mod_crear_tipo_oferta'),
+    path('tipos-oferta/<int:tipo_id>/modificar/', views.modificar_tipo_oferta, name='mod_modificar_tipo_oferta'),
+    path('tipos-oferta/<int:tipo_id>/baja/', views.eliminar_tipo_oferta, name='mod_eliminar_tipo_oferta'),
 ]

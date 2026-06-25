@@ -3,6 +3,17 @@ from django.conf import settings
 from django.utils import timezone
 from .state import ESTADOS
 
+class TipoOferta(models.Model):
+    nombre = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        verbose_name = "Tipo de Oferta"
+        verbose_name_plural = "Tipos de Ofertas"
+
+    def __str__(self):
+        return self.nombre
+
+
 class CategoriaOferta(models.Model):
 
     nombre = models.CharField(max_length=100)
@@ -48,6 +59,7 @@ class Oferta(models.Model):
 
     
     empresa = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ofertas')
+    tipo_oferta = models.ForeignKey('TipoOferta', on_delete=models.SET_NULL, null=True, blank=True, related_name='ofertas')
     categoria = models.ForeignKey('CategoriaOferta', on_delete=models.SET_NULL, null=True, blank=True, related_name='ofertas')
     titulo = models.CharField(max_length=100)
     nombre_puesto = models.CharField(max_length=150)

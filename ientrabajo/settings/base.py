@@ -104,6 +104,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 LANGUAGE_CODE = 'es-es'
 TIME_ZONE = 'America/Argentina/Buenos_Aires'
 USE_I18N = True
