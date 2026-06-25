@@ -1,18 +1,24 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
+from django.urls import reverse
 from .forms import OfertaForm
 from .models import Oferta
 from .services import crear_oferta_laboral, obtener_ofertas_por_empresa, obtener_oferta_por_id, eliminar_oferta_por_id, obtener_ofertas_activas
 from usuarios.forms import OferenteForm
-from django.http import JsonResponse
+from usuarios.service import obtener_url_contacto
+from usuarios.decorators import oferente_required, oferente_validado_required
+from .dtos import OfertaDTO
+from dataclasses import asdict
 
+@oferente_required
+def validacion_pendiente(request):
+    email_contacto_url = obtener_url_contacto(request.user.email)
+    return render(request, 'Ofertas/validacion_pendiente.html', {
+        'email_contacto_url': email_contacto_url,
+    })
 
-@login_required
+@oferente_validado_required
 def crear_oferta(request):
-    es_oferente = hasattr(request.user, 'oferente')
-    if not es_oferente:
-        return redirect('home')
 
     if request.method == 'POST':
         form = OfertaForm(request.POST)
@@ -30,11 +36,9 @@ def crear_oferta(request):
     return redirect('dashboard_empresa')
 
 
-@login_required
+@oferente_validado_required
 def dashboard_empresa(request):
-    if not hasattr(request.user, 'oferente'):
-        return redirect('home')
-
+    
     oferente = request.user.oferente
     ofertas = obtener_ofertas_por_empresa(request.user)
     form_perfil = OferenteForm(instance=oferente)
@@ -49,11 +53,11 @@ def dashboard_empresa(request):
     })
 
 
-@login_required
+@oferente_validado_required
 def editar_oferta(request, pk):
     oferta = obtener_oferta_por_id(pk)
 
-    if not oferta or oferta.empresa != request.user:
+    if not oferta or oferta.empresa != request.user or not oferta.puede_editarse():
         return redirect('dashboard_empresa')
 
     if request.method == 'POST':
@@ -72,7 +76,7 @@ def editar_oferta(request, pk):
     return redirect('dashboard_empresa')
 
 
-@login_required
+@oferente_validado_required
 def eliminar_oferta(request, pk):
     oferta = obtener_oferta_por_id(pk)
 
@@ -88,46 +92,29 @@ def eliminar_oferta(request, pk):
 
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-
-@login_required
+@oferente_validado_required
 def datos_oferta(request, pk):
     oferta = obtener_oferta_por_id(pk)
 
     if not oferta or oferta.empresa != request.user:
         return JsonResponse({'error': 'No encontrada'}, status=404)
 
-    return JsonResponse({
-        'titulo': oferta.titulo,
-        'nombre_puesto': oferta.nombre_puesto,
-        'categoria': oferta.categoria_id,
-        'ubicacion': oferta.ubicacion,
-        'modalidad': oferta.modalidad,
-        'descripcion': oferta.descripcion,
-        'requisitos': oferta.requisitos,
-        'habilidades_requeridas': oferta.habilidades_requeridas,
-        'experiencia_requerida': oferta.experiencia_requerida,
-        'nivel_educativo': oferta.nivel_educativo,
-        'es_confidencial': oferta.es_confidencial,
-        'fecha_cierre': oferta.fecha_cierre.strftime('%Y-%m-%d') if oferta.fecha_cierre else '',
-    })
+    dto = OfertaDTO.desde_modelo(oferta)
+    return JsonResponse(asdict(dto))
 
-
-@login_required
+@oferente_validado_required
 def lista_ofertas_parcial(request):
-    if not hasattr(request.user, 'oferente'):
-        return JsonResponse({'error': 'No autorizado'}, status=403)
 
     ofertas = obtener_ofertas_por_empresa(request.user)
 
     return render(request, 'Ofertas/_lista-ofertas.html', {
         'ofertas': ofertas,
+        'oferente': request.user.oferente, #temporalmente necesario para el template, se puede refactorizar para no necesitarlo
     })
 
 
-@login_required
+@oferente_validado_required
 def editar_perfil_empresa(request):
-    if not hasattr(request.user, 'oferente'):
-        return redirect('home')
 
     oferente = request.user.oferente
 
@@ -135,7 +122,7 @@ def editar_perfil_empresa(request):
         form = OferenteForm(request.POST, request.FILES, instance=oferente)
         if form.is_valid():
             form.save()
-            return redirect('dashboard_empresa#empresa')
+            return redirect(reverse('dashboard_empresa') + '#empresa')
 
     return redirect('dashboard_empresa')
 

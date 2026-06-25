@@ -11,4 +11,5 @@ urlpatterns = [
     path('lista-parcial/', views.lista_ofertas_parcial, name='lista_ofertas_parcial'),
     path('buscar/', views.buscar_empleo, name='buscar_empleo'),
     path('<int:pk>/', views.detalle_oferta_postulante, name='detalle_oferta'),
+    path('validacion-pendiente/', views.validacion_pendiente, name='validacion_pendiente'),
 ]

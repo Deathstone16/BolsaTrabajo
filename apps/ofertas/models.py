@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from .state import ESTADOS
 
 class CategoriaOferta(models.Model):
 
@@ -24,7 +25,9 @@ class Oferta(models.Model):
     ESTADO_CHOICES = [
         ('pendiente', 'Pendiente de Aprobación'),
         ('activa', 'Activa'),
+        ('rechazada', 'Rechazada'),
         ('finalizada', 'Finalizada'),
+        
     ]
 
     EXPERIENCIA_CHOICES = [
@@ -51,14 +54,15 @@ class Oferta(models.Model):
     ubicacion = models.CharField(max_length=100)
     modalidad = models.CharField(max_length=20, choices=MODALIDAD_CHOICES, default='presencial')
     descripcion = models.TextField()
-    requisitos = models.TextField()
     habilidades_requeridas = models.TextField()
-    experiencia_requerida = models.CharField(max_length=100) # Ej: "2-3 años"
+    experiencia_requerida = models.PositiveIntegerField(default=0)
     nivel_educativo = models.CharField(max_length=30, choices=NIVEL_EDUCATIVO_CHOICES)
     es_confidencial = models.BooleanField(default=False)
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
     fecha_publicacion = models.DateTimeField(default=timezone.now)
     fecha_cierre = models.DateTimeField()
+    motivo_rechazo = models.TextField(null=True, blank=True)
+    
     
     class Meta:
         verbose_name = "Oferta"
@@ -67,3 +71,19 @@ class Oferta(models.Model):
 
     def __str__(self):
         return f"{self.titulo} - {self.nombre_puesto}"  
+    
+    def get_state(self):
+        
+        return ESTADOS[self.estado]
+
+    def aprobar(self):
+        self.get_state().aprobar(self)
+
+    def rechazar(self):
+        self.get_state().rechazar(self)
+
+    def finalizar(self):
+        self.get_state().finalizar(self)
+
+    def puede_editarse(self):
+        return self.get_state().puede_editarse()

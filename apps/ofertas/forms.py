@@ -8,12 +8,13 @@ class OfertaForm(forms.ModelForm):
         model = Oferta
         fields = [
             'titulo', 'nombre_puesto', 'categoria', 'ubicacion', 'modalidad', 
-            'descripcion', 'requisitos', 'habilidades_requeridas', 
+            'descripcion', 'habilidades_requeridas', 
             'experiencia_requerida', 'nivel_educativo', 'es_confidencial', 'fecha_cierre'
         ]
         
         widgets = {
             'fecha_cierre': forms.DateInput(attrs={'type': 'date'}),
+            'habilidades_requeridas': forms.HiddenInput(),
         }
 
     def clean_titulo(self):
@@ -27,3 +28,9 @@ class OfertaForm(forms.ModelForm):
         if fecha_cierre and fecha_cierre <= timezone.now():
             raise forms.ValidationError("La fecha de cierre debe ser posterior a la fecha actual del sistema.")
         return fecha_cierre
+    
+    def clean_experiencia_requerida(self):
+        valor = self.cleaned_data.get('experiencia_requerida')
+        if valor is not None and valor < 0:
+            raise forms.ValidationError("Los años de experiencia no pueden ser negativos.")
+        return valor

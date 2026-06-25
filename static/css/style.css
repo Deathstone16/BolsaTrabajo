@@ -10,3 +10,29 @@ body {
 input, select, textarea, button { font-family: inherit; }
 [data-lucide] { width: 1em; height: 1em; }
 .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+#modal-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.2s;
+}
+#modal-scroll:hover {
+  scrollbar-color: #e5e7eb transparent;
+}
+#modal-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+#modal-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+#modal-scroll::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 999px;
+  transition: background 0.2s;
+}
+#modal-scroll:hover::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+}
+#modal-scroll::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
