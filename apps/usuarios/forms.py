@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, SetPasswordForm as DjangoSetPasswordForm
 from .models import Usuario, Postulante, Oferente
 
 
@@ -82,6 +82,57 @@ class DatosPersonalesForm(forms.ModelForm):
         if not telefono.isdigit():
             raise forms.ValidationError('El teléfono solo puede contener números.')
         return telefono
-    
-    
-    
+
+
+# ─── Formularios nuevos: recuperación de contraseña ──────────────────────────
+
+class PasswordResetRequestForm(forms.Form):
+    """
+    Paso 1: el usuario ingresa su email.
+    No revela si el correo existe (seguridad por oscuridad).
+    """
+    email = forms.EmailField(
+        label="Email",
+        max_length=254,
+        widget=forms.EmailInput(attrs={
+            'class': 'w-full px-4 py-2 rounded-lg border border-border bg-input-background '
+                     'focus:outline-none focus:ring-2 focus:ring-primary/30',
+            'placeholder': 'tu@email.com',
+            'autofocus': True,
+        })
+    )
+
+    def get_usuario(self):
+        """Retorna el Usuario si el email existe, o None. Sin excepciones."""
+        email = self.cleaned_data.get('email', '').lower()
+        try:
+            return Usuario.objects.get(email__iexact=email)
+        except Usuario.DoesNotExist:
+            return None
+
+
+class SetPasswordForm(DjangoSetPasswordForm):
+    """
+    Paso 3: nueva contraseña. Extiende el built-in de Django
+    con los estilos Tailwind del proyecto.
+    """
+    new_password1 = forms.CharField(
+        label="Nueva contraseña",
+        strip=False,
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full px-4 py-2 rounded-lg border border-border bg-input-background '
+                     'focus:outline-none focus:ring-2 focus:ring-primary/30 pr-10',
+            'placeholder': 'Mínimo 8 caracteres',
+            'id': 'nueva_contrasena',
+        }),
+    )
+    new_password2 = forms.CharField(
+        label="Confirmar contraseña",
+        strip=False,
+        widget=forms.PasswordInput(attrs={
+            'class': 'w-full px-4 py-2 rounded-lg border border-border bg-input-background '
+                     'focus:outline-none focus:ring-2 focus:ring-primary/30 pr-10',
+            'placeholder': 'Repetí la contraseña',
+            'id': 'confirmar_contrasena',
+        }),
+    )

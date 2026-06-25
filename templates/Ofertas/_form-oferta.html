@@ -35,6 +35,19 @@
   </div>
 
   <div class="space-y-2">
+    <label class="block text-sm font-medium">Tipo de oferta</label>
+    <select name="tipo_oferta" class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+      <option value="">Seleccionar tipo de oferta</option>
+      {% for tipo in form.fields.tipo_oferta.queryset %}
+        <option value="{{ tipo.id }}" {% if form.tipo_oferta.value|stringformat:"s" == tipo.id|stringformat:"s" %}selected{% endif %}>
+          {{ tipo.nombre }}
+        </option>
+      {% endfor %}
+    </select>
+    {% if form.tipo_oferta.errors %}<p class="text-sm text-red-500">{{ form.tipo_oferta.errors.0 }}</p>{% endif %}
+  </div>
+
+  <div class="space-y-2">
     <label class="block text-sm font-medium">Categoría</label>
     <select name="categoria" class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
       <option value="">Seleccionar categoría</option>

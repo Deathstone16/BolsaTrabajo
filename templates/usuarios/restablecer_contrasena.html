@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-accent px-4">
+  <div class="bg-white rounded-xl shadow-sm border border-border w-full max-w-md p-8 space-y-6">
+
+    <div class="text-center space-y-2">
+      <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto">
+        <i data-lucide="lock-keyhole-open" class="w-6 h-6 text-primary"></i>
+      </div>
+      <h1 class="text-2xl font-medium">Nueva contraseña</h1>
+      <p class="text-muted-foreground text-sm">Elegí una contraseña segura (mínimo 8 caracteres)</p>
+    </div>
+
+    {% if form.errors %}
+      <div class="bg-destructive/10 text-destructive text-sm rounded-lg px-4 py-3 space-y-1">
+        {% for field in form %}{% for error in field.errors %}<p>{{ error }}</p>{% endfor %}{% endfor %}
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="POST" class="space-y-4">
+      {% csrf_token %}
+
+      <div class="space-y-1">
+        <label class="text-sm font-medium">{{ form.new_password1.label }}</label>
+        <div class="relative">
+          {{ form.new_password1 }}
+          <button type="button" onclick="toggleVer('nueva_contrasena','ojo1')"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
+            <i data-lucide="eye" id="ojo1" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-1">
+        <label class="text-sm font-medium">{{ form.new_password2.label }}</label>
+        <div class="relative">
+          {{ form.new_password2 }}
+          <button type="button" onclick="toggleVer('confirmar_contrasena','ojo2')"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
+            <i data-lucide="eye" id="ojo2" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <p id="msg-coincidencia" class="text-xs mt-1 hidden"></p>
+      </div>
+
+      <button type="submit" id="btn-submit"
+        class="w-full py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+        Cambiar contraseña
+      </button>
+    </form>
+
+  </div>
+</div>
+
+<script>
+  function toggleVer(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon  = document.getElementById(iconId);
+    input.type = input.type === 'password' ? 'text' : 'password';
+    icon.setAttribute('data-lucide', input.type === 'password' ? 'eye' : 'eye-off');
+    lucide.createIcons();
+  }
+  const p1 = document.getElementById('nueva_contrasena');
+  const p2 = document.getElementById('confirmar_contrasena');
+  const msg = document.getElementById('msg-coincidencia');
+  const btn = document.getElementById('btn-submit');
+  function validar() {
+    if (!p2.value) { msg.classList.add('hidden'); return; }
+    msg.classList.remove('hidden');
+    const ok = p1.value === p2.value;
+    msg.textContent = ok ? '✓ Las contraseñas coinciden' : '✗ Las contraseñas no coinciden';
+    msg.className = `text-xs mt-1 ${ok ? 'text-green-600' : 'text-destructive'}`;
+    btn.disabled = !ok;
+  }
+  p1.addEventListener('input', validar);
+  p2.addEventListener('input', validar);
+</script>
+{% endblock %}

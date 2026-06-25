@@ -7,7 +7,9 @@ from cursos import services as cursos_services
 from usuarios.models import Oferente
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
-from ofertas.models import Oferta
+from ofertas.models import Oferta, TipoOferta, Habilidad
+from ofertas.forms import TipoOfertaForm, HabilidadForm
+from ofertas import services as ofertas_services
 from ofertas.dtos import OfertaDTO
 from dataclasses import asdict
 
@@ -210,3 +212,127 @@ def finalizar_oferta(request, pk):
         return JsonResponse({'success': True})
     except ValueError as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+# ========== TIPOS DE OFERTA ==========
+
+@staff_required
+def listar_tipos_oferta(request):
+    tipos = ofertas_services.listar_tipos_oferta()
+    return render(request, 'moderacion/listar_tipos_oferta.html', {'tipos': tipos})
+
+
+@staff_required
+def crear_tipo_oferta(request):
+    if request.method == 'POST':
+        form = TipoOfertaForm(request.POST)
+        if form.is_valid():
+            ofertas_services.crear_tipo_oferta(form)
+            messages.success(request, 'Tipo de oferta creado correctamente')
+            return redirect('mod_listar_tipos_oferta')
+        else:
+            messages.error(request, 'Corregí los errores del formulario')
+    else:
+        form = TipoOfertaForm()
+    return render(request, 'moderacion/crear_tipo_oferta.html', {'form': form})
+
+
+@staff_required
+def modificar_tipo_oferta(request, tipo_id):
+    tipo = get_object_or_404(TipoOferta, id=tipo_id)
+    if request.method == 'POST':
+        form = TipoOfertaForm(request.POST, instance=tipo)
+        if form.is_valid():
+            ofertas_services.modificar_tipo_oferta(tipo_id, form)
+            messages.success(request, 'Tipo de oferta modificado correctamente')
+            return redirect('mod_listar_tipos_oferta')
+        else:
+            messages.error(request, 'Corregí los errores del formulario')
+    else:
+        form = TipoOfertaForm(instance=tipo)
+    return render(request, 'moderacion/modificar_tipo_oferta.html', {'form': form, 'tipo': tipo})
+
+
+@staff_required
+def eliminar_tipo_oferta(request, tipo_id):
+    tipo = get_object_or_404(TipoOferta, id=tipo_id)
+    if not ofertas_services.puede_eliminar_tipo_oferta(tipo_id):
+        messages.error(request, 'No se puede eliminar este tipo de oferta porque tiene ofertas asociadas.')
+        return redirect('mod_listar_tipos_oferta')
+    if request.method == 'POST':
+        ofertas_services.eliminar_tipo_oferta(tipo_id)
+        messages.success(request, f"Tipo de oferta '{tipo.nombre}' eliminado correctamente")
+        return redirect('mod_listar_tipos_oferta')
+    return render(request, 'moderacion/confirmar_baja_tipo_oferta.html', {'tipo': tipo})
+
+
+# ========== HABILIDADES ==========
+
+@staff_required
+def listar_habilidades(request, tipo_id):
+    tipo = get_object_or_404(TipoOferta, id=tipo_id)
+    habilidades = ofertas_services.listar_habilidades_por_tipo(tipo_id)
+    return render(request, 'moderacion/listar_habilidades.html', {
+        'tipo': tipo,
+        'habilidades': habilidades,
+    })
+
+
+@staff_required
+def crear_habilidad(request, tipo_id):
+    tipo = get_object_or_404(TipoOferta, id=tipo_id)
+    if request.method == 'POST':
+        form = HabilidadForm(request.POST)
+        if form.is_valid():
+            if Habilidad.objects.filter(nombre=form.cleaned_data['nombre'], tipo_oferta=tipo).exists():
+                form.add_error('nombre', 'Ya existe una habilidad con ese nombre en este tipo de oferta.')
+            else:
+                habilidad = form.save(commit=False)
+                habilidad.tipo_oferta = tipo
+                habilidad.save()
+                messages.success(request, 'Habilidad creada correctamente')
+                return redirect('mod_listar_habilidades', tipo_id=tipo_id)
+        else:
+            messages.error(request, 'Corregí los errores del formulario')
+    else:
+        form = HabilidadForm()
+    return render(request, 'moderacion/crear_habilidad.html', {'form': form, 'tipo': tipo})
+
+
+@staff_required
+def modificar_habilidad(request, habilidad_id):
+    habilidad = get_object_or_404(Habilidad, id=habilidad_id)
+    tipo = habilidad.tipo_oferta
+    if request.method == 'POST':
+        form = HabilidadForm(request.POST, instance=habilidad)
+        if form.is_valid():
+            nuevo_nombre = form.cleaned_data['nombre']
+            if Habilidad.objects.filter(nombre=nuevo_nombre, tipo_oferta=tipo).exclude(id=habilidad_id).exists():
+                form.add_error('nombre', 'Ya existe una habilidad con ese nombre en este tipo de oferta.')
+            else:
+                form.save()
+                messages.success(request, 'Habilidad modificada correctamente')
+                return redirect('mod_listar_habilidades', tipo_id=habilidad.tipo_oferta_id)
+        else:
+            messages.error(request, 'Corregí los errores del formulario')
+    else:
+        form = HabilidadForm(instance=habilidad)
+    return render(request, 'moderacion/modificar_habilidad.html', {
+        'form': form, 'habilidad': habilidad, 'tipo': tipo
+    })
+
+
+@staff_required
+def eliminar_habilidad(request, habilidad_id):
+    habilidad = get_object_or_404(Habilidad, id=habilidad_id)
+    tipo_id = habilidad.tipo_oferta_id
+    if not ofertas_services.puede_eliminar_habilidad(habilidad_id):
+        messages.error(request, 'No se puede eliminar esta habilidad porque está siendo utilizada.')
+        return redirect('mod_listar_habilidades', tipo_id=tipo_id)
+    if request.method == 'POST':
+        ofertas_services.eliminar_habilidad(habilidad_id)
+        messages.success(request, f"Habilidad '{habilidad.nombre}' eliminada correctamente")
+        return redirect('mod_listar_habilidades', tipo_id=tipo_id)
+    return render(request, 'moderacion/confirmar_baja_habilidad.html', {
+        'habilidad': habilidad, 'tipo': habilidad.tipo_oferta
+    })

@@ -11,4 +11,9 @@ urlpatterns = [
     path('oferente/<int:pk>/', views.perfil_oferente, name='perfil_oferente'),
     path('mi-perfil/', views.mi_perfil, name='mi_perfil'),
     
+    # ── Recuperación de contraseña ────────────────────────────────────────────
+    path('recuperar/',                              views.password_reset_request, name='recuperar-contrasena'),
+    path('recuperar/enviado/',                      views.recuperacion_enviada,   name='recuperacion-enviada'),
+    path('restablecer/<uidb64>/<token>/',           views.password_reset_confirm, name='restablecer-contrasena'),
+    path('recuperar/exitoso/',                      views.contrasena_restablecida,name='contrasena-restablecida'),
 ]

@@ -22,4 +22,14 @@ urlpatterns = [
     path('oferta/<int:pk>/aprobar/', views.aprobar_oferta, name='mod_aprobar_oferta'),
     path('oferta/<int:pk>/rechazar/', views.rechazar_oferta, name='mod_rechazar_oferta'),
     path('oferta/<int:pk>/finalizar/', views.finalizar_oferta, name='mod_finalizar_oferta'),
+
+    path('tipos-oferta/', views.listar_tipos_oferta, name='mod_listar_tipos_oferta'),
+    path('tipos-oferta/crear/', views.crear_tipo_oferta, name='mod_crear_tipo_oferta'),
+    path('tipos-oferta/<int:tipo_id>/modificar/', views.modificar_tipo_oferta, name='mod_modificar_tipo_oferta'),
+    path('tipos-oferta/<int:tipo_id>/baja/', views.eliminar_tipo_oferta, name='mod_eliminar_tipo_oferta'),
+
+    path('tipos-oferta/<int:tipo_id>/habilidades/', views.listar_habilidades, name='mod_listar_habilidades'),
+    path('tipos-oferta/<int:tipo_id>/habilidades/crear/', views.crear_habilidad, name='mod_crear_habilidad'),
+    path('habilidades/<int:habilidad_id>/modificar/', views.modificar_habilidad, name='mod_modificar_habilidad'),
+    path('habilidades/<int:habilidad_id>/baja/', views.eliminar_habilidad, name='mod_eliminar_habilidad'),
 ]
