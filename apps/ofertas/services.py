@@ -24,3 +24,21 @@ def eliminar_oferta_por_id(oferta_id):
         oferta.delete()
         return True
     return False
+
+def obtener_ofertas_activas(busqueda='', modalidad='', experiencia=''):
+    ofertas = Oferta.objects.filter(estado='activa').select_related('empresa__oferente', 'categoria').order_by('-fecha_publicacion')
+    if busqueda:
+        ofertas = ofertas.filter(titulo__icontains=busqueda) | ofertas.filter(nombre_puesto__icontains=busqueda)
+    if modalidad:
+        ofertas = ofertas.filter(modalidad=modalidad)
+    if experiencia:
+        ofertas = ofertas.filter(experiencia_requerida=experiencia)
+    return ofertas
+
+def actualizar_estado_oferta(oferta_id, nuevo_estado):
+    oferta = obtener_oferta_por_id(oferta_id)
+    if oferta:
+        oferta.estado = nuevo_estado
+        oferta.save()
+        return True
+    return False

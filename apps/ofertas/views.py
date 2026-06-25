@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.urls import reverse
 from .forms import OfertaForm
-from .services import crear_oferta_laboral, obtener_ofertas_por_empresa, obtener_oferta_por_id, eliminar_oferta_por_id
+from .models import Oferta
+from .services import crear_oferta_laboral, obtener_ofertas_por_empresa, obtener_oferta_por_id, eliminar_oferta_por_id, obtener_ofertas_activas
 from usuarios.forms import OferenteForm
 from usuarios.service import obtener_url_contacto
 from usuarios.decorators import oferente_required, oferente_validado_required
@@ -48,6 +49,7 @@ def dashboard_empresa(request):
         'ofertas': ofertas,
         'form_perfil': form_perfil,
         'form': form,
+        'experiencia_choices': Oferta.EXPERIENCIA_CHOICES,
     })
 
 
@@ -123,3 +125,27 @@ def editar_perfil_empresa(request):
             return redirect(reverse('dashboard_empresa') + '#empresa')
 
     return redirect('dashboard_empresa')
+
+
+def detalle_oferta_postulante(request, pk):
+    oferta = get_object_or_404(Oferta, pk=pk, estado='activa')
+    habilidades = [h.strip() for h in oferta.habilidades_requeridas.split(',') if h.strip()]
+    return render(request, 'Ofertas/detalle_oferta.html', {'oferta': oferta, 'habilidades': habilidades})
+
+
+def buscar_empleo(request):
+    busqueda = request.GET.get('q', '')
+    modalidad = request.GET.get('modalidad', '')
+    experiencia = request.GET.get('experiencia', '')
+
+    ofertas = obtener_ofertas_activas(busqueda, modalidad, experiencia)
+
+    return render(request, 'Ofertas/buscar_empleo.html', {
+        'ofertas': ofertas,
+        'busqueda': busqueda,
+        'modalidad': modalidad,
+        'experiencia': experiencia,
+        'modalidad_choices': Oferta.MODALIDAD_CHOICES,
+        'experiencia_choices': Oferta.EXPERIENCIA_CHOICES,
+        'total': ofertas.count(),
+    })

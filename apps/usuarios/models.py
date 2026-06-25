@@ -55,6 +55,12 @@ class Oferente(models.Model):
     ('rechazado', 'Rechazada'),
 ]
     
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente de validación'),
+        ('aprobado', 'Aprobado'),
+        ('rechazado', 'Rechazado'),
+    ]
+
     TAMANO_CHOICES = [
         ('1-10', '1-10 empleados'),
         ('11-50', '11-50 empleados'),
@@ -64,6 +70,7 @@ class Oferente(models.Model):
     ]
     
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
     nombre_empresa = models.CharField(max_length=200)
     cuit = models.CharField(max_length=13)
     logo = models.ImageField(upload_to='empresas/logos/', null=True, blank=True)

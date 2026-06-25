@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+
+  <div class="mb-8">
+    <h1 class="text-3xl font-medium mb-2">Empresas pendientes de validación</h1>
+    <p class="text-muted-foreground">Revisá y validá las empresas que solicitaron registro en la plataforma.</p>
+  </div>
+
+  <!-- Buscador -->
+  <div class="bg-white rounded-xl shadow-sm border border-border p-6 mb-6">
+    <div class="relative">
+      <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground"></i>
+      <input type="text" id="empresa-search" placeholder="Buscar por nombre o CUIT..."
+             class="w-full pl-10 pr-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-8">
+    <table class="w-full">
+      <thead>
+        <tr class="border-b border-border text-sm text-muted-foreground">
+          <th class="text-left px-6 py-4 font-medium">Empresa</th>
+          <th class="text-left px-6 py-4 font-medium">CUIT</th>
+          <th class="text-left px-6 py-4 font-medium">Email</th>
+          <th class="text-left px-6 py-4 font-medium">Industria</th>
+          <th class="text-left px-6 py-4 font-medium">Estado</th>
+          <th class="text-left px-6 py-4 font-medium">Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="empresas-tabla">
+        {% for empresa in empresas %}
+        <tr class="border-b border-border last:border-0 hover:bg-muted/40 transition-colors"
+            data-nombre="{{ empresa.nombre_empresa|lower }}">
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-3">
+              {% if empresa.logo %}
+                <img src="{{ empresa.logo.url }}" class="w-9 h-9 rounded-lg object-cover">
+              {% else %}
+                <div class="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-medium">
+                  {{ empresa.nombre_empresa|first }}
+                </div>
+              {% endif %}
+              <span class="font-medium text-sm">{{ empresa.nombre_empresa }}</span>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-sm text-muted-foreground">{{ empresa.cuit }}</td>
+          <td class="px-6 py-4 text-sm text-muted-foreground">{{ empresa.usuario.email }}</td>
+          <td class="px-6 py-4 text-sm text-muted-foreground">{{ empresa.industria|default:"—" }}</td>
+          <td class="px-6 py-4">
+            <span class="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+              Pendiente
+            </span>
+          </td>
+          <td class="px-6 py-4">
+            <a href="{% url 'mod_detalle_empresa' empresa.pk %}"
+               class="flex items-center gap-1.5 text-sm text-primary hover:underline">
+              <i data-lucide="eye" class="w-4 h-4"></i> Ver detalle
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="px-6 py-12 text-center text-sm text-muted-foreground">
+            No hay empresas pendientes de validación.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="bg-white rounded-xl shadow-sm border border-border p-6">
+      <p class="text-sm text-muted-foreground mb-1">Pendientes de validación</p>
+      <p class="text-3xl font-medium">{{ total }}</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const searchInput = document.getElementById('empresa-search');
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.toLowerCase();
+    document.querySelectorAll('#empresas-tabla tr[data-nombre]').forEach(row => {
+      row.style.display = row.dataset.nombre.includes(q) ? '' : 'none';
+    });
+  });
+</script>
+{% endblock %}

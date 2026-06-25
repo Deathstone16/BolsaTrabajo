@@ -30,6 +30,15 @@ class Oferta(models.Model):
         
     ]
 
+    EXPERIENCIA_CHOICES = [
+        ('sin-experiencia', 'Sin experiencia'),
+        ('menos-1', 'Menos de 1 año'),
+        ('1-2', '1-2 años'),
+        ('2-3', '2-3 años'),
+        ('3-5', '3-5 años'),
+        ('5+', '5+ años'),
+    ]
+
     NIVEL_EDUCATIVO_CHOICES = [
         ('secundario', 'Secundario Completo / Bachillerato'),
         ('terciario', 'Terciario'),

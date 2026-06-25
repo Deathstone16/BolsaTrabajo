@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import user_passes_test
-from django.http import JsonResponse ## agregacion temporal para listar ofertas pendientes en moderacion hasta que se implemente la HU del Template de moderacion de ofertas
+from django.contrib.admin.views.decorators import staff_member_required
+from django.http import JsonResponse
 from cursos.models import Curso, Categoria
 from cursos.forms import CursoForm, CategoriaForm
 from cursos import services as cursos_services
+from usuarios.models import Oferente
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from ofertas.models import Oferta
 from ofertas.dtos import OfertaDTO
@@ -107,6 +109,40 @@ def dar_de_baja_categoria(request, categoria_id):
     categoria = get_object_or_404(Categoria, id=categoria_id)
     return render(request, 'moderacion/confirmar_baja_categoria.html', {'categoria': categoria})
 
+
+@staff_member_required
+def listar_empresas(request):
+    empresas = Oferente.objects.filter(estado='pendiente').select_related('usuario').order_by('nombre_empresa')
+    return render(request, 'moderacion/listar_empresas.html', {
+        'empresas': empresas,
+        'total': empresas.count(),
+    })
+
+
+@staff_member_required
+def detalle_empresa(request, pk):
+    empresa = get_object_or_404(Oferente, pk=pk)
+    return render(request, 'moderacion/detalle_empresa.html', {'empresa': empresa})
+
+
+@staff_member_required
+def aprobar_empresa(request, pk):
+    if request.method == 'POST':
+        empresa = get_object_or_404(Oferente, pk=pk)
+        empresa.estado = 'aprobado'
+        empresa.save()
+        return redirect('mod_listar_empresas')
+    return redirect('mod_listar_empresas')
+
+
+@staff_member_required
+def rechazar_empresa(request, pk):
+    if request.method == 'POST':
+        empresa = get_object_or_404(Oferente, pk=pk)
+        empresa.estado = 'rechazado'
+        empresa.save()
+        return redirect('mod_listar_empresas')
+    return redirect('mod_listar_empresas')
 # ========== OFERTAS (moderación) ==========
 
 @staff_required
