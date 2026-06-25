@@ -8,6 +8,8 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('datos-personales/',views.datos_personales, name='datos_personales'),
     path('datos-personales-exitoso/', views.datos_personales_exitoso, name='datos_personales_exitoso'),
+    path('oferente/<int:pk>/', views.perfil_oferente, name='perfil_oferente'),
+    path('mi-perfil/', views.mi_perfil, name='mi_perfil'),
     
     # ── Recuperación de contraseña ────────────────────────────────────────────
     path('recuperar/',                              views.password_reset_request, name='recuperar-contrasena'),

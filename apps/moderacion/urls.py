@@ -11,8 +11,15 @@ urlpatterns = [
     path('categorias/crear/', views.crear_categoria, name='mod_crear_categoria'),
     path('categorias/<int:categoria_id>/modificar/', views.modificar_categoria, name='mod_modificar_categoria'),
     path('categorias/<int:categoria_id>/baja/', views.dar_de_baja_categoria, name='mod_dar_de_baja_categoria'),
+
+    path('empresas/', views.listar_empresas, name='mod_listar_empresas'),
+    path('empresas/<int:pk>/', views.detalle_empresa, name='mod_detalle_empresa'),
+    path('empresas/<int:pk>/aprobar/', views.aprobar_empresa, name='mod_aprobar_empresa'),
+    path('empresas/<int:pk>/rechazar/', views.rechazar_empresa, name='mod_rechazar_empresa'),
     
-    path('ofertas/', views.listar_ofertas_pendientes, name='mod_listar_ofertas_pendientes'),
-    path('ofertas/<int:oferta_id>/aprobar/', views.aprobar_oferta, name='mod_aprobar_oferta'),
-    path('ofertas/<int:oferta_id>/rechazar/', views.rechazar_oferta, name='mod_rechazar_oferta'),
+    path('ofertas/', views.listar_ofertas, name='mod_listar_ofertas'),
+    path('oferta/<int:pk>/detalle/', views.detalle_oferta_json, name='mod_detalle_oferta'),
+    path('oferta/<int:pk>/aprobar/', views.aprobar_oferta, name='mod_aprobar_oferta'),
+    path('oferta/<int:pk>/rechazar/', views.rechazar_oferta, name='mod_rechazar_oferta'),
+    path('oferta/<int:pk>/finalizar/', views.finalizar_oferta, name='mod_finalizar_oferta'),
 ]

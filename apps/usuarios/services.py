@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
@@ -11,11 +12,32 @@ from .models import Usuario, Postulante, Oferente
 token_generator = PasswordResetTokenGenerator()
 
 
+def autenticar_usuario(request, email, password):
+    user = authenticate(request, email=email, password=password)
+    if user is not None:
+        auth_login(request, user)
+        return True
+    return False
+
+
+def registrar_usuario(form):
+    return form.save()
+
+
+def actualizar_datos_postulante(user, form):
+    postulante = form.save(commit=False)
+    user.first_name = form.cleaned_data['first_name']
+    user.last_name = form.cleaned_data['last_name']
+    user.email = form.cleaned_data['email']
+    user.save()
+    postulante.save()
+
+
+def actualizar_perfil_oferente(form):
+    form.save()
+
+
 def get_rol_label(usuario):
-    """
-    Detecta el rol del usuario según la relación OneToOne existente.
-    Compatible con la arquitectura actual (modelos Postulante/Oferente separados).
-    """
     try:
         usuario.postulante
         return 'Postulante'
@@ -30,11 +52,6 @@ def get_rol_label(usuario):
 
 
 def enviar_email_recuperacion(usuario, request):
-    """
-    Genera el token de recuperación y envía el email con el enlace seguro.
-    El token expira según PASSWORD_RESET_TIMEOUT (24hs por defecto).
-    Retorna True si el usuario existe y el email se intentó enviar.
-    """
     uid   = urlsafe_base64_encode(force_bytes(usuario.pk))
     token = token_generator.make_token(usuario)
     link  = request.build_absolute_uri(
@@ -64,10 +81,6 @@ def enviar_email_recuperacion(usuario, request):
 
 
 def validar_token_recuperacion(uidb64, token):
-    """
-    Decodifica el uid y valida el token con PasswordResetTokenGenerator.
-    Retorna el Usuario si el token es válido, o None si no lo es.
-    """
     from django.utils.http import urlsafe_base64_decode
     from django.utils.encoding import force_str
 

@@ -35,8 +35,32 @@ class Postulante(models.Model):
     def __str__(self):
         return self.usuario.get_full_name() or self.usuario.email
 
+
+class OferenteManager(models.Manager):
+    """Custom Manager: encapsula queries frecuentes sobre Oferente."""
+
+    def pendientes(self):
+        """Empresas que aún no fueron validadas."""
+        return self.filter(estado_validacion='pendiente')
+
+    def aprobados(self):
+        """Empresas que pueden publicar ofertas."""
+        return self.filter(estado_validacion='aprobado')
+
 class Oferente(models.Model):
+    objects = OferenteManager()
+    ESTADO_VALIDACION_CHOICES = [
+    ('pendiente', 'Pendiente de Validación'),
+    ('aprobado', 'Aprobada'),
+    ('rechazado', 'Rechazada'),
+]
     
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente de validación'),
+        ('aprobado', 'Aprobado'),
+        ('rechazado', 'Rechazado'),
+    ]
+
     TAMANO_CHOICES = [
         ('1-10', '1-10 empleados'),
         ('11-50', '11-50 empleados'),
@@ -46,6 +70,7 @@ class Oferente(models.Model):
     ]
     
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
     nombre_empresa = models.CharField(max_length=200)
     cuit = models.CharField(max_length=13)
     logo = models.ImageField(upload_to='empresas/logos/', null=True, blank=True)
@@ -60,3 +85,10 @@ class Oferente(models.Model):
     
     def __str__(self):
         return self.nombre_empresa
+
+    estado_validacion = models.CharField(
+        max_length=20,
+        choices=ESTADO_VALIDACION_CHOICES,
+        default='pendiente',
+    )
+    

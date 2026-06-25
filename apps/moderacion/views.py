@@ -1,13 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import user_passes_test
-from django.http import JsonResponse ## agregacion temporal para listar ofertas pendientes en moderacion hasta que se implemente la HU del Template de moderacion de ofertas
+from django.http import JsonResponse
 from cursos.models import Curso, Categoria
 from cursos.forms import CursoForm, CategoriaForm
 from cursos import services as cursos_services
+from usuarios.models import Oferente
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from ofertas.models import Oferta
-
+from ofertas.dtos import OfertaDTO
+from dataclasses import asdict
 
 
 def es_staff(user):
@@ -107,21 +109,104 @@ def dar_de_baja_categoria(request, categoria_id):
     categoria = get_object_or_404(Categoria, id=categoria_id)
     return render(request, 'moderacion/confirmar_baja_categoria.html', {'categoria': categoria})
 
-@staff_member_required
-def listar_ofertas_pendientes(request):
-    ofertas = Oferta.objects.filter(estado='pendiente').values(
-        'id', 'titulo', 'fecha_publicacion'
-    )
-    return JsonResponse(list(ofertas), safe=False)
 
 @staff_member_required
-def aprobar_oferta(request, oferta_id):
-    oferta = get_object_or_404(Oferta, id=oferta_id, estado='pendiente')
-    oferta.aprobar()
-    return redirect('mod_listar_ofertas_pendientes')
+def listar_empresas(request):
+    empresas = Oferente.objects.filter(estado='pendiente').select_related('usuario').order_by('nombre_empresa')
+    return render(request, 'moderacion/listar_empresas.html', {
+        'empresas': empresas,
+        'total': empresas.count(),
+    })
+
 
 @staff_member_required
-def rechazar_oferta(request, oferta_id):
-    oferta = get_object_or_404(Oferta, id=oferta_id, estado='pendiente')
-    oferta.rechazar()
-    return redirect('mod_listar_ofertas_pendientes')
+def detalle_empresa(request, pk):
+    empresa = get_object_or_404(Oferente, pk=pk)
+    return render(request, 'moderacion/detalle_empresa.html', {'empresa': empresa})
+
+
+@staff_member_required
+def aprobar_empresa(request, pk):
+    if request.method == 'POST':
+        empresa = get_object_or_404(Oferente, pk=pk)
+        empresa.estado = 'aprobado'
+        empresa.save()
+        return redirect('mod_listar_empresas')
+    return redirect('mod_listar_empresas')
+
+
+@staff_member_required
+def rechazar_empresa(request, pk):
+    if request.method == 'POST':
+        empresa = get_object_or_404(Oferente, pk=pk)
+        empresa.estado = 'rechazado'
+        empresa.save()
+        return redirect('mod_listar_empresas')
+    return redirect('mod_listar_empresas')
+# ========== OFERTAS (moderación) ==========
+
+@staff_required
+def listar_ofertas(request):
+    estado = request.GET.get('estado', '')
+    ofertas = Oferta.objects.all().order_by('-fecha_publicacion')
+    if estado:
+        ofertas = ofertas.filter(estado=estado)
+
+    total = ofertas.count()
+    pendientes = Oferta.objects.filter(estado='pendiente').count()
+    activas = Oferta.objects.filter(estado='activa').count()
+
+    return render(request, 'moderacion/ofertas_pendientes.html', {
+        'ofertas': ofertas,
+        'total': total,
+        'pendientes': pendientes,
+        'aprobadas': activas,
+        'filtro_actual': estado,
+    })
+
+
+@staff_required
+def detalle_oferta_json(request, pk):
+    oferta = get_object_or_404(Oferta, id=pk)
+    dto = OfertaDTO.desde_modelo(oferta)
+    return JsonResponse(asdict(dto))
+
+
+@staff_required
+def aprobar_oferta(request, pk):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+    oferta = get_object_or_404(Oferta, id=pk)
+    try:
+        oferta.aprobar()
+        return JsonResponse({'success': True})
+    except ValueError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+@staff_required
+def rechazar_oferta(request, pk):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+    oferta = get_object_or_404(Oferta, id=pk)
+    try:
+        oferta.rechazar()
+        oferta.motivo_rechazo = request.POST.get('motivo', '')
+        oferta.save(update_fields=['motivo_rechazo'])
+        return JsonResponse({'success': True})
+    except ValueError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@staff_required
+def finalizar_oferta(request, pk):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+    oferta = get_object_or_404(Oferta, id=pk)
+    try:
+        oferta.finalizar()
+        return JsonResponse({'success': True})
+    except ValueError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)

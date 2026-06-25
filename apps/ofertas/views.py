@@ -2,15 +2,22 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.urls import reverse
 from .forms import OfertaForm
-from .services import crear_oferta_laboral, obtener_ofertas_por_empresa, obtener_oferta_por_id, eliminar_oferta_por_id
+from .models import Oferta
+from .services import crear_oferta_laboral, obtener_ofertas_por_empresa, obtener_oferta_por_id, eliminar_oferta_por_id, obtener_ofertas_activas
 from usuarios.forms import OferenteForm
-from usuarios.decorators import oferente_required
+from usuarios.service import obtener_url_contacto
+from usuarios.decorators import oferente_required, oferente_validado_required
 from .dtos import OfertaDTO
 from dataclasses import asdict
 
-
-
 @oferente_required
+def validacion_pendiente(request):
+    email_contacto_url = obtener_url_contacto(request.user.email)
+    return render(request, 'Ofertas/validacion_pendiente.html', {
+        'email_contacto_url': email_contacto_url,
+    })
+
+@oferente_validado_required
 def crear_oferta(request):
 
     if request.method == 'POST':
@@ -29,7 +36,7 @@ def crear_oferta(request):
     return redirect('dashboard_empresa')
 
 
-@oferente_required
+@oferente_validado_required
 def dashboard_empresa(request):
     
     oferente = request.user.oferente
@@ -42,10 +49,11 @@ def dashboard_empresa(request):
         'ofertas': ofertas,
         'form_perfil': form_perfil,
         'form': form,
+        'experiencia_choices': Oferta.EXPERIENCIA_CHOICES,
     })
 
 
-@oferente_required
+@oferente_validado_required
 def editar_oferta(request, pk):
     oferta = obtener_oferta_por_id(pk)
 
@@ -68,7 +76,7 @@ def editar_oferta(request, pk):
     return redirect('dashboard_empresa')
 
 
-@oferente_required
+@oferente_validado_required
 def eliminar_oferta(request, pk):
     oferta = obtener_oferta_por_id(pk)
 
@@ -84,7 +92,7 @@ def eliminar_oferta(request, pk):
 
     return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-@oferente_required
+@oferente_validado_required
 def datos_oferta(request, pk):
     oferta = obtener_oferta_por_id(pk)
 
@@ -94,17 +102,18 @@ def datos_oferta(request, pk):
     dto = OfertaDTO.desde_modelo(oferta)
     return JsonResponse(asdict(dto))
 
-@oferente_required
+@oferente_validado_required
 def lista_ofertas_parcial(request):
 
     ofertas = obtener_ofertas_por_empresa(request.user)
 
     return render(request, 'Ofertas/_lista-ofertas.html', {
         'ofertas': ofertas,
+        'oferente': request.user.oferente, #temporalmente necesario para el template, se puede refactorizar para no necesitarlo
     })
 
 
-@oferente_required
+@oferente_validado_required
 def editar_perfil_empresa(request):
 
     oferente = request.user.oferente
@@ -116,3 +125,27 @@ def editar_perfil_empresa(request):
             return redirect(reverse('dashboard_empresa') + '#empresa')
 
     return redirect('dashboard_empresa')
+
+
+def detalle_oferta_postulante(request, pk):
+    oferta = get_object_or_404(Oferta, pk=pk, estado='activa')
+    habilidades = [h.strip() for h in oferta.habilidades_requeridas.split(',') if h.strip()]
+    return render(request, 'Ofertas/detalle_oferta.html', {'oferta': oferta, 'habilidades': habilidades})
+
+
+def buscar_empleo(request):
+    busqueda = request.GET.get('q', '')
+    modalidad = request.GET.get('modalidad', '')
+    experiencia = request.GET.get('experiencia', '')
+
+    ofertas = obtener_ofertas_activas(busqueda, modalidad, experiencia)
+
+    return render(request, 'Ofertas/buscar_empleo.html', {
+        'ofertas': ofertas,
+        'busqueda': busqueda,
+        'modalidad': modalidad,
+        'experiencia': experiencia,
+        'modalidad_choices': Oferta.MODALIDAD_CHOICES,
+        'experiencia_choices': Oferta.EXPERIENCIA_CHOICES,
+        'total': ofertas.count(),
+    })

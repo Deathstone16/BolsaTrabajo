@@ -1,33 +1,16 @@
-from functools import wraps
-
-from django.shortcuts import redirect, render
+from .decorators import postulante_required
+from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
+from .forms import RegistroPostulanteForm, RegistroOferenteForm, LoginForm, DatosPersonalesForm, OferenteForm
+from .decorators import postulante_required, oferente_required
+from .models import Oferente
+
 
 from .forms import RegistroPostulanteForm, RegistroOferenteForm, LoginForm, DatosPersonalesForm, OferenteForm, PasswordResetRequestForm, SetPasswordForm
 from . import service
 from . import services
-
-
-#decoradores 
-
-def requiere_oferente(view_func):
-    @wraps(view_func)
-    def wrapper(request, *args, **kwargs):
-        if not service.es_oferente(request.user):
-            return redirect('home')
-        return view_func(request, *args, **kwargs)
-    return wrapper
-
-
-def requiere_postulante(view_func):
-    @wraps(view_func)
-    def wrapper(request, *args, **kwargs):
-        if not service.es_postulante(request.user):
-            return redirect('home')
-        return view_func(request, *args, **kwargs)
-    return wrapper
 
 
 #vistas
@@ -63,7 +46,11 @@ def login_view(request):
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
             if service.autenticar_usuario(request, email, password):
+                
+                if hasattr(request.user, 'oferente'):
+                    return redirect('dashboard_empresa')
                 return redirect('home')
+                
             else:
                 form.add_error(None, 'Email o contraseña incorrectos.')
     else:
@@ -76,10 +63,24 @@ def logout_view(request):
     auth_logout(request)
     return redirect('login')
 
+@login_required
+@oferente_required
+def editar_perfil_empresa(request):
+    oferente = request.user.oferente
+
+    if request.method == 'POST':
+        form = OferenteForm(request.POST, request.FILES, instance=oferente)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard_empresa')
+    else:
+        form = OferenteForm(instance=oferente)
+
+    return render(request, 'ofertas/editar-perfil.html', {'form': form, 'oferente': oferente})
 
 
 @login_required
-@requiere_postulante
+@postulante_required
 def datos_personales(request):
     postulante = request.user.postulante
 
@@ -97,6 +98,15 @@ def datos_personales(request):
 
     return render(request, 'usuarios/datos_personales.html', {'form': form})
 
+@login_required
+@postulante_required
+def perfil_oferente(request, pk):
+    oferente = get_object_or_404(Oferente, pk=pk)
+    ofertas = oferente.usuario.ofertas.filter(estado='activa')
+    return render(request, 'Ofertas/perfil_oferente_publico.html', {
+        'oferente': oferente,
+        'ofertas': ofertas,
+    })
 
 def datos_personales_exitoso(request):
     return render(request, 'usuarios/exito.html', {
@@ -110,14 +120,12 @@ def datos_personales_exitoso(request):
 # ─── Recuperación de contraseña ───────────────────────────────────────────────
 
 def password_reset_request(request):
-    """Paso 1 — Solicitud (CA1-CA5). Vista delgada: delega en services."""
     if request.method == 'POST':
         form = PasswordResetRequestForm(request.POST)
         if form.is_valid():
             usuario = form.get_usuario()
             if usuario is not None:
                 services.enviar_email_recuperacion(usuario, request)
-            # Siempre redirigir: no revelar si el email existe (CA3)
             return redirect('recuperacion-enviada')
     else:
         form = PasswordResetRequestForm()
@@ -126,12 +134,10 @@ def password_reset_request(request):
 
 
 def recuperacion_enviada(request):
-    """Paso 2 — Confirmación de envío."""
     return render(request, 'usuarios/recuperar_enviado.html')
 
 
 def password_reset_confirm(request, uidb64, token):
-    """Paso 3 — Nueva contraseña (CA6). Vista delgada: delega validación en services."""
     usuario = services.validar_token_recuperacion(uidb64, token)
 
     if usuario is None:
@@ -153,5 +159,11 @@ def password_reset_confirm(request, uidb64, token):
 
 
 def contrasena_restablecida(request):
-    """Paso 4 — Éxito (CA6: redirigir al login)."""
     return render(request, 'usuarios/contrasena_exitosa.html')
+
+
+@login_required
+@postulante_required
+def mi_perfil(request):
+    postulante = request.user.postulante
+    return render(request, 'usuarios/mi_perfil.html', {'postulante': postulante})
