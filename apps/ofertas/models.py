@@ -14,6 +14,19 @@ class TipoOferta(models.Model):
         return self.nombre
 
 
+class Habilidad(models.Model):
+    nombre = models.CharField(max_length=100)
+    tipo_oferta = models.ForeignKey(TipoOferta, on_delete=models.CASCADE, related_name='habilidades')
+
+    class Meta:
+        verbose_name = "Habilidad"
+        verbose_name_plural = "Habilidades"
+        unique_together = ('nombre', 'tipo_oferta')
+
+    def __str__(self):
+        return f"{self.nombre} ({self.tipo_oferta.nombre})"
+
+
 class CategoriaOferta(models.Model):
 
     nombre = models.CharField(max_length=100)
