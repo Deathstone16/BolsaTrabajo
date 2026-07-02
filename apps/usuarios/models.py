@@ -49,16 +49,11 @@ class OferenteManager(models.Manager):
 
 class Oferente(models.Model):
     objects = OferenteManager()
+
     ESTADO_VALIDACION_CHOICES = [
-    ('pendiente', 'Pendiente de Validación'),
-    ('aprobado', 'Aprobada'),
-    ('rechazado', 'Rechazada'),
-]
-    
-    ESTADO_CHOICES = [
-        ('pendiente', 'Pendiente de validación'),
-        ('aprobado', 'Aprobado'),
-        ('rechazado', 'Rechazado'),
+        ('pendiente', 'Pendiente de Validación'),
+        ('aprobado', 'Aprobada'),
+        ('rechazado', 'Rechazada'),
     ]
 
     TAMANO_CHOICES = [
@@ -68,9 +63,13 @@ class Oferente(models.Model):
         ('201-1000', '201-1000 empleados'),
         ('1000+', 'Más de 1000 empleados'),
     ]
-    
+
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
-    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
+    estado_validacion = models.CharField(
+        max_length=20,
+        choices=ESTADO_VALIDACION_CHOICES,
+        default='pendiente',
+    )
     nombre_empresa = models.CharField(max_length=200)
     cuit = models.CharField(max_length=13)
     logo = models.ImageField(upload_to='empresas/logos/', null=True, blank=True)
@@ -82,13 +81,6 @@ class Oferente(models.Model):
     anio_fundacion = models.IntegerField(null=True, blank=True)
     sitio_web = models.URLField(max_length=300, null=True, blank=True)
     telefono = models.CharField(max_length=50, null=True, blank=True)
-    
+
     def __str__(self):
         return self.nombre_empresa
-
-    estado_validacion = models.CharField(
-        max_length=20,
-        choices=ESTADO_VALIDACION_CHOICES,
-        default='pendiente',
-    )
-    

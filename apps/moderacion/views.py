@@ -5,6 +5,7 @@ from cursos.models import Curso, Categoria
 from cursos.forms import CursoForm, CategoriaForm
 from cursos import services as cursos_services
 from usuarios.models import Oferente
+from usuarios import service as usuarios_service
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from ofertas.models import Oferta, TipoOferta, Habilidad
@@ -114,7 +115,7 @@ def dar_de_baja_categoria(request, categoria_id):
 
 @staff_member_required
 def listar_empresas(request):
-    empresas = Oferente.objects.filter(estado='pendiente').select_related('usuario').order_by('nombre_empresa')
+    empresas = Oferente.objects.pendientes().select_related('usuario').order_by('nombre_empresa')
     return render(request, 'moderacion/listar_empresas.html', {
         'empresas': empresas,
         'total': empresas.count(),
@@ -131,9 +132,7 @@ def detalle_empresa(request, pk):
 def aprobar_empresa(request, pk):
     if request.method == 'POST':
         empresa = get_object_or_404(Oferente, pk=pk)
-        empresa.estado = 'aprobado'
-        empresa.save()
-        return redirect('mod_listar_empresas')
+        usuarios_service.aprobar_empresa(empresa)
     return redirect('mod_listar_empresas')
 
 
@@ -141,9 +140,7 @@ def aprobar_empresa(request, pk):
 def rechazar_empresa(request, pk):
     if request.method == 'POST':
         empresa = get_object_or_404(Oferente, pk=pk)
-        empresa.estado = 'rechazado'
-        empresa.save()
-        return redirect('mod_listar_empresas')
+        usuarios_service.rechazar_empresa(empresa)
     return redirect('mod_listar_empresas')
 # ========== OFERTAS (moderación) ==========
 

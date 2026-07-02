@@ -1,16 +1,20 @@
-from .decorators import postulante_required
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
-from .forms import RegistroPostulanteForm, RegistroOferenteForm, LoginForm, DatosPersonalesForm, OferenteForm
+
+from .forms import (
+    RegistroPostulanteForm,
+    RegistroOferenteForm,
+    LoginForm,
+    DatosPersonalesForm,
+    OferenteForm,
+    PasswordResetRequestForm,
+    SetPasswordForm,
+)
 from .decorators import postulante_required, oferente_required
 from .models import Oferente
-
-
-from .forms import RegistroPostulanteForm, RegistroOferenteForm, LoginForm, DatosPersonalesForm, OferenteForm, PasswordResetRequestForm, SetPasswordForm
 from . import service
-from . import services
 
 
 #vistas
@@ -125,7 +129,7 @@ def password_reset_request(request):
         if form.is_valid():
             usuario = form.get_usuario()
             if usuario is not None:
-                services.enviar_email_recuperacion(usuario, request)
+                service.enviar_email_recuperacion(usuario, request)
             return redirect('recuperacion-enviada')
     else:
         form = PasswordResetRequestForm()
@@ -138,7 +142,7 @@ def recuperacion_enviada(request):
 
 
 def password_reset_confirm(request, uidb64, token):
-    usuario = services.validar_token_recuperacion(uidb64, token)
+    usuario = service.validar_token_recuperacion(uidb64, token)
 
     if usuario is None:
         return render(request, 'usuarios/token_invalido.html')

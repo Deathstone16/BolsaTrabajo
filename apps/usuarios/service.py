@@ -1,27 +1,19 @@
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.conf import settings
+from django.core.mail import send_mail
 from django.db import transaction
-from .models import Oferente
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
-@transaction.atomic
-def aprobar_empresa(oferente_id):
-    """
-    Aprueba una empresa y la habilita para publicar ofertas.
-    @transaction.atomic: si algo falla, se revierte TODO (BD consistente).
-    """
-    oferente = Oferente.objects.get(id=oferente_id)
-    oferente.estado_validacion = 'aprobado'
-    oferente.save()
-    # Acá después podríamos agregar: enviar_email(oferente)
+from .models import Usuario
 
-@transaction.atomic
-def rechazar_empresa(oferente_id):
-    oferente = Oferente.objects.get(id=oferente_id)
-    oferente.estado_validacion = 'rechazado'
-    oferente.save()
+token_generator = PasswordResetTokenGenerator()
 
-def puede_publicar_ofertas(oferente):
-    """Regla de negocio: solo empresas aprobadas pueden publicar."""
-    return oferente.estado_validacion == 'aprobado'
+
+# --- Autenticación y perfiles ---
 
 def autenticar_usuario(request, email, password):
     user = authenticate(request, email=email, password=password)
@@ -40,6 +32,38 @@ def actualizar_datos_postulante(user, form):
     postulante.save()
 
 
+def get_rol_label(usuario):
+    if hasattr(usuario, 'postulante'):
+        return 'Postulante'
+    if hasattr(usuario, 'oferente'):
+        return 'Oferente'
+    return 'Usuario'
+
+
+# --- Validación de empresas ---
+
+@transaction.atomic
+def aprobar_empresa(oferente):
+    """
+    Aprueba una empresa y la habilita para publicar ofertas.
+    @transaction.atomic: si algo falla, se revierte TODO (BD consistente).
+    """
+    oferente.estado_validacion = 'aprobado'
+    oferente.save()
+    # Acá después podríamos agregar: enviar_email(oferente)
+
+
+@transaction.atomic
+def rechazar_empresa(oferente):
+    oferente.estado_validacion = 'rechazado'
+    oferente.save()
+
+
+def puede_publicar_ofertas(oferente):
+    """Regla de negocio: solo empresas aprobadas pueden publicar."""
+    return oferente.estado_validacion == 'aprobado'
+
+
 def obtener_url_contacto(email_usuario):
     dominio = email_usuario.split('@')[1].lower()
     destino = 'contacto@ien.edu.ar'
@@ -52,3 +76,41 @@ def obtener_url_contacto(email_usuario):
         return f'https://compose.mail.yahoo.com/?to={destino}&subject={asunto}'
     else:
         return f'mailto:{destino}?subject={asunto}'
+
+
+# --- Recuperación de contraseña ---
+
+def enviar_email_recuperacion(usuario, request):
+    uid = urlsafe_base64_encode(force_bytes(usuario.pk))
+    token = token_generator.make_token(usuario)
+    link = request.build_absolute_uri(
+        reverse('restablecer-contrasena', args=[uid, token])
+    )
+
+    contexto = {
+        'usuario': usuario,
+        'link': link,
+        'rol_label': get_rol_label(usuario),
+    }
+
+    send_mail(
+        subject='Recuperación de contraseña - IEN Empleo',
+        message=render_to_string('emails/reset_email.txt', contexto),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[usuario.email],
+        html_message=render_to_string('emails/reset_email.html', contexto),
+        fail_silently=False,
+    )
+
+
+def validar_token_recuperacion(uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        usuario = Usuario.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, Usuario.DoesNotExist):
+        return None
+
+    if not token_generator.check_token(usuario, token):
+        return None
+
+    return usuario

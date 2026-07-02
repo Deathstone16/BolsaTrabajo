@@ -30,10 +30,10 @@
           <div class="flex items-center gap-3 flex-wrap">
             <h1 class="text-2xl font-medium">{{ empresa.nombre_empresa }}</h1>
             <span class="px-3 py-1 rounded-full text-xs font-medium
-              {% if empresa.estado == 'aprobado' %}bg-green-100 text-green-700
-              {% elif empresa.estado == 'pendiente' %}bg-yellow-100 text-yellow-700
+              {% if empresa.estado_validacion == 'aprobado' %}bg-green-100 text-green-700
+              {% elif empresa.estado_validacion == 'pendiente' %}bg-yellow-100 text-yellow-700
               {% else %}bg-red-100 text-red-700{% endif %}">
-              {{ empresa.get_estado_display }}
+              {{ empresa.get_estado_validacion_display }}
             </span>
           </div>
           <div class="flex flex-wrap gap-3 text-sm text-muted-foreground mt-2">
@@ -100,7 +100,7 @@
   </div>
 
   <!-- Botones acción -->
-  {% if empresa.estado == 'pendiente' %}
+  {% if empresa.estado_validacion == 'pendiente' %}
   <div class="flex gap-4">
     <form method="post" action="{% url 'mod_aprobar_empresa' empresa.pk %}" class="flex-1">
       {% csrf_token %}
@@ -119,7 +119,7 @@
   </div>
   {% else %}
   <div class="bg-muted rounded-xl p-4 text-center text-sm text-muted-foreground">
-    Esta empresa ya fue <strong>{{ empresa.get_estado_display|lower }}</strong>. No se pueden realizar más acciones.
+    Esta empresa ya fue <strong>{{ empresa.get_estado_validacion_display|lower }}</strong>. No se pueden realizar más acciones.
   </div>
   {% endif %}
 
