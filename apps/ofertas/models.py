@@ -2,41 +2,11 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from .state import ESTADOS
-
-class TipoOferta(models.Model):
-    nombre = models.CharField(max_length=100, unique=True)
-
-    class Meta:
-        verbose_name = "Tipo de Oferta"
-        verbose_name_plural = "Tipos de Ofertas"
-
-    def __str__(self):
-        return self.nombre
+from categorias.models import Categoria
 
 
-class Habilidad(models.Model):
-    nombre = models.CharField(max_length=100)
-    tipo_oferta = models.ForeignKey(TipoOferta, on_delete=models.CASCADE, related_name='habilidades')
-
-    class Meta:
-        verbose_name = "Habilidad"
-        verbose_name_plural = "Habilidades"
-        unique_together = ('nombre', 'tipo_oferta')
-
-    def __str__(self):
-        return f"{self.nombre} ({self.tipo_oferta.nombre})"
 
 
-class CategoriaOferta(models.Model):
-
-    nombre = models.CharField(max_length=100)
-
-    class Meta:
-        verbose_name = "Categoría de Oferta"
-        verbose_name_plural = "Categorías de Ofertas"
-
-    def __str__(self):
-        return self.nombre
 
 class Oferta(models.Model):
     
@@ -72,8 +42,7 @@ class Oferta(models.Model):
 
     
     empresa = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    tipo_oferta = models.ForeignKey('TipoOferta', on_delete=models.SET_NULL, null=True, blank=True)
-    categoria = models.ForeignKey('CategoriaOferta', on_delete=models.SET_NULL, null=True, blank=True)
+    categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
     titulo = models.CharField(max_length=100)
     nombre_puesto = models.CharField(max_length=150)
     ubicacion = models.CharField(max_length=100)
