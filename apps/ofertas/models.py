@@ -72,8 +72,8 @@ class Oferta(models.Model):
 
     
     empresa = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ofertas')
-    tipo_oferta = models.ForeignKey('TipoOferta', on_delete=models.SET_NULL, null=True, blank=True, related_name='ofertas')
-    categoria = models.ForeignKey('CategoriaOferta', on_delete=models.SET_NULL, null=True, blank=True, related_name='ofertas')
+    tipo_oferta = models.ForeignKey('TipoOferta', on_delete=models.SET_NULL, null=True, blank=True)
+    categoria = models.ForeignKey('CategoriaOferta', on_delete=models.SET_NULL, null=True, blank=True)
     titulo = models.CharField(max_length=100)
     nombre_puesto = models.CharField(max_length=150)
     ubicacion = models.CharField(max_length=100)
