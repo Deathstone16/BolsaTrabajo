@@ -15,6 +15,7 @@ token_generator = PasswordResetTokenGenerator()
 
 # --- Autenticación y perfiles ---
 
+
 def autenticar_usuario(request, email, password):
     user = authenticate(request, email=email, password=password)
     if user is not None:
@@ -25,22 +26,23 @@ def autenticar_usuario(request, email, password):
 
 def actualizar_datos_postulante(user, form):
     postulante = form.save(commit=False)
-    user.first_name = form.cleaned_data['first_name']
-    user.last_name = form.cleaned_data['last_name']
-    user.email = form.cleaned_data['email']
+    user.first_name = form.cleaned_data["first_name"]
+    user.last_name = form.cleaned_data["last_name"]
+    user.email = form.cleaned_data["email"]
     user.save()
     postulante.save()
 
 
 def get_rol_label(usuario):
-    if hasattr(usuario, 'postulante'):
-        return 'Postulante'
-    if hasattr(usuario, 'oferente'):
-        return 'Oferente'
-    return 'Usuario'
+    if hasattr(usuario, "postulante"):
+        return "Postulante"
+    if hasattr(usuario, "oferente"):
+        return "Oferente"
+    return "Usuario"
 
 
 # --- Validación de empresas ---
+
 
 @transaction.atomic
 def aprobar_empresa(oferente):
@@ -48,57 +50,58 @@ def aprobar_empresa(oferente):
     Aprueba una empresa y la habilita para publicar ofertas.
     @transaction.atomic: si algo falla, se revierte TODO (BD consistente).
     """
-    oferente.estado_validacion = 'aprobado'
+    oferente.estado_validacion = "aprobado"
     oferente.save()
     # Acá después podríamos agregar: enviar_email(oferente)
 
 
 @transaction.atomic
 def rechazar_empresa(oferente):
-    oferente.estado_validacion = 'rechazado'
+    oferente.estado_validacion = "rechazado"
     oferente.save()
 
 
 def puede_publicar_ofertas(oferente):
     """Regla de negocio: solo empresas aprobadas pueden publicar."""
-    return oferente.estado_validacion == 'aprobado'
+    return oferente.estado_obj.puede_publicar()
 
 
 def obtener_url_contacto(email_usuario):
-    dominio = email_usuario.split('@')[1].lower()
-    destino = 'contacto@ien.edu.ar'
-    asunto = 'Solicitud de validación de empresa'
-    if 'gmail' in dominio:
-        return f'https://mail.google.com/mail/?view=cm&fs=1&to={destino}&su={asunto}'
-    elif 'outlook' in dominio or 'hotmail' in dominio or 'live' in dominio:
-        return f'https://outlook.live.com/mail/0/deeplink/compose?to={destino}&subject={asunto}'
-    elif 'yahoo' in dominio:
-        return f'https://compose.mail.yahoo.com/?to={destino}&subject={asunto}'
+    dominio = email_usuario.split("@")[1].lower()
+    destino = "contacto@ien.edu.ar"
+    asunto = "Solicitud de validación de empresa"
+    if "gmail" in dominio:
+        return f"https://mail.google.com/mail/?view=cm&fs=1&to={destino}&su={asunto}"
+    elif "outlook" in dominio or "hotmail" in dominio or "live" in dominio:
+        return f"https://outlook.live.com/mail/0/deeplink/compose?to={destino}&subject={asunto}"
+    elif "yahoo" in dominio:
+        return f"https://compose.mail.yahoo.com/?to={destino}&subject={asunto}"
     else:
-        return f'mailto:{destino}?subject={asunto}'
+        return f"mailto:{destino}?subject={asunto}"
 
 
 # --- Recuperación de contraseña ---
+
 
 def enviar_email_recuperacion(usuario, request):
     uid = urlsafe_base64_encode(force_bytes(usuario.pk))
     token = token_generator.make_token(usuario)
     link = request.build_absolute_uri(
-        reverse('restablecer-contrasena', args=[uid, token])
+        reverse("restablecer-contrasena", args=[uid, token])
     )
 
     contexto = {
-        'usuario': usuario,
-        'link': link,
-        'rol_label': get_rol_label(usuario),
+        "usuario": usuario,
+        "link": link,
+        "rol_label": get_rol_label(usuario),
     }
 
     send_mail(
-        subject='Recuperación de contraseña - IEN Empleo',
-        message=render_to_string('emails/reset_email.txt', contexto),
+        subject="Recuperación de contraseña - IEN Empleo",
+        message=render_to_string("emails/reset_email.txt", contexto),
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[usuario.email],
-        html_message=render_to_string('emails/reset_email.html', contexto),
+        html_message=render_to_string("emails/reset_email.html", contexto),
         fail_silently=False,
     )
 

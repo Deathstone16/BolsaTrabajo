@@ -1,10 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from .estado_oferente import ESTADOS, Pendiente
+
 
 class UsuarioManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
-            raise ValueError('El email es obligatorio')
+            raise ValueError("El email es obligatorio")
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
@@ -12,18 +14,21 @@ class UsuarioManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
         return self.create_user(email, password, **extra_fields)
+
 
 class Usuario(AbstractUser):
     email = models.EmailField(unique=True)
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
     username = None
     objects = UsuarioManager()
+
     def __str__(self):
         return self.email
+
 
 class Postulante(models.Model):
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
@@ -31,7 +36,7 @@ class Postulante(models.Model):
     fecha_nacimiento = models.DateField(blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     direccion = models.CharField(max_length=200, blank=True, null=True)
-    
+
     def __str__(self):
         return self.usuario.get_full_name() or self.usuario.email
 
@@ -41,46 +46,54 @@ class OferenteManager(models.Manager):
 
     def pendientes(self):
         """Empresas que aún no fueron validadas."""
-        return self.filter(estado_validacion='pendiente')
+        return self.filter(estado_validacion="pendiente")
 
     def aprobados(self):
         """Empresas que pueden publicar ofertas."""
-        return self.filter(estado_validacion='aprobado')
+        return self.filter(estado_validacion="aprobado")
+
 
 class Oferente(models.Model):
     objects = OferenteManager()
 
     ESTADO_VALIDACION_CHOICES = [
-        ('pendiente', 'Pendiente de Validación'),
-        ('aprobado', 'Aprobada'),
-        ('rechazado', 'Rechazada'),
+        ("pendiente", "Pendiente de Validación"),
+        ("aprobado", "Aprobada"),
+        ("rechazado", "Rechazada"),
     ]
 
     TAMANO_CHOICES = [
-        ('1-10', '1-10 empleados'),
-        ('11-50', '11-50 empleados'),
-        ('51-200', '51-200 empleados'),
-        ('201-1000', '201-1000 empleados'),
-        ('1000+', 'Más de 1000 empleados'),
+        ("1-10", "1-10 empleados"),
+        ("11-50", "11-50 empleados"),
+        ("51-200", "51-200 empleados"),
+        ("201-1000", "201-1000 empleados"),
+        ("1000+", "Más de 1000 empleados"),
     ]
 
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
     estado_validacion = models.CharField(
         max_length=20,
         choices=ESTADO_VALIDACION_CHOICES,
-        default='pendiente',
+        default="pendiente",
     )
     nombre_empresa = models.CharField(max_length=200)
     cuit = models.CharField(max_length=13)
-    logo = models.ImageField(upload_to='empresas/logos/', null=True, blank=True)
-    banner = models.ImageField(upload_to='empresas/banners/', null=True, blank=True)
+    logo = models.ImageField(upload_to="empresas/logos/", null=True, blank=True)
+    banner = models.ImageField(upload_to="empresas/banners/", null=True, blank=True)
     descripcion = models.TextField(null=True, blank=True)
     industria = models.CharField(max_length=100, null=True, blank=True)
-    tamano_empresa = models.CharField(max_length=20, choices=TAMANO_CHOICES, null=True, blank=True)
+    tamano_empresa = models.CharField(
+        max_length=20, choices=TAMANO_CHOICES, null=True, blank=True
+    )
     ubicacion = models.CharField(max_length=200, null=True, blank=True)
     anio_fundacion = models.IntegerField(null=True, blank=True)
     sitio_web = models.URLField(max_length=300, null=True, blank=True)
     telefono = models.CharField(max_length=50, null=True, blank=True)
+
+    @property
+    def estado_obj(self):
+        """Devuelve el objeto de estado según el valor en BD."""
+        return ESTADOS.get(self.estado_validacion, Pendiente())
 
     def __str__(self):
         return self.nombre_empresa
