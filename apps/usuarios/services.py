@@ -78,24 +78,17 @@ def es_postulante(user):
 
 @transaction.atomic
 def aprobar_empresa(oferente):
-    """
-    Aprueba una empresa y la habilita para publicar ofertas.
-    @transaction.atomic: si algo falla, se revierte TODO (BD consistente).
-    """
-    oferente.estado_validacion = 'aprobado'
-    oferente.save()
+    oferente.aprobar()
+    
   
-
-
 @transaction.atomic
 def rechazar_empresa(oferente):
-    oferente.estado_validacion = 'rechazado'
-    oferente.save()
+    oferente.rechazar()
+    
 
 
 def puede_publicar_ofertas(oferente):
-    """Regla de negocio: solo empresas aprobadas pueden publicar."""
-    return oferente.estado_validacion == 'aprobado'
+    return oferente.esta_aprobado
 
 
 def obtener_url_contacto(email_usuario):
@@ -148,3 +141,7 @@ def validar_token_recuperacion(uidb64, token):
         return None
 
     return usuario
+
+
+
+

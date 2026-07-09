@@ -59,7 +59,7 @@ def oferente_validado_required(view_func):
     @oferente_required
     @wraps(view_func)
     def _wrapped(request, *args, **kwargs):
-        if request.user.oferente.estado_validacion != 'aprobado':
+        if not request.user.oferente.esta_aprobado:
             return redirect('validacion_pendiente')
         return view_func(request, *args, **kwargs)
 
