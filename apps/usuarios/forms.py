@@ -2,6 +2,9 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, SetPasswordForm as DjangoSetPasswordForm
 from .models import Usuario, Postulante, Oferente
 
+CV_FORMATOS_PERMITIDOS = ['pdf', 'doc', 'docx']
+CV_TAMANO_MAXIMO_MB = 5
+
 
 
 class RegistroBaseForm(UserCreationForm):
@@ -136,3 +139,27 @@ class SetPasswordForm(DjangoSetPasswordForm):
             'id': 'confirmar_contrasena',
         }),
     )
+
+
+class CargaCVForm(forms.Form):
+    cv = forms.FileField(label='Archivo CV')
+
+    def clean_cv(self):
+        archivo = self.cleaned_data.get('cv')
+        if not archivo:
+            raise forms.ValidationError('Debes seleccionar un archivo.')
+
+        extension = archivo.name.rsplit('.', 1)[-1].lower()
+        if extension not in CV_FORMATOS_PERMITIDOS:
+            raise forms.ValidationError(
+                f'Formato no permitido. Solo se aceptan: {", ".join(CV_FORMATOS_PERMITIDOS).upper()}'
+            )
+
+        tamano_bytes = archivo.size
+        tamano_maximo_bytes = CV_TAMANO_MAXIMO_MB * 1024 * 1024
+        if tamano_bytes > tamano_maximo_bytes:
+            raise forms.ValidationError(
+                f'El archivo supera el tamaño máximo de {CV_TAMANO_MAXIMO_MB} MB.'
+            )
+
+        return archivo

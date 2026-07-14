@@ -1,6 +1,8 @@
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import JsonResponse
 from django.urls import reverse
 
 from .forms import (
@@ -11,6 +13,7 @@ from .forms import (
     OferenteForm,
     PasswordResetRequestForm,
     SetPasswordForm,
+    CargaCVForm,
 )
 from .decorators import postulante_required, oferente_required
 from .models import Oferente
@@ -170,4 +173,34 @@ def contrasena_restablecida(request):
 @postulante_required
 def mi_perfil(request):
     postulante = request.user.postulante
-    return render(request, 'usuarios/mi_perfil.html', {'postulante': postulante})
+
+    if request.method == 'POST':
+        form = CargaCVForm(request.POST, request.FILES)
+        if form.is_valid():
+            service.cargar_cv(postulante, form.cleaned_data['cv'])
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'mensaje': 'CV cargado con éxito.'})
+            messages.success(request, 'CV cargado con éxito.')
+            return redirect('mi_perfil')
+        else:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                errores = form.errors.get('cv', [])
+                return JsonResponse({'success': False, 'mensaje': errores[0] if errores else 'Error al cargar el CV.'})
+    else:
+        form = CargaCVForm()
+
+    return render(request, 'usuarios/mi_perfil.html', {
+        'postulante': postulante,
+        'form': form,
+    })
+
+
+@login_required
+@postulante_required
+def eliminar_cv(request):
+    if request.method == 'POST':
+        service.eliminar_cv(request.user.postulante)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'mensaje': 'CV eliminado.'})
+        messages.success(request, 'CV eliminado correctamente.')
+    return redirect('mi_perfil')

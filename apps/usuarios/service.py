@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils import timezone
 
 from .models import Usuario
 
@@ -114,3 +115,23 @@ def validar_token_recuperacion(uidb64, token):
         return None
 
     return usuario
+
+
+# --- Gestión de CV ---
+
+def cargar_cv(postulante, archivo):
+    """Carga o reemplaza el CV del postulante. Elimina el anterior si existe."""
+    if postulante.cv:
+        postulante.cv.delete(save=False)
+    postulante.cv = archivo
+    postulante.cv_fecha_carga = timezone.now()
+    postulante.save()
+
+
+def eliminar_cv(postulante):
+    """Elimina el CV del postulante."""
+    if postulante.cv:
+        postulante.cv.delete(save=False)
+        postulante.cv = None
+        postulante.cv_fecha_carga = None
+        postulante.save()
