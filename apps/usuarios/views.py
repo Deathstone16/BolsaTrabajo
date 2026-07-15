@@ -102,8 +102,6 @@ def datos_personales(request):
 
     return render(request, 'usuarios/datos_personales.html', {'form': form})
 
-@login_required
-@postulante_required
 def perfil_oferente(request, pk):
     oferente = get_object_or_404(Oferente, pk=pk)
     ofertas = oferente.usuario.ofertas.filter(estado='activa')
