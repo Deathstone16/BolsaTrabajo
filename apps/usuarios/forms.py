@@ -21,9 +21,14 @@ class RegistroPostulanteForm(RegistroBaseForm):
             'last_name': 'Apellido',
         }
 
+    
+
+
 class RegistroOferenteForm(RegistroBaseForm):
     nombre_empresa = forms.CharField(max_length=200, label='Nombre de la empresa')
     cuit = forms.CharField(max_length=13, label='CUIT')
+
+
 
 class LoginForm(forms.Form):
     email = forms.EmailField(label='Email')

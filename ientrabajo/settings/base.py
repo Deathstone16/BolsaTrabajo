@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'cursos',
     'moderacion',
     'ofertas',
+    'categorias',
 ]
 
 MIDDLEWARE = [

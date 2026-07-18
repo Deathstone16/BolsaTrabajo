@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Oferta, CategoriaOferta
+from .models import Oferta
 
 @admin.register(Oferta)
 class OfertaAdmin(admin.ModelAdmin):
@@ -7,6 +7,3 @@ class OfertaAdmin(admin.ModelAdmin):
     list_filter = ('estado', 'modalidad')
     search_fields = ('titulo', 'nombre_puesto')
 
-@admin.register(CategoriaOferta)
-class CategoriaOfertaAdmin(admin.ModelAdmin):
-    list_display = ('nombre',)

@@ -5,7 +5,7 @@ from cursos.models import Curso, Categoria
 from cursos.forms import CursoForm, CategoriaForm
 from cursos import services as cursos_services
 from usuarios.models import Oferente
-from usuarios import service as usuarios_service
+from usuarios import services as usuarios_service
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from ofertas.models import Oferta, TipoOferta, Habilidad

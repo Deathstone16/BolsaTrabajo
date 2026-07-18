@@ -42,17 +42,15 @@ def get_rol_label(usuario):
         return "Oferente"
     return "Usuario"
 
-
 @transaction.atomic
 def registrar_postulante(email, password, first_name, last_name):
     user = Usuario.objects.create_user(
         email=email, password=password,
         first_name=first_name, last_name=last_name
     )
-
+    
     Postulante.objects.create(usuario=user)
     return user
-
 
 @transaction.atomic
 def registrar_oferente(email, password, nombre_empresa, cuit):
@@ -77,10 +75,16 @@ def es_postulante(user):
     return hasattr(user, 'postulante')
 
 
+
 # --- Validación de empresas ---
+
 
 @transaction.atomic
 def aprobar_empresa(oferente):
+    """
+    Aprueba una empresa y la habilita para publicar ofertas.
+    @transaction.atomic: si algo falla, se revierte TODO (BD consistente).
+    """
     oferente.aprobar()
 
 
@@ -90,6 +94,7 @@ def rechazar_empresa(oferente):
 
 
 def puede_publicar_ofertas(oferente):
+    """Regla de negocio: solo empresas aprobadas pueden publicar."""
     return oferente.estado_obj.puede_publicar()
 
 
@@ -108,6 +113,7 @@ def obtener_url_contacto(email_usuario):
 
 
 # --- Recuperación de contraseña ---
+
 
 def enviar_email_recuperacion(usuario, request):
     uid = urlsafe_base64_encode(force_bytes(usuario.pk))

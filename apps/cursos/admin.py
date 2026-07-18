@@ -1,5 +1,4 @@
 from django.contrib import admin
-from .models import Categoria, Curso
+from .models import Curso
 
-admin.site.register(Categoria)
 admin.site.register(Curso)

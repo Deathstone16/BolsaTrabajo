@@ -17,8 +17,10 @@ from .forms import (
 from .decorators import postulante_required, oferente_required
 from .models import Oferente
 from . import services
+from django.views.decorators.http import require_POST
 
 
+#vistas
 def registro(request):
     tipo = request.GET.get('tipo', 'postulante')
     FormClass = RegistroOferenteForm if tipo == 'oferente' else RegistroPostulanteForm
@@ -43,6 +45,10 @@ def registro(request):
     else:
         form = FormClass()
     return render(request, 'usuarios/registro.html', {'form': form, 'tipo': tipo})
+    
+    
+    
+    
 
 
 def registro_exitoso(request):
