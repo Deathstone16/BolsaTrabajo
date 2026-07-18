@@ -5,7 +5,7 @@ from .forms import OfertaForm
 from .models import Oferta
 from .services import crear_oferta_laboral, obtener_ofertas_por_empresa, obtener_oferta_por_id, eliminar_oferta_por_id, obtener_ofertas_activas
 from usuarios.forms import OferenteForm
-from usuarios.service import obtener_url_contacto
+from usuarios.services import obtener_url_contacto
 from usuarios.decorators import oferente_required, oferente_validado_required
 from .dtos import OfertaDTO
 from dataclasses import asdict
@@ -115,16 +115,15 @@ def lista_ofertas_parcial(request):
 
 @oferente_validado_required
 def editar_perfil_empresa(request):
-
     oferente = request.user.oferente
-
     if request.method == 'POST':
         form = OferenteForm(request.POST, request.FILES, instance=oferente)
         if form.is_valid():
             form.save()
             return redirect(reverse('dashboard_empresa') + '#empresa')
-
-    return redirect('dashboard_empresa')
+    else:
+        form = OferenteForm(instance=oferente)
+    return render(request, 'Ofertas/editar-perfil.html', {'form': form, 'oferente': oferente})
 
 
 def detalle_oferta_postulante(request, pk):
