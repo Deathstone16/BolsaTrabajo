@@ -7,7 +7,8 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-
+from django.contrib.auth import logout as auth_logout
+from .models import Postulante, Oferente
 from .models import Usuario
 
 token_generator = PasswordResetTokenGenerator()
@@ -40,6 +41,39 @@ def get_rol_label(usuario):
         return "Oferente"
     return "Usuario"
 
+@transaction.atomic
+def registrar_postulante(email, password, first_name, last_name):
+    user = Usuario.objects.create_user(
+        email=email, password=password,
+        first_name=first_name, last_name=last_name
+    )
+    
+    Postulante.objects.create(usuario=user)
+    return user
+
+@transaction.atomic
+def registrar_oferente(email, password, nombre_empresa, cuit):
+    user = Usuario.objects.create_user(email=email, password=password)
+    Oferente.objects.create(
+        usuario=user,
+        nombre_empresa=nombre_empresa,
+        cuit=cuit
+    )
+    return user
+
+
+def cerrar_sesion(request):
+    auth_logout(request)
+
+
+def es_oferente(user):
+    return hasattr(user, 'oferente')
+
+
+def es_postulante(user):
+    return hasattr(user, 'postulante')
+
+
 
 # --- Validación de empresas ---
 
@@ -50,15 +84,12 @@ def aprobar_empresa(oferente):
     Aprueba una empresa y la habilita para publicar ofertas.
     @transaction.atomic: si algo falla, se revierte TODO (BD consistente).
     """
-    oferente.estado_validacion = "aprobado"
-    oferente.save()
-    # Acá después podríamos agregar: enviar_email(oferente)
+    oferente.aprobar()
 
 
 @transaction.atomic
 def rechazar_empresa(oferente):
-    oferente.estado_validacion = "rechazado"
-    oferente.save()
+    oferente.rechazar()
 
 
 def puede_publicar_ofertas(oferente):
@@ -117,3 +148,7 @@ def validar_token_recuperacion(uidb64, token):
         return None
 
     return usuario
+
+
+
+
