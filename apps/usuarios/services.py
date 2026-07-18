@@ -7,7 +7,9 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils import timezone
 from django.contrib.auth import logout as auth_logout
+
 from .models import Postulante, Oferente
 from .models import Usuario
 
@@ -15,7 +17,6 @@ token_generator = PasswordResetTokenGenerator()
 
 
 # --- Autenticación y perfiles ---
-
 
 def autenticar_usuario(request, email, password):
     user = authenticate(request, email=email, password=password)
@@ -150,5 +151,19 @@ def validar_token_recuperacion(uidb64, token):
     return usuario
 
 
+# --- Gestión de CV ---
+
+def cargar_cv(postulante, archivo):
+    if postulante.cv:
+        postulante.cv.delete(save=False)
+    postulante.cv = archivo
+    postulante.cv_fecha_carga = timezone.now()
+    postulante.save()
 
 
+def eliminar_cv(postulante):
+    if postulante.cv:
+        postulante.cv.delete(save=False)
+        postulante.cv = None
+        postulante.cv_fecha_carga = None
+        postulante.save()

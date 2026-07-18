@@ -36,6 +36,8 @@ class Postulante(models.Model):
     fecha_nacimiento = models.DateField(blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     direccion = models.CharField(max_length=200, blank=True, null=True)
+    cv = models.FileField(upload_to='postulantes/cv/', blank=True, null=True)
+    cv_fecha_carga = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.usuario.get_full_name() or self.usuario.email
