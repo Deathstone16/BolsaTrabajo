@@ -1,39 +1,47 @@
 from django.shortcuts import redirect, render, get_object_or_404
-from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 
 from .forms import (
     RegistroPostulanteForm,
     RegistroOferenteForm,
     LoginForm,
     DatosPersonalesForm,
-    OferenteForm,
     PasswordResetRequestForm,
     SetPasswordForm,
     CargaCVForm,
 )
 from .decorators import postulante_required, oferente_required
 from .models import Oferente
-from . import service
+from . import services
 
-
-#vistas
 
 def registro(request):
     tipo = request.GET.get('tipo', 'postulante')
     FormClass = RegistroOferenteForm if tipo == 'oferente' else RegistroPostulanteForm
-
     if request.method == 'POST':
         form = FormClass(request.POST)
         if form.is_valid():
-            form.save()
+            if tipo == 'oferente':
+                services.registrar_oferente(
+                    email=form.cleaned_data['email'],
+                    password=form.cleaned_data['password1'],
+                    nombre_empresa=form.cleaned_data['nombre_empresa'],
+                    cuit=form.cleaned_data['cuit'],
+                )
+            else:
+                services.registrar_postulante(
+                    email=form.cleaned_data['email'],
+                    password=form.cleaned_data['password1'],
+                    first_name=form.cleaned_data['first_name'],
+                    last_name=form.cleaned_data['last_name'],
+                )
             return redirect('registro_exitoso')
     else:
         form = FormClass()
-
     return render(request, 'usuarios/registro.html', {'form': form, 'tipo': tipo})
 
 
@@ -52,12 +60,10 @@ def login_view(request):
         if form.is_valid():
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            if service.autenticar_usuario(request, email, password):
-                
-                if hasattr(request.user, 'oferente'):
+            if services.autenticar_usuario(request, email, password):
+                if services.es_oferente(request.user):
                     return redirect('dashboard_empresa')
                 return redirect('home')
-                
             else:
                 form.add_error(None, 'Email o contraseña incorrectos.')
     else:
@@ -66,24 +72,10 @@ def login_view(request):
     return render(request, 'usuarios/login.html', {'form': form})
 
 
+@require_POST
 def logout_view(request):
-    auth_logout(request)
+    services.cerrar_sesion(request)
     return redirect('login')
-
-@login_required
-@oferente_required
-def editar_perfil_empresa(request):
-    oferente = request.user.oferente
-
-    if request.method == 'POST':
-        form = OferenteForm(request.POST, request.FILES, instance=oferente)
-        if form.is_valid():
-            form.save()
-            return redirect('dashboard_empresa')
-    else:
-        form = OferenteForm(instance=oferente)
-
-    return render(request, 'ofertas/editar-perfil.html', {'form': form, 'oferente': oferente})
 
 
 @login_required
@@ -94,7 +86,7 @@ def datos_personales(request):
     if request.method == 'POST':
         form = DatosPersonalesForm(request.POST, instance=postulante)
         if form.is_valid():
-            service.actualizar_datos_postulante(request.user, form)
+            services.actualizar_datos_postulante(request.user, form)
             return redirect('datos_personales_exitoso')
     else:
         form = DatosPersonalesForm(instance=postulante, initial={
@@ -105,6 +97,7 @@ def datos_personales(request):
 
     return render(request, 'usuarios/datos_personales.html', {'form': form})
 
+
 @login_required
 @postulante_required
 def perfil_oferente(request, pk):
@@ -114,6 +107,7 @@ def perfil_oferente(request, pk):
         'oferente': oferente,
         'ofertas': ofertas,
     })
+
 
 def datos_personales_exitoso(request):
     return render(request, 'usuarios/exito.html', {
@@ -132,7 +126,7 @@ def password_reset_request(request):
         if form.is_valid():
             usuario = form.get_usuario()
             if usuario is not None:
-                service.enviar_email_recuperacion(usuario, request)
+                services.enviar_email_recuperacion(usuario, request)
             return redirect('recuperacion-enviada')
     else:
         form = PasswordResetRequestForm()
@@ -145,7 +139,7 @@ def recuperacion_enviada(request):
 
 
 def password_reset_confirm(request, uidb64, token):
-    usuario = service.validar_token_recuperacion(uidb64, token)
+    usuario = services.validar_token_recuperacion(uidb64, token)
 
     if usuario is None:
         return render(request, 'usuarios/token_invalido.html')
@@ -177,7 +171,7 @@ def mi_perfil(request):
     if request.method == 'POST':
         form = CargaCVForm(request.POST, request.FILES)
         if form.is_valid():
-            service.cargar_cv(postulante, form.cleaned_data['cv'])
+            services.cargar_cv(postulante, form.cleaned_data['cv'])
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'success': True, 'mensaje': 'CV cargado con éxito.'})
             messages.success(request, 'CV cargado con éxito.')
@@ -199,7 +193,7 @@ def mi_perfil(request):
 @postulante_required
 def eliminar_cv(request):
     if request.method == 'POST':
-        service.eliminar_cv(request.user.postulante)
+        services.eliminar_cv(request.user.postulante)
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'success': True, 'mensaje': 'CV eliminado.'})
         messages.success(request, 'CV eliminado correctamente.')

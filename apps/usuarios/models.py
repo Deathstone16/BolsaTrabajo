@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from .estado_oferente import ESTADOS, Pendiente
+
 
 class UsuarioManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -39,24 +41,20 @@ class Postulante(models.Model):
 
 
 class OferenteManager(models.Manager):
-    """Custom Manager: encapsula queries frecuentes sobre Oferente."""
-
     def pendientes(self):
-        """Empresas que aún no fueron validadas."""
-        return self.filter(estado_validacion='pendiente')
+        return self.filter(estado_validacion=self.model.EstadoValidacion.PENDIENTE)
 
     def aprobados(self):
-        """Empresas que pueden publicar ofertas."""
-        return self.filter(estado_validacion='aprobado')
+        return self.filter(estado_validacion=self.model.EstadoValidacion.APROBADO)
+
 
 class Oferente(models.Model):
     objects = OferenteManager()
 
-    ESTADO_VALIDACION_CHOICES = [
-        ('pendiente', 'Pendiente de Validación'),
-        ('aprobado', 'Aprobada'),
-        ('rechazado', 'Rechazada'),
-    ]
+    class EstadoValidacion(models.TextChoices):
+        PENDIENTE = 'pendiente', 'Pendiente de Validación'
+        APROBADO = 'aprobado', 'Aprobada'
+        RECHAZADO = 'rechazado', 'Rechazada'
 
     TAMANO_CHOICES = [
         ('1-10', '1-10 empleados'),
@@ -69,8 +67,8 @@ class Oferente(models.Model):
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
     estado_validacion = models.CharField(
         max_length=20,
-        choices=ESTADO_VALIDACION_CHOICES,
-        default='pendiente',
+        choices=EstadoValidacion.choices,
+        default=EstadoValidacion.PENDIENTE,
     )
     nombre_empresa = models.CharField(max_length=200)
     cuit = models.CharField(max_length=13)
@@ -83,6 +81,18 @@ class Oferente(models.Model):
     anio_fundacion = models.IntegerField(null=True, blank=True)
     sitio_web = models.URLField(max_length=300, null=True, blank=True)
     telefono = models.CharField(max_length=50, null=True, blank=True)
+
+    def aprobar(self):
+        self.estado_validacion = self.EstadoValidacion.APROBADO
+        self.save(update_fields=['estado_validacion'])
+
+    def rechazar(self):
+        self.estado_validacion = self.EstadoValidacion.RECHAZADO
+        self.save(update_fields=['estado_validacion'])
+
+    @property
+    def estado_obj(self):
+        return ESTADOS.get(self.estado_validacion, Pendiente())
 
     def __str__(self):
         return self.nombre_empresa

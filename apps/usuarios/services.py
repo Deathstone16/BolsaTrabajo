@@ -8,7 +8,9 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils import timezone
+from django.contrib.auth import logout as auth_logout
 
+from .models import Postulante, Oferente
 from .models import Usuario
 
 token_generator = PasswordResetTokenGenerator()
@@ -26,57 +28,83 @@ def autenticar_usuario(request, email, password):
 
 def actualizar_datos_postulante(user, form):
     postulante = form.save(commit=False)
-    user.first_name = form.cleaned_data['first_name']
-    user.last_name = form.cleaned_data['last_name']
-    user.email = form.cleaned_data['email']
+    user.first_name = form.cleaned_data["first_name"]
+    user.last_name = form.cleaned_data["last_name"]
+    user.email = form.cleaned_data["email"]
     user.save()
     postulante.save()
 
 
 def get_rol_label(usuario):
-    if hasattr(usuario, 'postulante'):
-        return 'Postulante'
-    if hasattr(usuario, 'oferente'):
-        return 'Oferente'
-    return 'Usuario'
+    if hasattr(usuario, "postulante"):
+        return "Postulante"
+    if hasattr(usuario, "oferente"):
+        return "Oferente"
+    return "Usuario"
+
+
+@transaction.atomic
+def registrar_postulante(email, password, first_name, last_name):
+    user = Usuario.objects.create_user(
+        email=email, password=password,
+        first_name=first_name, last_name=last_name
+    )
+
+    Postulante.objects.create(usuario=user)
+    return user
+
+
+@transaction.atomic
+def registrar_oferente(email, password, nombre_empresa, cuit):
+    user = Usuario.objects.create_user(email=email, password=password)
+    Oferente.objects.create(
+        usuario=user,
+        nombre_empresa=nombre_empresa,
+        cuit=cuit
+    )
+    return user
+
+
+def cerrar_sesion(request):
+    auth_logout(request)
+
+
+def es_oferente(user):
+    return hasattr(user, 'oferente')
+
+
+def es_postulante(user):
+    return hasattr(user, 'postulante')
 
 
 # --- Validación de empresas ---
 
 @transaction.atomic
 def aprobar_empresa(oferente):
-    """
-    Aprueba una empresa y la habilita para publicar ofertas.
-    @transaction.atomic: si algo falla, se revierte TODO (BD consistente).
-    """
-    oferente.estado_validacion = 'aprobado'
-    oferente.save()
-    # Acá después podríamos agregar: enviar_email(oferente)
+    oferente.aprobar()
 
 
 @transaction.atomic
 def rechazar_empresa(oferente):
-    oferente.estado_validacion = 'rechazado'
-    oferente.save()
+    oferente.rechazar()
 
 
 def puede_publicar_ofertas(oferente):
-    """Regla de negocio: solo empresas aprobadas pueden publicar."""
-    return oferente.estado_validacion == 'aprobado'
+    return oferente.estado_obj.puede_publicar()
 
 
 def obtener_url_contacto(email_usuario):
-    dominio = email_usuario.split('@')[1].lower()
-    destino = 'contacto@ien.edu.ar'
-    asunto = 'Solicitud de validación de empresa'
-    if 'gmail' in dominio:
-        return f'https://mail.google.com/mail/?view=cm&fs=1&to={destino}&su={asunto}'
-    elif 'outlook' in dominio or 'hotmail' in dominio or 'live' in dominio:
-        return f'https://outlook.live.com/mail/0/deeplink/compose?to={destino}&subject={asunto}'
-    elif 'yahoo' in dominio:
-        return f'https://compose.mail.yahoo.com/?to={destino}&subject={asunto}'
+    dominio = email_usuario.split("@")[1].lower()
+    destino = "contacto@ien.edu.ar"
+    asunto = "Solicitud de validación de empresa"
+    if "gmail" in dominio:
+        return f"https://mail.google.com/mail/?view=cm&fs=1&to={destino}&su={asunto}"
+    elif "outlook" in dominio or "hotmail" in dominio or "live" in dominio:
+        return f"https://outlook.live.com/mail/0/deeplink/compose?to={destino}&subject={asunto}"
+    elif "yahoo" in dominio:
+        return f"https://compose.mail.yahoo.com/?to={destino}&subject={asunto}"
     else:
-        return f'mailto:{destino}?subject={asunto}'
+        return f"mailto:{destino}?subject={asunto}"
 
 
 # --- Recuperación de contraseña ---
@@ -85,21 +113,21 @@ def enviar_email_recuperacion(usuario, request):
     uid = urlsafe_base64_encode(force_bytes(usuario.pk))
     token = token_generator.make_token(usuario)
     link = request.build_absolute_uri(
-        reverse('restablecer-contrasena', args=[uid, token])
+        reverse("restablecer-contrasena", args=[uid, token])
     )
 
     contexto = {
-        'usuario': usuario,
-        'link': link,
-        'rol_label': get_rol_label(usuario),
+        "usuario": usuario,
+        "link": link,
+        "rol_label": get_rol_label(usuario),
     }
 
     send_mail(
-        subject='Recuperación de contraseña - IEN Empleo',
-        message=render_to_string('emails/reset_email.txt', contexto),
+        subject="Recuperación de contraseña - IEN Empleo",
+        message=render_to_string("emails/reset_email.txt", contexto),
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[usuario.email],
-        html_message=render_to_string('emails/reset_email.html', contexto),
+        html_message=render_to_string("emails/reset_email.html", contexto),
         fail_silently=False,
     )
 
@@ -120,7 +148,6 @@ def validar_token_recuperacion(uidb64, token):
 # --- Gestión de CV ---
 
 def cargar_cv(postulante, archivo):
-    """Carga o reemplaza el CV del postulante. Elimina el anterior si existe."""
     if postulante.cv:
         postulante.cv.delete(save=False)
     postulante.cv = archivo
@@ -129,7 +156,6 @@ def cargar_cv(postulante, archivo):
 
 
 def eliminar_cv(postulante):
-    """Elimina el CV del postulante."""
     if postulante.cv:
         postulante.cv.delete(save=False)
         postulante.cv = None
