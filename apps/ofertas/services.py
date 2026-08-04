@@ -1,5 +1,5 @@
 from .models import Oferta
-from .models import Oferta, TipoOferta, Habilidad
+from categorias.models import TipoOferta, Habilidad
 from django.shortcuts import get_object_or_404
 
 

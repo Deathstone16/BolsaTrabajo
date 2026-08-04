@@ -5,6 +5,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("usuarios", "0007_alter_oferente_id_alter_postulante_id_and_more"),
+        ("usuarios", "0007_oferente_estado"),
     ]
 
     operations = [
