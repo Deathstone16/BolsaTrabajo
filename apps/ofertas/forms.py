@@ -1,6 +1,7 @@
 from django import forms
 from django.utils import timezone
-from .models import Oferta, TipoOferta, Habilidad
+from .models import Oferta
+from categorias.models import Categoria, TipoOferta, Habilidad
 
 INPUT_CLASS = "w-full px-4 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/30"
 
@@ -12,7 +13,7 @@ class OfertaForm(forms.ModelForm):
         empty_label="Seleccionar tipo de oferta",
     )
     categoria = forms.ModelChoiceField(
-        queryset=CategoriaOferta.objects.all(),
+        queryset=Categoria.objects.all(),
         required=False,
         empty_label="Seleccionar categoría",
     )
@@ -54,14 +55,6 @@ class OfertaForm(forms.ModelForm):
                 "La fecha de cierre debe ser posterior a la fecha actual del sistema."
             )
         return fecha_cierre
-
-    def clean_experiencia_requerida(self):
-        valor = self.cleaned_data.get("experiencia_requerida")
-        if valor is not None and valor < 0:
-            raise forms.ValidationError(
-                "Los años de experiencia no pueden ser negativos."
-            )
-        return valor
 
 
 class TipoOfertaForm(forms.ModelForm):
