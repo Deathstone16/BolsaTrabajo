@@ -89,8 +89,13 @@ def aprobar_empresa(oferente):
 
 
 @transaction.atomic
-def rechazar_empresa(oferente):
-    oferente.rechazar()
+def rechazar_empresa(oferente, motivo=None):
+    oferente.rechazar(motivo=motivo)
+
+
+@transaction.atomic
+def enviar_a_revision(oferente):
+    oferente.enviar_a_revision()
 
 
 def puede_publicar_ofertas(oferente):

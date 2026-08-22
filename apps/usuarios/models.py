@@ -75,7 +75,7 @@ class Oferente(models.Model):
         choices=EstadoValidacion.choices,
         default=EstadoValidacion.PENDIENTE,
     )
-    
+    motivo_rechazo = models.TextField(blank=True, null=True)
     nombre_empresa = models.CharField(max_length=200)
     cuit = models.CharField(max_length=13)
     logo = models.ImageField(upload_to="empresas/logos/", null=True, blank=True)
@@ -94,9 +94,15 @@ class Oferente(models.Model):
         self.estado_validacion = self.EstadoValidacion.APROBADO
         self.save(update_fields=['estado_validacion'])
 
-    def rechazar(self):
+    def rechazar(self, motivo=None):
         self.estado_validacion = self.EstadoValidacion.RECHAZADO
-        self.save(update_fields=['estado_validacion'])
+        self.motivo_rechazo = motivo
+        self.save(update_fields=['estado_validacion', 'motivo_rechazo'])
+
+    def enviar_a_revision(self):
+        self.estado_validacion = self.EstadoValidacion.PENDIENTE
+        self.motivo_rechazo = None
+        self.save(update_fields=['estado_validacion', 'motivo_rechazo'])
 
     @property
     def estado_obj(self):

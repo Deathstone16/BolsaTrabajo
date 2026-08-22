@@ -16,7 +16,7 @@ from ofertas.models import Oferta, TipoOferta, Habilidad
 from ofertas.forms import TipoOfertaForm, HabilidadForm
 from ofertas import services as ofertas_services
 from ofertas.dtos import OfertaDTO
-
+from .forms import RechazarEmpresaForm
 from . import services
 
 
@@ -169,10 +169,20 @@ def aprobar_empresa(request, pk):
 
 @staff_member_required
 def rechazar_empresa(request, pk):
+    empresa = services.obtener_empresa(pk)
     if request.method == 'POST':
-        empresa = services.obtener_empresa(pk)
-        usuarios_service.rechazar_empresa(empresa)
-    return redirect('mod_listar_empresas')
+        form = RechazarEmpresaForm(request.POST)
+        if form.is_valid():
+            motivo = form.cleaned_data['motivo_rechazo']
+            usuarios_service.rechazar_empresa(empresa, motivo=motivo)
+            messages.success(request, f"Empresa '{empresa.nombre_empresa}' rechazada.")
+            return redirect('mod_listar_empresas')
+    else:
+        form = RechazarEmpresaForm()
+    return render(request, 'moderacion/rechazar_empresa.html', {
+        'empresa': empresa,
+        'form': form,
+    })
 
 
 # ============================================================

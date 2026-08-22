@@ -6,15 +6,18 @@ from .models import Oferta
 from .services import crear_oferta_laboral, obtener_ofertas_por_empresa, obtener_oferta_por_id, eliminar_oferta_por_id, obtener_ofertas_activas
 from usuarios.forms import OferenteForm
 from usuarios.services import obtener_url_contacto
+from usuarios import services as usuarios_service
 from usuarios.decorators import oferente_required, oferente_validado_required
 from .dtos import OfertaDTO
 from dataclasses import asdict
 
 @oferente_required
 def validacion_pendiente(request):
+    oferente = request.user.oferente
     email_contacto_url = obtener_url_contacto(request.user.email)
     return render(request, 'Ofertas/validacion_pendiente.html', {
         'email_contacto_url': email_contacto_url,
+        'oferente': oferente,
     })
 
 @oferente_validado_required
@@ -113,13 +116,15 @@ def lista_ofertas_parcial(request):
     })
 
 
-@oferente_validado_required
+@oferente_required
 def editar_perfil_empresa(request):
     oferente = request.user.oferente
     if request.method == 'POST':
         form = OferenteForm(request.POST, request.FILES, instance=oferente)
         if form.is_valid():
             form.save()
+            if oferente.estado_validacion == 'rechazado':
+                usuarios_service.enviar_a_revision(oferente)
             return redirect(reverse('dashboard_empresa') + '#empresa')
     else:
         form = OferenteForm(instance=oferente)
