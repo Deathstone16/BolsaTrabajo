@@ -1,3 +1,11 @@
+"""
+Servicios de autenticación y gestión de usuarios.
+
+Maneja login, registro de postulantes y oferentes,
+validación de empresas, recuperación de contraseñas
+y carga de CV.
+"""
+
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.conf import settings
@@ -18,7 +26,9 @@ token_generator = PasswordResetTokenGenerator()
 
 # --- Autenticación y perfiles ---
 
+
 def autenticar_usuario(request, email, password):
+    """Autentica un usuario con email y password, y lo loguea en la sesión."""
     user = authenticate(request, email=email, password=password)
     if user is not None:
         auth_login(request, user)
@@ -27,6 +37,7 @@ def autenticar_usuario(request, email, password):
 
 
 def actualizar_datos_postulante(user, form):
+    """Actualiza los datos del perfil de un postulante desde un formulario."""
     postulante = form.save(commit=False)
     user.first_name = form.cleaned_data["first_name"]
     user.last_name = form.cleaned_data["last_name"]
@@ -36,6 +47,7 @@ def actualizar_datos_postulante(user, form):
 
 
 def get_rol_label(usuario):
+    """Devuelve el label del rol del usuario: 'Postulante', 'Oferente' o 'Usuario'."""
     if hasattr(usuario, "postulante"):
         return "Postulante"
     if hasattr(usuario, "oferente"):
@@ -44,6 +56,7 @@ def get_rol_label(usuario):
 
 @transaction.atomic
 def registrar_postulante(email, password, first_name, last_name):
+    """Registra un nuevo usuario y le crea un perfil de Postulante."""
     user = Usuario.objects.create_user(
         email=email, password=password,
         first_name=first_name, last_name=last_name
@@ -54,6 +67,7 @@ def registrar_postulante(email, password, first_name, last_name):
 
 @transaction.atomic
 def registrar_oferente(email, password, nombre_empresa, cuit):
+    """Registra un nuevo usuario y le crea un perfil de Oferente (empresa)."""
     user = Usuario.objects.create_user(email=email, password=password)
     Oferente.objects.create(
         usuario=user,
@@ -64,14 +78,17 @@ def registrar_oferente(email, password, nombre_empresa, cuit):
 
 
 def cerrar_sesion(request):
+    """Cierra la sesión del usuario actual."""
     auth_logout(request)
 
 
 def es_oferente(user):
+    """Verifica si el usuario tiene un perfil de Oferente asociado."""
     return hasattr(user, 'oferente')
 
 
 def es_postulante(user):
+    """Verifica si el usuario tiene un perfil de Postulante asociado."""
     return hasattr(user, 'postulante')
 
 
@@ -81,29 +98,57 @@ def es_postulante(user):
 
 @transaction.atomic
 def aprobar_empresa(oferente):
-    """
-    Aprueba una empresa y la habilita para publicar ofertas.
-    @transaction.atomic: si algo falla, se revierte TODO (BD consistente).
+    """Aprueba una empresa y la habilita para publicar ofertas.
+
+    Args:
+        oferente: Instancia del modelo Oferente.
     """
     oferente.aprobar()
 
 
 @transaction.atomic
 def rechazar_empresa(oferente, motivo=None):
+    """Rechaza una empresa y guarda el motivo para que el oferente pueda ver qué corregir.
+
+    Args:
+        oferente: Instancia del modelo Oferente.
+        motivo (str, optional): Texto explicando el motivo del rechazo.
+    """
     oferente.rechazar(motivo=motivo)
 
 
 @transaction.atomic
 def enviar_a_revision(oferente):
+    """Resetea el estado de un oferente a pendiente (cuando corrige y reenvía).
+
+    Args:
+        oferente: Instancia del modelo Oferente.
+    """
     oferente.enviar_a_revision()
 
 
 def puede_publicar_ofertas(oferente):
+    """Verifica si un oferente puede publicar ofertas (solo empresas aprobadas).
+
+    Args:
+        oferente: Instancia del modelo Oferente.
+
+    Returns:
+        bool: True si el estado es aprobado.
+    """
     """Regla de negocio: solo empresas aprobadas pueden publicar."""
     return oferente.estado_obj.puede_publicar()
 
 
 def obtener_url_contacto(email_usuario):
+    """Genera URL de contacto según el dominio del email (Gmail, Outlook, etc.).
+
+    Args:
+        email_usuario (str): Email del usuario.
+
+    Returns:
+        str: URL del cliente de correo con destinatario prellenado.
+    """
     dominio = email_usuario.split("@")[1].lower()
     destino = "contacto@ien.edu.ar"
     asunto = "Solicitud de validación de empresa"
@@ -121,6 +166,12 @@ def obtener_url_contacto(email_usuario):
 
 
 def enviar_email_recuperacion(usuario, request):
+    """Envía email de recuperación de contraseña con token.
+
+    Args:
+        usuario: Instancia del modelo Usuario.
+        request: HttpRequest para construir la URL absoluta.
+    """
     uid = urlsafe_base64_encode(force_bytes(usuario.pk))
     token = token_generator.make_token(usuario)
     link = request.build_absolute_uri(
@@ -144,6 +195,15 @@ def enviar_email_recuperacion(usuario, request):
 
 
 def validar_token_recuperacion(uidb64, token):
+    """Valida el token de recuperación de contraseña.
+
+    Args:
+        uidb64 (str): ID del usuario codificado en base64.
+        token (str): Token de recuperación.
+
+    Returns:
+        Usuario si el token es válido, None si no.
+    """
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         usuario = Usuario.objects.get(pk=uid)
@@ -159,6 +219,12 @@ def validar_token_recuperacion(uidb64, token):
 # --- Gestión de CV ---
 
 def cargar_cv(postulante, archivo):
+    """Carga o reemplaza el CV de un postulante.
+
+    Args:
+        postulante: Instancia del modelo Postulante.
+        archivo: Archivo subido desde el formulario.
+    """
     if postulante.cv:
         postulante.cv.delete(save=False)
     postulante.cv = archivo
@@ -167,6 +233,11 @@ def cargar_cv(postulante, archivo):
 
 
 def eliminar_cv(postulante):
+    """Elimina el CV de un postulante y limpia la fecha de carga.
+
+    Args:
+        postulante: Instancia del modelo Postulante.
+    """
     if postulante.cv:
         postulante.cv.delete(save=False)
         postulante.cv = None

@@ -28,8 +28,9 @@ urlpatterns = [
     path('tipos-oferta/<int:tipo_id>/modificar/', views.modificar_tipo_oferta, name='mod_modificar_tipo_oferta'),
     path('tipos-oferta/<int:tipo_id>/baja/', views.eliminar_tipo_oferta, name='mod_eliminar_tipo_oferta'),
 
-    path('tipos-oferta/<int:tipo_id>/habilidades/', views.listar_habilidades, name='mod_listar_habilidades'),
-    path('tipos-oferta/<int:tipo_id>/habilidades/crear/', views.crear_habilidad, name='mod_crear_habilidad'),
-    path('habilidades/<int:habilidad_id>/modificar/', views.modificar_habilidad, name='mod_modificar_habilidad'),
-    path('habilidades/<int:habilidad_id>/baja/', views.eliminar_habilidad, name='mod_eliminar_habilidad'),
+#     path('tipos-oferta/<int:tipo_id>/habilidades/', views.listar_habilidades, name='mod_listar_habilidades'),
+#     path('tipos-oferta/<int:tipo_id>/habilidades/crear/', views.crear_habilidad, name='mod_crear_habilidad'),
+#     path('habilidades/<int:habilidad_id>/modificar/', views.modificar_habilidad, name='mod_modificar_habilidad'),
+#     path('habilidades/<int:habilidad_id>/baja/', views.eliminar_habilidad, name='mod_eliminar_habilidad'),
+# 
 ]

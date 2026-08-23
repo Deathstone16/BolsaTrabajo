@@ -1,3 +1,10 @@
+"""
+Modelos de cursos y categorías.
+
+Define ``Curso`` con sus tipos (Presencial, Virtual, Híbrido)
+y su relación con ``Categoria``.
+"""
+
 from django.db import models
 from categorias.models import Categoria
 
@@ -6,6 +13,7 @@ from categorias.models import Categoria
 
 
 class Curso(models.Model):
+    """Modelo de curso del instituto con tipo, duración y horario."""
     PRESENCIAL = 'Presencial'
     VIRTUAL = 'Virtual'
     HIBRIDO = 'Hibrido'

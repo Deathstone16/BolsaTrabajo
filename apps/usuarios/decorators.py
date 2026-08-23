@@ -1,3 +1,11 @@
+"""
+Decoradores de autorización por perfil de usuario.
+
+Cada decorator verifica si el usuario autenticado tiene el perfil
+requerido (Oferente, Postulante o ambos) y redirige a login/home
+en caso contrario.
+"""
+
 from functools import wraps
 
 from django.shortcuts import redirect

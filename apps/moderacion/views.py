@@ -12,8 +12,8 @@ from usuarios.models import Oferente
 from usuarios import services as usuarios_service
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
-from ofertas.models import Oferta, TipoOferta, Habilidad
-from ofertas.forms import TipoOfertaForm, HabilidadForm
+from ofertas.models import Oferta
+from ofertas.forms import HabilidadForm
 from ofertas import services as ofertas_services
 from ofertas.dtos import OfertaDTO
 from .forms import RechazarEmpresaForm

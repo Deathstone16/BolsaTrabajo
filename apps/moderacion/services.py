@@ -1,103 +1,98 @@
+"""
+Servicios de la capa de moderación.
+
+Funciones que alimentan las vistas del panel de administración
+para cursos, categorías, empresas y ofertas.
+"""
+
+from django.shortcuts import get_object_or_404
+from cursos.models import Curso, Categoria
+from usuarios.models import Oferente
 from ofertas.models import Oferta
-# TODO: descomentar cuando modelos TipoOferta y Habilidad estén migrados
-# from .models import Oferta, TipoOferta, Habilidad
+from cursos import services as cursos_services
 
 
-def crear_oferta_laboral(usuario_empresa, form_oferta):
-    oferta = form_oferta.save(commit=False)
-    oferta.empresa = usuario_empresa
-    oferta.estado = 'pendiente'
-    oferta.save()
-    return oferta
+# ============================================================
+# CURSOS
+# ============================================================
+
+def listar_cursos_contexto():
+    cursos, resumen = cursos_services.listar_cursos_con_resumen()
+    return {
+        'cursos': cursos,
+        'cursos_presenciales': resumen['presenciales'],
+        'cursos_virtuales': resumen['virtuales'],
+    }
 
 
-def obtener_ofertas_por_empresa(usuario_empresa):
-    return Oferta.objects.filter(empresa=usuario_empresa).order_by('-fecha_publicacion')
+def obtener_curso(curso_id):
+    return get_object_or_404(Curso, id=curso_id)
 
 
-def obtener_oferta_por_id(id_oferta):
-    try:
-        return Oferta.objects.get(id=id_oferta)
-    except Oferta.DoesNotExist:
-        return None
+# ============================================================
+# CATEGORÍAS
+# ============================================================
+
+def listar_categorias_contexto():
+    return {'categorias': Categoria.objects.all()}
 
 
-def eliminar_oferta_por_id(oferta_id):
-    oferta = obtener_oferta_por_id(oferta_id)
-    if oferta:
-        oferta.delete()
-        return True
-    return False
+# ============================================================
+# EMPRESAS
+# ============================================================
+
+def listar_empresas_contexto():
+    empresas = Oferente.objects.pendientes()
+    return {
+        'empresas': empresas,
+        'total': empresas.count(),
+    }
 
 
-def obtener_ofertas_activas(busqueda='', modalidad='', experiencia=''):
-    ofertas = Oferta.objects.filter(estado='activa').select_related(
+def obtener_empresa(pk):
+    return get_object_or_404(Oferente, pk=pk)
+
+
+# ============================================================
+# OFERTAS (moderación)
+# ============================================================
+
+def listar_ofertas_contexto(estado=''):
+    ofertas = Oferta.objects.all().select_related(
         'empresa__oferente', 'categoria'
-    ).order_by('-fecha_publicacion')
-    if busqueda:
-        ofertas = ofertas.filter(titulo__icontains=busqueda) | ofertas.filter(nombre_puesto__icontains=busqueda)
-    if modalidad:
-        ofertas = ofertas.filter(modalidad=modalidad)
-    if experiencia:
-        ofertas = ofertas.filter(experiencia_requerida=experiencia)
-    return ofertas
+    )
+    if estado:
+        ofertas = ofertas.filter(estado=estado)
+    return {
+        'ofertas': ofertas,
+        'filtro_actual': estado,
+    }
 
 
-def actualizar_estado_oferta(oferta_id, nuevo_estado):
-    oferta = obtener_oferta_por_id(oferta_id)
-    if oferta:
-        oferta.estado = nuevo_estado
-        oferta.save()
-        return True
-    return False
+def obtener_oferta(pk):
+    return get_object_or_404(
+        Oferta.objects.select_select_related('empresa__oferente', 'categoria'),
+        pk=pk,
+    )
 
 
-# TODO: descomentar cuando modelos TipoOferta y Habilidad estén migrados
-# ============================================================
-# TIPOS DE OFERTA
-# ============================================================
+def aprobar_oferta(pk):
+    obtener_oferta(pk).aprobar()
+
+
+def rechazar_oferta(pk):
+    obtener_oferta(pk).rechazar()
+
+
+def finalizar_oferta(pk):
+    obtener_oferta(pk).finalizar()
+
+
+# TODO: Implementar cuando TipoOferta esté migrado como modelo
+# Bloqueado por: falta crear el modelo en ofertas/models.py y generar migración
 #
-# def listar_tipos_oferta():
-#     return TipoOferta.objects.all()
+# def listar_tipos_oferta_contexto():
+#     return {'tipos': TipoOferta.objects.all()}
 #
-# def crear_tipo_oferta(form):
-#     return form.save()
-#
-# def modificar_tipo_oferta(tipo_id, form):
-#     tipo = get_object_or_404(TipoOferta, id=tipo_id)
-#     return form.save()
-#
-# def eliminar_tipo_oferta(tipo_id):
-#     tipo = get_object_or_404(TipoOferta, id=tipo_id)
-#     nombre = tipo.nombre
-#     tipo.delete()
-#     return nombre
-#
-# def puede_eliminar_tipo_oferta(tipo_id):
-#     return not Oferta.objects.filter(tipo_oferta_id=tipo_id).exists()
-#
-# ============================================================
-# HABILIDADES
-# ============================================================
-#
-# def listar_habilidades_por_tipo(tipo_id):
-#     return Habilidad.objects.filter(tipo_oferta_id=tipo_id)
-#
-# def crear_habilidad(form):
-#     return form.save()
-#
-# def modificar_habilidad(habilidad_id, form):
-#     habilidad = get_object_or_404(Habilidad, id=habilidad_id)
-#     return form.save()
-#
-# def eliminar_habilidad(habilidad_id):
-#     habilidad = get_object_or_404(Habilidad, id=habilidad_id)
-#     nombre = habilidad.nombre
-#     habilidad.delete()
-#     return nombre
-#
-# def puede_eliminar_habilidad(habilidad_id):
-#     habilidad = get_object_or_404(Habilidad, id=habilidad_id)
-#     if Oferta.objects.filter(habilidades_requeridas__icontains=habilidad.nombre).exists():
-#         return False
-#     return True
+# def obtener_tipo_oferta(tipo_id):
+#     return get_object_or_404(TipoOferta, id=tipo_id)

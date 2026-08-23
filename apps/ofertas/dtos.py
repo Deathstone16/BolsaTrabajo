@@ -1,9 +1,21 @@
+"""
+Data Transfer Object para serialización de Ofertas a JSON.
+
+Define ``OfertaDTO`` como dataclass para exponer datos de una oferta
+a endpoints JSON sin exponer el modelo directamente.
+"""
+
 from dataclasses import dataclass, asdict
 from typing import Optional
 
 
 @dataclass
 class OfertaDTO:
+    """Data Transfer Object para serializar una Oferta a JSON.
+
+    Se usa en el endpoint de detalle de oferta para exponeer
+    datos formateados al frontend sin exponer el modelo directamente.
+    """
     """Data Transfer Object para serializar Oferta a JSON."""
 
     id: int
@@ -36,8 +48,6 @@ class OfertaDTO:
             titulo=oferta.titulo,
             nombre_puesto=oferta.nombre_puesto,
             categoria=oferta.categoria_id,
-            tipo_oferta=oferta.tipo_oferta_id,
-            tipo_oferta_nombre=oferta.tipo_oferta.nombre if oferta.tipo_oferta else "",
             ubicacion=oferta.ubicacion,
             modalidad=oferta.modalidad,
             modalidad_display=oferta.get_modalidad_display(),
