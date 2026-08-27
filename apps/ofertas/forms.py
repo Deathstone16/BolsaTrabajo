@@ -1,14 +1,14 @@
 from django import forms
 from django.utils import timezone
 from .models import Oferta
-from categorias.models import Categoria, TipoOferta, Habilidad
+from categorias.models import Categoria, Habilidad
 
 INPUT_CLASS = "w-full px-4 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/30"
 
 
 class OfertaForm(forms.ModelForm):
     tipo_oferta = forms.ModelChoiceField(
-        queryset=TipoOferta.objects.all(),
+        queryset=Categoria.objects.none(),
         required=False,
         empty_label="Seleccionar tipo de oferta",
     )
@@ -56,23 +56,6 @@ class OfertaForm(forms.ModelForm):
             )
         return fecha_cierre
 
-
-class TipoOfertaForm(forms.ModelForm):
-    class Meta:
-        model = TipoOferta
-        fields = ["nombre"]
-        labels = {"nombre": "Nombre"}
-        widgets = {
-            "nombre": forms.TextInput(
-                attrs={"class": INPUT_CLASS, "placeholder": "Ej. Tecnología"}
-            ),
-        }
-
-    def clean_nombre(self):
-        nombre = self.cleaned_data.get("nombre")
-        if nombre and len(nombre) < 3:
-            raise forms.ValidationError("El nombre debe tener al menos 3 caracteres.")
-        return nombre
 
 
 class HabilidadForm(forms.ModelForm):

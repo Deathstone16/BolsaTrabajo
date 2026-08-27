@@ -109,11 +109,11 @@
         <i data-lucide="check" class="w-5 h-5"></i> Aprobar empresa
       </button>
     </form>
-    <form method="post" action="{% url 'mod_rechazar_empresa' empresa.pk %}" class="flex-1">
+    <form method="get" action="{% url 'mod_rechazar_empresa' empresa.pk %}">
       {% csrf_token %}
       <button type="submit"
               class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-destructive text-white rounded-lg hover:bg-destructive/90 transition-colors font-medium">
-        <i data-lucide="x" class="w-5 h-5"></i> Rechazar empresa
+          <i data-lucide="x" class="w-5 h-5"></i> Rechazar empresa
       </button>
     </form>
   </div>

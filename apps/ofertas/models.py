@@ -1,3 +1,10 @@
+"""
+Modelo de oferta laboral.
+
+Define la estructura de una oferta de trabajo publicada por una empresa,
+incluyendo campos de puesto, requisitos, estado y fechas.
+"""
+
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -9,6 +16,11 @@ from categorias.models import Categoria, TipoOferta
 
 
 class Oferta(models.Model):
+    """Oferta laboral publicada por una empresa.
+
+    Maneja estados (pendiente, activa, rechazada, finalizada) mediante
+    el patrón State y expone métodos aprobar(), rechazar(), finalizar().
+    """
     
     MODALIDAD_CHOICES = [
         ('presencial', 'Presencial'),
@@ -68,17 +80,22 @@ class Oferta(models.Model):
         return f"{self.titulo} - {self.nombre_puesto}"  
     
     def get_state(self):
+        """Devuelve el objeto de estado según el valor actual del campo 'estado'."""
         
         return ESTADOS[self.estado]
 
     def aprobar(self):
+        """Aprueba la oferta (pendiente → activa). Lanza ValueError si la transición es inválida."""
         self.get_state().aprobar(self)
 
     def rechazar(self):
+        """Rechaza la oferta (pendiente → rechazada). Lanza ValueError si la transición es inválida."""
         self.get_state().rechazar(self)
 
     def finalizar(self):
+        """Finaliza la oferta (activa → finalizada). Lanza ValueError si la transición es inválida."""
         self.get_state().finalizar(self)
 
     def puede_editarse(self):
+        """Indica si la oferta puede ser editada (solo en estado pendiente)."""
         return self.get_state().puede_editarse()

@@ -1,3 +1,10 @@
+"""
+Patrón State para el estado de validación de empresas.
+
+Define los estados posibles de un Oferente (pendiente, aprobado,
+rechazado) y las propiedades visuales y de permisos de cada uno.
+"""
+
 from abc import ABC, abstractmethod
 
 class EstadoValidacion(ABC):

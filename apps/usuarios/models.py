@@ -1,9 +1,17 @@
+"""
+Modelos de autenticación y perfiles.
+
+Define ``Usuario`` (custom AbstractUser), ``Postulante`` y ``Oferente``
+con su manager y patrón de estados de validación.
+"""
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from .estado_oferente import ESTADOS, Pendiente
 
 
 class UsuarioManager(BaseUserManager):
+    """Manager personalizado para el modelo Usuario con email como campo principal."""
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError("El email es obligatorio")
@@ -20,6 +28,7 @@ class UsuarioManager(BaseUserManager):
 
 
 class Usuario(AbstractUser):
+    """Modelo de usuario custom con email como identificador principal."""
     email = models.EmailField(unique=True)
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -31,6 +40,7 @@ class Usuario(AbstractUser):
 
 
 class Postulante(models.Model):
+    """Perfil de postulante con datos personales y CV."""
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
     dni = models.CharField(max_length=8, blank=True, null=True)
     fecha_nacimiento = models.DateField(blank=True, null=True)
@@ -44,6 +54,7 @@ class Postulante(models.Model):
 
 
 class OferenteManager(models.Manager):
+    """Manager para Oferente con filtros por estado de validación."""
     def pendientes(self):
         """Empresas que aún no fueron validadas."""
         return self.filter(estado_validacion=self.model.EstadoValidacion.PENDIENTE)
@@ -54,6 +65,7 @@ class OferenteManager(models.Manager):
 
 
 class Oferente(models.Model):
+    """Perfil de empresa (oferente) con estado de validación y datos de la empresa."""
     objects = OferenteManager()
 
     class EstadoValidacion(models.TextChoices):
@@ -75,7 +87,7 @@ class Oferente(models.Model):
         choices=EstadoValidacion.choices,
         default=EstadoValidacion.PENDIENTE,
     )
-    
+    motivo_rechazo = models.TextField(blank=True, null=True)
     nombre_empresa = models.CharField(max_length=200)
     cuit = models.CharField(max_length=13)
     logo = models.ImageField(upload_to="empresas/logos/", null=True, blank=True)
@@ -91,12 +103,25 @@ class Oferente(models.Model):
     telefono = models.CharField(max_length=50, null=True, blank=True)
 
     def aprobar(self):
+        """Aprueba la empresa cambiando estado a aprobado."""
         self.estado_validacion = self.EstadoValidacion.APROBADO
         self.save(update_fields=['estado_validacion'])
 
-    def rechazar(self):
+    def rechazar(self, motivo=None):
+        """Rechaza la empresa guardando el motivo del rechazo.
+
+        Args:
+            motivo (str, optional): Explicación del motivo.
+        """
         self.estado_validacion = self.EstadoValidacion.RECHAZADO
-        self.save(update_fields=['estado_validacion'])
+        self.motivo_rechazo = motivo
+        self.save(update_fields=['estado_validacion', 'motivo_rechazo'])
+
+    def enviar_a_revision(self):
+        """Resetea estado a pendiente y limpia motivo (cuando el oferente corrige)."""
+        self.estado_validacion = self.EstadoValidacion.PENDIENTE
+        self.motivo_rechazo = None
+        self.save(update_fields=['estado_validacion', 'motivo_rechazo'])
 
     @property
     def estado_obj(self):

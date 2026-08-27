@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-2">Rechazar empresa</h1>
+    <p class="text-muted-foreground mb-6">
+        Vas a rechazar a <strong>{{ empresa.nombre_empresa }}</strong>.
+        Explicá el motivo para que el oferente sepa qué corregir.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-4">
+            <label for="id_motivo_rechazo" class="block text-sm font-medium mb-1">
+                {{ form.motivo_rechazo.label }}
+            </label>
+            {{ form.motivo_rechazo }}
+            {% if form.motivo_rechazo.errors %}
+                <p class="text-destructive text-sm mt-1">{{ form.motivo_rechazo.errors.0 }}</p>
+            {% endif %}
+            <p class="text-xs text-muted-foreground mt-1">{{ form.motivo_rechazo.help_text }}</p>
+        </div>
+
+        <div class="flex gap-4">
+            <a href="{% url 'mod_detalle_empresa' empresa.pk %}"
+               class="px-6 py-3 border border-border rounded-lg hover:bg-muted transition-colors">
+                Cancelar
+            </a>
+            <button type="submit"
+                    class="flex-1 px-6 py-3 bg-destructive text-white rounded-lg hover:bg-destructive/90 transition-colors font-medium">
+                Confirmar rechazo
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
