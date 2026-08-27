@@ -9,7 +9,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from .state import ESTADOS
-from categorias.models import Categoria
+from categorias.models import Categoria, TipoOferta
 
 
 
@@ -55,13 +55,14 @@ class Oferta(models.Model):
     
     empresa = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
+    tipo_oferta = models.ForeignKey(TipoOferta, null=True, blank=True, on_delete=models.SET_NULL)
     titulo = models.CharField(max_length=100)
     nombre_puesto = models.CharField(max_length=150)
     ubicacion = models.CharField(max_length=100)
     modalidad = models.CharField(max_length=20, choices=MODALIDAD_CHOICES, default='presencial')
     descripcion = models.TextField()
     habilidades_requeridas = models.TextField()
-    experiencia_requerida = models.PositiveIntegerField(default=0)
+    experiencia_requerida = models.CharField(max_length=20, choices=EXPERIENCIA_CHOICES, default='sin-experiencia')
     nivel_educativo = models.CharField(max_length=30, choices=NIVEL_EDUCATIVO_CHOICES)
     es_confidencial = models.BooleanField(default=False)
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')

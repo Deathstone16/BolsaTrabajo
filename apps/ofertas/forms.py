@@ -56,14 +56,6 @@ class OfertaForm(forms.ModelForm):
             )
         return fecha_cierre
 
-    def clean_experiencia_requerida(self):
-        valor = self.cleaned_data.get("experiencia_requerida")
-        if valor is not None and valor < 0:
-            raise forms.ValidationError(
-                "Los años de experiencia no pueden ser negativos."
-            )
-        return valor
-
 
 
 class HabilidadForm(forms.ModelForm):
