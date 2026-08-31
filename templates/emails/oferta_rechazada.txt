@@ -1,0 +1,15 @@
+Hola {{ offerente.nombre_empresa }},
+
+Lamentamos informarte que la oferta "{{ oferta.titulo }}" ha sido rechazada.
+
+Motivo: {{ motivo_rechazo }}
+
+Si considerás que fue un error, podés volver a publicar una nueva oferta en cualquier momento.
+
+Ver detalles: {{ protocol }}://{{ domain }}/ofertas/{{ oferta.id }}/
+
+Si tenés preguntas, escribí a soporte@ien.edu.ar.
+
+Saludos,
+
+Equipo BolsaTrabajo IEN
