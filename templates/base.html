@@ -26,7 +26,7 @@
         <div class="hidden md:flex items-center gap-8">
           <a href="/" class="text-muted-foreground hover:text-foreground transition-colors">Inicio</a>
           {% if not user.is_authenticated or user.postulante %}
-            <a href="buscar-empleo.html" class="text-muted-foreground hover:text-foreground transition-colors">Buscar empleo</a>
+            <a href="{% url 'buscar_empleo' %}" class="text-muted-foreground hover:text-foreground transition-colors">Buscar empleo</a>
           {% endif %}
           {% if user.is_authenticated and user.oferente and user.oferente.estado_obj.puede_publicar %}
             <a href="{% url 'dashboard_empresa' %}" class="text-muted-foreground hover:text-foreground transition-colors">Mi panel</a>
@@ -43,11 +43,16 @@
               <a href="{% url 'mod_listar_ofertas' %}" class="text-muted-foreground hover:text-foreground transition-colors">Ofertas</a>
               <a href="{% url 'mod_listar_cursos' %}" class="text-muted-foreground hover:text-foreground transition-colors">Cursos</a>
               <a href="{% url 'mod_listar_tipos_oferta' %}" class="text-muted-foreground hover:text-foreground transition-colors">Tipos de Oferta</a>
+              Bienvenido/a: {{user.first_name}}
+            Rol: Staff IEN
             {% endif %}
             <form method="post" action="{% url 'logout' %}" style="display:inline">
               {% csrf_token %}
               <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors">Cerrar sesión</button>
             </form>
+
+            
+
           {% else %}
             <a href="{% url 'login' %}" class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
               <i data-lucide="user" class="w-4 h-4"></i>Ingresar
