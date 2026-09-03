@@ -1,0 +1,12 @@
+Hola {{ oferente.nombre_empresa }},
+
+¡Excelentes noticias! Tu perfil de empresa ha sido aprobado y ya estás autorizado para publicar ofertas en BolsaTrabajo IEN.
+
+Ahora podés comenzar a publicar ofertas laborales y recibir postulantes. Accede a tu panel para gestionar tu empresa.
+
+Ir a Panel: {{ protocol }}://{{ domain }}/empresa/dashboard/
+
+Si tenés alguna duda, escribí a soporte@ien.edu.ar.
+
+Saludos,
+Equipo BolsaTrabajo IEN 2026

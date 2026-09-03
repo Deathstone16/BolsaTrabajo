@@ -1,0 +1,15 @@
+Hola {{ oferente.nombre_empresa }},
+
+Lamentamos informarte que tu perfil de empresa ha sido rechazado.
+
+Motivo: {{ motivo_rechazo }}
+
+Para volver a intentarlo, corregí los datos solicitados y volvé a enviar tu solicitud de validación. Tu perfil volverá a estado "pendiente" para ser reanalizado.
+
+Corregir y reenviar: {{ protocol }}://{{ domain }}/editar-perfil/
+
+Si tenés preguntas, escribí a soporte@ien.edu.ar.
+
+Saludos,
+
+Equipo BolsaTrabajo IEN 2026

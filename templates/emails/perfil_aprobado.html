@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil Aprobado</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6f8;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f8;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#10b981,#059669);padding:32px 40px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:600;letter-spacing:-0.3px;">
+                ✅ Perfil Aprobado
+              </h1>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px;">
+              <h2 style="margin:0 0 16px;color:#1e293b;font-size:20px;font-weight:600;">
+                Hola {{ oferente.nombre_empresa }},
+              </h2>
+
+              <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.6;">
+                ¡Excelentes noticias! Tu perfil de empresa ha sido <span style="color: #10b981;">aprobado</span> y ya estás autorizado para publicar ofertas en BolsaTrabajo IEN.
+              </p>
+
+              <p style="margin:0 0 28px;color:#475569;font-size:15px;line-height:1.6;">
+                Ahora podés comenzar a publicar ofertas laborales y recibir postulantes. Accede a tu panel para gestionar tu empresa.
+              </p>
+
+              <!-- CTA Button -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding:0 0 28px;">
+                    <a href="https://tusitio.com/empresa/dashboard/"
+                       style="display:inline-block;background-color:#10b981;color:#ffffff;font-size:16px;font-weight:600;text-decoration:none;padding:14px 36px;border-radius:8px;letter-spacing:0.2px;">
+                        Ir a Panel
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Fallback link -->
+              <p style="margin:0 0 28px;color:#94a3b8;font-size:13px;line-height:1.5;text-align:center;">
+                Si el botón no funciona, copiá y pegá este enlace en tu navegador:<br>
+                <a href="https://tusitio.com/empresa/dashboard/" style="color:#10b981;text-decoration:underline;word-break:break-all;">{{ protocol }}://{{ domain }}/empresa/dashboard/</a>
+              </p>
+
+              <hr style="border:none;border-top:1px solid #e2e8f0;margin:0 0 24px;">
+
+              <p style="margin:0 0 12px;color:#64748b;font-size:13px;line-height:1.5;">
+                🎯 Ya podés comenzar a publicar ofertas y captar talento para tu empresa.
+              </p>
+
+              <p style="margin:0;color:#64748b;font-size:13px;line-height:1.5;">
+                Si tenés alguna duda, escribí a soporte@ien.edu.ar.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#f8fafc;padding:24px 40px;text-align:center;border-top:1px solid #e2e8f0;">
+              <p style="margin:0;color:#94a3b8;font-size:12px;line-height:1.5;">
+                —<br>
+                BolsaTrabajo IEN 2026
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

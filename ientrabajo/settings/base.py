@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'moderacion',
     'ofertas',
     'categorias',
+    'emails',
 ]
 
 MIDDLEWARE = [
