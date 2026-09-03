@@ -43,7 +43,7 @@ def listar_categorias_contexto():
 # ============================================================
 
 def listar_empresas_contexto():
-    empresas = Oferente.objects.pendientes()
+    empresas = Oferente.objects.all()
     return {
         'empresas': empresas,
         'total': empresas.count(),
