@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('categorias', '0002_alter_habilidad_unique_together'),
+        ('categorias', '0003_alter_categoria_options'),
     ]
 
     operations = [

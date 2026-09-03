@@ -4,7 +4,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("usuarios", "0011_oferente_motivo_rechazo"),
+        ("usuarios", "0013_alter_oferente_estado_validacion"),
     ]
 
     operations = [

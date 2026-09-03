@@ -46,7 +46,14 @@ import json
 from google import genai
 from google.genai import types
 
-client = genai.Client()
+def get_genai_client():
+    """Crea el cliente de Gemini en el momento de usarlo.
+
+    Antes se instanciaba a nivel de modulo. Como urls.py importa este
+    archivo, `genai.Client()` corria en cada arranque y, sin GEMINI_API_KEY
+    configurada, tiraba ValueError y el proyecto entero no levantaba.
+    """
+    return genai.Client()
 
 def extraer_detalles_bloque(texto_bloque):
     """Extrae absolutamente TODAS las tecnologías y experiencias encontradas en la sección."""
@@ -58,7 +65,7 @@ def extraer_detalles_bloque(texto_bloque):
     {texto_bloque}
     """
     
-    response = client.models.generate_content(
+    response = get_genai_client().models.generate_content(
         model='gemini-3.5-flash',
         contents=prompt,
         config=types.GenerateContentConfig(
@@ -101,7 +108,7 @@ def consolidar_y_evaluar_cv(lista_habilidades_totales):
     {json.dumps(lista_habilidades_totales, ensure_ascii=False, indent=2)}
     """
 
-    response = client.models.generate_content(
+    response = get_genai_client().models.generate_content(
         model='gemini-3.5-flash',
         contents=prompt,
         config=types.GenerateContentConfig(
