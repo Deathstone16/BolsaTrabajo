@@ -1,7 +1,8 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from .models import Oferta
-from categorias.models import Categoria, Habilidad
+from categorias.models import Categoria, Habilidad, TipoOferta
 
 INPUT_CLASS = "w-full px-4 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/30"
 
@@ -73,5 +74,40 @@ class HabilidadForm(forms.ModelForm):
         nombre = self.cleaned_data.get("nombre")
         if nombre and len(nombre) < 2:
             raise forms.ValidationError("El nombre debe tener al menos 2 caracteres.")
+        return nombre
+
+    def validate_unique(self):
+        """Valida la unicidad (nombre, tipo_oferta) como error de formulario.
+
+        Django excluye de la validacion de unicidad los campos que no estan
+        en el form. Como `tipo_oferta` lo asigna la URL y no el usuario,
+        quedaria fuera y la restriccion recien saltaria en la base como
+        IntegrityError. Lo sacamos de las exclusiones para que el duplicado
+        se muestre como error de campo.
+        """
+        exclude = self._get_validation_exclusions()
+        exclude.discard("tipo_oferta")
+        try:
+            self.instance.validate_unique(exclude=exclude)
+        except ValidationError as e:
+            self._update_errors(e)
+
+
+
+class TipoOfertaForm(forms.ModelForm):
+    class Meta:
+        model = TipoOferta
+        fields = ["nombre", "descripcion"]
+        labels = {"nombre": "Nombre"}
+        widgets = {
+            "nombre": forms.TextInput(
+                attrs={"class": INPUT_CLASS, "placeholder": "Ej. Python"}
+            ),
+        }
+
+    def clean_nombre(self):
+        nombre = self.cleaned_data.get("nombre")
+        if nombre and len(nombre) < 3:
+            raise forms.ValidationError("El nombre debe tener al menos 3 caracteres.")
         return nombre
 

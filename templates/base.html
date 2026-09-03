@@ -26,7 +26,7 @@
         <div class="hidden md:flex items-center gap-8">
           <a href="/" class="text-muted-foreground hover:text-foreground transition-colors">Inicio</a>
           {% if not user.is_authenticated or user.postulante %}
-            <a href="buscar-empleo.html" class="text-muted-foreground hover:text-foreground transition-colors">Buscar empleo</a>
+            <a href="{% url 'buscar_empleo' %}" class="text-muted-foreground hover:text-foreground transition-colors">Buscar empleo</a>
           {% endif %}
           {% if user.is_authenticated and user.oferente and user.oferente.estado_obj.puede_publicar %}
             <a href="{% url 'dashboard_empresa' %}" class="text-muted-foreground hover:text-foreground transition-colors">Mi panel</a>

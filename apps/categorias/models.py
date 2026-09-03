@@ -33,13 +33,13 @@ class Categoria(models.Model):
 
 
 class Habilidad(models.Model):
-    """Habilidad (blanda o dura) asociada a una categoría."""
+    """Habilidad (blanda o dura) asociada a un tipo de oferta."""
     HABILIDAD_CHOICES = [
         ('B', 'Blandas'),
         ('D', 'Duras'),
     ]
 
-    categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
+    
     tipo_oferta = models.ForeignKey(
         TipoOferta, null=True, blank=True, on_delete=models.SET_NULL
     )
@@ -49,7 +49,7 @@ class Habilidad(models.Model):
     class Meta:
         verbose_name = "Habilidad"
         verbose_name_plural = "Habilidades"
-        unique_together = ('nombre', 'categoria')
+        unique_together = ('nombre', 'tipo_oferta')
 
     def __str__(self):
-        return f"{self.nombre} ({self.categoria.nombre})"
+        return f"{self.nombre} ({self.tipo_oferta.nombre})"

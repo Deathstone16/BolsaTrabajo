@@ -4,7 +4,6 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from dataclasses import asdict
-
 from cursos.models import Curso
 from categorias.models import Categoria, TipoOferta, Habilidad
 from cursos.forms import CursoForm, CategoriaForm
@@ -14,11 +13,12 @@ from usuarios import services as usuarios_service
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from ofertas.models import Oferta
-from ofertas.forms import HabilidadForm
+from ofertas.forms import HabilidadForm, TipoOfertaForm
 from ofertas import services as ofertas_services
 from ofertas.dtos import OfertaDTO
 from .forms import RechazarEmpresaForm
 from . import services
+
 
 
 def es_staff(user):
@@ -326,9 +326,8 @@ def listar_habilidades(request, tipo_id):
 def crear_habilidad(request, tipo_id):
     tipo = get_object_or_404(TipoOferta, id=tipo_id)
     if request.method == 'POST':
-        form = HabilidadForm(request.POST)
+        form = HabilidadForm(request.POST, instance=Habilidad(tipo_oferta=tipo))
         if form.is_valid():
-            form.instance.tipo_oferta = tipo
             form.save()
             messages.success(request, 'Habilidad creada correctamente')
             return redirect('mod_listar_habilidades', tipo_id=tipo.id)

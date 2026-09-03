@@ -10,6 +10,7 @@ from cursos.models import Curso, Categoria
 from usuarios.models import Oferente
 from ofertas.models import Oferta
 from cursos import services as cursos_services
+from categorias.models import TipoOferta
 
 
 # ============================================================
@@ -91,8 +92,8 @@ def finalizar_oferta(pk):
 # TODO: Implementar cuando TipoOferta esté migrado como modelo
 # Bloqueado por: falta crear el modelo en ofertas/models.py y generar migración
 #
-# def listar_tipos_oferta_contexto():
-#     return {'tipos': TipoOferta.objects.all()}
+def listar_tipos_oferta_contexto():
+    return {'tipos': TipoOferta.objects.all()}
 #
-# def obtener_tipo_oferta(tipo_id):
-#     return get_object_or_404(TipoOferta, id=tipo_id)
+def obtener_tipo_oferta(tipo_id):
+    return get_object_or_404(TipoOferta, id=tipo_id)
