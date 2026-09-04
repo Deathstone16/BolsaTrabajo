@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="flex-1 py-12 px-4 bg-muted min-h-screen">
+  <div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-2xl shadow-sm border border-border p-8">
+
+      <div class="mb-8">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-12 h-12 bg-secondary/20 rounded-xl flex items-center justify-center">
+            <i data-lucide="building2" class="w-6 h-6 text-secondary-foreground"></i>
+          </div>
+          <h1 class="text-3xl font-medium">Editar perfil de empresa</h1>
+        </div>
+        <p class="text-muted-foreground">Actualizá los datos de tu empresa. Esta información es la que ven los postulantes.</p>
+      </div>
+
+      {% if oferente.estado_validacion == 'rechazado' %}
+      <div class="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-lg mb-6">
+        <p class="font-medium mb-1">Tu perfil fue rechazado</p>
+        {% if oferente.motivo_rechazo %}
+          <p class="text-sm">Motivo: {{ oferente.motivo_rechazo }}</p>
+        {% endif %}
+        <p class="text-sm mt-1">Al guardar los cambios, el perfil vuelve a enviarse a revisión.</p>
+      </div>
+      {% endif %}
+
+      {{ form.non_field_errors }}
+
+      {% if form.errors %}
+      <div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6">
+        <p class="font-medium mb-1">Corregí los siguientes errores:</p>
+        <ul class="list-disc pl-5 text-sm">
+          {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+              <li>{{ field|capfirst }}: {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'editar_perfil_empresa' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="space-y-4">
+          <h3 class="font-medium flex items-center gap-2">
+            <i data-lucide="building2" class="w-5 h-5 text-primary"></i>Datos de la empresa
+          </h3>
+
+          <div class="space-y-2">
+            <label class="block text-sm font-medium">Nombre de la empresa</label>
+            <input type="text" name="nombre_empresa" value="{{ form.nombre_empresa.value|default:'' }}"
+                   placeholder="Ej. Acme SA" maxlength="200"
+                   class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" required>
+            {% if form.nombre_empresa.errors %}<p class="text-sm text-red-500">{{ form.nombre_empresa.errors.0 }}</p>{% endif %}
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-sm font-medium">CUIT</label>
+            <input type="text" name="cuit" value="{{ form.cuit.value|default:'' }}"
+                   placeholder="Ej. 30-12345678-9" maxlength="13"
+                   class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" required>
+            {% if form.cuit.errors %}<p class="text-sm text-red-500">{{ form.cuit.errors.0 }}</p>{% endif %}
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-sm font-medium">Descripción</label>
+            <textarea name="descripcion" rows="4" placeholder="Contá a qué se dedica tu empresa"
+                      class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">{{ form.descripcion.value|default:'' }}</textarea>
+            {% if form.descripcion.errors %}<p class="text-sm text-red-500">{{ form.descripcion.errors.0 }}</p>{% endif %}
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label class="block text-sm font-medium">Industria</label>
+              <input type="text" name="industria" value="{{ form.industria.value|default:'' }}"
+                     placeholder="Ej. Tecnología" maxlength="100"
+                     class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+              {% if form.industria.errors %}<p class="text-sm text-red-500">{{ form.industria.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div class="space-y-2">
+              <label class="block text-sm font-medium">Tamaño de la empresa</label>
+              <select name="tamano_empresa"
+                      class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                <option value="">Seleccionar...</option>
+                {% for valor, etiqueta in form.fields.tamano_empresa.choices %}
+                  {% if valor %}
+                    <option value="{{ valor }}" {% if form.tamano_empresa.value == valor %}selected{% endif %}>{{ etiqueta }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+              {% if form.tamano_empresa.errors %}<p class="text-sm text-red-500">{{ form.tamano_empresa.errors.0 }}</p>{% endif %}
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label class="block text-sm font-medium">Ubicación</label>
+              <input type="text" name="ubicacion" value="{{ form.ubicacion.value|default:'' }}"
+                     placeholder="Ej. La Plata, Buenos Aires" maxlength="200"
+                     class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+              {% if form.ubicacion.errors %}<p class="text-sm text-red-500">{{ form.ubicacion.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div class="space-y-2">
+              <label class="block text-sm font-medium">Año de fundación</label>
+              <input type="number" name="anio_fundacion" value="{{ form.anio_fundacion.value|default:'' }}"
+                     placeholder="Ej. 2015"
+                     class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+              {% if form.anio_fundacion.errors %}<p class="text-sm text-red-500">{{ form.anio_fundacion.errors.0 }}</p>{% endif %}
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label class="block text-sm font-medium">Sitio web</label>
+              <input type="url" name="sitio_web" value="{{ form.sitio_web.value|default:'' }}"
+                     placeholder="https://www.ejemplo.com" maxlength="300"
+                     class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+              {% if form.sitio_web.errors %}<p class="text-sm text-red-500">{{ form.sitio_web.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div class="space-y-2">
+              <label class="block text-sm font-medium">Teléfono</label>
+              <input type="text" name="telefono" value="{{ form.telefono.value|default:'' }}"
+                     placeholder="Ej. 2215551234" maxlength="50"
+                     class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+              {% if form.telefono.errors %}<p class="text-sm text-red-500">{{ form.telefono.errors.0 }}</p>{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-4 mt-8">
+          <h3 class="font-medium flex items-center gap-2">
+            <i data-lucide="image" class="w-5 h-5 text-primary"></i>Imágenes
+          </h3>
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label class="block text-sm font-medium">Logo</label>
+              {% if oferente.logo %}
+                <img src="{{ oferente.logo.url }}" alt="Logo actual" class="w-20 h-20 object-cover rounded-lg border border-border">
+              {% endif %}
+              <input type="file" name="logo" accept="image/*"
+                     class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+              {% if form.logo.errors %}<p class="text-sm text-red-500">{{ form.logo.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div class="space-y-2">
+              <label class="block text-sm font-medium">Banner</label>
+              {% if oferente.banner %}
+                <img src="{{ oferente.banner.url }}" alt="Banner actual" class="w-full h-20 object-cover rounded-lg border border-border">
+              {% endif %}
+              <input type="file" name="banner" accept="image/*"
+                     class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+              {% if form.banner.errors %}<p class="text-sm text-red-500">{{ form.banner.errors.0 }}</p>{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 mt-8">
+          <button type="submit"
+                  class="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+            Guardar cambios
+          </button>
+          <a href="{% url 'dashboard_empresa' %}"
+             class="px-6 py-2.5 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors">
+            Cancelar
+          </a>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
