@@ -6,7 +6,10 @@ def home(request):
         {"id": 2, "title": "Analista de Datos", "company": "DataMetrics", "location": "CABA", "modality": "Híbrido"},
         {"id": 3, "title": "Diseñador UX/UI", "company": "CreativeLab", "location": "La Plata", "modality": "Presencial"},
     ]
-    IAA()
+    # IAA() queda desactivada: abre un "cv_extenso.pdf" hardcodeado que no
+    # existe en el repo, y al llamarse desde home() tiraba FileNotFoundError
+    # en cada visita a "/". Volver a activarla cuando reciba la ruta del CV
+    # por parametro.
     return render(request, 'home.html', {'featured_jobs': featured_jobs})
 
 
