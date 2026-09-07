@@ -43,7 +43,7 @@ def listar_categorias_contexto():
 # ============================================================
 
 def listar_empresas_contexto():
-    empresas = Oferente.objects.all()
+    empresas = Oferente.objects.select_related('usuario').order_by('-usuario__date_joined')
     return {
         'empresas': empresas,
         'total': empresas.count(),
@@ -59,20 +59,32 @@ def obtener_empresa(pk):
 # ============================================================
 
 def listar_ofertas_contexto(estado=''):
-    ofertas = Oferta.objects.all().select_related(
-        'empresa__oferente', 'categoria'
-    )
+    # Base queryset optimizado
+    base_qs = Oferta.objects.select_related('empresa__oferente', 'categoria', 'tipo_oferta').order_by('-fecha_publicacion')
+    
+    # Stats globales (SIN filtro) - variables que el template YA usa
+    total = Oferta.objects.count()
+    pendientes = Oferta.objects.filter(estado='pendiente').count()
+    aprobadas = Oferta.objects.filter(estado='activa').count()
+    
+    # Aplicar filtro solo a la lista
     if estado:
-        ofertas = ofertas.filter(estado=estado)
+        ofertas = base_qs.filter(estado=estado)
+    else:
+        ofertas = base_qs
+    
     return {
         'ofertas': ofertas,
         'filtro_actual': estado,
+        'total': total,
+        'pendientes': pendientes,
+        'aprobadas': aprobadas,
     }
 
 
 def obtener_oferta(pk):
     return get_object_or_404(
-        Oferta.objects.select_select_related('empresa__oferente', 'categoria'),
+        Oferta.objects.select_related('empresa__oferente', 'categoria'),
         pk=pk,
     )
 
