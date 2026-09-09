@@ -47,7 +47,7 @@ def extraer_texto_por_bloques(ruta_pdf, paginas_por_bloque=5):
 
 import json
 from google import genai
-from google.genai import types
+from google.genai  import types
 
 def get_genai_client():
     """Crea el cliente de Gemini en el momento de usarlo.
