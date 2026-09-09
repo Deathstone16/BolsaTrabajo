@@ -93,8 +93,8 @@ def aprobar_oferta(pk):
     obtener_oferta(pk).aprobar()
 
 
-def rechazar_oferta(pk):
-    obtener_oferta(pk).rechazar()
+def rechazar_oferta(pk, motivo=None):
+    obtener_oferta(pk).rechazar(motivo=motivo)
 
 
 def finalizar_oferta(pk):

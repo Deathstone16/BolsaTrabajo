@@ -228,8 +228,14 @@ def rechazar_oferta(request, pk):
             {'success': False, 'error': 'Método no permitido'},
             status=405
         )
+    motivo = request.POST.get('motivo', '').strip()
+    if not motivo: 
+        return JsonResponse(
+            {'success': False, 'error': 'Se requiere un motivo para rechazar la oferta'},
+            status=400
+        )
     try:
-        services.rechazar_oferta(pk)
+        services.rechazar_oferta(pk, motivo=motivo)
         return JsonResponse({'success': True})
     except ValueError as e:
         return JsonResponse(
