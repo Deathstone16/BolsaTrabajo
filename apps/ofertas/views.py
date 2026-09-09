@@ -66,7 +66,9 @@ def editar_oferta(request, pk):
     if request.method == 'POST':
         form = OfertaForm(request.POST, instance=oferta)
         if form.is_valid():
-            form.save()
+            oferta = form.save(commit=False)
+            oferta.estado = 'pendiente'
+            oferta.save()
             es_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
             if es_ajax:
                 return JsonResponse({'success': True})
