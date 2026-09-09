@@ -9,13 +9,13 @@ INPUT_CLASS = "w-full px-4 py-2 rounded-lg border border-border bg-input-backgro
 
 class OfertaForm(forms.ModelForm):
     tipo_oferta = forms.ModelChoiceField(
-        queryset=Categoria.objects.none(),
+        queryset=TipoOferta.objects.all(),
         required=False,
         empty_label="Seleccionar tipo de oferta",
     )
     categoria = forms.ModelChoiceField(
         queryset=Categoria.objects.all(),
-        required=False,
+        required=True,
         empty_label="Seleccionar categoría",
     )
 
