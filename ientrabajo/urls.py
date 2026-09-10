@@ -29,6 +29,6 @@ urlpatterns = [
     path('ofertas/', include('ofertas.urls')),
 
     #url solo para probar ia hasta que este completa la pantalla
-    path('prueba/', views.ia, name='ia')
+    path    ('prueba/', views.ia, name='ia')
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
