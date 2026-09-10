@@ -69,11 +69,14 @@ def registrar_postulante(email, password, first_name, last_name):
 def registrar_oferente(email, password, nombre_empresa, cuit):
     """Registra un nuevo usuario y le crea un perfil de Oferente (empresa)."""
     user = Usuario.objects.create_user(email=email, password=password)
-    Oferente.objects.create(
-        usuario=user,
-        nombre_empresa=nombre_empresa,
-        cuit=cuit
-    )
+    try:
+        Oferente.objects.create(
+            usuario=user,
+            nombre_empresa=nombre_empresa,
+            cuit=cuit
+        )
+    except Exception as a:
+        print()
     return user
 
 

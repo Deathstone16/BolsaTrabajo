@@ -10,6 +10,7 @@ from cursos.models import Curso, Categoria
 from usuarios.models import Oferente
 from ofertas.models import Oferta
 from cursos import services as cursos_services
+from categorias.models import TipoOferta
 
 
 # ============================================================
@@ -42,7 +43,7 @@ def listar_categorias_contexto():
 # ============================================================
 
 def listar_empresas_contexto():
-    empresas = Oferente.objects.pendientes()
+    empresas = Oferente.objects.select_related('usuario').order_by('-usuario__date_joined')
     return {
         'empresas': empresas,
         'total': empresas.count(),
@@ -58,20 +59,32 @@ def obtener_empresa(pk):
 # ============================================================
 
 def listar_ofertas_contexto(estado=''):
-    ofertas = Oferta.objects.all().select_related(
-        'empresa__oferente', 'categoria'
-    )
+    # Base queryset optimizado
+    base_qs = Oferta.objects.select_related('empresa__oferente', 'categoria', 'tipo_oferta').order_by('-fecha_publicacion')
+    
+    # Stats globales (SIN filtro) - variables que el template YA usa
+    total = Oferta.objects.count()
+    pendientes = Oferta.objects.filter(estado='pendiente').count()
+    aprobadas = Oferta.objects.filter(estado='activa').count()
+    
+    # Aplicar filtro solo a la lista
     if estado:
-        ofertas = ofertas.filter(estado=estado)
+        ofertas = base_qs.filter(estado=estado)
+    else:
+        ofertas = base_qs
+    
     return {
         'ofertas': ofertas,
         'filtro_actual': estado,
+        'total': total,
+        'pendientes': pendientes,
+        'aprobadas': aprobadas,
     }
 
 
 def obtener_oferta(pk):
     return get_object_or_404(
-        Oferta.objects.select_select_related('empresa__oferente', 'categoria'),
+        Oferta.objects.select_related('empresa__oferente', 'categoria'),
         pk=pk,
     )
 
@@ -80,8 +93,8 @@ def aprobar_oferta(pk):
     obtener_oferta(pk).aprobar()
 
 
-def rechazar_oferta(pk):
-    obtener_oferta(pk).rechazar()
+def rechazar_oferta(pk, motivo=None):
+    obtener_oferta(pk).rechazar(motivo=motivo)
 
 
 def finalizar_oferta(pk):
@@ -91,8 +104,8 @@ def finalizar_oferta(pk):
 # TODO: Implementar cuando TipoOferta esté migrado como modelo
 # Bloqueado por: falta crear el modelo en ofertas/models.py y generar migración
 #
-# def listar_tipos_oferta_contexto():
-#     return {'tipos': TipoOferta.objects.all()}
+def listar_tipos_oferta_contexto():
+    return {'tipos': TipoOferta.objects.all()}
 #
-# def obtener_tipo_oferta(tipo_id):
-#     return get_object_or_404(TipoOferta, id=tipo_id)
+def obtener_tipo_oferta(tipo_id):
+    return get_object_or_404(TipoOferta, id=tipo_id)

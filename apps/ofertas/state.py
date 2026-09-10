@@ -40,7 +40,8 @@ class Activa(EstadoOferta):
         raise ValueError("No se puede rechazar una oferta activa")
     def finalizar(self, oferta):
         oferta.estado = 'finalizada'; oferta.save()
-    def puede_editarse(self): return False
+    def puede_editarse(self): return True # era False
+
 
 class Finalizada(EstadoOferta):
     """Estado de oferta finalizada. Estado terminal, sin transiciones."""

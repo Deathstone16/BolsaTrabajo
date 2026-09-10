@@ -88,8 +88,13 @@ class Oferta(models.Model):
         """Aprueba la oferta (pendiente → activa). Lanza ValueError si la transición es inválida."""
         self.get_state().aprobar(self)
 
-    def rechazar(self):
-        """Rechaza la oferta (pendiente → rechazada). Lanza ValueError si la transición es inválida."""
+    def rechazar(self, motivo=None):
+        """Rechaza la empresa guardando el motivo del rechazo.
+
+        Args:
+            motivo (str, optional): Explicación del motivo.
+        """
+        self.motivo_rechazo = motivo
         self.get_state().rechazar(self)
 
     def finalizar(self):

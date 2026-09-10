@@ -11,31 +11,53 @@
   <div class="bg-white rounded-xl shadow-sm border border-border p-6">
     <form method="POST" enctype="multipart/form-data" class="space-y-4">
       {% csrf_token %}
-    {% for field in form %}
-    <div class="space-y-1">
-        <label class="text-sm font-medium">{{ field.label }}</label>
-        {% if field.name == 'imagen' %}
-    <div class="flex items-center gap-3">
-        <label for="imagen-input"
-            class="cursor-pointer px-4 py-2 bg-muted text-foreground rounded-lg border border-border hover:bg-muted/80 transition-colors text-sm">
-            Elegir imagen
-        </label>
-        <span id="imagen-nombre" class="text-sm text-muted-foreground">Ninguna imagen seleccionada</span>
-    </div>
-    {{ field }}
-    {% if field.errors %}
-        <p class="text-destructive text-xs mt-1">La imagen es obligatoria.</p>
-    {% endif %}
-{% else %}
-    {{ field }}
-    {% if field.errors %}
-        <p class="text-destructive text-xs">{{ field.errors }}</p>
-    {% endif %}
-{% endif %}
-    </div>
-    {% endfor %}
       
-
+      <!-- 🔧 FIX 1: Agregar non_field_errors (ERROR GLOBALES) -->
+      {% if form.non_field_errors %}
+      <div class="mb-4 p-3 bg-red-100 border border-red-200 rounded-lg text-red-700 text-sm">
+        {% for error in form.non_field_errors %}
+          {{ error }}
+        {% endfor %}
+      </div>
+      {% endif %}
+      
+      {% for field in form %}
+      <div class="space-y-1">
+          <label class="text-sm font-medium">{{ field.label }}</label>
+          {% if field.name == 'imagen' %}
+      <!-- 🔧 FIX 2: Renderizar widget completo nativo (sin 'hidden') + JS para nombre archivo -->
+      <div class="flex items-center gap-3">
+        {{ field }}
+        <span id="imagen-nombre" class="text-sm text-muted-foreground">Ninguna imagen seleccionada</span>
+      </div>
+      <script>
+        document.querySelector('input[type="file"][name="imagen"]').addEventListener('change', function() {
+          const nombre = this.files[0] ? this.files[0].name : 'Ninguna imagen seleccionada';
+          document.getElementById('imagen-nombre').textContent = nombre;
+        });
+      </script>
+      {% if field.errors %}
+          <!-- 🔧 FIX 3: Errores de campo como lista individual -->
+          <div class="text-destructive text-xs mt-1 space-y-1">
+            {% for error in field.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+      {% endif %}
+      {% else %}
+      {{ field }}
+      {% if field.errors %}
+          <!-- 🔧 FIX 3: Errores de campo como lista individual -->
+          <div class="text-destructive text-xs mt-1 space-y-1">
+            {% for error in field.errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          </div>
+      {% endif %}
+      {% endif %}
+      </div>
+      {% endfor %}
+       
       <div class="flex gap-3 pt-4 border-t border-border">
         <button type="submit"
                 class="flex-1 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">
@@ -50,10 +72,4 @@
   </div>
 
 </div>
-<script>
-  document.getElementById('imagen-input').addEventListener('change', function() {
-    const nombre = this.files[0] ? this.files[0].name : 'Ninguna imagen seleccionada';
-    document.getElementById('imagen-nombre').textContent = nombre;
-  });
-</script>
 {% endblock %}

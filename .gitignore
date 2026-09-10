@@ -8,7 +8,7 @@
 __pycache__/
 local_settings.py
 
-
+*.pdf
 # If your build process includes running collectstatic, then you probably don't need or want to include staticfiles/
 # in your Git repository. Update and uncomment the following line accordingly.
 # <django-project-name>/staticfiles/
@@ -494,3 +494,5 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/django,python,node,linux,macos,windows,visualstudiocode
 db.sqlite3
 *.sqlite3
+# Claude Code (configuracion local, no se comparte)
+.claude/

@@ -50,9 +50,19 @@
           <td class="px-6 py-4 text-sm text-muted-foreground">{{ empresa.usuario.email }}</td>
           <td class="px-6 py-4 text-sm text-muted-foreground">{{ empresa.industria|default:"—" }}</td>
           <td class="px-6 py-4">
-            <span class="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
-              Pendiente
-            </span>
+            {% if empresa.estado_validacion == 'pendiente' %}
+  <span class="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+    Pendiente
+  </span>
+{% elif empresa.estado_validacion == 'aprobado' %}
+  <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+    Aprobada
+  </span>
+{% else %}
+  <span class="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+    Rechazada
+  </span>
+{% endif %}
           </td>
           <td class="px-6 py-4">
             <a href="{% url 'mod_detalle_empresa' empresa.pk %}"

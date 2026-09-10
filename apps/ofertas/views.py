@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.urls import reverse
 from .forms import OfertaForm
@@ -66,7 +66,9 @@ def editar_oferta(request, pk):
     if request.method == 'POST':
         form = OfertaForm(request.POST, instance=oferta)
         if form.is_valid():
-            form.save()
+            oferta = form.save(commit=False)
+            oferta.estado = 'pendiente'
+            oferta.save()
             es_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
             if es_ajax:
                 return JsonResponse({'success': True})
