@@ -66,7 +66,7 @@
             </div>
             
             <!-- Logout button (separado) -->
-            <form method="post" action="{% url 'logout' %}">
+            <form method="post" action="{% url 'logout' %}" id="form-logout">
               {% csrf_token %}
               <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors">
                 <i data-lucide="log-out" class="w-4 h-4"></i>
@@ -107,6 +107,64 @@
   </footer>
 
   <script>lucide.createIcons();</script>
+  <script>
+    // Confirmacion antes de cerrar sesion.
+    // Intercepta el submit del formulario y lo reenvia solo si el usuario
+    // confirma. Sin JS el formulario sigue funcionando como antes.
+    (function () {
+      var form = document.getElementById('form-logout');
+      if (!form) return;
+
+      var confirmado = false;
+
+      form.addEventListener('submit', function (e) {
+        if (confirmado) return;
+        e.preventDefault();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4';
+
+        var modal = document.createElement('div');
+        modal.className = 'bg-white rounded-2xl shadow-xl max-w-sm w-full p-6';
+        modal.onclick = function (ev) { ev.stopPropagation(); };
+        modal.innerHTML =
+          '<div class="text-center mb-4">' +
+            '<div class="w-12 h-12 mx-auto mb-3 rounded-full bg-muted flex items-center justify-center">' +
+              '<i data-lucide="log-out" class="w-6 h-6 text-foreground"></i>' +
+            '</div>' +
+            '<h3 class="text-lg font-medium mb-1">¿Cerrar sesión?</h3>' +
+            '<p class="text-sm text-muted-foreground">Vas a tener que volver a ingresar con tu email y contraseña.</p>' +
+          '</div>' +
+          '<div class="flex gap-3">' +
+            '<button id="btn-cancelar-logout" type="button" class="flex-1 px-4 py-2.5 border border-border rounded-lg text-sm font-medium hover:bg-muted transition-colors">Cancelar</button>' +
+            '<button id="btn-confirmar-logout" type="button" class="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 transition-colors">Cerrar sesión</button>' +
+          '</div>';
+
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        function cerrar() {
+          overlay.remove();
+          document.removeEventListener('keydown', onTecla);
+        }
+        function onTecla(ev) {
+          if (ev.key === 'Escape') cerrar();
+        }
+
+        document.addEventListener('keydown', onTecla);
+        overlay.onclick = cerrar;
+        document.getElementById('btn-cancelar-logout').onclick = cerrar;
+        document.getElementById('btn-confirmar-logout').onclick = function () {
+          confirmado = true;
+          cerrar();
+          form.submit();
+        };
+        document.getElementById('btn-confirmar-logout').focus();
+      });
+    })();
+  </script>
+
   {% block extra_js %}{% endblock %}
 </body>
 </html>
