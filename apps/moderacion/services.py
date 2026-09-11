@@ -10,7 +10,7 @@ from cursos.models import Curso, Categoria
 from usuarios.models import Oferente
 from ofertas.models import Oferta
 from cursos import services as cursos_services
-from categorias.models import TipoOferta
+
 
 
 # ============================================================
@@ -60,7 +60,7 @@ def obtener_empresa(pk):
 
 def listar_ofertas_contexto(estado=''):
     # Base queryset optimizado
-    base_qs = Oferta.objects.select_related('empresa__oferente', 'categoria', 'tipo_oferta').order_by('-fecha_publicacion')
+    base_qs = Oferta.objects.select_related('empresa__oferente', 'categoria').order_by('-fecha_publicacion')
     
     # Stats globales (SIN filtro) - variables que el template YA usa
     total = Oferta.objects.count()
@@ -101,11 +101,3 @@ def finalizar_oferta(pk):
     obtener_oferta(pk).finalizar()
 
 
-# TODO: Implementar cuando TipoOferta esté migrado como modelo
-# Bloqueado por: falta crear el modelo en ofertas/models.py y generar migración
-#
-def listar_tipos_oferta_contexto():
-    return {'tipos': TipoOferta.objects.all()}
-#
-def obtener_tipo_oferta(tipo_id):
-    return get_object_or_404(TipoOferta, id=tipo_id)

@@ -28,6 +28,10 @@
         <tr class="border-b border-border hover:bg-muted/50 transition-colors">
           <td class="py-3 px-4">{{ categoria.nombre }}</td>
           <td class="py-3 px-4 flex gap-2">
+            <a href="{% url 'mod_listar_habilidades' categoria.id %}"
+               class="px-3 py-1 bg-secondary/20 text-secondary-foreground rounded-lg hover:bg-secondary/30 transition-colors text-xs">
+              Habilidades
+            </a>
             <a href="{% url 'mod_modificar_categoria' categoria.id %}"
                class="px-3 py-1 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-xs">
               Editar

@@ -2,17 +2,13 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from .models import Oferta
-from categorias.models import Categoria, Habilidad, TipoOferta
+from categorias.models import Categoria, Habilidad
 
 INPUT_CLASS = "w-full px-4 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/30"
 
 
 class OfertaForm(forms.ModelForm):
-    tipo_oferta = forms.ModelChoiceField(
-        queryset=TipoOferta.objects.all(),
-        required=False,
-        empty_label="Seleccionar tipo de oferta",
-    )
+    
     categoria = forms.ModelChoiceField(
         queryset=Categoria.objects.all(),
         required=True,
@@ -24,7 +20,6 @@ class OfertaForm(forms.ModelForm):
         fields = [
             "titulo",
             "nombre_puesto",
-            "tipo_oferta",
             "categoria",
             "ubicacion",
             "modalidad",
@@ -86,7 +81,7 @@ class HabilidadForm(forms.ModelForm):
         se muestre como error de campo.
         """
         exclude = self._get_validation_exclusions()
-        exclude.discard("tipo_oferta")
+        exclude.discard("categoria")  
         try:
             self.instance.validate_unique(exclude=exclude)
         except ValidationError as e:
@@ -94,20 +89,4 @@ class HabilidadForm(forms.ModelForm):
 
 
 
-class TipoOfertaForm(forms.ModelForm):
-    class Meta:
-        model = TipoOferta
-        fields = ["nombre", "descripcion"]
-        labels = {"nombre": "Nombre"}
-        widgets = {
-            "nombre": forms.TextInput(
-                attrs={"class": INPUT_CLASS, "placeholder": "Ej. Python"}
-            ),
-        }
-
-    def clean_nombre(self):
-        nombre = self.cleaned_data.get("nombre")
-        if nombre and len(nombre) < 3:
-            raise forms.ValidationError("El nombre debe tener al menos 3 caracteres.")
-        return nombre
 

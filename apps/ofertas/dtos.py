@@ -22,14 +22,12 @@ class OfertaDTO:
     titulo: str
     nombre_puesto: str
     categoria: Optional[int]
-    tipo_oferta: Optional[int]
-    tipo_oferta_nombre: str
     ubicacion: str
     modalidad: str
     modalidad_display: str
     descripcion: str
     habilidades_requeridas: str
-    experiencia_requerida: int
+    experiencia_requerida: str
     nivel_educativo: str
     nivel_educativo_display: str
     es_confidencial: bool

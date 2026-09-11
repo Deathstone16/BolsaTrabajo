@@ -9,7 +9,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from .state import ESTADOS
-from categorias.models import Categoria, TipoOferta
+from categorias.models import Categoria
 
 
 
@@ -55,7 +55,6 @@ class Oferta(models.Model):
     
     empresa = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
-    tipo_oferta = models.ForeignKey(TipoOferta, null=True, blank=True, on_delete=models.SET_NULL)
     titulo = models.CharField(max_length=100)
     nombre_puesto = models.CharField(max_length=150)
     ubicacion = models.CharField(max_length=100)

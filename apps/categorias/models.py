@@ -8,17 +8,6 @@ y ``Habilidad`` para las competencias requeridas.
 from django.db import models
 
 
-class TipoOferta(models.Model):
-    nombre = models.CharField(max_length=100, unique=True)
-    descripcion = models.TextField(blank=True, null=True)
-
-    class Meta:
-        verbose_name = "Tipo de Oferta"
-        verbose_name_plural = "Tipos de Ofertas"
-
-    def __str__(self):
-        return self.nombre
-
 
 class Categoria(models.Model):
     """Categoría para clasificar ofertas laborales y cursos."""
@@ -40,16 +29,14 @@ class Habilidad(models.Model):
     ]
 
     
-    tipo_oferta = models.ForeignKey(
-        TipoOferta, null=True, blank=True, on_delete=models.SET_NULL
-    )
+    categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
     nombre = models.CharField(max_length=100)
     tipo_habilidad = models.CharField(max_length=1, choices=HABILIDAD_CHOICES, default='D')
 
     class Meta:
         verbose_name = "Habilidad"
         verbose_name_plural = "Habilidades"
-        unique_together = ('nombre', 'tipo_oferta')
+        unique_together = ('nombre', 'categoria')
 
     def __str__(self):
-        return f"{self.nombre} ({self.tipo_oferta.nombre})"
+        return f"{self.nombre} ({self.categoria.nombre})"

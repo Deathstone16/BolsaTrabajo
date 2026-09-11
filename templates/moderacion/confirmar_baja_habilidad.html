@@ -11,7 +11,7 @@
 
     <h1 class="text-2xl font-medium">Eliminar Habilidad</h1>
     <p class="text-muted-foreground">
-      Estás por eliminar la habilidad <b>{{ habilidad.nombre }}</b> del tipo <b>{{ tipo.nombre }}</b>.
+      Estás por eliminar la habilidad <b>{{ habilidad.nombre }}</b> de la categoría <b>{{ habilidad.categoria.nombre }}</b>.
       Esta acción no se puede deshacer.
     </p>
 
@@ -23,7 +23,7 @@
           Confirmar eliminación
         </button>
       </form>
-      <a href="{% url 'mod_listar_habilidades' tipo.id %}"
+      <a href="{% url 'mod_listar_habilidades' habilidad.categoria_id %}"
          class="flex-1 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors text-center">
         Cancelar
       </a>
