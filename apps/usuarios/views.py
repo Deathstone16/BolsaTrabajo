@@ -14,10 +14,9 @@ from .forms import (
     SetPasswordForm,
     CargaCVForm,
 )
-from .decorators import postulante_required, oferente_required
+from .decorators import postulante_required
 from .models import Oferente
 from . import services
-from django.views.decorators.http import require_POST
 
 
 #vistas

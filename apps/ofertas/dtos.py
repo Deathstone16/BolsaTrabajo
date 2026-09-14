@@ -5,7 +5,7 @@ Define ``OfertaDTO`` como dataclass para exponer datos de una oferta
 a endpoints JSON sin exponer el modelo directamente.
 """
 
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from typing import Optional
 
 
@@ -13,10 +13,9 @@ from typing import Optional
 class OfertaDTO:
     """Data Transfer Object para serializar una Oferta a JSON.
 
-    Se usa en el endpoint de detalle de oferta para exponeer
+    Se usa en el endpoint de detalle de oferta para exponer
     datos formateados al frontend sin exponer el modelo directamente.
     """
-    """Data Transfer Object para serializar Oferta a JSON."""
 
     id: int
     titulo: str

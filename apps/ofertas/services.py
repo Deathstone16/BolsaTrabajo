@@ -107,7 +107,6 @@ def crear_habilidad(form):
     return form.save()
 #
 def modificar_habilidad(habilidad_id, form):
-    habilidad = get_object_or_404(Habilidad, id=habilidad_id)
     return form.save()
 #
 def eliminar_habilidad(habilidad_id):

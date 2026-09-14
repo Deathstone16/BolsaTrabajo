@@ -72,16 +72,16 @@ class HabilidadForm(forms.ModelForm):
         return nombre
 
     def validate_unique(self):
-        """Valida la unicidad (nombre, tipo_oferta) como error de formulario.
+        """Valida la unicidad (nombre, categoria) como error de formulario.
 
         Django excluye de la validacion de unicidad los campos que no estan
-        en el form. Como `tipo_oferta` lo asigna la URL y no el usuario,
+        en el form. Como `categoria` la asigna la URL y no el usuario,
         quedaria fuera y la restriccion recien saltaria en la base como
-        IntegrityError. Lo sacamos de las exclusiones para que el duplicado
+        IntegrityError. La sacamos de las exclusiones para que el duplicado
         se muestre como error de campo.
         """
         exclude = self._get_validation_exclusions()
-        exclude.discard("categoria")  
+        exclude.discard("categoria")
         try:
             self.instance.validate_unique(exclude=exclude)
         except ValidationError as e:

@@ -34,13 +34,6 @@ def dar_de_baja_curso(curso_id):
     curso.activo= False
     curso.save()
 
-def modificar_curso(curso_id, datos):
-    curso= Curso.objects.get(id=curso_id)
-    curso.nombre = datos.get('nombre', curso.nombre)
-    curso.descripcion = datos.get('descripcion', curso.descripcion)
-    curso.save()
-    return curso
-
 def modificar_curso(curso_id, form):
     """Modifica un curso existente con los datos del formulario.
 
@@ -48,7 +41,6 @@ def modificar_curso(curso_id, form):
         curso_id (int): ID del curso a modificar.
         form: Formulario CursoForm con datos validados.
     """
-    curso = get_object_or_404(Curso, id=curso_id) 
     return form.save()
 
 def listar_categorias():
@@ -61,7 +53,6 @@ def crear_categoria(form):
 
 def modificar_categoria(categoria_id, form):
     """Modifica una categoría existente."""
-    categoria = get_object_or_404(Categoria, id=categoria_id)
     return form.save()
 
 def dar_de_baja_categoria(categoria_id):
@@ -84,7 +75,6 @@ def listar_cursos_con_resumen():
     Returns:
         tuple: (QuerySet de cursos, dict con keys total/presenciales/virtuales/hibridos).
     """
-    """Devuelve cursos activos + resumen de tipos."""
     cursos = Curso.objects.filter(activo=True)
     resumen = {
         'total': cursos.count(),

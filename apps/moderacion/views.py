@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
@@ -8,11 +7,7 @@ from cursos.models import Curso
 from categorias.models import Categoria, Habilidad
 from cursos.forms import CursoForm, CategoriaForm
 from cursos import services as cursos_services
-from usuarios.models import Oferente
 from usuarios import services as usuarios_service
-from django.contrib.auth.decorators import user_passes_test
-from django.contrib import messages
-from ofertas.models import Oferta
 from ofertas.forms import HabilidadForm
 from ofertas import services as ofertas_services
 from ofertas.dtos import OfertaDTO
@@ -146,13 +141,13 @@ def dar_de_baja_categoria(request, categoria_id):
 # EMPRESAS
 # ============================================================
 
-@staff_member_required
+@staff_required
 def listar_empresas(request):
     return render(request, 'moderacion/listar_empresas.html',
                   services.listar_empresas_contexto())
 
 
-@staff_member_required
+@staff_required
 def detalle_empresa(request, pk):
     empresa = services.obtener_empresa(pk)
     return render(request, 'moderacion/detalle_empresa.html', {
@@ -160,7 +155,7 @@ def detalle_empresa(request, pk):
     })
 
 
-@staff_member_required
+@staff_required
 def aprobar_empresa(request, pk):
     if request.method == 'POST':
         empresa = services.obtener_empresa(pk)
@@ -168,7 +163,7 @@ def aprobar_empresa(request, pk):
     return redirect('mod_listar_empresas')
 
 
-@staff_member_required
+@staff_required
 def rechazar_empresa(request, pk):
     empresa = services.obtener_empresa(pk)
     if request.method == 'POST':
