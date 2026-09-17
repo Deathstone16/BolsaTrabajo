@@ -1,0 +1,163 @@
+{% extends 'nueva_ui/base.html' %}
+
+{% block title %}{{ oferta.titulo }} · IEN Empleo{% endblock %}
+{% block description %}{{ oferta.descripcion|truncatechars:150 }}{% endblock %}
+
+{% block content %}
+<section class="bg-[#F8F3F0] pb-16">
+
+  <div class="relative overflow-hidden border-b border-[rgba(110,85,55,0.16)] bg-[#F8F3F0] pb-10 pt-10">
+    <div class="absolute inset-0 hero-dots opacity-30" aria-hidden="true"></div>
+    <div class="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <a href="{% url 'buscar_empleo_ui' %}" class="inline-flex items-center gap-2 text-sm text-[#6B645C] transition-colors hover:text-[#512DA8]">
+        <span data-icon="arrow-left" class="h-4 w-4"></span> Volver a las ofertas
+      </a>
+
+      <div class="mt-6 flex flex-wrap items-start justify-between gap-6">
+        <div class="flex items-center gap-5">
+          <div class="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-3xl bg-[#512DA8] text-lg font-bold text-white shadow-[0_16px_40px_-16px_rgba(81,45,168,0.5)]">
+            {% if oferta.es_confidencial or not oferta.empresa.oferente %}
+              IEN
+            {% elif oferta.empresa.oferente.logo %}
+              <img src="{{ oferta.empresa.oferente.logo.url }}" alt="{{ oferta.empresa.oferente.nombre_empresa }}" class="h-full w-full object-cover" />
+            {% else %}
+              {{ oferta.empresa.oferente.nombre_empresa|slice:":2"|upper }}
+            {% endif %}
+          </div>
+
+          <div>
+            <div class="flex flex-wrap items-center gap-3">
+              <h1 class="text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">{{ oferta.titulo }}</h1>
+              <span class="chip">Publicado el {{ oferta.fecha_publicacion|date:"d/m/Y" }}</span>
+            </div>
+            <p class="mt-2 flex flex-wrap items-center gap-2 text-[#6B645C]">
+              <span data-icon="building" class="h-4 w-4 text-[#512DA8]"></span>
+              {% if oferta.es_confidencial %}
+                Empresa confidencial
+              {% elif oferta.empresa.oferente %}
+                <a href="{% url 'perfil_oferente' oferta.empresa.oferente.pk %}" class="transition-colors hover:text-[#512DA8]">
+                  {{ oferta.empresa.oferente.nombre_empresa }}
+                </a>
+              {% endif %}
+              {% if oferta.nombre_puesto %}
+                <span class="text-[#6B645C]/50">·</span>
+                <span>{{ oferta.nombre_puesto }}</span>
+              {% endif %}
+            </p>
+          </div>
+        </div>
+
+        <button type="button" data-save="{{ oferta.pk }}" class="btn-ghost !py-2.5 text-sm">
+          <span data-icon="bookmark" class="h-4 w-4"></span> Guardar
+        </button>
+      </div>
+
+      <div class="mt-7 flex flex-wrap gap-2">
+        {% if oferta.ubicacion %}
+          <span class="chip"><span data-icon="map-pin" class="h-3 w-3"></span> {{ oferta.ubicacion }}</span>
+        {% endif %}
+        <span class="chip"><span data-icon="briefcase" class="h-3 w-3"></span> {{ oferta.get_modalidad_display }}</span>
+        <span class="chip"><span data-icon="clock" class="h-3 w-3"></span> {{ oferta.get_experiencia_requerida_display }}</span>
+        {% if oferta.nivel_educativo %}
+          <span class="chip"><span data-icon="graduation-cap" class="h-3 w-3"></span> {{ oferta.get_nivel_educativo_display }}</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="mx-auto mt-10 max-w-5xl px-4 sm:px-6 lg:px-8">
+    <div class="grid gap-8 lg:grid-cols-3">
+
+      <div class="space-y-6 lg:col-span-2">
+        <div class="panel p-8">
+          <h2 class="text-xl font-bold text-[#26222E]">Descripción del puesto</h2>
+          <p class="mt-4 whitespace-pre-line leading-relaxed text-[#6B645C]">{{ oferta.descripcion }}</p>
+        </div>
+
+        {% if habilidades %}
+          <div class="panel p-8">
+            <h2 class="text-xl font-bold text-[#26222E]">Habilidades requeridas</h2>
+            {% comment %}
+              El mockup marcaba en verde/rojo el match contra el perfil. Eso depende de la IA
+              de matching, que todavia no esta; por ahora se listan todas por igual.
+            {% endcomment %}
+            <ul class="mt-5 space-y-4">
+              {% for habilidad in habilidades %}
+                <li class="flex items-start gap-3">
+                  <span data-icon="check-circle" class="mt-0.5 h-5 w-5 shrink-0 text-[#27AE60]"></span>
+                  <span class="text-[#26222E]">{{ habilidad }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="space-y-6">
+        {# Match inteligente: placeholder, igual que en templates/Ofertas/detalle_oferta.html #}
+        <div class="panel select-none p-6 text-center opacity-50">
+          <h3 class="font-mono text-xs uppercase tracking-widest text-[#6B645C]">Match inteligente</h3>
+          <div class="relative mx-auto mt-6 h-36 w-36">
+            <svg class="h-36 w-36 -rotate-90" viewBox="0 0 120 120" aria-hidden="true">
+              <circle cx="60" cy="60" r="54" stroke="#F0E9E1" stroke-width="12" fill="none"></circle>
+              <circle cx="60" cy="60" r="54" stroke="#512DA8" stroke-width="12" fill="none"
+                      stroke-dasharray="339.29" stroke-dashoffset="339.29" stroke-linecap="round"></circle>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span class="text-3xl font-bold text-[#26222E]">0%</span>
+              <span class="font-mono text-[10px] uppercase tracking-widest text-[#6B645C]">match</span>
+            </div>
+          </div>
+          <span class="chip mt-5 inline-flex">Próximamente</span>
+        </div>
+
+        {# TODO: todavia no existe el modelo de postulaciones. #}
+        <button type="button" disabled class="btn-sun w-full cursor-not-allowed opacity-70">Postularme — Próximamente</button>
+
+        <div class="panel space-y-4 p-6">
+          <h3 class="font-semibold text-[#26222E]">Información adicional</h3>
+          <div class="flex items-center justify-between border-b border-[rgba(110,85,55,0.16)] pb-3">
+            <p class="text-sm text-[#6B645C]">Publicada</p>
+            <p class="text-sm font-semibold text-[#26222E]">{{ oferta.fecha_publicacion|date:"d/m/Y" }}</p>
+          </div>
+          {% if oferta.fecha_cierre %}
+            <div class="flex items-center justify-between border-b border-[rgba(110,85,55,0.16)] pb-3">
+              <p class="text-sm text-[#6B645C]">Cierra</p>
+              <p class="text-sm font-semibold text-[#26222E]">{{ oferta.fecha_cierre|date:"d/m/Y" }}</p>
+            </div>
+          {% endif %}
+          {% if oferta.categoria %}
+            <div class="flex items-center justify-between border-b border-[rgba(110,85,55,0.16)] pb-3">
+              <p class="text-sm text-[#6B645C]">Categoría</p>
+              <p class="text-sm font-semibold text-[#26222E]">{{ oferta.categoria.nombre }}</p>
+            </div>
+          {% endif %}
+          <div class="flex items-center justify-between">
+            <p class="text-sm text-[#6B645C]">Modalidad</p>
+            <p class="text-sm font-semibold text-[#26222E]">{{ oferta.get_modalidad_display }}</p>
+          </div>
+        </div>
+
+        {% if not oferta.es_confidencial and oferta.empresa.oferente %}
+          <a href="{% url 'perfil_oferente' oferta.empresa.oferente.pk %}"
+             class="group flex items-center gap-3 rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#FEFCF9] p-4 transition-all hover:-translate-y-0.5 hover:border-[#512DA8]/30 hover:shadow-lg">
+            <div class="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-2xl bg-[#512DA8]/10 text-sm font-bold text-[#512DA8]">
+              {% if oferta.empresa.oferente.logo %}
+                <img src="{{ oferta.empresa.oferente.logo.url }}" alt="" class="h-full w-full object-cover" />
+              {% else %}
+                {{ oferta.empresa.oferente.nombre_empresa|slice:":2"|upper }}
+              {% endif %}
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-semibold text-[#26222E]">{{ oferta.empresa.oferente.nombre_empresa }}</p>
+              <p class="text-xs text-[#6B645C]">Ver perfil de la empresa</p>
+            </div>
+            <span data-icon="arrow-right" class="h-4 w-4 shrink-0 text-[#6B645C] transition-all group-hover:translate-x-1 group-hover:text-[#512DA8]"></span>
+          </a>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</section>
+{% endblock %}

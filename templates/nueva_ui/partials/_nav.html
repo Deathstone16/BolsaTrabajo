@@ -1,0 +1,87 @@
+{% load static %}
+{# Nav del rediseno, con la logica de sesion y roles que ya traia templates/base.html #}
+<header id="global-nav" class="sticky top-0 z-50 border-b border-[rgba(110,85,55,0.16)] bg-[#F8F3F0]/85 backdrop-blur-xl">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex h-16 items-center justify-between gap-6">
+      <a href="{% url 'home_ui' %}" class="group flex items-center gap-3">
+        <span class="relative grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#512DA8] to-[#43218F] text-base font-bold tracking-tight text-white shadow-[0_10px_24px_-10px_rgba(81,45,168,0.55)]">
+          <span class="-mt-0.5">IEN</span>
+          <span class="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#FFDE59]"></span>
+        </span>
+        <span class="flex flex-col leading-none">
+          <span class="font-semibold text-[#26222E] tracking-tight">IEN Empleo</span>
+          <span class="pt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-[#512DA8]">Bolsa de trabajo · Chaco</span>
+        </span>
+      </a>
+
+      <div class="hidden md:flex items-center gap-7">
+        <a href="{% url 'home_ui' %}" class="nav-link text-sm font-medium transition-colors hover:text-[#512DA8] {% if vista_activa == 'inicio' %}text-[#512DA8]{% else %}text-[#6B645C]{% endif %}">Inicio</a>
+
+        {% if not user.is_authenticated or user.postulante %}
+          <a href="{% url 'buscar_empleo_ui' %}" class="nav-link text-sm font-medium transition-colors hover:text-[#512DA8] {% if vista_activa == 'buscar' %}text-[#512DA8]{% else %}text-[#6B645C]{% endif %}">Buscar empleo</a>
+        {% endif %}
+
+        {% if user.is_authenticated and user.oferente and user.oferente.estado_obj.puede_publicar %}
+          <a href="{% url 'dashboard_empresa' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Mi panel</a>
+          <a href="{% url 'crear_oferta' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Publicar oferta</a>
+          <a href="{% url 'editar_perfil_empresa' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Mi empresa</a>
+        {% endif %}
+
+        {% if user.is_authenticated and user.postulante %}
+          <a href="{% url 'mi_perfil' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Mi perfil</a>
+        {% endif %}
+
+        {% if user.is_staff %}
+          <a href="{% url 'mod_listar_empresas' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Empresas</a>
+          <a href="{% url 'mod_listar_ofertas' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Ofertas</a>
+          <a href="{% url 'mod_listar_cursos' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Cursos</a>
+        {% endif %}
+
+        <div class="flex items-center gap-3">
+          {% if user.is_authenticated %}
+            <span class="chip">
+              {{ user.first_name|default:user.email }}
+              {% if user.is_staff %}· Staff{% elif user.oferente %}· Empresa{% else %}· Postulante{% endif %}
+            </span>
+            <form method="post" action="{% url 'logout' %}" onsubmit="return confirm('¿Seguro que querés cerrar sesión?');">
+              {% csrf_token %}
+              <button type="submit" class="btn-ghost text-sm !py-2">Salir <span data-icon="log-out" class="h-4 w-4"></span></button>
+            </form>
+          {% else %}
+            <a href="{% url 'registro' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Crear cuenta</a>
+            <a href="{% url 'login' %}" class="btn-ien text-sm !py-2">Ingresar <span data-icon="arrow-up-right" class="h-4 w-4"></span></a>
+          {% endif %}
+        </div>
+      </div>
+
+      <button class="nav-burger md:hidden grid h-10 w-10 place-items-center rounded-xl border border-[rgba(110,85,55,0.16)] bg-white" aria-label="Abrir menú">
+        <span data-icon="menu" class="h-5 w-5"></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="nav-mobile hidden border-t border-[rgba(110,85,55,0.16)] bg-[#F8F3F0] px-4 pb-6 pt-4 md:hidden">
+    <div class="flex flex-col gap-2">
+      <a href="{% url 'home_ui' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Inicio</a>
+      {% if not user.is_authenticated or user.postulante %}
+        <a href="{% url 'buscar_empleo_ui' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Buscar empleo</a>
+      {% endif %}
+      {% if user.is_authenticated and user.oferente and user.oferente.estado_obj.puede_publicar %}
+        <a href="{% url 'dashboard_empresa' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Mi panel</a>
+        <a href="{% url 'crear_oferta' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Publicar oferta</a>
+      {% endif %}
+      {% if user.is_authenticated and user.postulante %}
+        <a href="{% url 'mi_perfil' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Mi perfil</a>
+      {% endif %}
+      {% if user.is_authenticated %}
+        <form method="post" action="{% url 'logout' %}" onsubmit="return confirm('¿Seguro que querés cerrar sesión?');">
+          {% csrf_token %}
+          <button type="submit" class="btn-ghost w-full">Salir <span data-icon="log-out" class="h-4 w-4"></span></button>
+        </form>
+      {% else %}
+        <a href="{% url 'registro' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Crear cuenta</a>
+        <a href="{% url 'login' %}" class="btn-ien">Ingresar <span data-icon="arrow-up-right" class="h-4 w-4"></span></a>
+      {% endif %}
+    </div>
+  </div>
+</header>

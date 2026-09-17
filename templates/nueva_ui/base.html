@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}IEN Empleo · Bolsa de trabajo del Instituto Económico Nacional{% endblock %}</title>
+  <meta name="description" content="{% block description %}Conectamos el talento del nordeste con las oportunidades de todo el país.{% endblock %}" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23512DA8'/%3E%3Ctext x='32' y='42' font-family='Poppins,sans-serif' font-weight='700' font-size='24' fill='%23fff' text-anchor='middle'%3EIEN%3C/text%3E%3Ccircle cx='50' cy='14' r='4' fill='%23FFDE59'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'css/ui/tailwind-ui.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/ui/ien-theme.css' %}" />
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-[#F8F3F0] text-[#26222E] antialiased">
+
+  {% include "nueva_ui/partials/_aviso.html" %}
+  {% include "nueva_ui/partials/_nav.html" %}
+
+  <main>
+    {% if messages %}
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        {% for message in messages %}
+          <div class="panel mb-3 flex items-start gap-3 px-5 py-4 text-sm
+                      {% if message.tags == 'error' %}border-[#d4183d]/30 text-[#d4183d]
+                      {% elif message.tags == 'success' %}border-[#27AE60]/30 text-[#27AE60]
+                      {% else %}text-[#26222E]{% endif %}">
+            <span data-icon="{% if message.tags == 'error' %}x-circle{% elif message.tags == 'success' %}check-circle{% else %}alert{% endif %}" class="mt-0.5 h-5 w-5 shrink-0"></span>
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  {% include "nueva_ui/partials/_footer.html" %}
+
+  <script src="{% static 'js/ui/ien-ui.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

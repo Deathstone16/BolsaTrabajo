@@ -1,0 +1,190 @@
+/* Tema IEN Empleo - extraido de index-ui.html del rediseno (rama nueva-interfaz-bolsatrabajo). */
+@layer base, components, utilities;
+
+:root {
+  --font-size: 16px;
+  --background: #F8F3F0;
+  --foreground: #26222E;
+  --card: #FEFCF9;
+  --primary: #512DA8;
+  --primary-600: #43218F;
+  --sun: #FFDE59;
+  --sun-foreground: #26222E;
+  --secondary: #f5e6a8;
+  --muted: #F0E9E1;
+  --muted-foreground: #6B645C;
+  --accent: #F1EAE2;
+  --destructive: #d4183d;
+  --border: rgba(110, 85, 55, 0.16);
+  --input-background: #F3EDE5;
+  --switch-background: #cbced4;
+  --radius: 0.75rem;
+}
+
+* { box-sizing: border-box; min-width: 0; }
+
+html { font-size: var(--font-size); scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Poppins", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection { background: var(--primary); color: #fff; }
+
+@layer base {
+  h1 { font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+  h2 { font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
+  h3 { font-weight: 600; line-height: 1.4; }
+  h4 { font-weight: 500; line-height: 1.5; }
+  label { font-weight: 500; line-height: 1.5; }
+  button { font-weight: 500; line-height: 1.5; }
+  input { font-weight: 400; line-height: 1.5; }
+}
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+.kicker::before { content: ""; width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: var(--sun); box-shadow: 0 0 0 3px rgba(255, 222, 89, 0.35); }
+
+.btn-ien {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--primary);
+  color: #fff;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.8rem 1.6rem;
+  cursor: pointer;
+  box-shadow: 0 10px 24px -10px rgba(81, 45, 168, 0.55);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.btn-ien:hover { transform: translateY(-2px); background: var(--primary-600); box-shadow: 0 16px 32px -12px rgba(81, 45, 168, 0.6); }
+
+.btn-sun {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--sun);
+  color: var(--sun-foreground);
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 0.8rem 1.6rem;
+  cursor: pointer;
+  box-shadow: 0 10px 24px -12px rgba(255, 222, 89, 0.7);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.btn-sun:hover { transform: translateY(-2px); filter: brightness(1.04); box-shadow: 0 16px 36px -12px rgba(255, 222, 89, 0.75); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(38, 34, 46, 0.14);
+  background: transparent;
+  color: var(--foreground);
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.78rem 1.5rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.btn-ghost:hover { border-color: var(--primary); color: var(--primary); background: rgba(81, 45, 168, 0.05); }
+
+.panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  box-shadow: 0 1px 2px rgba(60, 40, 20, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 9999px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  background: rgba(81, 45, 168, 0.08);
+  color: var(--primary);
+  border: 1px solid rgba(81, 45, 168, 0.12);
+}
+
+.hero-dots { background-image: radial-gradient(rgba(81, 45, 168, 0.14) 1.5px, transparent 1.5px); background-size: 26px 26px; }
+
+.hero-grid-fade {
+  background-image: linear-gradient(rgba(81, 45, 168, 0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(81, 45, 168, 0.07) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 55%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 55%, transparent 100%);
+}
+
+.marquee { overflow: hidden; white-space: nowrap; }
+.marquee-track {
+  display: inline-flex;
+  gap: 2.5rem;
+  padding-left: 1.25rem;
+  animation: marquee 30s linear infinite;
+  will-change: transform;
+}
+.marquee:hover .marquee-track { animation-play-state: paused; }
+
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.revealed { opacity: 1; transform: translateY(0); }
+
+.input-ien {
+  width: 100%;
+  background: var(--input-background);
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  padding: 0.75rem 1rem;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.9rem;
+  color: var(--foreground);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.input-ien:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(81, 45, 168, 0.12); background: #fff; }
+
+.switch-ien { position: relative; display: inline-flex; cursor: pointer; }
+.switch-ien input { position: absolute; opacity: 0; pointer-events: none; }
+.switch-ien .track { height: 1.75rem; width: 3rem; border-radius: 9999px; background: var(--switch-background); transition: background 0.2s ease; }
+.switch-ien .thumb { position: absolute; left: 3px; top: 3px; height: 1.375rem; width: 1.375rem; border-radius: 9999px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform 0.2s ease; }
+.switch-ien input:checked + .track { background: var(--primary); }
+.switch-ien input:checked + .track + .thumb { transform: translateX(1.25rem); }
+
+svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track, .reveal { animation: none; transition: none; transform: none; opacity: 1; }
+}
