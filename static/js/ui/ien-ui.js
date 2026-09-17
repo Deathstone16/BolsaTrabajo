@@ -51,7 +51,18 @@
     "eye": '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle>',
     "image": '<rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-5-5L5 21"></path>',
     // estado_oferente.py devuelve "alert-circle"; el mockup solo traia "alert".
-    "alert-circle": '<circle cx="12" cy="12" r="9"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path>'
+    "alert-circle": '<circle cx="12" cy="12" r="9"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path>',
+    // Agregados al portar moderacion y recuperacion de contrasena.
+    "chevron-right": '<path d="m9 6 6 6-6 6"></path>',
+    "eye-off": '<path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c6.5 0 10 8 10 8a18 18 0 0 1-2.6 3.8"></path><path d="M6.6 6.6A18 18 0 0 0 2 12s3.5 8 10 8a9.1 9.1 0 0 0 4.4-1.1"></path><path d="M3 3l18 18"></path>',
+    "filter": '<path d="M3 5h18l-7 8v5l-4 2v-7L3 5Z"></path>',
+    "triangle-alert": '<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path>',
+    "info": '<circle cx="12" cy="12" r="9"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path>',
+    "globe": '<circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18Z"></path>',
+    "archive": '<rect x="3" y="4" width="18" height="4" rx="1"></rect><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8"></path><path d="M10 12h4"></path>',
+    "mail-check": '<path d="M21 10V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8"></path><path d="m3 7 9 6 9-6"></path><path d="m16 19 2 2 4-4"></path>',
+    "lock-keyhole": '<rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path><circle cx="12" cy="16" r="1"></circle>',
+    "lock-keyhole-open": '<rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 7.5-2"></path><circle cx="12" cy="16" r="1"></circle>'
   };
 
   function injectIcons(root) {

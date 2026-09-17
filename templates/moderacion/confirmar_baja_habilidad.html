@@ -1,15 +1,15 @@
-{% extends 'base.html' %}
+{% extends 'nueva_ui/base.html' %}
 
 {% block content %}
 <div class="max-w-md mx-auto px-4 py-8">
 
-  <div class="bg-white rounded-xl shadow-sm border border-border p-6 text-center space-y-4">
+  <div class="panel p-6 text-center space-y-4">
 
     <div class="w-16 h-16 bg-destructive/10 rounded-2xl flex items-center justify-center mx-auto">
-      <i data-lucide="trash-2" class="w-8 h-8 text-destructive"></i>
+      <span data-icon="trash" class="h-8 w-8 text-destructive"></span>
     </div>
 
-    <h1 class="text-2xl font-medium">Eliminar Habilidad</h1>
+    <h1 class="text-2xl font-bold tracking-tight text-[#26222E]">Eliminar Habilidad</h1>
     <p class="text-muted-foreground">
       Estás por eliminar la habilidad <b>{{ habilidad.nombre }}</b> de la categoría <b>{{ habilidad.categoria.nombre }}</b>.
       Esta acción no se puede deshacer.

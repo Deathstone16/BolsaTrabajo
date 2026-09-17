@@ -1,17 +1,17 @@
 <div id="detalle-overlay" class="fixed inset-0 bg-black/50 z-50 hidden" onclick="event.stopPropagation()"></div>
 
 <div id="detalle-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-8 relative z-10"
+  <div class="panel max-w-lg w-full max-h-[90vh] overflow-y-auto p-8 relative z-10"
        onclick="event.stopPropagation()">
 
     <!-- Header -->
     <div class="flex items-start justify-between mb-1">
       <div>
-        <h2 id="modal-titulo" class="text-2xl font-medium"></h2>
+        <h2 id="modal-titulo" class="text-2xl font-bold tracking-tight text-[#26222E]"></h2>
         <p class="text-sm text-muted-foreground mt-1">Revisa los detalles de la oferta para aprobarla o rechazarla</p>
       </div>
       <button id="btn-cerrar-modal" type="button" class="p-2 hover:bg-muted rounded-lg text-muted-foreground ml-4">
-        <i data-lucide="x" class="w-5 h-5"></i>
+        <span data-icon="x" class="h-5 w-5"></span>
       </button>
     </div>
 
@@ -24,7 +24,7 @@
     <!-- Empresa -->
     <div class="mb-6">
       <h3 class="text-sm font-medium flex items-center gap-2 mb-3">
-        <i data-lucide="building2" class="w-4 h-4 text-primary"></i> Empresa
+        <span data-icon="building" class="h-4 w-4 text-primary"></span> Empresa
       </h3>
       <div class="flex items-center gap-3">
         <div class="flex-1 flex items-center gap-3 border border-border rounded-xl p-3">
@@ -33,11 +33,11 @@
             <p id="modal-empresa-nombre" class="font-medium text-sm"></p>
             <p class="text-xs text-muted-foreground">Ver perfil dentro del modal</p>
           </div>
-          <i data-lucide="chevron-right" class="w-4 h-4 text-muted-foreground"></i>
+          <span data-icon="chevron-right" class="h-4 w-4 text-muted-foreground"></span>
         </div>
         <a id="modal-empresa-link" href="#" target="_blank"
            class="flex flex-col items-center gap-1 px-4 py-3 border border-border rounded-xl hover:border-primary/40 transition-colors text-muted-foreground hover:text-primary">
-          <i data-lucide="building2" class="w-5 h-5"></i>
+          <span data-icon="building" class="h-5 w-5"></span>
           <span class="text-xs">Ir al perfil</span>
         </a>
       </div>
@@ -56,7 +56,7 @@
     <!-- Descripción -->
     <div class="mb-5">
       <h3 class="text-sm font-medium flex items-center gap-2 mb-2">
-        <i data-lucide="file-text" class="w-4 h-4 text-primary"></i> Descripción del puesto
+        <span data-icon="file-text" class="h-4 w-4 text-primary"></span> Descripción del puesto
       </h3>
       <p id="modal-descripcion" class="text-sm text-muted-foreground leading-relaxed"></p>
     </div>
@@ -71,13 +71,13 @@
     <div class="grid grid-cols-2 gap-4 mb-8">
       <div>
         <p class="text-xs text-muted-foreground flex items-center gap-1 mb-1">
-          <i data-lucide="clock" class="w-3.5 h-3.5"></i> Experiencia requerida
+          <span data-icon="clock" class="w-3.5 h-3.5"></span> Experiencia requerida
         </p>
         <p id="modal-experiencia" class="text-sm font-medium"></p>
       </div>
       <div>
         <p class="text-xs text-muted-foreground flex items-center gap-1 mb-1">
-          <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i> Nivel educativo
+          <span data-icon="graduation-cap" class="w-3.5 h-3.5"></span> Nivel educativo
         </p>
         <p id="modal-educativo" class="text-sm font-medium"></p>
       </div>

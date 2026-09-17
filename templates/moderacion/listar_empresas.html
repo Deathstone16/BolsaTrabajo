@@ -1,24 +1,24 @@
-{% extends 'base.html' %}
+{% extends 'nueva_ui/base.html' %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
 
   <div class="mb-8">
-    <h1 class="text-3xl font-medium mb-2">Empresas pendientes de validación</h1>
+    <h1 class="text-3xl font-bold tracking-tight text-[#26222E] mb-2">Empresas pendientes de validación</h1>
     <p class="text-muted-foreground">Revisá y validá las empresas que solicitaron registro en la plataforma.</p>
   </div>
 
   <!-- Buscador -->
-  <div class="bg-white rounded-xl shadow-sm border border-border p-6 mb-6">
+  <div class="panel p-6 mb-6">
     <div class="relative">
-      <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground"></i>
+      <span data-icon="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground"></span>
       <input type="text" id="empresa-search" placeholder="Buscar por nombre o CUIT..."
              class="w-full pl-10 pr-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
     </div>
   </div>
 
   <!-- Tabla -->
-  <div class="bg-white rounded-xl shadow-sm border border-border overflow-hidden mb-8">
+  <div class="panel overflow-hidden mb-8">
     <table class="w-full">
       <thead>
         <tr class="border-b border-border text-sm text-muted-foreground">
@@ -67,7 +67,7 @@
           <td class="px-6 py-4">
             <a href="{% url 'mod_detalle_empresa' empresa.pk %}"
                class="flex items-center gap-1.5 text-sm text-primary hover:underline">
-              <i data-lucide="eye" class="w-4 h-4"></i> Ver detalle
+              <span data-icon="eye" class="h-4 w-4"></span> Ver detalle
             </a>
           </td>
         </tr>
@@ -84,9 +84,9 @@
 
   <!-- Stats -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div class="bg-white rounded-xl shadow-sm border border-border p-6">
+    <div class="panel p-6">
       <p class="text-sm text-muted-foreground mb-1">Pendientes de validación</p>
-      <p class="text-3xl font-medium">{{ total }}</p>
+      <p class="text-3xl font-bold tracking-tight text-[#26222E]">{{ total }}</p>
     </div>
   </div>
 

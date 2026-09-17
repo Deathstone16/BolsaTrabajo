@@ -21,9 +21,13 @@
           <a href="{% url 'buscar_empleo' %}" class="nav-link text-sm font-medium transition-colors hover:text-[#512DA8] {% if vista_activa == 'buscar' %}text-[#512DA8]{% else %}text-[#6B645C]{% endif %}">Buscar empleo</a>
         {% endif %}
 
+        {% comment %}
+          No va un enlace a crear_oferta: esa vista en GET hace redirect a
+          dashboard_empresa, asi que duplicaba Mi panel. Para publicar esta el
+          boton "Nueva oferta" dentro del panel, que abre el modal.
+        {% endcomment %}
         {% if user.is_authenticated and user.oferente and user.oferente.estado_obj.puede_publicar %}
           <a href="{% url 'dashboard_empresa' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Mi panel</a>
-          <a href="{% url 'crear_oferta' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Publicar oferta</a>
           <a href="{% url 'editar_perfil_empresa' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Mi empresa</a>
         {% endif %}
 
@@ -68,7 +72,6 @@
       {% endif %}
       {% if user.is_authenticated and user.oferente and user.oferente.estado_obj.puede_publicar %}
         <a href="{% url 'dashboard_empresa' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Mi panel</a>
-        <a href="{% url 'crear_oferta' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Publicar oferta</a>
       {% endif %}
       {% if user.is_authenticated and user.postulante %}
         <a href="{% url 'mi_perfil' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Mi perfil</a>

@@ -309,3 +309,120 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 
 /* dashboard.js dibuja las pildoras de habilidades con "chip !text-sm" */
 .\!text-sm { font-size: 0.875rem !important; line-height: 1.25rem !important; }
+
+/* ---------------------------------------------------------------------------
+ * Vocabulario semantico (compatibilidad)
+ *
+ * Las pantallas de moderacion, recuperacion de contrasena y perfil de empresa
+ * fueron escritas con los nombres del tema anterior (bg-primary, text-muted-
+ * foreground, border-border...). Antes los generaba el CDN de Tailwind; ahora
+ * que todo corre con el CSS compilado hay que definirlos, apuntados a la
+ * paleta del rediseno. Asi esas pantallas se repintan sin reescribir su markup.
+ *
+ * Si algun dia se compila Tailwind desde el proyecto, este bloque sobra.
+ * ------------------------------------------------------------------------ */
+
+.bg-background            { background-color: var(--background); }
+.bg-card                  { background-color: var(--card); }
+.bg-accent                { background-color: var(--accent); }
+.bg-muted                 { background-color: var(--muted); }
+.bg-muted\/40             { background-color: rgba(240, 233, 225, 0.4); }
+.bg-muted\/50             { background-color: rgba(240, 233, 225, 0.5); }
+.bg-input-background      { background-color: var(--input-background); }
+.bg-primary               { background-color: var(--primary); }
+.bg-primary\/10           { background-color: rgba(81, 45, 168, 0.1); }
+.bg-primary\/20           { background-color: rgba(81, 45, 168, 0.2); }
+.bg-secondary\/20         { background-color: rgba(255, 222, 89, 0.2); }
+.bg-destructive           { background-color: var(--destructive); }
+.bg-destructive\/10       { background-color: rgba(212, 24, 61, 0.1); }
+
+.text-foreground          { color: var(--foreground); }
+.text-primary-foreground  { color: #fff; }
+.text-secondary-foreground { color: var(--sun-foreground); }
+.text-destructive         { color: var(--destructive); }
+.text-success             { color: #27AE60; }
+.text-primary\/40         { color: rgba(81, 45, 168, 0.4); }
+
+.border-border            { border-color: var(--border); }
+.border-destructive\/30   { border-color: rgba(212, 24, 61, 0.3); }
+.border-success\/30       { border-color: rgba(39, 174, 96, 0.3); }
+
+.hover\:bg-accent:hover        { background-color: var(--accent); }
+.hover\:bg-muted:hover         { background-color: var(--muted); }
+.hover\:bg-muted\/40:hover     { background-color: rgba(240, 233, 225, 0.4); }
+.hover\:bg-muted\/50:hover     { background-color: rgba(240, 233, 225, 0.5); }
+.hover\:bg-muted\/80:hover     { background-color: rgba(240, 233, 225, 0.8); }
+.hover\:bg-primary\/20:hover   { background-color: rgba(81, 45, 168, 0.2); }
+.hover\:bg-primary\/90:hover   { background-color: var(--primary-600); }
+.hover\:bg-secondary\/30:hover { background-color: rgba(255, 222, 89, 0.3); }
+.hover\:bg-destructive\/20:hover { background-color: rgba(212, 24, 61, 0.2); }
+.hover\:bg-destructive\/90:hover { background-color: #b01333; }
+.hover\:text-foreground:hover  { color: var(--foreground); }
+.hover\:text-primary:hover     { color: var(--primary); }
+.hover\:border-primary\/30:hover { border-color: rgba(81, 45, 168, 0.3); }
+.hover\:border-primary\/40:hover { border-color: rgba(81, 45, 168, 0.4); }
+
+.focus\:ring-ring:focus,
+.focus\:ring-primary\/30:focus { outline: none; box-shadow: 0 0 0 4px rgba(81, 45, 168, 0.12); }
+
+.from-primary\/20 { --tw-gradient-from: rgba(81, 45, 168, 0.2); }
+.to-primary\/10   { --tw-gradient-to: rgba(81, 45, 168, 0.1); }
+
+/* Colores de estado. Se reencuadran en la paleta calida del rediseno para que
+   no desentonen con el resto (el verde y el rojo planos quedaban muy crudos). */
+.bg-green-50   { background-color: #ECF8F1; }
+.bg-green-100  { background-color: #D9F0E3; }
+.text-green-600 { color: #27AE60; }
+.text-green-700 { color: #1B6B42; }
+.border-green-200 { border-color: #B7E4C9; }
+.hover\:bg-green-50:hover { background-color: #ECF8F1; }
+
+.bg-yellow-100 { background-color: rgba(255, 222, 89, 0.35); }
+.text-yellow-700 { color: #8A6400; }
+.bg-\[\#FEFCE8\] { background-color: #FEFCE8; }
+
+.bg-red-50     { background-color: #FDEEF1; }
+.bg-red-100    { background-color: #FAD9E0; }
+.text-red-500  { color: #d4183d; }
+.text-red-600  { color: #c21537; }
+.text-red-700  { color: #8A1028; }
+.border-red-200 { border-color: #F5C2CD; }
+.hover\:bg-red-50:hover { background-color: #FDEEF1; }
+
+.text-orange-600 { color: #C77B1E; }
+.border-orange-200 { border-color: #F0D5A8; }
+.hover\:bg-orange-50:hover { background-color: #FDF6E9; }
+
+.border-amber-200 { border-color: #F0D5A8; }
+.text-amber-800   { color: #8A6400; }
+
+/* Utilidades sueltas que usan esas pantallas */
+.-mt-12        { margin-top: -3rem; }
+.ml-4          { margin-left: 1rem; }
+.px-12         { padding-left: 3rem; padding-right: 3rem; }
+.col-span-full { grid-column: 1 / -1; }
+@media (min-width: 640px) { .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 768px) { .md\:mt-14 { margin-top: 3.5rem; } }
+
+/* Clases que ofertas_moderacion.js genera en tiempo de ejecucion
+   (badges de estado y botones del modal), no aparecen en ninguna plantilla. */
+.bg-gray-100     { background-color: #F0E9E1; }
+.text-gray-700   { color: #6B645C; }
+.bg-orange-600   { background-color: #C77B1E; }
+.hover\:bg-orange-700:hover { background-color: #A66415; }
+
+/* Tamanos y espaciados que solo aparecen dentro de strings de JS */
+.p-0\.5   { padding: 0.125rem; }
+.p-1\.5   { padding: 0.375rem; }
+.py-1\.5  { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+.py-2\.5  { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+.w-3\.5   { width: 0.875rem; }
+.h-3\.5   { height: 0.875rem; }
+.hover\:opacity-60:hover { opacity: 0.6; }
+
+/* Spinner de la carga de CV (cv_upload.js) */
+.animate-spin { animation: girar 1s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
+.opacity-25 { opacity: 0.25; }
+.opacity-75 { opacity: 0.75; }
+.text-blue-600 { color: #512DA8; }

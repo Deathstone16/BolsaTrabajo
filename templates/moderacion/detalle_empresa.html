@@ -1,16 +1,16 @@
-{% extends 'base.html' %}
+{% extends 'nueva_ui/base.html' %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 lg:px-8 py-8">
 
   <div class="mb-6">
     <a href="{% url 'mod_listar_empresas' %}" class="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-      <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver al listado
+      <span data-icon="arrow-left" class="h-4 w-4"></span> Volver al listado
     </a>
   </div>
 
   <!-- Header -->
-  <div class="bg-white rounded-2xl shadow-sm border border-border overflow-hidden mb-6">
+  <div class="panel overflow-hidden mb-6">
     <div class="h-36 bg-gradient-to-r from-primary/20 to-primary/10">
       {% if empresa.banner %}
         <img src="{{ empresa.banner.url }}" class="w-full h-full object-cover">
@@ -28,7 +28,7 @@
         {% endif %}
         <div class="flex-1 mt-12 md:mt-14">
           <div class="flex items-center gap-3 flex-wrap">
-            <h1 class="text-2xl font-medium">{{ empresa.nombre_empresa }}</h1>
+            <h1 class="text-2xl font-bold tracking-tight text-[#26222E]">{{ empresa.nombre_empresa }}</h1>
             <span class="px-3 py-1 rounded-full text-xs font-medium
               {% if empresa.estado_validacion == 'aprobado' %}bg-green-100 text-green-700
               {% elif empresa.estado_validacion == 'pendiente' %}bg-yellow-100 text-yellow-700
@@ -38,13 +38,13 @@
           </div>
           <div class="flex flex-wrap gap-3 text-sm text-muted-foreground mt-2">
             {% if empresa.industria %}
-              <span><i data-lucide="building2" class="w-4 h-4 inline"></i> {{ empresa.industria }}</span>
+              <span><span data-icon="building" class="h-4 w-4 inline"></span> {{ empresa.industria }}</span>
             {% endif %}
             {% if empresa.ubicacion %}
-              <span><i data-lucide="map-pin" class="w-4 h-4 inline"></i> {{ empresa.ubicacion }}</span>
+              <span><span data-icon="map-pin" class="h-4 w-4 inline"></span> {{ empresa.ubicacion }}</span>
             {% endif %}
             {% if empresa.tamano_empresa %}
-              <span><i data-lucide="users" class="w-4 h-4 inline"></i> {{ empresa.get_tamano_empresa_display }}</span>
+              <span><span data-icon="users" class="h-4 w-4 inline"></span> {{ empresa.get_tamano_empresa_display }}</span>
             {% endif %}
           </div>
         </div>
@@ -53,8 +53,8 @@
   </div>
 
   <!-- Info completa -->
-  <div class="bg-white rounded-xl shadow-sm border border-border p-8 mb-6">
-    <h2 class="text-lg font-medium mb-6">Información de la empresa</h2>
+  <div class="panel p-8 mb-6">
+    <h2 class="text-lg font-semibold text-[#26222E] mb-6">Información de la empresa</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
       <div>
         <p class="text-muted-foreground mb-1">Nombre empresa</p>
@@ -106,14 +106,14 @@
       {% csrf_token %}
       <button type="submit"
               class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium">
-        <i data-lucide="check" class="w-5 h-5"></i> Aprobar empresa
+        <span data-icon="check" class="h-5 w-5"></span> Aprobar empresa
       </button>
     </form>
     <form method="get" action="{% url 'mod_rechazar_empresa' empresa.pk %}">
       {% csrf_token %}
       <button type="submit"
               class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-destructive text-white rounded-lg hover:bg-destructive/90 transition-colors font-medium">
-          <i data-lucide="x" class="w-5 h-5"></i> Rechazar empresa
+          <span data-icon="x" class="h-5 w-5"></span> Rechazar empresa
       </button>
     </form>
   </div>
