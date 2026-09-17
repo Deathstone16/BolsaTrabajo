@@ -19,7 +19,7 @@ from .models import AnalisisCV
 @postulante_required
 @require_POST
 def solicitar_analisis(request):
-    """Envía el PDF del CV a FastAPI para que lo extraiga y analice."""
+    """Envía el PDF a FastAPI, que lo encola para extraerlo y analizarlo."""
     postulante = request.user.postulante
 
     if not postulante.cv:
@@ -45,32 +45,30 @@ def solicitar_analisis(request):
         }, status=202)
 
     analisis = AnalisisCV.objects.create(postulante=postulante)
-    data = {
-        'analysis_id': analisis.id,
-        'candidate_id': postulante.id,
-    }
     headers = {}
     if settings.IA_API_TOKEN:
         headers['Authorization'] = f'Bearer {settings.IA_API_TOKEN}'
 
     try:
         with postulante.cv.open('rb') as cv_file:
-            files = {
-                'cv': (
-                    postulante.cv.name.rsplit('/', 1)[-1],
-                    cv_file,
-                    'application/pdf',
-                )
-            }
             respuesta = requests.post(
                 settings.IA_API_URL,
-                data=data,
-                files=files,
+                data={
+                    'analysis_id': analisis.id,
+                    'candidate_id': postulante.id,
+                },
+                files={
+                    'cv': (
+                        postulante.cv.name.rsplit('/', 1)[-1],
+                        cv_file,
+                        'application/pdf',
+                    ),
+                },
                 headers=headers,
                 timeout=30,
             )
-            respuesta.raise_for_status()
-    except requests.RequestException as exc:
+        respuesta.raise_for_status()
+    except (OSError, requests.RequestException) as exc:
         analisis.estado = AnalisisCV.Estado.ERROR
         analisis.error = str(exc)
         analisis.save(update_fields=['estado', 'error'])
