@@ -1,148 +1,120 @@
-{% extends 'base.html' %}
+{% extends 'nueva_ui/base.html' %}
 {% load static %}
 
+{% block title %}Mi perfil profesional · IEN Empleo{% endblock %}
+
 {% block content %}
-<div class="flex min-h-screen bg-muted">
+{% comment %}
+  El contenedor va a max-w-7xl igual que el nav y el footer, asi la columna
+  queda alineada con el resto del sitio. Antes era un flex a ancho completo
+  con el contenido limitado a max-w-3xl, y quedaba corrido a la izquierda.
 
-  <!-- Sidebar -->
-  <aside class="w-56 flex-shrink-0 bg-white border-r border-border py-8 px-4 flex flex-col gap-2">
-    <div class="flex flex-col items-center gap-2 mb-8 px-2">
-      <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xl font-medium">
-        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
-      </div>
-      <p class="font-medium text-sm text-center">{{ request.user.get_full_name }}</p>
-      {% if postulante.dni %}
-        <p class="text-xs text-muted-foreground text-center">{{ postulante.dni }}</p>
-      {% endif %}
-    </div>
+  Los ids cv-input, cv-upload-area, cv-feedback, form-cv-upload y
+  form-eliminar-cv los usa static/js/cv_upload.js: no cambiarlos.
+{% endcomment %}
+<div class="min-h-screen bg-[#F8F3F0] py-12">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid gap-8 lg:grid-cols-[16rem_1fr]">
 
-    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
-      <i data-lucide="bookmark" class="w-4 h-4"></i> Empleos guardados
-    </a>
-    <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
-      <i data-lucide="trending-up" class="w-4 h-4"></i> Brecha de habilidades
-    </a>
-    <a href="{% url 'mi_perfil' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-primary/10 text-primary transition-colors">
-      <i data-lucide="user" class="w-4 h-4"></i> Perfil profesional
-    </a>
-    <a href="{% url 'datos_personales' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
-      <i data-lucide="user-cog" class="w-4 h-4"></i> Mis datos personales
-    </a>
-  </aside>
+      {% include "usuarios/_sidebar_postulante.html" with seccion="perfil" %}
 
-  <!-- Contenido -->
-  <div class="flex-1 py-10 px-8 max-w-3xl">
-    <h1 class="text-3xl font-medium mb-1">Mi Perfil Profesional</h1>
-    <p class="text-muted-foreground mb-8">Nuestra plataforma analizará tu trayectoria para conectarte con oportunidades que realmente encajan con tu perfil y aspiraciones profesionales.</p>
+      <div class="min-w-0">
+        <p class="kicker">Tu perfil</p>
+        <h1 class="mt-3 text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">Mi perfil profesional</h1>
+        <p class="mt-3 max-w-2xl leading-relaxed text-[#6B645C]">
+          Nuestra plataforma analizará tu trayectoria para conectarte con oportunidades que realmente encajan con tu perfil y aspiraciones profesionales.
+        </p>
 
-    {% if messages %}
-    <div id="messages-container" class="mb-6">
-      {% for message in messages %}
-      <div class="flex items-center gap-3 p-4 rounded-lg mb-2 {% if message.tags == 'success' %}bg-green-50 text-green-800 border border-green-200{% elif message.tags == 'error' %}bg-red-50 text-red-800 border border-red-200{% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
-        {% if message.tags == 'success' %}
-          <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
-        {% elif message.tags == 'error' %}
-          <i data-lucide="alert-circle" class="w-5 h-5 text-red-600"></i>
+        {# Los mensajes los renderiza nueva_ui/base.html, no hace falta repetirlos aca. #}
+
+        {% if postulante.cv %}
+          <div class="panel mt-8 p-6">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+              <div class="flex items-center gap-4">
+                <div class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#512DA8]/10">
+                  <span data-icon="file-text" class="h-6 w-6 text-[#512DA8]"></span>
+                </div>
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-semibold text-[#26222E]">{{ postulante.cv.name|cut:"postulantes/cv/" }}</p>
+                  {% if postulante.cv_fecha_carga %}
+                    <p class="font-mono text-xs text-[#6B645C]">
+                      Cargado el {{ postulante.cv_fecha_carga|date:"d/m/Y" }} a las {{ postulante.cv_fecha_carga|date:"H:i" }}
+                    </p>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <a href="{{ postulante.cv.url }}" target="_blank" rel="noopener" class="btn-ghost !py-2 text-sm">
+                  Ver CV <span data-icon="external-link" class="h-4 w-4"></span>
+                </a>
+                <form method="post" action="{% url 'eliminar_cv' %}" class="inline" id="form-eliminar-cv">
+                  {% csrf_token %}
+                  <button type="submit"
+                          class="inline-flex items-center gap-2 rounded-full border border-[#d4183d]/30 px-5 py-2 text-sm font-semibold text-[#d4183d] transition-colors hover:bg-[#d4183d]/5">
+                    Eliminar
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel mt-6 flex cursor-pointer flex-col items-center justify-center p-12 text-center transition-colors hover:border-[#512DA8]/40"
+               onclick="document.getElementById('cv-input').click()" id="cv-upload-area">
+            <span data-icon="upload" class="mb-4 h-10 w-10 text-[#6B645C]"></span>
+            <p class="font-semibold text-[#26222E]">Reemplazar CV</p>
+            <p class="mt-1 text-sm text-[#6B645C]">Hacé clic para seleccionar un nuevo archivo</p>
+            <div class="mt-5 flex flex-wrap justify-center gap-2">
+              <span class="chip">PDF</span><span class="chip">DOC</span><span class="chip">DOCX</span><span class="chip">Máx 5 MB</span>
+            </div>
+            <input type="file" id="cv-input" class="hidden" accept=".pdf,.doc,.docx">
+          </div>
+
         {% else %}
-          <i data-lucide="info" class="w-5 h-5 text-blue-600"></i>
-        {% endif %}
-        <p class="text-sm font-medium">{{ message }}</p>
-      </div>
-      {% endfor %}
-    </div>
-    {% endif %}
-
-    <!-- CV Section -->
-    {% if postulante.cv %}
-    <!-- CV Cargado -->
-    <div class="bg-white rounded-xl border border-border p-6 mb-8">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-            <i data-lucide="file-text" class="w-6 h-6 text-primary"></i>
-          </div>
-          <div>
-            <p class="font-medium text-sm">{{ postulante.cv.name|cut:"postulantes/cv/" }}</p>
-            <p class="text-xs text-muted-foreground">
-              {% if postulante.cv_fecha_carga %}
-                Cargado el {{ postulante.cv_fecha_carga|date:"d/m/Y" }} a las {{ postulante.cv_fecha_carga|date:"H:i" }}
-              {% endif %}
-            </p>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <a href="{{ postulante.cv.url }}" target="_blank" class="px-4 py-2 text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary/5 transition-colors">
-            Ver CV
-          </a>
-          <form method="post" action="{% url 'eliminar_cv' %}" class="inline" id="form-eliminar-cv">
+          <form method="post" enctype="multipart/form-data" action="{% url 'mi_perfil' %}" id="form-cv-upload" class="mt-8">
             {% csrf_token %}
-            <button type="submit" class="px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">
-              Eliminar
-            </button>
+            <div class="panel flex cursor-pointer flex-col items-center justify-center p-12 text-center transition-colors hover:border-[#512DA8]/40"
+                 onclick="document.getElementById('cv-input').click()" id="cv-upload-area">
+              <span data-icon="upload" class="mb-4 h-10 w-10 text-[#6B645C]"></span>
+              <p class="font-semibold text-[#26222E]">Arrastrá tu archivo acá</p>
+              <p class="mt-1 text-sm text-[#6B645C]">O hacé clic para seleccionar desde tu dispositivo</p>
+              <div class="mt-5 flex flex-wrap justify-center gap-2">
+                <span class="chip">PDF</span><span class="chip">DOC</span><span class="chip">DOCX</span><span class="chip">Máx 5 MB</span>
+              </div>
+              <input type="file" id="cv-input" name="cv" class="hidden" accept=".pdf,.doc,.docx">
+            </div>
           </form>
+        {% endif %}
+
+        <div id="cv-feedback" class="mt-6 hidden"></div>
+
+        <h2 class="mt-12 text-2xl font-bold tracking-tight text-[#26222E]">¿Por qué IEN Empleo?</h2>
+        <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div class="panel p-6">
+            <div class="grid h-11 w-11 place-items-center rounded-2xl bg-[#512DA8]/10">
+              <span data-icon="shield" class="h-5 w-5 text-[#512DA8]"></span>
+            </div>
+            <p class="mt-4 font-semibold text-[#26222E]">Privacidad total</p>
+            <p class="mt-1 text-sm leading-relaxed text-[#6B645C]">Tus datos están protegidos y solo vos decidís quién puede ver tu CV.</p>
+          </div>
+          <div class="panel p-6">
+            <div class="grid h-11 w-11 place-items-center rounded-2xl bg-[#512DA8]/10">
+              <span data-icon="trending-up" class="h-5 w-5 text-[#512DA8]"></span>
+            </div>
+            <p class="mt-4 font-semibold text-[#26222E]">Análisis de habilidades</p>
+            <p class="mt-1 text-sm leading-relaxed text-[#6B645C]">Identificamos tus fortalezas y las comparamos con el mercado actual.</p>
+          </div>
+          <div class="panel p-6">
+            <div class="grid h-11 w-11 place-items-center rounded-2xl bg-[#512DA8]/10">
+              <span data-icon="sparkles" class="h-5 w-5 text-[#512DA8]"></span>
+            </div>
+            <p class="mt-4 font-semibold text-[#26222E]">Matching inteligente</p>
+            <p class="mt-1 text-sm leading-relaxed text-[#6B645C]">Recibí ofertas personalizadas basadas en tu experiencia real.</p>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Reemplazar CV -->
-    <div class="bg-white rounded-xl border border-border p-12 flex flex-col items-center justify-center text-center mb-8 cursor-pointer hover:border-primary/40 transition-colors"
-         onclick="document.getElementById('cv-input').click()" id="cv-upload-area">
-      <i data-lucide="refresh-cw" class="w-10 h-10 text-muted-foreground mb-4"></i>
-      <p class="font-medium mb-1">Reemplazar CV</p>
-      <p class="text-sm text-muted-foreground mb-4">Haz clic para seleccionar un nuevo archivo</p>
-      <div class="flex gap-2">
-        <span class="px-3 py-1 border border-border rounded-full text-xs text-muted-foreground">PDF</span>
-        <span class="px-3 py-1 border border-border rounded-full text-xs text-muted-foreground">DOC</span>
-        <span class="px-3 py-1 border border-border rounded-full text-xs text-muted-foreground">DOCX</span>
-        <span class="px-3 py-1 border border-border rounded-full text-xs text-muted-foreground">Max 5MB</span>
-      </div>
-      <input type="file" id="cv-input" class="hidden" accept=".pdf,.doc,.docx">
-    </div>
-
-    {% else %}
-    <!-- Sin CV - Upload -->
-    <form method="post" enctype="multipart/form-data" action="{% url 'mi_perfil' %}" id="form-cv-upload">
-      {% csrf_token %}
-      <div class="bg-white rounded-xl border border-border p-12 flex flex-col items-center justify-center text-center mb-8 cursor-pointer hover:border-primary/40 transition-colors"
-           onclick="document.getElementById('cv-input').click()" id="cv-upload-area">
-        <i data-lucide="upload" class="w-10 h-10 text-muted-foreground mb-4"></i>
-        <p class="font-medium mb-1">Arrastra tu archivo aquí</p>
-        <p class="text-sm text-muted-foreground mb-4">O haz clic para seleccionar desde tu dispositivo</p>
-        <div class="flex gap-2">
-          <span class="px-3 py-1 border border-border rounded-full text-xs text-muted-foreground">PDF</span>
-          <span class="px-3 py-1 border border-border rounded-full text-xs text-muted-foreground">DOC</span>
-          <span class="px-3 py-1 border border-border rounded-full text-xs text-muted-foreground">DOCX</span>
-          <span class="px-3 py-1 border border-border rounded-full text-xs text-muted-foreground">Max 5MB</span>
-        </div>
-        <input type="file" id="cv-input" name="cv" class="hidden" accept=".pdf,.doc,.docx">
-      </div>
-    </form>
-    {% endif %}
-
-    <!-- Feedback de carga -->
-    <div id="cv-feedback" class="hidden mb-8"></div>
-
-    <!-- Por qué IEN Empleo -->
-    <h2 class="text-2xl font-medium mb-6">¿Por qué IEN Empleo?</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-white rounded-xl border border-border p-6">
-        <i data-lucide="shield-check" class="w-6 h-6 text-primary mb-3"></i>
-        <p class="font-medium text-sm mb-1">Privacidad Total</p>
-        <p class="text-xs text-muted-foreground">Tus datos están protegidos y solo tú decides quién puede ver tu CV.</p>
-      </div>
-      <div class="bg-white rounded-xl border border-border p-6">
-        <i data-lucide="trending-up" class="w-6 h-6 text-primary mb-3"></i>
-        <p class="font-medium text-sm mb-1">Análisis de Habilidades</p>
-        <p class="text-xs text-muted-foreground">Identificamos tus fortalezas y las comparamos con el mercado actual.</p>
-      </div>
-      <div class="bg-white rounded-xl border border-border p-6">
-        <i data-lucide="layout-dashboard" class="w-6 h-6 text-primary mb-3"></i>
-        <p class="font-medium text-sm mb-1">Matching Inteligente</p>
-        <p class="text-xs text-muted-foreground">Recibe ofertas personalizadas basadas en tu experiencia real.</p>
-      </div>
     </div>
   </div>
-
 </div>
 
 <script src="{% static 'js/cv_upload.js' %}"></script>

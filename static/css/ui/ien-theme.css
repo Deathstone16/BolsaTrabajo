@@ -188,3 +188,44 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 @media (prefers-reduced-motion: reduce) {
   .marquee-track, .reveal { animation: none; transition: none; transform: none; opacity: 1; }
 }
+
+/* ---------------------------------------------------------------------------
+ * Utilidades que faltan en tailwind-ui.css
+ *
+ * tailwind-ui.css es Tailwind YA COMPILADO a partir del mockup: solo contiene
+ * las clases que aparecian en index-ui.html. Cualquier clase que usemos en una
+ * plantilla nueva y no estuviera en el mockup simplemente no existe y no hace
+ * nada. Estas son las que hicieron falta al portar las pantallas.
+ *
+ * Si algun dia se compila Tailwind desde el proyecto (con las plantillas de
+ * Django como content), este bloque se puede borrar entero.
+ * ------------------------------------------------------------------------ */
+
+/* Layout de dos columnas de la seccion del postulante (sidebar + contenido) */
+@media (min-width: 1024px) {
+  .lg\:grid-cols-\[16rem_1fr\] { grid-template-columns: 16rem 1fr; }
+}
+
+/* Descripciones recortadas a dos lineas en las tarjetas de oferta */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+/* Respeta los saltos de linea de la descripcion cargada por la empresa */
+.whitespace-pre-line { white-space: pre-line; }
+
+/* Estados de error y exito (mensajes, errores de formulario) */
+.bg-\[\#d4183d\]\/10    { background-color: rgba(212, 24, 61, 0.1); }
+.border-\[\#d4183d\]\/30 { border-color: rgba(212, 24, 61, 0.3); }
+.border-\[\#27AE60\]\/30 { border-color: rgba(39, 174, 96, 0.3); }
+.hover\:bg-\[\#d4183d\]\/5:hover { background-color: rgba(212, 24, 61, 0.05); }
+
+.min-h-\[70vh\] { min-height: 70vh; }
+
+@media (min-width: 640px) {
+  .sm\:w-auto { width: auto; }
+  .sm\:\!px-10 { padding-left: 2.5rem !important; padding-right: 2.5rem !important; }
+}

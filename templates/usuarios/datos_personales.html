@@ -1,31 +1,42 @@
-{% extends 'base.html' %}
+{% extends 'nueva_ui/base.html' %}
+
+{% block title %}Mis datos personales · IEN Empleo{% endblock %}
+
 {% block content %}
-<div class="flex items-center justify-center bg-accent px-4 py-8">
-  <div class="bg-white rounded-xl shadow-sm border border-border w-full max-w-lg p-8 space-y-5">
+{# Mismo contenedor y mismo sidebar que mi_perfil.html: las dos son la misma seccion. #}
+<div class="min-h-screen bg-[#F8F3F0] py-12">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid gap-8 lg:grid-cols-[16rem_1fr]">
 
-    <div class="text-center space-y-1">
-      <h1 class="text-2xl font-medium">Mis datos personales</h1>
-      <p class="text-muted-foreground text-sm">Completá tu información personal</p>
-    </div>
+      {% include "usuarios/_sidebar_postulante.html" with seccion="datos" %}
 
-    {% if form.non_field_errors %}
-    <div class="bg-destructive/10 text-destructive text-sm rounded-lg px-4 py-3">
-      {{ form.non_field_errors }}
-    </div>
-    {% endif %}
+      <div class="min-w-0">
+        <p class="kicker">Tu cuenta</p>
+        <h1 class="mt-3 text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">Mis datos personales</h1>
+        <p class="mt-3 max-w-2xl leading-relaxed text-[#6B645C]">
+          Completá tu información personal. Estos datos los ven las empresas cuando te postulás a una oferta.
+        </p>
 
-    <form method="POST" class="space-y-3">
-      {% csrf_token %}
-      <div class="grid grid-cols-2 gap-3">
-        {% include 'usuarios/_form_fields.html' %}
+        {% if form.non_field_errors %}
+          <div class="mt-8 rounded-2xl border border-[#d4183d]/30 bg-[#d4183d]/10 px-4 py-3 text-sm text-[#d4183d]">
+            {{ form.non_field_errors }}
+          </div>
+        {% endif %}
+
+        <form method="POST" class="panel mt-8 p-8">
+          {% csrf_token %}
+
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            {% include 'usuarios/_form_fields.html' %}
+          </div>
+
+          <button type="submit" class="btn-ien mt-8 w-full !py-3.5 sm:w-auto sm:!px-10">
+            Guardar <span data-icon="check" class="h-4 w-4"></span>
+          </button>
+        </form>
       </div>
 
-      <button type="submit"
-              class="w-full py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
-        Guardar
-      </button>
-    </form>
-
+    </div>
   </div>
 </div>
 {% endblock %}
