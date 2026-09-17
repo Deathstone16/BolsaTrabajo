@@ -80,6 +80,12 @@
               Eliminar
             </button>
           </form>
+          <form method="post" action="{% url 'ia:solicitar_analisis' %}" class="inline" id="form-analizar-cv">
+            {% csrf_token %}
+            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors">
+              Analizar CV
+            </button>
+          </form>
         </div>
       </div>
     </div>

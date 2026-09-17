@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'ofertas',
     'categorias',
     'emails',
+    'ia',
 ]
 
 MIDDLEWARE = [
@@ -138,3 +139,11 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 PASSWORD_RESET_TIMEOUT = 86400  # 24 horas en segundos
+
+# Configuración del servicio externo que analiza el texto del CV.
+# Definila en .env para no exponer datos sensibles en el repositorio.
+IA_API_URL = os.environ.get('IA_API_URL', '')
+IA_API_TOKEN = os.environ.get('IA_API_TOKEN', '')
+IA_CALLBACK_TOKEN = os.environ.get('IA_CALLBACK_TOKEN', '')
+# Opcional: URL pública fija para callbacks (útil si Django corre detrás de proxy o túnel).
+IA_CALLBACK_URL = os.environ.get('IA_CALLBACK_URL', '')

@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const uploadArea = document.getElementById('cv-upload-area');
     const formUpload = document.getElementById('form-cv-upload');
     const formEliminar = document.getElementById('form-eliminar-cv');
+    const formAnalizar = document.getElementById('form-analizar-cv');
 
     if (!cvInput) return;
 
@@ -61,6 +62,36 @@ document.addEventListener('DOMContentLoaded', function() {
                     mostrarFeedback('error', 'Error de conexión.');
                 });
             }
+        });
+    }
+
+    if (formAnalizar) {
+        formAnalizar.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const boton = formAnalizar.querySelector('button[type="submit"]');
+            boton.disabled = true;
+            mostrarFeedback('loading', 'Enviando CV para analizar...');
+
+            fetch(formAnalizar.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': formAnalizar.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarFeedback('success', data.mensaje || 'CV enviado para analizar.');
+                } else {
+                    mostrarFeedback('error', data.mensaje || 'No se pudo enviar el CV.');
+                    boton.disabled = false;
+                }
+            })
+            .catch(() => {
+                mostrarFeedback('error', 'Error de conexión. Intentá nuevamente.');
+                boton.disabled = false;
+            });
         });
     }
 

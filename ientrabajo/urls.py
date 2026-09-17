@@ -27,6 +27,7 @@ urlpatterns = [
     path('usuarios/', include('usuarios.urls')),
     path('moderacion/', include('moderacion.urls')),
     path('ofertas/', include('ofertas.urls')),
+    path('ia/', include('ia.urls')),
 
     #url solo para probar ia hasta que este completa la pantalla
     path    ('prueba/', views.ia, name='ia')
