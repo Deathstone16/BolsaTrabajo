@@ -44,9 +44,6 @@
             <a href="{% url 'mod_listar_cursos' %}" class="text-muted-foreground hover:text-foreground transition-colors">Cursos</a>
             <a href="{% url 'mod_listar_tipos_oferta' %}" class="text-muted-foreground hover:text-foreground transition-colors">Tipos de Oferta</a>
           {% endif %}
-          {% if user.is_authenticated and user.postulante %}
-            <a href="{% url 'mi_perfil' %}" class="text-muted-foreground hover:text-foreground transition-colors">Probar análisis de CV</a>
-          {% endif %}
         </div>
 
         <!-- Zona de usuario (visible en todos los tamaños) -->

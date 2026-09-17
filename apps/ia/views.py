@@ -32,6 +32,18 @@ def solicitar_analisis(request):
     if not settings.IA_API_URL:
         return JsonResponse({'success': False, 'mensaje': 'El servicio de análisis no está configurado.'}, status=503)
 
+    analisis_pendiente = (
+        AnalisisCV.objects
+        .filter(postulante=postulante, estado=AnalisisCV.Estado.PENDIENTE)
+        .first()
+    )
+    if analisis_pendiente:
+        return JsonResponse({
+            'success': True,
+            'mensaje': 'Ya hay un análisis de CV en proceso.',
+            'analisis_id': analisis_pendiente.id,
+        }, status=202)
+
     analisis = AnalisisCV.objects.create(postulante=postulante)
     data = {
         'analysis_id': analisis.id,
