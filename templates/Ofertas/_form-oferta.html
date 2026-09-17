@@ -49,8 +49,13 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="space-y-2">
       <label class="block text-sm font-medium"><i data-lucide="map-pin" class="w-4 h-4 inline"></i> Ubicación</label>
-      <input type="text" name="ubicacion" value="{{ form.ubicacion.value|default:'' }}" placeholder="Ej. Buenos Aires, Córdoba"
-             class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" required>
+      <div class="relative">
+        <input autocomplete="off" id="input-ubicacion" type="text" name="ubicacion" value="{{ form.ubicacion.value|default:'' }}" placeholder="Ej. Villa María, Córdoba"
+              maxlength="100" class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" required>
+        <ul id="sugerencias-ubicacion"
+            class="hidden absolute z-10 mt-1 w-full max-h-60 overflow-y-auto bg-white border border-border rounded-lg shadow-lg text-sm">
+        </ul>
+      </div>
       {% if form.ubicacion.errors %}<p class="text-sm text-red-500">{{ form.ubicacion.errors.0 }}</p>{% endif %}
     </div>
     <div class="space-y-2">
