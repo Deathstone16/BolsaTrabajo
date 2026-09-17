@@ -16,7 +16,7 @@
           <h1 class="reveal mt-5 text-4xl font-bold leading-[1.06] tracking-tight text-[#26222E] sm:text-5xl lg:text-6xl">Tu próxima oportunidad <span class="relative whitespace-nowrap text-[#512DA8]">empieza acá<svg class="absolute -bottom-2 left-0 w-full" viewBox="0 0 120 8" fill="none" aria-hidden="true"><path d="M2 6C30 2 60 1 118 4" stroke="#FFDE59" stroke-width="5" stroke-linecap="round"></path></svg></span></h1>
           <p class="reveal mt-6 max-w-xl text-base leading-relaxed text-[#6B645C] sm:text-lg">El Instituto Económico Nacional conecta a postulantes con empresas verificadas de toda la región. Conocé tu compatibilidad antes de postularte y cerrá la brecha de habilidades con cursos gratuitos.</p>
 
-          <form method="get" action="{% url 'buscar_empleo_ui' %}" class="reveal mt-8 flex max-w-2xl flex-col gap-2 rounded-3xl border border-[rgba(110,85,55,0.16)] bg-white p-2.5 shadow-[0_24px_60px_-30px_rgba(81,45,168,0.35)] sm:flex-row sm:items-center">
+          <form method="get" action="{% url 'buscar_empleo' %}" class="reveal mt-8 flex max-w-2xl flex-col gap-2 rounded-3xl border border-[rgba(110,85,55,0.16)] bg-white p-2.5 shadow-[0_24px_60px_-30px_rgba(81,45,168,0.35)] sm:flex-row sm:items-center">
             <div class="flex flex-1 items-center gap-3 rounded-2xl bg-[#F3EDE5] px-4 py-3">
               <span data-icon="search" class="h-5 w-5 shrink-0 text-[#512DA8]"></span>
               <input type="text" name="q" placeholder="Programador, contador, docente…" class="min-w-0 flex-1 bg-transparent text-sm focus:outline-none" />
@@ -62,7 +62,7 @@
               </div>
               <div class="relative mt-6 flex items-center justify-between border-t border-[rgba(110,85,55,0.16)] pt-4">
                 <p class="font-mono text-[11px] uppercase tracking-widest text-[#6B645C]">Publicada el {{ oferta_destacada.fecha_publicacion|date:"d/m/Y" }}</p>
-                <a href="{% url 'detalle_oferta_ui' oferta_destacada.pk %}" class="grid h-9 w-9 place-items-center rounded-full bg-[#512DA8] text-white transition-transform hover:scale-110"><span data-icon="arrow-right" class="h-4 w-4"></span></a>
+                <a href="{% url 'detalle_oferta' oferta_destacada.pk %}" class="grid h-9 w-9 place-items-center rounded-full bg-[#512DA8] text-white transition-transform hover:scale-110"><span data-icon="arrow-right" class="h-4 w-4"></span></a>
               </div>
             </div>
             {% endif %}
@@ -94,13 +94,13 @@
           <p class="kicker">Recién publicadas</p>
           <h2 class="mt-3 text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">Ofertas que están en boca de todos</h2>
         </div>
-        <a href="{% url 'buscar_empleo_ui' %}" class="btn-ghost text-sm">Ver todas las ofertas <span data-icon="arrow-right" class="h-4 w-4"></span></a>
+        <a href="{% url 'buscar_empleo' %}" class="btn-ghost text-sm">Ver todas las ofertas <span data-icon="arrow-right" class="h-4 w-4"></span></a>
       </div>
 
       {% if ofertas_destacadas %}
       <div class="mt-10 divide-y divide-[rgba(110,85,55,0.16)] overflow-hidden rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#FEFCF9] shadow-[0_30px_80px_-50px_rgba(60,40,80,0.4)]">
         {% for oferta in ofertas_destacadas %}
-          <a href="{% url 'detalle_oferta_ui' oferta.pk %}" class="reveal group grid items-center gap-4 px-5 py-6 transition-colors hover:bg-white sm:grid-cols-[auto_1fr_auto] sm:px-8 sm:py-7">
+          <a href="{% url 'detalle_oferta' oferta.pk %}" class="reveal group grid items-center gap-4 px-5 py-6 transition-colors hover:bg-white sm:grid-cols-[auto_1fr_auto] sm:px-8 sm:py-7">
             <span class="font-mono text-sm font-semibold text-[#512DA8]">{{ forloop.counter|stringformat:"02d" }}</span>
             <div class="flex items-center gap-4">
               <div class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#512DA8]/10 text-sm font-bold text-[#512DA8] transition-colors group-hover:bg-[#512DA8] group-hover:text-white">
@@ -180,42 +180,42 @@
       </div>
 
       <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <a href="{% url 'buscar_empleo_ui' %}" class="reveal group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#FEFCF9] p-6 transition-all hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(60,40,80,0.35)]">
+        <a href="{% url 'buscar_empleo' %}" class="reveal group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#FEFCF9] p-6 transition-all hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(60,40,80,0.35)]">
           <div class="flex items-start justify-between">
             <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[#512DA8]/10 text-[#512DA8]"><span data-icon="trending-up" class="h-6 w-6"></span></div>
             <span class="font-mono text-xs text-[#6B645C]">01</span>
           </div>
           <div class="mt-10"><h3 class="text-lg font-semibold text-[#26222E]">Contabilidad y Finanzas</h3><p class="mt-1 flex items-center gap-2 text-sm text-[#6B645C]"><span class="font-mono font-semibold text-[#512DA8]">Ver ofertas</span><span class="transition-transform group-hover:translate-x-1"><span data-icon="arrow-right" class="h-3.5 w-3.5"></span></span></p></div>
         </a>
-        <a href="{% url 'buscar_empleo_ui' %}" class="reveal group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#FEFCF9] p-6 transition-all hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(60,40,80,0.35)]">
+        <a href="{% url 'buscar_empleo' %}" class="reveal group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#FEFCF9] p-6 transition-all hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(60,40,80,0.35)]">
           <div class="flex items-start justify-between">
             <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[#1273A6]/10 text-[#1273A6]"><svg class="ic h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><path d="m2.5 9 9.5-5 9.5 5-9.5 5-9.5-5Z"></path><path d="M7 12.5V17c0 1.2 2.2 2 5 2s5-.8 5-2v-4.5"></path><path d="m22 9 0 6"></path></svg></div>
             <span class="font-mono text-xs text-[#6B645C]">02</span>
           </div>
           <div class="mt-10"><h3 class="text-lg font-semibold text-[#26222E]">Software y Data</h3><p class="mt-1 flex items-center gap-2 text-sm text-[#6B645C]"><span class="font-mono font-semibold text-[#512DA8]">Ver ofertas</span><span class="transition-transform group-hover:translate-x-1"><span data-icon="arrow-right" class="h-3.5 w-3.5"></span></span></p></div>
         </a>
-        <a href="{% url 'buscar_empleo_ui' %}" class="reveal group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#FEFCF9] p-6 transition-all hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(60,40,80,0.35)]">
+        <a href="{% url 'buscar_empleo' %}" class="reveal group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#FEFCF9] p-6 transition-all hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(60,40,80,0.35)]">
           <div class="flex items-start justify-between">
             <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[#B34A8A]/10 text-[#B34A8A]"><svg class="ic h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l1-5h16l1 5"></path><path d="M3 9v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9"></path><path d="M3 9h18v4"></path><path d="M9 9V5"></path><path d="M15 9V5"></path><path d="M9 13h.01M15 13h.01M9 17h.01M15 17h.01"></path></svg></div>
             <span class="font-mono text-xs text-[#6B645C]">03</span>
           </div>
           <div class="mt-10"><h3 class="text-lg font-semibold text-[#26222E]">Comercio y Ventas</h3><p class="mt-1 flex items-center gap-2 text-sm text-[#6B645C]"><span class="font-mono font-semibold text-[#512DA8]">Ver ofertas</span><span class="transition-transform group-hover:translate-x-1"><span data-icon="arrow-right" class="h-3.5 w-3.5"></span></span></p></div>
         </a>
-        <a href="{% url 'buscar_empleo_ui' %}" class="reveal group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#FEFCF9] p-6 transition-all hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(60,40,80,0.35)]">
+        <a href="{% url 'buscar_empleo' %}" class="reveal group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#FEFCF9] p-6 transition-all hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(60,40,80,0.35)]">
           <div class="flex items-start justify-between">
             <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[#C77B1E]/10 text-[#C77B1E]"><svg class="ic h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V8l7-5 7 5v13"></path><path d="M9 21v-6h6v6"></path></svg></div>
             <span class="font-mono text-xs text-[#6B645C]">04</span>
           </div>
           <div class="mt-10"><h3 class="text-lg font-semibold text-[#26222E]">Administración pública</h3><p class="mt-1 flex items-center gap-2 text-sm text-[#6B645C]"><span class="font-mono font-semibold text-[#512DA8]">Ver ofertas</span><span class="transition-transform group-hover:translate-x-1"><span data-icon="arrow-right" class="h-3.5 w-3.5"></span></span></p></div>
         </a>
-        <a href="{% url 'buscar_empleo_ui' %}" class="reveal group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#FEFCF9] p-6 transition-all hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(60,40,80,0.35)]">
+        <a href="{% url 'buscar_empleo' %}" class="reveal group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#FEFCF9] p-6 transition-all hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(60,40,80,0.35)]">
           <div class="flex items-start justify-between">
             <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[#2E8B57]/10 text-[#2E8B57]"><svg class="ic h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21V9"></path><path d="M16 21V5"></path><path d="M8 9a4 4 0 0 0 8 0"></path><path d="M2 21h20"></path></svg></div>
             <span class="font-mono text-xs text-[#6B645C]">05</span>
           </div>
           <div class="mt-10"><h3 class="text-lg font-semibold text-[#26222E]">Docencia técnica</h3><p class="mt-1 flex items-center gap-2 text-sm text-[#6B645C]"><span class="font-mono font-semibold text-[#512DA8]">Ver ofertas</span><span class="transition-transform group-hover:translate-x-1"><span data-icon="arrow-right" class="h-3.5 w-3.5"></span></span></p></div>
         </a>
-        <a href="{% url 'buscar_empleo_ui' %}" class="reveal group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#FEFCF9] p-6 transition-all hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(60,40,80,0.35)]">
+        <a href="{% url 'buscar_empleo' %}" class="reveal group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#FEFCF9] p-6 transition-all hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(60,40,80,0.35)]">
           <div class="flex items-start justify-between">
             <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[#C2402E]/10 text-[#C2402E]"><svg class="ic h-6 w-6" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18a4 4 0 0 0 4 4h8a4 4 0 0 0 4-4V6"></path><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3"></path></svg></div>
             <span class="font-mono text-xs text-[#6B645C]">06</span>
@@ -235,7 +235,7 @@
           <h2 class="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">La oferta exigía una habilidad que no tenés. Resolvelo.</h2>
           <p class="mt-5 max-w-md leading-relaxed text-white/75">Cuando tu match queda corto, la plataforma te recomienda la capacitación exacta para cubrir el vacío. Gratuita, en línea y reconocida por tu empleador.</p>
           <div class="mt-8 flex flex-wrap gap-3">
-            <a href="{% url 'buscar_empleo_ui' %}" class="btn-sun">Explorar cursos <span data-icon="arrow-right" class="h-4 w-4"></span></a>
+            <a href="{% url 'buscar_empleo' %}" class="btn-sun">Explorar cursos <span data-icon="arrow-right" class="h-4 w-4"></span></a>
             <span class="chip !bg-white/10 !text-white" style="border-color:rgba(255,255,255,0.2)">Certificado IEN</span>
           </div>
         </div>
@@ -293,7 +293,7 @@
           </ul>
           <div class="mt-8 flex flex-wrap gap-3">
             <a href="{% url 'login' %}" class="btn-ien">Empezar gratis <span data-icon="arrow-right" class="h-4 w-4"></span></a>
-            <a href="{% url 'buscar_empleo_ui' %}" class="btn-ghost">Ver ofertas</a>
+            <a href="{% url 'buscar_empleo' %}" class="btn-ghost">Ver ofertas</a>
           </div>
         </div>
       </div>
@@ -340,7 +340,7 @@
       <p class="mt-5 text-lg text-white/70">Miles de postulantes del nordeste ya encontraron empleo a través del IEN.</p>
       <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
         <a href="{% url 'registro' %}" class="btn-sun !px-8 !py-3.5 text-base">Crear mi cuenta gratis</a>
-        <a href="{% url 'buscar_empleo_ui' %}" class="btn-ghost !border-white/25 !text-white" style="border-color:rgba(255,255,255,0.25);color:#fff">Ver ofertas sin registrarme</a>
+        <a href="{% url 'buscar_empleo' %}" class="btn-ghost !border-white/25 !text-white" style="border-color:rgba(255,255,255,0.25);color:#fff">Ver ofertas sin registrarme</a>
       </div>
       <div class="mt-10 flex items-center justify-center gap-3 font-mono text-xs uppercase tracking-widest text-white/40">
         <span data-icon="wallet" class="h-4 w-4 text-[#FFDE59]"></span>

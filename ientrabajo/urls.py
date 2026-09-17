@@ -28,9 +28,6 @@ urlpatterns = [
     path('moderacion/', include('moderacion.urls')),
     path('ofertas/', include('ofertas.urls')),
 
-    # Interfaz nueva (rediseno) corriendo en paralelo a la actual.
-    path('ui/', include('ientrabajo.ui_urls')),
-
     #url solo para probar ia hasta que este completa la pantalla
     path    ('prueba/', views.ia, name='ia')
 

@@ -136,7 +136,11 @@ def editar_perfil_empresa(request):
 def detalle_oferta_postulante(request, pk):
     oferta = get_object_or_404(Oferta, pk=pk, estado='activa')
     habilidades = [h.strip() for h in oferta.habilidades_requeridas.split(',') if h.strip()]
-    return render(request, 'Ofertas/detalle_oferta.html', {'oferta': oferta, 'habilidades': habilidades})
+    return render(request, 'nueva_ui/detalle_oferta.html', {
+        'vista_activa': 'buscar',
+        'oferta': oferta,
+        'habilidades': habilidades,
+    })
 
 
 def buscar_empleo(request):
@@ -146,7 +150,8 @@ def buscar_empleo(request):
 
     ofertas = obtener_ofertas_activas(busqueda, modalidad, experiencia)
 
-    return render(request, 'Ofertas/buscar_empleo.html', {
+    return render(request, 'nueva_ui/buscar_empleo.html', {
+        'vista_activa': 'buscar',
         'ofertas': ofertas,
         'busqueda': busqueda,
         'modalidad': modalidad,
