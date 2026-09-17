@@ -4,6 +4,8 @@ import requests
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseNotAllowed, JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -11,14 +13,13 @@ from django.views.decorators.http import require_POST
 from usuarios.decorators import postulante_required
 
 from .models import AnalisisCV
-from .services import extraer_texto_cv
 
 
 @login_required
 @postulante_required
 @require_POST
 def solicitar_analisis(request):
-    """Extrae el texto del CV y lo envía al servicio externo de análisis."""
+    """Envía el PDF del CV a FastAPI para que lo extraiga y analice."""
     postulante = request.user.postulante
 
     if not postulante.cv:
@@ -31,27 +32,32 @@ def solicitar_analisis(request):
     if not settings.IA_API_URL:
         return JsonResponse({'success': False, 'mensaje': 'El servicio de análisis no está configurado.'}, status=503)
 
-    try:
-        texto_cv = extraer_texto_cv(postulante.cv.path)
-    except (OSError, ValueError):
-        return JsonResponse({'success': False, 'mensaje': 'No se pudo leer el PDF del CV.'}, status=400)
-
-    if not texto_cv:
-        return JsonResponse({'success': False, 'mensaje': 'El PDF no contiene texto extraíble.'}, status=400)
-
     analisis = AnalisisCV.objects.create(postulante=postulante)
-    payload = {
+    data = {
         'analysis_id': analisis.id,
         'candidate_id': postulante.id,
-        'cv_text': texto_cv,
     }
-    headers = {'Content-Type': 'application/json'}
+    headers = {}
     if settings.IA_API_TOKEN:
         headers['Authorization'] = f'Bearer {settings.IA_API_TOKEN}'
 
     try:
-        respuesta = requests.post(settings.IA_API_URL, json=payload, headers=headers, timeout=30)
-        respuesta.raise_for_status()
+        with postulante.cv.open('rb') as cv_file:
+            files = {
+                'cv': (
+                    postulante.cv.name.rsplit('/', 1)[-1],
+                    cv_file,
+                    'application/pdf',
+                )
+            }
+            respuesta = requests.post(
+                settings.IA_API_URL,
+                data=data,
+                files=files,
+                headers=headers,
+                timeout=30,
+            )
+            respuesta.raise_for_status()
     except requests.RequestException as exc:
         analisis.estado = AnalisisCV.Estado.ERROR
         analisis.error = str(exc)
@@ -63,6 +69,42 @@ def solicitar_analisis(request):
         'mensaje': 'CV enviado para analizar.',
         'analisis_id': analisis.id,
     }, status=202)
+
+
+@login_required
+@postulante_required
+def estado_analisis(request, analisis_id):
+    """Devuelve el estado para que el botón pueda actualizarse sin recargar."""
+    analisis = get_object_or_404(
+        AnalisisCV,
+        pk=analisis_id,
+        postulante=request.user.postulante,
+    )
+    data = {
+        'estado': analisis.estado,
+        'mensaje': '',
+        'resultado_url': None,
+    }
+    if analisis.estado == AnalisisCV.Estado.COMPLETADO:
+        data['mensaje'] = 'El análisis del CV está listo.'
+        data['resultado_url'] = reverse('ia:ver_resultado', args=[analisis.id])
+    elif analisis.estado == AnalisisCV.Estado.ERROR:
+        data['mensaje'] = analisis.error or 'No se pudo analizar el CV.'
+    else:
+        data['mensaje'] = 'Analizando CV…'
+    return JsonResponse(data)
+
+
+@login_required
+@postulante_required
+def ver_resultado(request, analisis_id):
+    """Muestra el resultado de un análisis que pertenece al postulante actual."""
+    analisis = get_object_or_404(
+        AnalisisCV,
+        pk=analisis_id,
+        postulante=request.user.postulante,
+    )
+    return render(request, 'ia/resultado_analisis.html', {'analisis': analisis})
 
 
 @csrf_exempt

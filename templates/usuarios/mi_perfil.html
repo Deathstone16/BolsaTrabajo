@@ -80,12 +80,18 @@
               Eliminar
             </button>
           </form>
-          <form method="post" action="{% url 'ia:solicitar_analisis' %}" class="inline" id="form-analizar-cv">
+          <form method="post" action="{% url 'ia:solicitar_analisis' %}" class="inline" id="form-analizar-cv" data-estado-url="{% url 'ia:estado_analisis' 0 %}">
             {% csrf_token %}
             <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors">
               Analizar CV
             </button>
           </form>
+          <a id="boton-ver-resultado"
+             href="{% if ultimo_analisis and ultimo_analisis.estado == 'completado' %}{% url 'ia:ver_resultado' ultimo_analisis.id %}{% else %}#{% endif %}"
+             aria-disabled="{% if not ultimo_analisis or ultimo_analisis.estado != 'completado' %}true{% else %}false{% endif %}"
+             class="px-4 py-2 text-sm font-medium border rounded-lg transition-colors {% if ultimo_analisis and ultimo_analisis.estado == 'completado' %}text-primary border-primary hover:bg-primary/5{% else %}text-muted-foreground border-border opacity-50 pointer-events-none{% endif %}">
+            Ver resultado
+          </a>
         </div>
       </div>
     </div>

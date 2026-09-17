@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="max-w-3xl mx-auto py-10 px-4">
+  <a href="{% url 'mi_perfil' %}" class="text-sm text-primary hover:underline">← Volver a mi perfil</a>
+  <h1 class="text-3xl font-medium mt-4 mb-2">Resultado del análisis de CV</h1>
+
+  {% if analisis.estado == 'completado' %}
+    <div class="bg-white rounded-xl border border-border p-6 mt-6">
+      <h2 class="text-xl font-medium mb-3">Resumen profesional</h2>
+      <p class="text-muted-foreground">{{ analisis.respuesta.result.resumen_ejecutivo }}</p>
+    </div>
+
+    <div class="bg-white rounded-xl border border-border p-6 mt-5">
+      <h2 class="text-xl font-medium mb-4">Habilidades detectadas</h2>
+      <div class="space-y-4">
+        {% for habilidad in analisis.respuesta.result.habilidades_analizadas %}
+          <article class="border border-border rounded-lg p-4">
+            <div class="flex items-center justify-between gap-4">
+              <h3 class="font-medium">{{ habilidad.tecnologia }}</h3>
+              <span class="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">{{ habilidad.nivel_evaluado }}</span>
+            </div>
+            <p class="text-sm text-muted-foreground mt-2">{{ habilidad.justificacion_evidencia }}</p>
+          </article>
+        {% empty %}
+          <p class="text-muted-foreground">No se detectaron habilidades técnicas.</p>
+        {% endfor %}
+      </div>
+    </div>
+  {% elif analisis.estado == 'error' %}
+    <div class="bg-red-50 text-red-800 border border-red-200 rounded-xl p-5 mt-6">
+      {{ analisis.error }}
+    </div>
+  {% else %}
+    <div class="bg-blue-50 text-blue-800 border border-blue-200 rounded-xl p-5 mt-6">
+      El análisis todavía está en proceso. Volvé a cargar esta página en unos instantes.
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

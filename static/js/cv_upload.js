@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const formUpload = document.getElementById('form-cv-upload');
     const formEliminar = document.getElementById('form-eliminar-cv');
     const formAnalizar = document.getElementById('form-analizar-cv');
+    const botonResultado = document.getElementById('boton-ver-resultado');
 
     if (!cvInput) return;
 
@@ -69,7 +70,10 @@ document.addEventListener('DOMContentLoaded', function() {
         formAnalizar.addEventListener('submit', function(e) {
             e.preventDefault();
             const boton = formAnalizar.querySelector('button[type="submit"]');
+            const textoOriginal = boton.innerHTML;
             boton.disabled = true;
+            boton.classList.add('opacity-70', 'cursor-wait');
+            boton.innerHTML = '<svg class="w-4 h-4 inline-block mr-2 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Analizando...';
             mostrarFeedback('loading', 'Enviando CV para analizar...');
 
             fetch(formAnalizar.action, {
@@ -82,17 +86,51 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    mostrarFeedback('success', data.mensaje || 'CV enviado para analizar.');
+                    consultarEstadoAnalisis(data.analisis_id, boton, textoOriginal);
                 } else {
                     mostrarFeedback('error', data.mensaje || 'No se pudo enviar el CV.');
-                    boton.disabled = false;
+                    restaurarBotonAnalizar(boton, textoOriginal);
                 }
             })
             .catch(() => {
                 mostrarFeedback('error', 'Error de conexión. Intentá nuevamente.');
-                boton.disabled = false;
+                restaurarBotonAnalizar(boton, textoOriginal);
             });
         });
+    }
+
+    function consultarEstadoAnalisis(analisisId, boton, textoOriginal) {
+        const url = formAnalizar.dataset.estadoUrl.replace('/0/', '/' + analisisId + '/');
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(response => response.json())
+            .then(data => {
+                if (data.estado === 'pendiente') {
+                    mostrarFeedback('loading', data.mensaje || 'Analizando CV...');
+                    setTimeout(() => consultarEstadoAnalisis(analisisId, boton, textoOriginal), 3000);
+                    return;
+                }
+
+                restaurarBotonAnalizar(boton, textoOriginal);
+                if (data.estado === 'completado') {
+                    mostrarFeedback('success', data.mensaje || 'El análisis del CV está listo.');
+                    botonResultado.href = data.resultado_url;
+                    botonResultado.setAttribute('aria-disabled', 'false');
+                    botonResultado.classList.remove('text-muted-foreground', 'border-border', 'opacity-50', 'pointer-events-none');
+                    botonResultado.classList.add('text-primary', 'border-primary', 'hover:bg-primary/5');
+                } else {
+                    mostrarFeedback('error', data.mensaje || 'No se pudo analizar el CV.');
+                }
+            })
+            .catch(() => {
+                restaurarBotonAnalizar(boton, textoOriginal);
+                mostrarFeedback('error', 'No se pudo consultar el estado del análisis.');
+            });
+    }
+
+    function restaurarBotonAnalizar(boton, textoOriginal) {
+        boton.disabled = false;
+        boton.classList.remove('opacity-70', 'cursor-wait');
+        boton.innerHTML = textoOriginal;
     }
 
     function enviarCV(archivo) {

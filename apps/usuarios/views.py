@@ -173,6 +173,8 @@ def contrasena_restablecida(request):
 @postulante_required
 def mi_perfil(request):
     postulante = request.user.postulante
+    # El último análisis permite ofrecer el resultado al volver al perfil.
+    ultimo_analisis = postulante.analisis_cv.first()
 
     if request.method == 'POST':
         form = CargaCVForm(request.POST, request.FILES)
@@ -192,6 +194,7 @@ def mi_perfil(request):
     return render(request, 'usuarios/mi_perfil.html', {
         'postulante': postulante,
         'form': form,
+        'ultimo_analisis': ultimo_analisis,
     })
 
 

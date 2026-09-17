@@ -26,8 +26,7 @@ class AnalisisCVViewsTests(TestCase):
         self.client.force_login(self.usuario)
 
     @patch('ia.views.requests.post')
-    @patch('ia.views.extraer_texto_cv', return_value='Experiencia con Python y Django')
-    def test_envia_texto_y_crea_solicitud(self, extraer_texto, post):
+    def test_envia_pdf_y_crea_solicitud(self, post):
         respuesta_api = Mock()
         respuesta_api.raise_for_status.return_value = None
         post.return_value = respuesta_api
@@ -36,10 +35,12 @@ class AnalisisCVViewsTests(TestCase):
 
         self.assertEqual(response.status_code, 202)
         analisis = AnalisisCV.objects.get(postulante=self.postulante)
-        payload = post.call_args.kwargs['json']
-        self.assertEqual(payload['analysis_id'], analisis.id)
-        self.assertEqual(payload['candidate_id'], self.postulante.id)
-        self.assertEqual(payload['cv_text'], 'Experiencia con Python y Django')
+        data = post.call_args.kwargs['data']
+        files = post.call_args.kwargs['files']
+        self.assertEqual(data['analysis_id'], analisis.id)
+        self.assertEqual(data['candidate_id'], self.postulante.id)
+        self.assertTrue(files['cv'][0].endswith('.pdf'))
+        self.assertEqual(files['cv'][2], 'application/pdf')
 
     def test_callback_guarda_json_de_api_externa(self):
         analisis = AnalisisCV.objects.create(postulante=self.postulante)
