@@ -1,3 +1,13 @@
+/*
+ * Las plantillas del rediseno usan <span data-icon> + ien-ui.js en vez de
+ * <i data-lucide> + lucide. Este helper dibuja los iconos con el sistema que
+ * este disponible, para que dashboard.js sirva en las dos bases.
+ */
+function dibujarIconos(scope) {
+  if (window.IenUI && window.IenUI.injectIcons) window.IenUI.injectIcons(scope || document);
+  else if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
 function getCSRFToken() {
   const cookies = document.cookie.split(';');
   for (let cookie of cookies) {
@@ -143,7 +153,7 @@ async function refrescarListaOfertas() {
   const response = await fetch(window.URLS.listaOfertasParcial);
   const html = await response.text();
   document.getElementById('ofertas-list').innerHTML = html;
-  lucide.createIcons();
+  dibujarIconos();
 }
 
 let pkEliminar = null;
@@ -196,11 +206,11 @@ function inicializarTags() {
 function dibujarPildora(texto) {
   const container = document.getElementById('tags-container');
   const pildora = document.createElement('span');
-  pildora.className = 'inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium';
+  pildora.className = 'chip !text-sm';
   pildora.innerHTML = `${escapeHtml(texto)}
     <button type="button" data-tag="${escapeHtml(texto)}"
-            class="hover:bg-primary/20 rounded-full p-0.5 transition-colors">
-      <i data-lucide="x" class="w-3 h-3"></i>
+            class="rounded-full p-0.5 transition-opacity hover:opacity-60">
+      <span data-icon="x" class="h-3 w-3"></span>
     </button>`;
   pildora.querySelector('button').addEventListener('click', function() {
     pildora.remove();
@@ -208,7 +218,7 @@ function dibujarPildora(texto) {
   });
   container.appendChild(pildora);
   actualizarHiddenInput();
-  lucide.createIcons();
+  dibujarIconos(pildora);
 }
 
 function actualizarHiddenInput() {

@@ -3,8 +3,8 @@
 {{ form.non_field_errors }}
 
 {% if form.errors %}
-<div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6">
-  <p class="font-medium mb-1">Corregí los siguientes errores:</p>
+<div class="mb-6 rounded-2xl border border-[#d4183d]/30 bg-[#d4183d]/10 p-4 text-[#d4183d]">
+  <p class="mb-1 font-semibold">Corregí los siguientes errores:</p>
   <ul class="list-disc pl-5 text-sm">
     {% for field, errors in form.errors.items %}
       {% for error in errors %}
@@ -16,27 +16,27 @@
 {% endif %}
 
 <div class="space-y-4">
-  <h3 class="font-medium flex items-center gap-2">
-    <i data-lucide="briefcase" class="w-5 h-5 text-primary"></i>Información básica
+  <h3 class="flex items-center gap-2 text-lg font-semibold text-[#26222E]">
+    <span data-icon="briefcase" class="h-5 w-5 text-[#512DA8]"></span>Información básica
   </h3>
 
   <div class="space-y-2">
-    <label class="block text-sm font-medium">Título de la oferta</label>
+    <label class="block text-sm">Título de la oferta</label>
     <input type="text" name="titulo" value="{{ form.titulo.value|default:'' }}" placeholder="Ej. Buscamos desarrollador Full Stack"
-           class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" required>
-    {% if form.titulo.errors %}<p class="text-sm text-red-500">{{ form.titulo.errors.0 }}</p>{% endif %}
+           class="input-ien" required>
+    {% if form.titulo.errors %}<p class="text-sm text-[#d4183d]">{{ form.titulo.errors.0 }}</p>{% endif %}
   </div>
 
   <div class="space-y-2">
-    <label class="block text-sm font-medium">Nombre del puesto</label>
+    <label class="block text-sm">Nombre del puesto</label>
     <input type="text" name="nombre_puesto" value="{{ form.nombre_puesto.value|default:'' }}" placeholder="Ej. Desarrollador Full Stack"
-           class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" required>
-    {% if form.nombre_puesto.errors %}<p class="text-sm text-red-500">{{ form.nombre_puesto.errors.0 }}</p>{% endif %}
+           class="input-ien" required>
+    {% if form.nombre_puesto.errors %}<p class="text-sm text-[#d4183d]">{{ form.nombre_puesto.errors.0 }}</p>{% endif %}
   </div>
 
   <div class="space-y-2">
-    <label class="block text-sm font-medium">Categoría</label>
-    <select name="categoria" class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+    <label class="block text-sm">Categoría</label>
+    <select name="categoria" class="input-ien">
       <option value="">Seleccionar categoría</option>
       {% for categoria in form.fields.categoria.queryset %}
         <option value="{{ categoria.id }}" {% if form.categoria.value|stringformat:"s" == categoria.id|stringformat:"s" %}selected{% endif %}>
@@ -48,19 +48,19 @@
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="space-y-2">
-      <label class="block text-sm font-medium"><i data-lucide="map-pin" class="w-4 h-4 inline"></i> Ubicación</label>
+      <label class="block text-sm"><span data-icon="map-pin" class="inline h-4 w-4"></span> Ubicación</label>
       <div class="relative">
         <input autocomplete="off" id="input-ubicacion" type="text" name="ubicacion" value="{{ form.ubicacion.value|default:'' }}" placeholder="Ej. Villa María, Córdoba"
-              maxlength="100" class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" required>
+              maxlength="100" class="input-ien" required>
         <ul id="sugerencias-ubicacion"
-            class="hidden absolute z-10 mt-1 w-full max-h-60 overflow-y-auto bg-white border border-border rounded-lg shadow-lg text-sm">
+            class="hidden absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-2xl border border-[rgba(110,85,55,0.16)] bg-white text-sm shadow-lg">
         </ul>
       </div>
-      {% if form.ubicacion.errors %}<p class="text-sm text-red-500">{{ form.ubicacion.errors.0 }}</p>{% endif %}
+      {% if form.ubicacion.errors %}<p class="text-sm text-[#d4183d]">{{ form.ubicacion.errors.0 }}</p>{% endif %}
     </div>
     <div class="space-y-2">
-      <label class="block text-sm font-medium">Modalidad</label>
-      <select name="modalidad" class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+      <label class="block text-sm">Modalidad</label>
+      <select name="modalidad" class="input-ien">
         {% for value, label in form.fields.modalidad.choices %}
           <option value="{{ value }}" {% if form.modalidad.value == value %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
@@ -69,29 +69,29 @@
   </div>
 </div>
 
-<div class="space-y-4 pt-6">
-  <h3 class="font-medium flex items-center gap-2">
-    <i data-lucide="file-text" class="w-5 h-5 text-primary"></i>Descripción del puesto
+<div class="space-y-4 border-t border-[rgba(110,85,55,0.16)] pt-8 mt-8">
+  <h3 class="flex items-center gap-2 text-lg font-semibold text-[#26222E]">
+    <span data-icon="file-text" class="h-5 w-5 text-[#512DA8]"></span>Descripción del puesto
   </h3>
 
   <div class="space-y-2">
-    <label class="block text-sm font-medium">Descripción</label>
+    <label class="block text-sm">Descripción</label>
     <textarea name="descripcion" rows="5" placeholder="Describe las responsabilidades y actividades del puesto..."
-              class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring resize-none" required>{{ form.descripcion.value|default:'' }}</textarea>
-    {% if form.descripcion.errors %}<p class="text-sm text-red-500">{{ form.descripcion.errors.0 }}</p>{% endif %}
+              class="input-ien resize-none" required>{{ form.descripcion.value|default:'' }}</textarea>
+    {% if form.descripcion.errors %}<p class="text-sm text-[#d4183d]">{{ form.descripcion.errors.0 }}</p>{% endif %}
   </div>
 
   <div class="space-y-2">
-    <label class="block text-sm font-medium">Habilidades requeridas</label>
+    <label class="block text-sm">Habilidades requeridas</label>
 
     <div class="relative">
       <input type="text" id="tags-input"
             placeholder="Escribí una habilidad y seleccioná del listado..."
-            class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+            class="input-ien"
             autocomplete="off">
 
       <ul id="tags-dropdown"
-          class="absolute z-10 w-full bg-white border border-border rounded-lg mt-1 shadow-lg hidden max-h-48 overflow-y-auto">
+          class="absolute z-10 mt-1 hidden max-h-48 w-full overflow-y-auto rounded-2xl border border-[rgba(110,85,55,0.16)] bg-white shadow-lg">
       </ul>
     </div>
 
@@ -103,71 +103,69 @@
   </div>
 </div>
 
-<div class="space-y-4 pt-6">
-  <h3 class="font-medium flex items-center gap-2">
-    <i data-lucide="graduation-cap" class="w-5 h-5 text-primary"></i>Experiencia y educación
+<div class="space-y-4 border-t border-[rgba(110,85,55,0.16)] pt-8 mt-8">
+  <h3 class="flex items-center gap-2 text-lg font-semibold text-[#26222E]">
+    <span data-icon="graduation-cap" class="h-5 w-5 text-[#512DA8]"></span>Experiencia y educación
   </h3>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="space-y-2">
-      <label class="block text-sm font-medium"><i data-lucide="clock" class="w-4 h-4 inline"></i> Experiencia requerida</label>
+      <label class="block text-sm"><span data-icon="clock" class="inline h-4 w-4"></span> Experiencia requerida</label>
       <div class="flex items-center gap-2">
-        <select name="experiencia_requerida" class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+        <select name="experiencia_requerida" class="input-ien">
           {% for value, label in form.fields.experiencia_requerida.choices %}
             <option value="{{ value }}" {% if form.experiencia_requerida.value == value %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
       </select>
-        <span class="text-sm text-muted-foreground">años</span>
+        <span class="text-sm text-[#6B645C]">años</span>
       </div>
-      {% if form.experiencia_requerida.errors %}<p class="text-sm text-red-500">{{ form.experiencia_requerida.errors.0 }}</p>{% endif %}
+      {% if form.experiencia_requerida.errors %}<p class="text-sm text-[#d4183d]">{{ form.experiencia_requerida.errors.0 }}</p>{% endif %}
     </div>
 
     <div class="space-y-2">
-      <label class="block text-sm font-medium">Nivel educativo</label>
-      <select name="nivel_educativo" class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+      <label class="block text-sm">Nivel educativo</label>
+      <select name="nivel_educativo" class="input-ien">
         {% for value, label in form.fields.nivel_educativo.choices %}
           <option value="{{ value }}" {% if form.nivel_educativo.value == value %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
       </select>
-      {% if form.nivel_educativo.errors %}<p class="text-sm text-red-500">{{ form.nivel_educativo.errors.0 }}</p>{% endif %}
+      {% if form.nivel_educativo.errors %}<p class="text-sm text-[#d4183d]">{{ form.nivel_educativo.errors.0 }}</p>{% endif %}
     </div>
   </div>
 </div>
 
-<div class="space-y-4 pt-6">
+<div class="space-y-4 border-t border-[rgba(110,85,55,0.16)] pt-8 mt-8">
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="space-y-2">
-      <label class="block text-sm font-medium">📅 Fecha de cierre</label>
+      <label class="flex items-center gap-2 text-sm"><span data-icon="calendar" class="h-4 w-4 text-[#512DA8]"></span> Fecha de cierre</label>
       <input type="date" name="fecha_cierre" value="{% if form.fecha_cierre.value %}{{ form.fecha_cierre.value|date:'Y-m-d' }}{% endif %}"
-             class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+             class="input-ien">
       
-      {% if form.fecha_cierre.errors %}<p class="text-sm text-red-500">{{ form.fecha_cierre.errors.0 }}</p>{% endif %}
+      {% if form.fecha_cierre.errors %}<p class="text-sm text-[#d4183d]">{{ form.fecha_cierre.errors.0 }}</p>{% endif %}
     </div>
     <div class="flex items-center justify-between pt-6">
       <div>
-        <label class="block text-sm font-medium">Publicación confidencial</label>
-        <p class="text-sm text-muted-foreground">Oculta el nombre de la empresa</p>
+        <label class="block text-sm">Publicación confidencial</label>
+        <p class="text-sm text-[#6B645C]">Oculta el nombre de la empresa</p>
       </div>
       <label class="relative inline-flex items-center cursor-pointer">
         <input type="checkbox" name="es_confidencial" class="sr-only peer"
                {% if form.es_confidencial.value %}checked{% endif %}>
-        <div class="w-11 h-6 bg-switch-background peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+        <div class="switch-track"></div>
       </label>
     </div>
   </div>
 
   <div class="flex gap-4 pt-4">
-    <button type="submit" class="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">
+    <button type="submit" class="btn-ien flex-1 !py-3.5">
       {{ submit_text|default:"Publicar oferta" }}
     </button>
     {% if modal_mode %}
-      <button type="button" onclick="closeOfertaModal()"
-              class="px-6 py-3 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors">
+      <button type="button" onclick="closeOfertaModal()" class="btn-ghost !py-3.5">
         Cancelar
       </button>
     {% else %}
-      <a href="{% url 'home' %}"
-         class="px-6 py-3 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors text-center">
+      <a href="{% url 'dashboard_empresa' %}" class="btn-ghost !py-3.5">
         Cancelar
       </a>
     {% endif %}

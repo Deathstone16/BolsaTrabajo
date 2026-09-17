@@ -65,6 +65,33 @@
                 <a href="{% url 'detalle_oferta' oferta_destacada.pk %}" class="grid h-9 w-9 place-items-center rounded-full bg-[#512DA8] text-white transition-transform hover:scale-110"><span data-icon="arrow-right" class="h-4 w-4"></span></a>
               </div>
             </div>
+            {% else %}
+            {% comment %}
+              Sin ofertas activas la tarjeta seguia existiendo pero vacia y el hero
+              quedaba desbalanceado. Se muestra el mismo diseno en estado neutro,
+              sin inventar una oferta que no existe.
+            {% endcomment %}
+            <div class="panel relative z-10 overflow-hidden p-6" style="animation:floatY 7s ease-in-out infinite">
+              <div class="absolute right-0 top-0 h-24 w-24 rounded-bl-[4rem] bg-[#512DA8]" aria-hidden="true"></div>
+              <div class="relative flex items-start justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#512DA8] text-sm font-bold text-white">IEN</div>
+                  <div>
+                    <p class="font-semibold text-[#26222E]">Acá va la próxima oferta</p>
+                    <p class="text-sm text-[#6B645C]">Todavía no hay ninguna publicada</p>
+                  </div>
+                </div>
+              </div>
+              <div class="relative mt-6 flex flex-wrap gap-2">
+                <span class="chip"><span data-icon="map-pin" class="h-3 w-3"></span> Chaco</span>
+                <span class="chip"><span data-icon="clock" class="h-3 w-3"></span> Todas las experiencias</span>
+                <span class="chip">Presencial · Remoto · Híbrido</span>
+              </div>
+              <div class="relative mt-6 flex items-center justify-between border-t border-[rgba(110,85,55,0.16)] pt-4">
+                <p class="font-mono text-[11px] uppercase tracking-widest text-[#6B645C]">¿Sos empresa? Publicá gratis</p>
+                <a href="{% url 'crear_oferta' %}" class="grid h-9 w-9 place-items-center rounded-full bg-[#512DA8] text-white transition-transform hover:scale-110"><span data-icon="arrow-right" class="h-4 w-4"></span></a>
+              </div>
+            </div>
             {% endif %}
 
             <div class="absolute -left-10 top-10 hidden -rotate-6 shadow-lg sm:flex" style="background:#fff;animation:floatY 8s ease-in-out 1s infinite">

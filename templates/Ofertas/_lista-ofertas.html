@@ -1,49 +1,55 @@
+{% comment %}
+  Lo devuelve tambien la vista lista_ofertas_parcial y dashboard.js lo inyecta
+  en #ofertas-list, asi que los onclick openEditModal/confirmDelete/openCreateModal
+  tienen que quedar como estan.
+{% endcomment %}
 {% if ofertas %}
   {% for oferta in ofertas %}
-    <div class="border border-border rounded-xl p-6 mb-4 hover:border-primary/30 transition-all">
-      <div class="flex items-start justify-between">
-        <div class="flex-1">
-          <h3 class="text-lg font-medium">{{ oferta.titulo }}</h3>
-          <p class="text-sm text-muted-foreground mt-1">
+    <div class="mb-4 rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#FEFCF9] p-6 transition-all hover:border-[#512DA8]/30 hover:shadow-[0_24px_50px_-24px_rgba(81,45,168,0.3)]">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div class="min-w-0 flex-1">
+          <h3 class="text-lg font-semibold text-[#26222E]">{{ oferta.titulo }}</h3>
+          <p class="mt-1 text-sm text-[#6B645C]">
             {{ oferta.nombre_puesto }} · {{ oferta.ubicacion }} · {{ oferta.get_modalidad_display }}
           </p>
         </div>
-        <div class="flex items-center gap-2 ml-4">
-          <span class="px-3 py-1 rounded-full text-xs font-medium
-            {% if oferta.estado == 'activa' %}bg-green-100 text-green-700
-            {% elif oferta.estado == 'pendiente' %}bg-yellow-100 text-yellow-700
-            {% else %}bg-gray-100 text-gray-700{% endif %}">
+
+        <div class="flex items-center gap-2">
+          <span class="rounded-full px-3 py-1 text-xs font-semibold
+            {% if oferta.estado == 'activa' %}bg-[#27AE60]/15 text-[#1B6B42]
+            {% elif oferta.estado == 'pendiente' %}bg-[#FFDE59]/35 text-[#8A6400]
+            {% elif oferta.estado == 'rechazada' %}bg-[#d4183d]/10 text-[#8A1028]
+            {% else %}bg-[#F0E9E1] text-[#6B645C]{% endif %}">
             {{ oferta.get_estado_display }}
           </span>
-          <button type="button" onclick="openEditModal({{ oferta.id }})"
-                  class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                  title="Editar oferta">
-            <i data-lucide="pencil" class="w-4 h-4"></i>
+
+          <button type="button" onclick="openEditModal({{ oferta.id }})" title="Editar oferta"
+                  class="grid h-9 w-9 place-items-center rounded-full border border-[rgba(110,85,55,0.16)] text-[#6B645C] transition-colors hover:border-[#512DA8] hover:text-[#512DA8]">
+            <span data-icon="pencil" class="h-4 w-4"></span>
           </button>
-          <button type="button" onclick="confirmDelete({{ oferta.id }})"
-                  class="p-2 text-muted-foreground hover:text-destructive hover:bg-red-50 rounded-lg transition-colors"
-                  title="Eliminar oferta">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          <button type="button" onclick="confirmDelete({{ oferta.id }})" title="Eliminar oferta"
+                  class="grid h-9 w-9 place-items-center rounded-full border border-[rgba(110,85,55,0.16)] text-[#6B645C] transition-colors hover:border-[#d4183d] hover:text-[#d4183d]">
+            <span data-icon="trash" class="h-4 w-4"></span>
           </button>
         </div>
       </div>
-      <p class="text-xs text-muted-foreground mt-3">
+
+      <p class="mt-4 font-mono text-xs uppercase tracking-wider text-[#6B645C]">
         Publicada: {{ oferta.fecha_publicacion|date:"d/m/Y" }}
         {% if oferta.fecha_cierre %} · Cierre: {{ oferta.fecha_cierre|date:"d/m/Y" }}{% endif %}
       </p>
     </div>
   {% endfor %}
 {% else %}
-  <div class="text-center py-12">
-    <div class="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
-      <i data-lucide="briefcase" class="w-8 h-8 text-muted-foreground"></i>
+  <div class="py-16 text-center">
+    <div class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-[#512DA8]/10">
+      <span data-icon="briefcase" class="h-8 w-8 text-[#512DA8]"></span>
     </div>
-    <h3 class="font-medium mb-2">No hay ofertas publicadas</h3>
-    <p class="text-sm text-muted-foreground mb-4">Publicá tu primera oferta para atraer talento</p>
+    <h3 class="mt-6 text-lg font-semibold text-[#26222E]">No hay ofertas publicadas</h3>
+    <p class="mt-2 text-sm text-[#6B645C]">Publicá tu primera oferta para atraer talento.</p>
     {% if oferente.estado_obj.puede_publicar %}
-      <button onclick="openCreateModal()"
-              class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg">
-        Publicar primera oferta
+      <button type="button" onclick="openCreateModal()" class="btn-ien mt-6">
+        Publicar primera oferta <span data-icon="arrow-right" class="h-4 w-4"></span>
       </button>
     {% endif %}
   </div>

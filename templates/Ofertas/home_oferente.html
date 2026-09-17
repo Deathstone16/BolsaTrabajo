@@ -1,73 +1,88 @@
-{% extends 'base.html' %}
+{% extends 'nueva_ui/base.html' %}
 {% load static %}
 
-{% block content %}
-  <div class="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+{% block title %}Mi panel · {{ oferente.nombre_empresa }} · IEN Empleo{% endblock %}
 
-    <div class="bg-white rounded-2xl shadow-sm border border-border overflow-hidden mb-6">
-      <div class="h-48 bg-gradient-to-r from-primary/20 to-primary/10">
+{% block content %}
+{% comment %}
+  Repintado con los tokens del rediseno. NO tocar, los usa static/js/dashboard.js:
+    ids     -> ofertas-list, oferta-modal, oferta-modal-overlay, oferta-form,
+               modal-title, modal-errors, modal-scroll, delete-modal,
+               confirm-delete-btn
+    clases  -> tab-link, tab-content (y los ids tab-ofertas / tab-empresa)
+    handler -> cambiarTab, openCreateModal, closeOfertaModal, closeDeleteModal
+  dashboard.js ademas agrega y saca border-primary/text-primary y
+  border-transparent/text-muted-foreground sobre .tab-link: esas cuatro clases
+  estan definidas en static/css/ui/ien-theme.css.
+{% endcomment %}
+<div class="min-h-screen bg-[#F8F3F0] py-10">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+    <div class="panel mb-6 overflow-hidden">
+      <div class="h-48 bg-gradient-to-r from-[#512DA8]/25 to-[#FFDE59]/25">
         {% if oferente.banner %}
-          <img src="{{ oferente.banner.url }}" class="w-full h-full object-cover">
+          <img src="{{ oferente.banner.url }}" alt="" class="h-full w-full object-cover">
         {% endif %}
       </div>
       <div class="px-8 pb-8">
-        <div class="flex flex-col md:flex-row gap-6 -mt-16 relative">
+        <div class="relative -mt-16 flex flex-col gap-6 md:flex-row">
           {% if oferente.logo %}
             <img src="{{ oferente.logo.url }}" alt="{{ oferente.nombre_empresa }}"
-                class="w-32 h-32 rounded-2xl border-4 border-white shadow-lg object-cover bg-white">
+                 class="h-32 w-32 rounded-3xl border-4 border-white bg-white object-cover shadow-lg">
           {% else %}
-            <div class="w-32 h-32 rounded-2xl border-4 border-white shadow-lg bg-primary/10 flex items-center justify-center text-5xl font-medium text-primary">
-              {{ oferente.nombre_empresa|first }}
+            <div class="grid h-32 w-32 shrink-0 place-items-center rounded-3xl border-4 border-white bg-[#512DA8] text-4xl font-bold text-white shadow-lg">
+              {{ oferente.nombre_empresa|slice:":2"|upper }}
             </div>
           {% endif %}
-          <div class="flex-1 mt-16 md:mt-20">
-            <h1 class="text-3xl font-medium">{{ oferente.nombre_empresa }}</h1>
-            <div class="flex flex-wrap gap-3 text-sm text-muted-foreground mt-2">
+          <div class="mt-4 flex-1 md:mt-20">
+            <h1 class="text-3xl font-bold tracking-tight text-[#26222E]">{{ oferente.nombre_empresa }}</h1>
+            <div class="mt-3 flex flex-wrap gap-2">
               {% if oferente.industria %}
-                <span><i data-lucide="building2" class="w-4 h-4 inline"></i> {{ oferente.industria }}</span>
+                <span class="chip"><span data-icon="building" class="h-3 w-3"></span> {{ oferente.industria }}</span>
               {% endif %}
               {% if oferente.ubicacion %}
-                <span><i data-lucide="map-pin" class="w-4 h-4 inline"></i> {{ oferente.ubicacion }}</span>
+                <span class="chip"><span data-icon="map-pin" class="h-3 w-3"></span> {{ oferente.ubicacion }}</span>
               {% endif %}
               {% if oferente.tamano_empresa %}
-                <span><i data-lucide="users" class="w-4 h-4 inline"></i> {{ oferente.get_tamano_empresa_display }}</span>
+                <span class="chip"><span data-icon="users" class="h-3 w-3"></span> {{ oferente.get_tamano_empresa_display }}</span>
               {% endif %}
             </div>
             {% if oferente.descripcion %}
-              <p class="text-muted-foreground mt-4">{{ oferente.descripcion }}</p>
+              <p class="mt-4 max-w-3xl leading-relaxed text-[#6B645C]">{{ oferente.descripcion }}</p>
             {% endif %}
           </div>
         </div>
       </div>
     </div>
 
-    <div class="{{ oferente.estado_obj.badge_css }} rounded-xl p-4 mb-6 flex items-center gap-3">
-        <i data-lucide="{{ oferente.estado_obj.badge_icon }}" class="w-5 h-5"></i>
-        <span class="font-medium">{{ oferente.estado_obj.badge_text }}</span>
+    {# badge_css y badge_icon los devuelve apps/usuarios/estado_oferente.py #}
+    <div class="{{ oferente.estado_obj.badge_css }} mb-6 flex items-center gap-3 rounded-2xl border px-5 py-4">
+      <span data-icon="{{ oferente.estado_obj.badge_icon }}" class="h-5 w-5 shrink-0"></span>
+      <span class="font-semibold">{{ oferente.estado_obj.badge_text }}</span>
     </div>
 
-   <div class="bg-white rounded-xl shadow-sm border border-border p-8">
+    <div class="panel p-8">
 
-      <nav class="flex gap-6 border-b border-border mb-6">
-        <a href="#ofertas" class="tab-link px-1 py-3 border-b-2 text-sm font-medium transition-colors"
-          data-tab="ofertas"
-          onclick="cambiarTab('ofertas'); return false;">
+      <nav class="mb-8 flex gap-6 border-b border-[rgba(110,85,55,0.16)]">
+        <a href="#ofertas" class="tab-link border-b-2 px-1 py-3 text-sm font-medium transition-colors"
+           data-tab="ofertas" onclick="cambiarTab('ofertas'); return false;">
           Ofertas laborales
         </a>
-        <a href="#empresa" class="tab-link px-1 py-3 border-b-2 text-sm font-medium transition-colors"
-          data-tab="empresa"
-          onclick="cambiarTab('empresa'); return false;">
+        <a href="#empresa" class="tab-link border-b-2 px-1 py-3 text-sm font-medium transition-colors"
+           data-tab="empresa" onclick="cambiarTab('empresa'); return false;">
           Información de la empresa
         </a>
       </nav>
 
       <div id="tab-ofertas" class="tab-content">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-medium">Mis ofertas publicadas</h2>
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p class="kicker">Tus publicaciones</p>
+            <h2 class="mt-2 text-2xl font-bold tracking-tight text-[#26222E]">Mis ofertas publicadas</h2>
+          </div>
           {% if oferente.estado_obj.puede_publicar %}
-            <button onclick="openCreateModal()"
-                    class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
-              <i data-lucide="plus" class="w-5 h-5"></i>Nueva oferta
+            <button type="button" onclick="openCreateModal()" class="btn-ien !py-2.5 text-sm">
+              <span data-icon="plus" class="h-4 w-4"></span> Nueva oferta
             </button>
           {% endif %}
         </div>
@@ -78,160 +93,125 @@
       </div>
 
       <div id="tab-empresa" class="tab-content hidden">
-        <h2 class="text-2xl font-medium mb-6">Información de la empresa</h2>
+        <p class="kicker">Tu empresa</p>
+        <h2 class="mt-2 text-2xl font-bold tracking-tight text-[#26222E]">Información de la empresa</h2>
 
-        <form method="post" action="{% url 'editar_perfil_empresa' %}"
-              enctype="multipart/form-data">
+        <form method="post" action="{% url 'editar_perfil_empresa' %}" enctype="multipart/form-data" class="mt-8">
           {% csrf_token %}
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-            <div class="space-y-2">
-              <label class="block text-sm font-medium">Nombre de la empresa</label>
-              <input type="text" name="nombre_empresa"
-                    value="{{ form_perfil.nombre_empresa.value|default:'' }}"
-                    class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg">
+          <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div class="space-y-1.5">
+              <label class="block text-sm">Nombre de la empresa</label>
+              <input type="text" name="nombre_empresa" value="{{ form_perfil.nombre_empresa.value|default:'' }}" class="input-ien">
             </div>
-
-            <div class="space-y-2">
-              <label class="block text-sm font-medium">CUIT</label>
-              <input type="text" name="cuit"
-                    value="{{ form_perfil.cuit.value|default:'' }}"
-                    class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg">
+            <div class="space-y-1.5">
+              <label class="block text-sm">CUIT</label>
+              <input type="text" name="cuit" value="{{ form_perfil.cuit.value|default:'' }}" class="input-ien">
             </div>
-
-            <div class="space-y-2">
-              <label class="block text-sm font-medium">Industria</label>
-              <input type="text" name="industria"
-                    value="{{ form_perfil.industria.value|default:'' }}"
-                    class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg">
+            <div class="space-y-1.5">
+              <label class="block text-sm">Industria</label>
+              <input type="text" name="industria" value="{{ form_perfil.industria.value|default:'' }}" class="input-ien">
             </div>
-
-            <div class="space-y-2">
-              <label class="block text-sm font-medium">Tamaño de la empresa</label>
-              <select name="tamano_empresa"
-                      class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg">
+            <div class="space-y-1.5">
+              <label class="block text-sm">Tamaño de la empresa</label>
+              <select name="tamano_empresa" class="input-ien">
                 <option value="">Seleccionar</option>
                 {% for value, label in form_perfil.fields.tamano_empresa.choices %}
-                  <option value="{{ value }}" {% if form_perfil.tamano_empresa.value == value %}selected{% endif %}>
-                    {{ label }}
-                  </option>
+                  <option value="{{ value }}" {% if form_perfil.tamano_empresa.value == value %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
               </select>
             </div>
-
-            <div class="space-y-2">
-              <label class="block text-sm font-medium">Ubicación</label>
-              <input type="text" name="ubicacion"
-                    value="{{ form_perfil.ubicacion.value|default:'' }}"
-                    class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg">
+            <div class="space-y-1.5">
+              <label class="block text-sm">Ubicación</label>
+              <input type="text" name="ubicacion" value="{{ form_perfil.ubicacion.value|default:'' }}" class="input-ien">
             </div>
-
-            <div class="space-y-2">
-              <label class="block text-sm font-medium">Año de fundación</label>
-              <input type="number" name="anio_fundacion"
-                    value="{{ form_perfil.anio_fundacion.value|default:'' }}"
-                    class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg">
+            <div class="space-y-1.5">
+              <label class="block text-sm">Año de fundación</label>
+              <input type="number" name="anio_fundacion" value="{{ form_perfil.anio_fundacion.value|default:'' }}" class="input-ien">
             </div>
-
-            <div class="space-y-2">
-              <label class="block text-sm font-medium">Sitio web</label>
-              <input type="url" name="sitio_web"
-                    value="{{ form_perfil.sitio_web.value|default:'' }}"
-                    class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg">
+            <div class="space-y-1.5">
+              <label class="block text-sm">Sitio web</label>
+              <input type="url" name="sitio_web" value="{{ form_perfil.sitio_web.value|default:'' }}" class="input-ien">
             </div>
-
-            <div class="space-y-2">
-              <label class="block text-sm font-medium">Teléfono</label>
-              <input type="text" name="telefono"
-                    value="{{ form_perfil.telefono.value|default:'' }}"
-                    class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg">
+            <div class="space-y-1.5">
+              <label class="block text-sm">Teléfono</label>
+              <input type="text" name="telefono" value="{{ form_perfil.telefono.value|default:'' }}" class="input-ien">
             </div>
-
           </div>
 
-          <div class="space-y-2 mt-6">
-            <label class="block text-sm font-medium">Descripción de la empresa</label>
-            <textarea name="descripcion" rows="4"
-                      class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg resize-none">{{ form_perfil.descripcion.value|default:'' }}</textarea>
+          <div class="mt-5 space-y-1.5">
+            <label class="block text-sm">Descripción de la empresa</label>
+            <textarea name="descripcion" rows="4" class="input-ien resize-none">{{ form_perfil.descripcion.value|default:'' }}</textarea>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            <div class="space-y-2">
-              <label class="block text-sm font-medium">Logo</label>
+          <div class="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div class="space-y-1.5">
+              <label class="block text-sm">Logo</label>
               {% if oferente.logo %}
-                <img src="{{ oferente.logo.url }}" class="w-20 h-20 rounded-lg object-cover mb-2">
+                <img src="{{ oferente.logo.url }}" alt="" class="mb-2 h-20 w-20 rounded-2xl object-cover">
               {% endif %}
-              <input type="file" name="logo" accept="image/*"
-                    class="w-full text-sm">
+              <input type="file" name="logo" accept="image/*" class="w-full text-sm text-[#6B645C]">
             </div>
-            <div class="space-y-2">
-              <label class="block text-sm font-medium">Banner</label>
+            <div class="space-y-1.5">
+              <label class="block text-sm">Banner</label>
               {% if oferente.banner %}
-                <img src="{{ oferente.banner.url }}" class="w-full h-20 rounded-lg object-cover mb-2">
+                <img src="{{ oferente.banner.url }}" alt="" class="mb-2 h-20 w-full rounded-2xl object-cover">
               {% endif %}
-              <input type="file" name="banner" accept="image/*"
-                    class="w-full text-sm">
+              <input type="file" name="banner" accept="image/*" class="w-full text-sm text-[#6B645C]">
             </div>
           </div>
 
-          <div class="flex gap-4 mt-8">
-            <button type="submit"
-                    class="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 font-medium">
-              Guardar cambios
-            </button>
-          </div>
-
-        </form>
-      </div>
-
-    </div>
-  </div>
-
-  <div id="oferta-modal-overlay" class="fixed inset-0 bg-black/50 z-50 hidden"
-      onclick="closeOfertaModal()"></div>
-
-  <div id="oferta-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col"
-        onclick="event.stopPropagation()">
-
-      <div class="overflow-y-auto p-8" id="modal-scroll">
-
-        <div class="flex items-center justify-between mb-6">
-          <h2 id="modal-title" class="text-2xl font-medium"></h2>
-          <button type="button" onclick="closeOfertaModal()"
-                  class="p-2 hover:bg-muted rounded-lg text-muted-foreground">
-            <i data-lucide="x" class="w-5 h-5"></i>
+          <button type="submit" class="btn-ien mt-8 !py-3.5">
+            Guardar cambios <span data-icon="check" class="h-4 w-4"></span>
           </button>
-        </div>
-
-        <div id="modal-errors" class="hidden bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6"></div>
-
-        <form id="oferta-form" method="post">
-          {% csrf_token %}
-          {% include 'Ofertas/_form-oferta.html' with submit_text="Guardar oferta" modal_mode=True %}
         </form>
-
       </div>
+
     </div>
   </div>
+</div>
 
-  <div id="delete-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
-      <h3 class="text-lg font-medium mb-2">¿Eliminar oferta?</h3>
-      <p class="text-sm text-muted-foreground mb-6">Esta acción no se puede deshacer.</p>
-      <div class="flex gap-3 justify-end">
-        <button type="button" onclick="closeDeleteModal()"
-                class="px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80">
-          Cancelar
-        </button>
-        <button type="button" id="confirm-delete-btn"
-                class="px-4 py-2 bg-destructive text-white rounded-lg hover:bg-destructive/90">
-          Eliminar
+<div id="oferta-modal-overlay" class="fixed inset-0 z-50 hidden bg-black/50" onclick="closeOfertaModal()"></div>
+
+<div id="oferta-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+  <div class="panel flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden" onclick="event.stopPropagation()">
+    <div class="overflow-y-auto p-8" id="modal-scroll">
+
+      <div class="mb-8 flex items-center justify-between">
+        <h2 id="modal-title" class="text-2xl font-bold tracking-tight text-[#26222E]"></h2>
+        <button type="button" onclick="closeOfertaModal()"
+                class="grid h-10 w-10 place-items-center rounded-full text-[#6B645C] transition-colors hover:bg-[#F3EDE5] hover:text-[#26222E]">
+          <span data-icon="x" class="h-5 w-5"></span>
         </button>
       </div>
+
+      <div id="modal-errors" class="mb-6 hidden rounded-2xl border border-[#d4183d]/30 bg-[#d4183d]/10 p-4 text-[#d4183d]"></div>
+
+      <form id="oferta-form" method="post">
+        {% csrf_token %}
+        {% include 'Ofertas/_form-oferta.html' with submit_text="Guardar oferta" modal_mode=True %}
+      </form>
+
     </div>
   </div>
+</div>
+
+<div id="delete-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+  <div class="panel w-full max-w-sm p-6">
+    <div class="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-[#d4183d]/10">
+      <span data-icon="trash" class="h-6 w-6 text-[#d4183d]"></span>
+    </div>
+    <h3 class="text-center text-lg font-semibold text-[#26222E]">¿Eliminar oferta?</h3>
+    <p class="mt-1 text-center text-sm text-[#6B645C]">Esta acción no se puede deshacer.</p>
+    <div class="mt-6 flex gap-3">
+      <button type="button" onclick="closeDeleteModal()" class="btn-ghost flex-1 !py-2.5 text-sm">Cancelar</button>
+      <button type="button" id="confirm-delete-btn"
+              class="flex-1 rounded-full bg-[#d4183d] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#b01333]">
+        Eliminar
+      </button>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}

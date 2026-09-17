@@ -229,3 +229,83 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
   .sm\:w-auto { width: auto; }
   .sm\:\!px-10 { padding-left: 2.5rem !important; padding-right: 2.5rem !important; }
 }
+
+/* Switch del formulario de oferta (Publicacion confidencial).
+   El input lleva "sr-only peer" y este div es su hermano siguiente. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;
+}
+.switch-track {
+  position: relative;
+  height: 1.5rem;
+  width: 2.75rem;
+  border-radius: 9999px;
+  background: var(--switch-background);
+  transition: background 0.2s ease;
+}
+.switch-track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  height: 1.25rem;
+  width: 1.25rem;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+.peer:checked ~ .switch-track { background: var(--primary); }
+.peer:checked ~ .switch-track::after { transform: translateX(1.25rem); }
+.peer:focus-visible ~ .switch-track { box-shadow: 0 0 0 4px rgba(81, 45, 168, 0.2); }
+
+/* Solapas del panel del oferente. dashboard.js agrega y saca estas clases,
+   asi que tienen que existir aunque no vinieran del mockup. */
+.border-primary { border-color: var(--primary); }
+.text-primary { color: var(--primary); }
+.border-transparent { border-color: transparent; }
+.text-muted-foreground { color: var(--muted-foreground); }
+
+/* Badges de estado del oferente: los nombres los devuelve
+   apps/usuarios/estado_oferente.py, no se tocan desde la plantilla. */
+.bg-yellow-50  { background-color: #FEF8E7; }
+.border-yellow-200 { border-color: #F5E3A8; }
+.text-yellow-800 { color: #8A6400; }
+.bg-green-50   { background-color: #ECF8F1; }
+.border-green-200 { border-color: #B7E4C9; }
+.text-green-800 { color: #1B6B42; }
+.bg-red-50     { background-color: #FDEEF1; }
+.border-red-200 { border-color: #F5C2CD; }
+.text-red-800  { color: #8A1028; }
+
+/* Utilidades que hicieron falta al portar el panel del oferente y sus parciales. */
+.from-\[\#512DA8\]\/25 { --tw-gradient-from: rgba(81, 45, 168, 0.25); }
+.to-\[\#FFDE59\]\/25   { --tw-gradient-to: rgba(255, 222, 89, 0.25); }
+.bg-gradient-to-r      { background-image: linear-gradient(to right, var(--tw-gradient-from), var(--tw-gradient-to)); }
+
+.max-w-sm  { max-width: 24rem; }
+.max-h-48  { max-height: 12rem; }
+.max-h-60  { max-height: 15rem; }
+.list-disc { list-style-type: disc; }
+.pl-5      { padding-left: 1.25rem; }
+
+/* Estados de las ofertas en el listado del panel */
+.bg-\[\#F0E9E1\]    { background-color: #F0E9E1; }
+.bg-\[\#FFDE59\]\/35 { background-color: rgba(255, 222, 89, 0.35); }
+.text-\[\#1B6B42\]  { color: #1B6B42; }
+.text-\[\#8A6400\]  { color: #8A6400; }
+.text-\[\#8A1028\]  { color: #8A1028; }
+.text-\[\#6B645C\]\/60 { color: rgba(107, 100, 92, 0.6); }
+
+.hover\:bg-\[\#b01333\]:hover     { background-color: #b01333; }
+.hover\:border-\[\#d4183d\]:hover { border-color: #d4183d; }
+.hover\:text-\[\#d4183d\]:hover   { color: #d4183d; }
+.hover\:text-\[\#26222E\]:hover   { color: #26222E; }
+
+@media (min-width: 640px) {
+  .sm\:p-10 { padding: 2.5rem; }
+}
+
+/* dashboard.js dibuja las pildoras de habilidades con "chip !text-sm" */
+.\!text-sm { font-size: 0.875rem !important; line-height: 1.25rem !important; }
