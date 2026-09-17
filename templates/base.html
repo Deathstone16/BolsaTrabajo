@@ -1,170 +1,71 @@
 {% load static %}
+{% comment %}
+  Base de transicion.
+
+  La usan las pantallas que todavia no se portaron una por una al rediseno
+  (login, registro, panel, moderacion, etc.). Les da el nav, el footer, las
+  fuentes y la paleta nuevos sin tocar su markup interno.
+
+  Para lograrlo se sigue cargando el CDN de Tailwind, porque esas plantillas
+  usan clases como bg-muted, text-muted-foreground o border-border. Lo que
+  cambia es la config: ahora esos nombres apuntan a los colores del rediseno,
+  asi que el contenido viejo se repinta solo.
+
+  Las pantallas ya portadas extienden nueva_ui/base.html, que en vez del CDN
+  usa el Tailwind compilado del diseno. A medida que se porten pantallas, van
+  pasando de esta base a aquella; cuando no quede ninguna, este archivo se borra.
+{% endcomment %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IEN Empleo - Bolsa de trabajo</title>
-  <meta name="description" content="Conecta postulantes con oportunidades laborales" />
+  <title>{% block title %}IEN Empleo · Bolsa de trabajo del Instituto Económico Nacional{% endblock %}</title>
+  <meta name="description" content="{% block description %}Conectamos el talento del nordeste con las oportunidades de todo el país.{% endblock %}" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23512DA8'/%3E%3Ctext x='32' y='42' font-family='Poppins,sans-serif' font-weight='700' font-size='24' fill='%23fff' text-anchor='middle'%3EIEN%3C/text%3E%3Ccircle cx='50' cy='14' r='4' fill='%23FFDE59'/%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:"#a69acf",foreground:"#ffffff"},secondary:{DEFAULT:"#f5e6a8",foreground:"#2d2d3a"},background:"#ffffff",foreground:"#2d2d3a",muted:{DEFAULT:"#f7f6fb",foreground:"#7a7a8a"},accent:{DEFAULT:"#faf8ff",foreground:"#2d2d3a"},destructive:{DEFAULT:"#d4183d",foreground:"#ffffff"},success:{DEFAULT:"#10b981",foreground:"#ffffff"},"input-background":"#fdfcff","switch-background":"#cbced4"},borderColor:{DEFAULT:"rgba(0,0,0,0.06)"},borderRadius:{lg:"0.75rem"}}}}</script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:{DEFAULT:"#512DA8",foreground:"#ffffff"},secondary:{DEFAULT:"#FFDE59",foreground:"#26222E"},background:"#F8F3F0",foreground:"#26222E",card:"#FEFCF9",border:"rgba(110,85,55,0.16)",muted:{DEFAULT:"#F0E9E1",foreground:"#6B645C"},accent:{DEFAULT:"#F1EAE2",foreground:"#26222E"},destructive:{DEFAULT:"#d4183d",foreground:"#ffffff"},success:{DEFAULT:"#27AE60",foreground:"#ffffff"},"input-background":"#F3EDE5","switch-background":"#cbced4"},fontFamily:{sans:["Poppins","ui-sans-serif","system-ui","sans-serif"],mono:["JetBrains Mono","ui-monospace","monospace"]},borderColor:{DEFAULT:"rgba(110,85,55,0.16)"},borderRadius:{lg:"0.75rem"}}}}</script>
+
+  <link rel="stylesheet" href="{% static 'css/ui/ien-theme.css' %}" />
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
   <script src="https://unpkg.com/lucide@latest"></script>
+  {% block extra_head %}{% endblock %}
 </head>
 <body class="bg-background text-foreground min-h-screen flex flex-col">
-  
-<nav class="border-b border-border bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-    
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
-        <a href="{% url 'home' %}" class="flex items-center gap-2">
-          <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center">
-            <i data-lucide="briefcase" class="w-6 h-6 text-white"></i>
-          </div>
-          <span class="font-medium text-lg text-foreground">IEN Empleo</span>
-        </a>
-        
-        <!-- Links de navegación principal (oculto en móvil) -->
-        <div class="hidden md:flex items-center gap-8">
-          <a href="/" class="text-muted-foreground hover:text-foreground transition-colors">Inicio</a>
-          {% if not user.is_authenticated or user.postulante %}
-            <a href="{% url 'buscar_empleo' %}" class="text-muted-foreground hover:text-foreground transition-colors">Buscar empleo</a>
-          {% endif %}
-          {% if user.is_authenticated and user.oferente and user.oferente.estado_obj.puede_publicar %}
-            <a href="{% url 'dashboard_empresa' %}" class="text-muted-foreground hover:text-foreground transition-colors">Mi panel</a>
-            <a href="{% url 'crear_oferta' %}" class="text-muted-foreground hover:text-foreground transition-colors">Publicar oferta</a>
-            <a href="{% url 'editar_perfil_empresa' %}" class="text-muted-foreground hover:text-foreground transition-colors">Mi empresa</a>
-          {% endif %}
-          {% if user.is_authenticated and user.postulante %}
-            <a href="{% url 'mi_perfil' %}" class="text-muted-foreground hover:text-foreground transition-colors">Mi perfil</a>
-          {% endif %}
-          {% if user.is_staff %}
-            <a href="{% url 'mod_listar_empresas' %}" class="text-muted-foreground hover:text-foreground transition-colors">Empresas</a>
-            <a href="{% url 'mod_listar_ofertas' %}" class="text-muted-foreground hover:text-foreground transition-colors">Ofertas</a>
-            <a href="{% url 'mod_listar_cursos' %}" class="text-muted-foreground hover:text-foreground transition-colors">Cursos</a>
-          {% endif %}
-            <a href="{% url 'ia' %}">probar</a>
-        </div>
 
-        <!-- Zona de usuario (visible en todos los tamaños) -->
-        <div class="flex items-center gap-3">
-          {% if user.is_authenticated %}
-            <!-- Badge de bienvenida con rol -->
-            <div class="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-lg border border-border">
-              <span class="text-sm text-foreground font-medium">
-                Bienvenido/a, {{ user.first_name|default:user.email }}
-              </span>
-              {% if user.is_staff %}
-                <span class="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full">Staff IEN</span>
-              {% elif user.oferente %}
-                <span class="text-xs px-2 py-0.5 bg-secondary/20 text-secondary rounded-full">
-                  {{ user.oferente.nombre_empresa|truncatechars:20 }}
-                </span>
-              {% elif user.postulante %}
-                <span class="text-xs px-2 py-0.5 bg-success/10 text-success rounded-full">Postulante</span>
-              {% endif %}
-            </div>
-            
-            <!-- Logout button (separado) -->
-            <form method="post" action="{% url 'logout' %}" id="form-logout">
-              {% csrf_token %}
-              <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors">
-                <i data-lucide="log-out" class="w-4 h-4"></i>
-                <span class="hidden sm:inline">Cerrar sesión</span>
-              </button>
-            </form>
-            
-          {% else %}
-            <a href="{% url 'login' %}" class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
-              <i data-lucide="user" class="w-4 h-4"></i>
-              <span class="hidden sm:inline">Ingresar</span>
-            </a>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-  </nav>
-  {% include 'partials/messages.html' %}
+  {% include "nueva_ui/partials/_aviso.html" %}
+  {% include "nueva_ui/partials/_nav.html" %}
+
   <main class="flex-1">
-    {% block content %}
-    {% endblock %}
+    {% if messages %}
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        {% for message in messages %}
+          <div class="panel mb-3 flex items-start gap-3 px-5 py-4 text-sm
+                      {% if message.tags == 'error' %}border-destructive/30 text-destructive
+                      {% elif message.tags == 'success' %}border-success/30 text-success
+                      {% else %}text-foreground{% endif %}">
+            <span data-icon="{% if message.tags == 'error' %}x-circle{% elif message.tags == 'success' %}check-circle{% else %}alert{% endif %}" class="mt-0.5 h-5 w-5 shrink-0"></span>
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
   </main>
 
-  <!-- Footer -->
-  <footer class="bg-muted border-t border-border mt-auto">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-        <div class="space-y-4">
-          <div class="flex items-center gap-2"><div class="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center"><i data-lucide="briefcase" class="w-6 h-6 text-white"></i></div><span class="font-medium text-lg">IEN Empleo</span></div>
-          <p class="text-sm text-muted-foreground">Conectando talento con oportunidades laborales</p>
-        </div>
-        <div><h4 class="font-medium mb-4">Plataforma</h4><ul class="space-y-2"><li><a href="{% url 'buscar_empleo' %}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Buscar empleo</a></li><li><a href="{% url 'crear_oferta' %}" class="text-sm text-muted-foreground hover:text-foreground transition-colors">Publicar oferta</a></li><li class="text-sm text-muted-foreground">Empresas</li></ul></div>
-        <div><h4 class="font-medium mb-4">Instituto</h4><ul class="space-y-2"><li class="text-sm text-muted-foreground">Sobre el IEN</li><li class="text-sm text-muted-foreground">Programas educativos</li></ul></div>
-        <div><h4 class="font-medium mb-4">Contacto</h4><ul class="space-y-3"><li class="flex items-center gap-2 text-sm text-muted-foreground"><i data-lucide="mail" class="w-4 h-4"></i>contacto@ien.edu.ar</li><li class="flex items-center gap-2 text-sm text-muted-foreground"><i data-lucide="phone" class="w-4 h-4"></i>+54 11 1234 5678</li><li class="flex items-center gap-2 text-sm text-muted-foreground"><i data-lucide="map-pin" class="w-4 h-4"></i>Buenos Aires, Argentina</li></ul></div>
-      </div>
-      <div class="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">&copy; <span id="footer-year">2026</span> Instituto de Educación. Todos los derechos reservados.</div>
-    </div>
-  </footer>
+  {% include "nueva_ui/partials/_footer.html" %}
 
+  {# lucide dibuja los <i data-lucide> que usan las plantillas sin portar #}
   <script>lucide.createIcons();</script>
-  <script>
-    // Confirmacion antes de cerrar sesion.
-    // Intercepta el submit del formulario y lo reenvia solo si el usuario
-    // confirma. Sin JS el formulario sigue funcionando como antes.
-    (function () {
-      var form = document.getElementById('form-logout');
-      if (!form) return;
-
-      var confirmado = false;
-
-      form.addEventListener('submit', function (e) {
-        if (confirmado) return;
-        e.preventDefault();
-
-        var overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4';
-
-        var modal = document.createElement('div');
-        modal.className = 'bg-white rounded-2xl shadow-xl max-w-sm w-full p-6';
-        modal.onclick = function (ev) { ev.stopPropagation(); };
-        modal.innerHTML =
-          '<div class="text-center mb-4">' +
-            '<div class="w-12 h-12 mx-auto mb-3 rounded-full bg-muted flex items-center justify-center">' +
-              '<i data-lucide="log-out" class="w-6 h-6 text-foreground"></i>' +
-            '</div>' +
-            '<h3 class="text-lg font-medium mb-1">¿Cerrar sesión?</h3>' +
-            '<p class="text-sm text-muted-foreground">Vas a tener que volver a ingresar con tu email y contraseña.</p>' +
-          '</div>' +
-          '<div class="flex gap-3">' +
-            '<button id="btn-cancelar-logout" type="button" class="flex-1 px-4 py-2.5 border border-border rounded-lg text-sm font-medium hover:bg-muted transition-colors">Cancelar</button>' +
-            '<button id="btn-confirmar-logout" type="button" class="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 transition-colors">Cerrar sesión</button>' +
-          '</div>';
-
-        overlay.appendChild(modal);
-        document.body.appendChild(overlay);
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-
-        function cerrar() {
-          overlay.remove();
-          document.removeEventListener('keydown', onTecla);
-        }
-        function onTecla(ev) {
-          if (ev.key === 'Escape') cerrar();
-        }
-
-        document.addEventListener('keydown', onTecla);
-        overlay.onclick = cerrar;
-        document.getElementById('btn-cancelar-logout').onclick = cerrar;
-        document.getElementById('btn-confirmar-logout').onclick = function () {
-          confirmado = true;
-          cerrar();
-          form.submit();
-        };
-        document.getElementById('btn-confirmar-logout').focus();
-      });
-    })();
-  </script>
-
+  {# ien-ui.js dibuja los <span data-icon> del nav y el footer nuevos #}
+  <script src="{% static 'js/ui/ien-ui.js' %}"></script>
+  {% include "nueva_ui/partials/_logout_modal.html" %}
   {% block extra_js %}{% endblock %}
 </body>
 </html>

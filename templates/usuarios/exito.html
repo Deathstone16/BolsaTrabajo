@@ -1,20 +1,22 @@
-{% extends 'base.html' %}
-{% block content %}
-<div class="flex items-center justify-center bg-accent px-4 py-8">
-  <div class="bg-white rounded-xl shadow-sm border border-border w-full max-w-md p-8 space-y-6 text-center">
-    
-    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto">
-      <i data-lucide="check" class="w-6 h-6 text-green-600"></i>
-    </div>
-    
-    <h1 class="text-2xl font-medium">{{ titulo }}</h1>
-    <p class="text-muted-foreground text-sm">{{ mensaje }}</p>
-    
-    <a href="{{ link_url }}" 
-       class="block w-full py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium">
-      {{ link_texto }}
-    </a>
+{% extends 'nueva_ui/base.html' %}
 
+{% block title %}{{ titulo }} · IEN Empleo{% endblock %}
+
+{% block content %}
+<section class="relative flex min-h-[70vh] items-center justify-center overflow-hidden bg-[#F8F3F0] px-4 py-16">
+  <div class="absolute inset-0 hero-dots opacity-40" aria-hidden="true"></div>
+  <div class="pointer-events-none absolute left-1/2 top-0 h-96 w-96 -translate-x-1/2 rounded-full bg-[#FFDE59]/40 blur-[140px]" aria-hidden="true"></div>
+
+  <div class="panel relative w-full max-w-md p-10 text-center">
+    <div class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#27AE60]/15">
+      <span data-icon="check" class="h-8 w-8 text-[#27AE60]"></span>
+    </div>
+    <h1 class="mt-6 text-2xl font-bold tracking-tight text-[#26222E]">{{ titulo }}</h1>
+    <p class="mt-2 text-sm text-[#6B645C]">{{ mensaje }}</p>
+    <div class="mt-8 flex flex-col gap-3">
+      <a href="{{ link_url }}" class="btn-ien w-full">{{ link_texto }} <span data-icon="arrow-right" class="h-4 w-4"></span></a>
+      <a href="{% url 'home' %}" class="text-sm text-[#6B645C] hover:text-[#512DA8]">Volver al inicio</a>
+    </div>
   </div>
-</div>
+</section>
 {% endblock %}

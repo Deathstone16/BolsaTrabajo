@@ -1,0 +1,62 @@
+{% comment %}
+  Confirmacion antes de cerrar sesion (viene de templates/base.html, commit 3e856e7).
+  Se movio a un partial para que la usen las dos bases, y se repinto con los
+  tokens del rediseno. Ahora engancha todos los formularios .form-logout
+  (escritorio y movil) en vez de un unico id.
+  Sin JS los formularios siguen funcionando como antes.
+{% endcomment %}
+<script>
+  (function () {
+    var forms = document.querySelectorAll('.form-logout');
+    if (!forms.length) return;
+
+    forms.forEach(function (form) {
+      var confirmado = false;
+
+      form.addEventListener('submit', function (e) {
+        if (confirmado) return;
+        e.preventDefault();
+
+        var overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4';
+
+        var modal = document.createElement('div');
+        modal.className = 'panel max-w-sm w-full p-6';
+        modal.onclick = function (ev) { ev.stopPropagation(); };
+        modal.innerHTML =
+          '<div class="text-center mb-5">' +
+            '<div class="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-[#512DA8]/10">' +
+              '<svg class="ic h-6 w-6 text-[#512DA8]" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M16 17l5-5-5-5"></path><path d="M21 12H9"></path></svg>' +
+            '</div>' +
+            '<h3 class="text-lg font-semibold text-[#26222E]">¿Cerrar sesión?</h3>' +
+            '<p class="mt-1 text-sm text-[#6B645C]">Vas a tener que volver a ingresar con tu email y contraseña.</p>' +
+          '</div>' +
+          '<div class="flex gap-3">' +
+            '<button data-logout-cancelar type="button" class="btn-ghost flex-1 !py-2.5 text-sm">Cancelar</button>' +
+            '<button data-logout-confirmar type="button" class="btn-ien flex-1 !py-2.5 text-sm">Cerrar sesión</button>' +
+          '</div>';
+
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        function cerrar() {
+          overlay.remove();
+          document.removeEventListener('keydown', onTecla);
+        }
+        function onTecla(ev) {
+          if (ev.key === 'Escape') cerrar();
+        }
+
+        document.addEventListener('keydown', onTecla);
+        overlay.onclick = cerrar;
+        modal.querySelector('[data-logout-cancelar]').onclick = cerrar;
+        modal.querySelector('[data-logout-confirmar]').onclick = function () {
+          confirmado = true;
+          cerrar();
+          form.submit();
+        };
+        modal.querySelector('[data-logout-confirmar]').focus();
+      });
+    });
+  })();
+</script>

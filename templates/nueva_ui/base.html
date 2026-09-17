@@ -16,8 +16,14 @@
 </head>
 <body class="bg-[#F8F3F0] text-[#26222E] antialiased">
 
-  {% include "nueva_ui/partials/_aviso.html" %}
-  {% include "nueva_ui/partials/_nav.html" %}
+  {% comment %}
+    Las pantallas de login y registro del diseno ocupan el alto completo y no
+    llevan nav ni footer: sobreescriben estos bloques con contenido vacio.
+  {% endcomment %}
+  {% block chrome_top %}
+    {% include "nueva_ui/partials/_aviso.html" %}
+    {% include "nueva_ui/partials/_nav.html" %}
+  {% endblock %}
 
   <main>
     {% if messages %}
@@ -37,9 +43,12 @@
     {% block content %}{% endblock %}
   </main>
 
-  {% include "nueva_ui/partials/_footer.html" %}
+  {% block chrome_bottom %}
+    {% include "nueva_ui/partials/_footer.html" %}
+  {% endblock %}
 
   <script src="{% static 'js/ui/ien-ui.js' %}"></script>
+  {% include "nueva_ui/partials/_logout_modal.html" %}
   {% block extra_js %}{% endblock %}
 </body>
 </html>
