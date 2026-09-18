@@ -60,6 +60,8 @@ class Oferta(models.Model):
     ubicacion = models.CharField(max_length=100)
     modalidad = models.CharField(max_length=20, choices=MODALIDAD_CHOICES, default='presencial')
     descripcion = models.TextField()
+    habilidades_duras = models.TextField(blank=True, default="")
+    habilidades_blandas = models.TextField(blank=True, default="")
     habilidades_requeridas = models.TextField()
     experiencia_requerida = models.CharField(max_length=20, choices=EXPERIENCIA_CHOICES, default='sin-experiencia')
     nivel_educativo = models.CharField(max_length=30, choices=NIVEL_EDUCATIVO_CHOICES)

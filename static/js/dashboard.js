@@ -34,7 +34,8 @@ function openCreateModal() {
   document.getElementById('oferta-form').reset();
   document.getElementById('oferta-form').action = window.URLS.crearOferta;
   ocultarErroresModal();
-  inicializarTags();
+  inicializarTags('duras');
+  inicializarTags('blandas');
   mostrarModalOferta();
 }
 
@@ -54,11 +55,18 @@ async function openEditModal(pk) {
   document.querySelector('[name="titulo"]').value = data.titulo || '';
   document.querySelector('[name="nombre_puesto"]').value = data.nombre_puesto || '';
   document.querySelector('[name="categoria"]').value = data.categoria || '';
-  document.querySelector('[name="ubicacion"]').value = data.ubicacion || '';
+  document.queryquerSelector('[name="ubicacion"]').value = data.ubicacion || '';
   document.querySelector('[name="modalidad"]').value = data.modalidad || '';
   document.querySelector('[name="descripcion"]').value = data.descripcion || '';
-  document.querySelector('[name="habilidades_requeridas"]').value = data.habilidades_requeridas || '';
-  inicializarTags();
+  
+  // Cargar habilidades duras y blandas (vienen como string "tag1, tag2")
+  const durasStr = data.habilidades_duras || '';
+  const blandasStr = data.habilidades_blandas || '';
+  document.getElementById('id_habilidades_duras').value = durasStr;
+  document.getElementById('id_habilidades_blandas').value = blandasStr;
+  inicializarTags('duras');
+  inicializarTags('blandas');
+  
   document.querySelector('[name="experiencia_requerida"]').value = data.experiencia_requerida || '';
   document.querySelector('[name="nivel_educativo"]').value = data.nivel_educativo || '';
   document.querySelector('[name="es_confidencial"]').checked = data.es_confidencial || false;
@@ -117,7 +125,8 @@ const CAMPOS_ES = {
   modalidad: 'Modalidad',
   descripcion: 'Descripción',
   requisitos: 'Requisitos',
-  habilidades_requeridas: 'Habilidades requeridas',
+  habilidades_duras: 'Habilidades técnicas',
+  habilidades_blandas: 'Habilidades blandas',
   experiencia_requerida: 'Experiencia requerida',
   nivel_educativo: 'Nivel educativo',
   fecha_cierre: 'Fecha de cierre',
@@ -180,42 +189,51 @@ document.getElementById('confirm-delete-btn').addEventListener('click', async fu
 });
 
 
-function inicializarTags() {
-  const container = document.getElementById('tags-container');
+function inicializarTags(sufijo) {
+  const container = document.getElementById('tags-container-' + sufijo);
+  if (!container) {
+    console.warn('Container no encontrado:', 'tags-container-' + sufijo);
+    return;  // Return temprano, no rompe
+  }
   container.innerHTML = '';
-  const hiddenInput = document.getElementById('id_habilidades_requeridas');
-  const valor = hiddenInput.value;
+  const hiddenInput = document.getElementById('id_habilidades_' + sufijo);
+  let valor = hiddenInput.value;
   if (valor && valor.trim()) {
     valor.split(',').forEach(tag => {
       const t = tag.trim();
-      if (t) dibujarPildora(t);
+      if (t) dibujarPildora(t, sufijo);
     });
   }
 }
 
-function dibujarPildora(texto) {
-  const container = document.getElementById('tags-container');
+function dibujarPildora(texto, sufijo) {
+  const container = document.getElementById('tags-container-' + sufijo);
+  if (!container) return;
+  const color = sufijo === 'duras' 
+    ? 'bg-indigo-100 text-indigo-700' 
+    : 'bg-emerald-100 text-emerald-700';
   const pildora = document.createElement('span');
-  pildora.className = 'inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium';
+  pildora.className = 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ' + color;
   pildora.innerHTML = `${escapeHtml(texto)}
-    <button type="button" data-tag="${escapeHtml(texto)}"
-            class="hover:bg-primary/20 rounded-full p-0.5 transition-colors">
+    <button type="button" data-tag="${escapeHtml(texto)}" data-sufijo="${sufijo}"
+            class="hover:opacity-70 rounded-full p-0.5 transition-opacity">
       <i data-lucide="x" class="w-3 h-3"></i>
     </button>`;
   pildora.querySelector('button').addEventListener('click', function() {
     pildora.remove();
-    actualizarHiddenInput();
+    actualizarHiddenInput(sufijo);
   });
   container.appendChild(pildora);
-  actualizarHiddenInput();
+  actualizarHiddenInput(sufijo);
   lucide.createIcons();
 }
 
-function actualizarHiddenInput() {
-  const container = document.getElementById('tags-container');
-  const hiddenInput = document.getElementById('id_habilidades_requeridas');
+function actualizarHiddenInput(sufijo) {
+  const container = document.getElementById('tags-container-' + sufijo);
+  if (!container) return;
+  const hiddenInput = document.getElementById('id_habilidades_' + sufijo);
   const tags = Array.from(container.children).map(el => el.childNodes[0].textContent.trim());
-  hiddenInput.value = tags.join(',');
+  hiddenInput.value = tags.join(', ');
 }
 
 function escapeHtml(texto) {
@@ -224,16 +242,20 @@ function escapeHtml(texto) {
   return div.innerHTML;
 }
 
-function obtenerTagsSeleccionados() {
-  const container = document.getElementById('tags-container');
+function obtenerTagsSeleccionados(sufijo) {
+  const container = document.getElementById('tags-container-' + sufijo);
+  if (!container) return [];
   return Array.from(container.children).map(el => el.childNodes[0].textContent.trim().toLowerCase());
 }
 
 
 document.addEventListener('input', function(e) {
-  if (e.target.id !== 'tags-input') return;
+  const sufijo = e.target.id === 'tags-input-duras' ? 'duras' 
+                 : e.target.id === 'tags-input-blandas' ? 'blandas' : null;
+  if (!sufijo) return;
+  
   const valor = e.target.value.trim();
-  const dropdown = document.getElementById('tags-dropdown');
+  const dropdown = document.getElementById('tags-dropdown-' + sufijo);
   dropdown.innerHTML = '';
 
   if (!valor) {
@@ -242,9 +264,10 @@ document.addEventListener('input', function(e) {
   }
 
   const lowerValor = valor.toLowerCase();
-  const yaSeleccionadas = obtenerTagsSeleccionados();
+  const yaSeleccionadas = obtenerTagsSeleccionados(sufijo);
+  const catalogo = sufijo === 'duras' ? window.HABILIDADES_DURAS : window.HABILIDADES_BLANDAS;
 
-  const sugerencias = window.HABILIDADES.filter(h =>
+  const sugerencias = catalogo.filter(h =>
     h.toLowerCase().includes(lowerValor) &&
     !yaSeleccionadas.includes(h.toLowerCase())
   );
@@ -258,46 +281,48 @@ document.addEventListener('input', function(e) {
     const li = document.createElement('li');
     li.className = 'px-4 py-2 cursor-pointer hover:bg-primary/10 text-sm transition-colors';
     li.textContent = s;
-    li.addEventListener('click', () => seleccionarSugerencia(s));
+    li.addEventListener('click', () => seleccionarSugerencia(s, sufijo));
     dropdown.appendChild(li);
   });
 
   dropdown.classList.remove('hidden');
 });
 
-function seleccionarSugerencia(texto) {
-  document.getElementById('tags-input').value = '';
-  document.getElementById('tags-dropdown').classList.add('hidden');
-  dibujarPildora(texto);
+function seleccionarSugerencia(texto, sufijo) {
+  document.getElementById('tags-input-' + sufijo).value = '';
+  document.getElementById('tags-dropdown-' + sufijo).classList.add('hidden');
+  dibujarPildora(texto, sufijo);
 }
 
 document.addEventListener('keydown', function(e) {
-  if (e.target.id !== 'tags-input') return;
+  const sufijo = e.target.id === 'tags-input-duras' ? 'duras' 
+                 : e.target.id === 'tags-input-blandas' ? 'blandas' : null;
+  if (!sufijo) return;
 
   if (e.key === 'Enter') {
     e.preventDefault();
     const valor = e.target.value.trim();
     if (!valor) return;
-    const primerSug = document.querySelector('#tags-dropdown li');
-    if (primerSug) {
-      seleccionarSugerencia(primerSug.textContent);
-    }
+    const primerSug = document.querySelector('#tags-dropdown-' + sufijo + ' li');
+    if (primerSug) seleccionarSugerencia(primerSug.textContent, sufijo);
   }
 
   if (e.key === 'Escape') {
-    document.getElementById('tags-dropdown').classList.add('hidden');
+    document.getElementById('tags-dropdown-' + sufijo).classList.add('hidden');
   }
 
   if (e.key === 'Backspace' && e.target.value === '') {
-    const ultima = document.querySelector('#tags-container span:last-child');
+    const ultima = document.querySelector('#tags-container-' + sufijo + ' span:last-child');
     if (ultima) ultima.querySelector('button')?.click();
   }
 });
 
 document.addEventListener('click', function(e) {
-  const input = document.getElementById('tags-input');
-  const dropdown = document.getElementById('tags-dropdown');
-  if (e.target !== input && !dropdown.contains(e.target)) {
-    dropdown.classList.add('hidden');
-  }
+  ['duras', 'blandas'].forEach(sufijo => {
+    const input = document.getElementById('tags-input-' + sufijo);
+    const dropdown = document.getElementById('tags-dropdown-' + sufijo);
+    if (input && dropdown && e.target !== input && !dropdown.contains(e.target)) {
+      dropdown.classList.add('hidden');
+    }
+  });
 });

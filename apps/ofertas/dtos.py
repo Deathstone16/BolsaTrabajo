@@ -50,6 +50,8 @@ class OfertaDTO:
             modalidad_display=oferta.get_modalidad_display(),
             descripcion=oferta.descripcion,
             habilidades_requeridas=oferta.habilidades_requeridas,
+            habilidades_duras=[h.strip() for h in (oferta.habilidades_duras or "").split(",") if h.strip()],
+            habilidades_blandas=[h.strip() for h in (oferta.habilidades_blandas or "").split(",") if h.strip()],
             experiencia_requerida=oferta.experiencia_requerida,
             nivel_educativo=oferta.nivel_educativo,
             nivel_educativo_display=oferta.get_nivel_educativo_display(),
