@@ -81,6 +81,28 @@
             </div>
           </div>
 
+          {% comment %}
+            Estado del analisis de CV. Lo actualiza cv_upload.js (mostrarEstadoAnalisis)
+            mientras el servicio externo procesa; si al cargar la pagina ya hay un
+            analisis pendiente, se pinta desde el servidor para que se vea de entrada.
+          {% endcomment %}
+          <div id="analisis-estado"
+               class="panel mt-4 overflow-hidden {% if not ultimo_analisis or ultimo_analisis.estado != 'pendiente' %}hidden{% endif %}"
+               role="status" aria-live="polite">
+            <div class="flex items-start gap-4 p-5">
+              <div data-analisis-icono class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#512DA8]/10 text-[#512DA8]">
+                <svg class="ic h-5 w-5 animate-spin" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.2-8.56"></path></svg>
+              </div>
+              <div class="min-w-0 flex-1">
+                <p data-analisis-titulo class="font-semibold text-[#26222E]">Analizando tu CV con IA…</p>
+                <p data-analisis-mensaje class="mt-1 text-sm text-[#6B645C]">Puede tardar un par de minutos. Podés seguir usando la plataforma: te avisamos acá cuando termine.</p>
+                {# style inline: .btn-ien fuerza inline-flex y le gana a .hidden #}
+                <a data-analisis-link href="#" class="btn-ien mt-4 !py-2 text-sm" style="display:none">Ver resultado <span data-icon="arrow-right" class="h-4 w-4"></span></a>
+              </div>
+            </div>
+            <div data-analisis-barra class="barra-indeterminada" aria-hidden="true"><span></span></div>
+          </div>
+
           <div class="panel mt-6 flex cursor-pointer flex-col items-center justify-center p-12 text-center transition-colors hover:border-[#512DA8]/40"
                onclick="document.getElementById('cv-input').click()" id="cv-upload-area">
             <span data-icon="upload" class="mb-4 h-10 w-10 text-[#6B645C]"></span>

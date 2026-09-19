@@ -432,3 +432,27 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 .cursor-wait { cursor: wait; }
 .mr-2 { margin-right: 0.5rem; }
 .hover\:bg-primary\/5:hover { background-color: rgba(81, 45, 168, 0.05); }
+
+/* Barra de progreso indeterminada del panel de analisis de CV (mi_perfil.html) */
+.barra-indeterminada {
+  position: relative;
+  height: 4px;
+  overflow: hidden;
+  background: rgba(81, 45, 168, 0.1);
+}
+.barra-indeterminada > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 40%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, var(--primary), var(--sun));
+  animation: barra-ida-vuelta 1.4s ease-in-out infinite;
+}
+@keyframes barra-ida-vuelta {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .barra-indeterminada > span { animation-duration: 3s; }
+}
+.text-green-800 { color: #1B6B42; }
