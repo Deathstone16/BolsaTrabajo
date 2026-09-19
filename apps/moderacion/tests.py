@@ -9,7 +9,7 @@ from ofertas.models import Oferta
 from usuarios.models import Oferente, Usuario
 
 
-class RechazarOfertaTests(TestCase):
+class ModeracionOfertasTests(TestCase):
     def setUp(self):
         self.staff = Usuario.objects.create_user(
             email='moderador@example.com', password='clave-segura', is_staff=True,
@@ -33,19 +33,47 @@ class RechazarOfertaTests(TestCase):
             nivel_educativo='universitario',
             fecha_cierre=timezone.now() + timedelta(days=10),
         )
+
+    def test_detalle_oferta_requiere_staff(self):
+        response = self.client.get(reverse('mod_detalle_oferta', args=[self.oferta.id]))
+        self.assertEqual(response.status_code, 302)
+
+    def test_detalle_oferta_muestra_datos(self):
         self.client.force_login(self.staff)
+        response = self.client.get(reverse('mod_detalle_oferta', args=[self.oferta.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Desarrollador')
+        self.assertContains(response, 'Empresa de prueba')
+
+    def test_aprobar_oferta_redirige_y_activa(self):
+        self.client.force_login(self.staff)
+        response = self.client.post(reverse('mod_aprobar_oferta', args=[self.oferta.id]))
+        self.assertEqual(response.status_code, 302)
+        self.oferta.refresh_from_db()
+        self.assertEqual(self.oferta.estado, 'activa')
 
     def test_rechazo_exige_motivo(self):
+        self.client.force_login(self.staff)
         response = self.client.post(reverse('mod_rechazar_oferta', args=[self.oferta.id]))
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
         self.oferta.refresh_from_db()
         self.assertEqual(self.oferta.estado, 'pendiente')
 
     def test_rechazo_guarda_motivo(self):
+        self.client.force_login(self.staff)
         response = self.client.post(
-            reverse('mod_rechazar_oferta', args=[self.oferta.id]), {'motivo': 'Datos incompletos'},
+            reverse('mod_rechazar_oferta', args=[self.oferta.id]),
+            {'motivo': 'Datos incompletos'},
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
         self.oferta.refresh_from_db()
         self.assertEqual(self.oferta.estado, 'rechazada')
         self.assertEqual(self.oferta.motivo_rechazo, 'Datos incompletos')
+
+    def test_finalizar_oferta_redirige_y_finaliza(self):
+        self.client.force_login(self.staff)
+        self.oferta.aprobar()
+        response = self.client.post(reverse('mod_finalizar_oferta', args=[self.oferta.id]))
+        self.assertEqual(response.status_code, 302)
+        self.oferta.refresh_from_db()
+        self.assertEqual(self.oferta.estado, 'finalizada')

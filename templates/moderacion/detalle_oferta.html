@@ -1,0 +1,124 @@
+{% extends 'nueva_ui/base.html' %}
+
+{% block title %}Moderar oferta · {{ oferta.nombre_puesto }} · IEN Empleo{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 lg:px-8 py-8">
+
+  <div class="mb-6">
+    <a href="{% url 'mod_listar_ofertas' %}" class="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+      <span data-icon="arrow-left" class="h-4 w-4"></span> Volver al listado
+    </a>
+  </div>
+
+  <div class="panel p-8 mb-6">
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight text-[#26222E]">{{ oferta.nombre_puesto }}</h1>
+        <p class="text-muted-foreground mt-1">{{ oferta.titulo }}</p>
+      </div>
+      <span class="px-3 py-1 rounded-full text-xs font-medium
+        {% if oferta.estado == 'activa' %}bg-green-100 text-green-700
+        {% elif oferta.estado == 'pendiente' %}bg-yellow-100 text-yellow-700
+        {% elif oferta.estado == 'rechazada' %}bg-red-100 text-red-700
+        {% else %}bg-gray-100 text-gray-700{% endif %}">{{ oferta.get_estado_display }}</span>
+    </div>
+
+    <div class="flex flex-wrap gap-3 text-sm text-muted-foreground mt-4">
+      {% if oferta.ubicacion %}<span><span data-icon="map-pin" class="h-4 w-4 inline"></span> {{ oferta.ubicacion }}</span>{% endif %}
+      {% if oferta.modalidad %}<span><span data-icon="building" class="h-4 w-4 inline"></span> {{ oferta.get_modalidad_display }}</span>{% endif %}
+      {% if oferta.categoria %}<span><span data-icon="tag" class="h-4 w-4 inline"></span> {{ oferta.categoria.nombre }}</span>{% endif %}
+      {% if oferta.fecha_cierre %}<span><span data-icon="calendar" class="h-4 w-4 inline"></span> Cierre: {{ oferta.fecha_cierre|date:"d/m/Y" }}</span>{% endif %}
+    </div>
+  </div>
+
+  <div class="panel p-8 mb-6">
+    <h2 class="text-lg font-semibold text-[#26222E] mb-6">Empresa</h2>
+    <div class="flex items-center gap-3">
+      {% if oferta.empresa.oferente.logo %}
+        <img src="{{ oferta.empresa.oferente.logo.url }}" alt="" class="h-12 w-12 rounded-xl object-cover">
+      {% else %}
+        <div class="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 font-medium text-primary">
+          {{ oferta.empresa.oferente.nombre_empresa|first|upper }}
+        </div>
+      {% endif %}
+      <div>
+        <p class="font-medium">{{ oferta.empresa.oferente.nombre_empresa }}</p>
+        {% if oferta.empresa.oferente.ubicacion %}
+          <p class="text-sm text-muted-foreground">{{ oferta.empresa.oferente.ubicacion }}</p>
+        {% endif %}
+      </div>
+      <a href="{% url 'mod_detalle_empresa' oferta.empresa.oferente.pk %}" class="ml-auto text-sm font-medium text-primary hover:underline">
+        Ver perfil
+      </a>
+    </div>
+  </div>
+
+  <div class="panel p-8 mb-6">
+    <h2 class="text-lg font-semibold text-[#26222E] mb-6">Detalle del puesto</h2>
+
+    <p class="mb-6 text-sm leading-relaxed text-muted-foreground">{{ oferta.descripcion }}</p>
+
+    <div class="mb-5">
+      <p class="mb-2 text-xs uppercase tracking-wide text-muted-foreground">Habilidades duras</p>
+      <div class="flex flex-wrap gap-2">
+        {% for h in habilidades_duras %}<span class="rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground">{{ h }}</span>{% endfor %}
+      </div>
+    </div>
+    <div class="mb-5">
+      <p class="mb-2 text-xs uppercase tracking-wide text-muted-foreground">Habilidades blandas</p>
+      <div class="flex flex-wrap gap-2">
+        {% for h in habilidades_blandas %}<span class="rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground">{{ h }}</span>{% endfor %}
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <p class="mb-1 text-xs text-muted-foreground">Experiencia requerida</p>
+        <p class="text-sm font-medium">{{ oferta.experiencia_requerida }} años</p>
+      </div>
+      <div>
+        <p class="mb-1 text-xs text-muted-foreground">Nivel educativo</p>
+        <p class="text-sm font-medium">{{ oferta.get_nivel_educativo_display }}</p>
+      </div>
+    </div>
+  </div>
+
+  {% if oferta.estado == 'rechazada' and oferta.motivo_rechazo %}
+  <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4">
+    <p class="mb-1 text-sm font-medium text-red-700">Motivo del rechazo</p>
+    <p class="text-sm text-red-600">{{ oferta.motivo_rechazo }}</p>
+  </div>
+  {% endif %}
+
+  {% if oferta.estado == 'pendiente' %}
+  <div class="flex gap-4">
+    <form method="post" action="{% url 'mod_aprobar_oferta' oferta.pk %}" class="flex-1">
+      {% csrf_token %}
+      <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 font-medium text-white transition-colors hover:bg-primary/90">
+        <span data-icon="check" class="h-5 w-5"></span> Aprobar oferta
+      </button>
+    </form>
+    <form method="get" action="{% url 'mod_rechazar_oferta' oferta.pk %}" class="flex-1">
+      <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-lg bg-destructive px-6 py-3 font-medium text-white transition-colors hover:bg-destructive/90">
+        <span data-icon="x" class="h-5 w-5"></span> Rechazar oferta
+      </button>
+    </form>
+  </div>
+  {% elif oferta.estado == 'activa' %}
+  <div class="flex gap-4">
+    <form method="post" action="{% url 'mod_finalizar_oferta' oferta.pk %}" class="flex-1">
+      {% csrf_token %}
+      <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-lg bg-orange-600 px-6 py-3 font-medium text-white transition-colors hover:bg-orange-700">
+        <span data-icon="archive" class="h-5 w-5"></span> Dar de baja
+      </button>
+    </form>
+  </div>
+  {% else %}
+  <div class="rounded-xl bg-muted p-4 text-center text-sm text-muted-foreground">
+    Esta oferta ya fue <strong>{{ oferta.get_estado_display|lower }}</strong>. No se pueden realizar más acciones.
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

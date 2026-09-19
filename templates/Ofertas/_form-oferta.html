@@ -171,18 +171,11 @@
     </div>
   </div>
 
-  <div class="flex gap-4 pt-4">
+<div class="flex gap-4 pt-4">
     <button type="submit" class="btn-ien flex-1 !py-3.5">
       {{ submit_text|default:"Publicar oferta" }}
     </button>
-    {% if modal_mode %}
-      <button type="button" onclick="closeOfertaModal()" class="btn-ghost !py-3.5">
-        Cancelar
-      </button>
-    {% else %}
-      <a href="{% url 'dashboard_empresa' %}" class="btn-ghost !py-3.5">
-        Cancelar
-      </a>
-    {% endif %}
+    <a href="{% url 'dashboard_empresa' %}" class="btn-ghost !py-3.5">
+      Cancelar
+    </a>
   </div>
-</div>

@@ -18,7 +18,7 @@ urlpatterns = [
     path('empresas/<int:pk>/rechazar/', views.rechazar_empresa, name='mod_rechazar_empresa'),
 
     path('ofertas/', views.listar_ofertas, name='mod_listar_ofertas'),
-    path('oferta/<int:pk>/detalle/', views.detalle_oferta_json, name='mod_detalle_oferta'),
+    path('oferta/<int:pk>/detalle/', views.detalle_oferta, name='mod_detalle_oferta'),
     path('oferta/<int:pk>/aprobar/', views.aprobar_oferta, name='mod_aprobar_oferta'),
     path('oferta/<int:pk>/rechazar/', views.rechazar_oferta, name='mod_rechazar_oferta'),
     path('oferta/<int:pk>/finalizar/', views.finalizar_oferta, name='mod_finalizar_oferta'),

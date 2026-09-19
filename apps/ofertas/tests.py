@@ -53,13 +53,26 @@ class OfertaFormTests(TestCase):
         self.assertIn("habilidades_duras", repetida.errors)
         self.assertIn("habilidades_blandas", cruzada.errors)
 
-    def test_dashboard_muestra_ambas_secciones_de_habilidades(self):
+    def test_paginas_de_formulario_muestran_ambas_secciones_de_habilidades(self):
         self.client.force_login(self.usuario)
-        response = self.client.get(reverse("dashboard_empresa"))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'id="tags-input-duras"')
-        self.assertContains(response, 'id="tags-input-blandas"')
-
+        oferta = Oferta.objects.create(
+            empresa=self.usuario,
+            categoria=self.categoria,
+            titulo="Desarrollador backend",
+            nombre_puesto="Backend Developer",
+            ubicacion="Córdoba",
+            descripcion="Descripción de prueba",
+            habilidades_requeridas="Python",
+            habilidades_duras="Python",
+            nivel_educativo="universitario",
+            fecha_cierre=timezone.localdate() + timedelta(days=7),
+        )
+        crear = self.client.get(reverse("crear_oferta"))
+        editar = self.client.get(reverse("editar_oferta", args=[oferta.pk]))
+        for response in (crear, editar):
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'id="tags-input-duras"')
+            self.assertContains(response, 'id="tags-input-blandas"')
     def test_crear_y_editar_oferta_con_habilidades_separadas(self):
         self.client.force_login(self.usuario)
         response = self.client.post(
@@ -70,20 +83,12 @@ class OfertaFormTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["success"], response.json())
 
-        oferta = Oferta.objects.get(pk=response.json()["id"])
+        oferta = Oferta.objects.get(empresa=self.usuario)
         self.assertEqual(oferta.habilidades_duras, "Python, Django")
         self.assertEqual(oferta.habilidades_blandas, "Comunicación, Trabajo en equipo")
         self.assertEqual(
             oferta.habilidades_requeridas,
             "Python, Django, Comunicación, Trabajo en equipo",
-        )
-
-        datos = self.client.get(reverse("datos_oferta", args=[oferta.pk]))
-        self.assertEqual(datos.status_code, 200)
-        self.assertEqual(datos.json()["habilidades_duras"], ["Python", "Django"])
-        self.assertEqual(
-            datos.json()["habilidades_blandas"],
-            ["Comunicación", "Trabajo en equipo"],
         )
 
         editados = {

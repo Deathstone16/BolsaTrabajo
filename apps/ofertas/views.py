@@ -10,8 +10,7 @@ from usuarios.forms import OferenteForm
 from usuarios.services import obtener_url_contacto
 from usuarios import services as usuarios_service
 from usuarios.decorators import oferente_required, oferente_validado_required
-from .dtos import OfertaDTO
-from dataclasses import asdict
+
 
 @oferente_required
 def validacion_pendiente(request):
@@ -22,31 +21,32 @@ def validacion_pendiente(request):
         'email_contacto_url': email_contacto_url,
         'oferente': oferente,
     })
-
 @oferente_validado_required
 def crear_oferta(request):
-    """Crea una oferta desde POST y devuelve JSON cuando la petición es AJAX."""
+    """Crea una oferta; renderiza la página completa en GET y en POST inválido."""
+    es_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
     if request.method == 'POST':
         form = OfertaForm(request.POST)
         if form.is_valid():
-            oferta = crear_oferta_laboral(request.user, form)
-            es_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+            crear_oferta_laboral(request.user, form)
             if es_ajax:
-                return JsonResponse({'success': True, 'id': oferta.id})
+                return JsonResponse({'success': True})
             return redirect('dashboard_empresa')
-        else:
-            es_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-            if es_ajax:
-                return JsonResponse({'success': False, 'errors': form.errors})
+        elif es_ajax:
+            return JsonResponse({'success': False, 'errors': form.errors})
+    else:
+        form = OfertaForm()
 
-    return redirect('dashboard_empresa')
-
-
+    return render(request, 'Ofertas/crear-empleo.html', {
+        'form': form,
+        'oferente': request.user.oferente,
+    })
+    
 @oferente_validado_required
 def dashboard_empresa(request):
     """Renderiza el panel de la empresa con perfil, ofertas y formulario."""
-    
+
     oferente = request.user.oferente
     ofertas = obtener_ofertas_por_empresa(request.user)
     form_perfil = OferenteForm(instance=oferente)
@@ -59,15 +59,15 @@ def dashboard_empresa(request):
         'form': form,
         'experiencia_choices': Oferta.EXPERIENCIA_CHOICES,
     })
-
-
 @oferente_validado_required
 def editar_oferta(request, pk):
-    """Actualiza una oferta propia editable y la devuelve a revisión."""
+    """Actualiza una oferta propia editable; GET renderiza la página de edición."""
     oferta = obtener_oferta_por_id(pk)
 
-    if not oferta or oferta.empresa != request.user or not oferta.puede_editarse():
+    if not oferta or oferta.empresa != request.user:
         return redirect('dashboard_empresa')
+
+    es_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
     if request.method == 'POST':
         form = OfertaForm(request.POST, instance=oferta)
@@ -75,57 +75,43 @@ def editar_oferta(request, pk):
             oferta = form.save(commit=False)
             oferta.estado = 'pendiente'
             oferta.save()
-            es_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
             if es_ajax:
                 return JsonResponse({'success': True})
             return redirect('dashboard_empresa')
-        else:
-            es_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-            if es_ajax:
-                return JsonResponse({'success': False, 'errors': form.errors})
+        elif es_ajax:
+            return JsonResponse({'success': False, 'errors': form.errors})
+    else:
+        form = OfertaForm(instance=oferta)
 
-    return redirect('dashboard_empresa')
-
+    return render(request, 'Ofertas/editar-empleo.html', {
+        'form': form,
+        'oferta': oferta,
+        'oferente': request.user.oferente,
+    })
 
 @oferente_validado_required
 def eliminar_oferta(request, pk):
-    """Elimina por POST una oferta perteneciente a la empresa autenticada."""
+    """Muestra confirmación (GET) y elimina (POST) una oferta propia."""
     oferta = obtener_oferta_por_id(pk)
 
     if not oferta or oferta.empresa != request.user:
         return JsonResponse({'error': 'No autorizado'}, status=403)
 
+    es_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
     if request.method == 'POST':
         eliminar_oferta_por_id(pk)
-        es_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
         if es_ajax:
             return JsonResponse({'success': True})
         return redirect('dashboard_empresa')
 
-    return JsonResponse({'error': 'Método no permitido'}, status=405)
+    if es_ajax:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
 
-@oferente_validado_required
-def datos_oferta(request, pk):
-    """Devuelve como JSON los datos de una oferta para completar el modal."""
-    oferta = obtener_oferta_por_id(pk)
-
-    if not oferta or oferta.empresa != request.user:
-        return JsonResponse({'error': 'No encontrada'}, status=404)
-
-    dto = OfertaDTO.desde_modelo(oferta)
-    return JsonResponse(asdict(dto))
-
-@oferente_validado_required
-def lista_ofertas_parcial(request):
-    """Renderiza solamente la lista usada para refrescar el panel por AJAX."""
-
-    ofertas = obtener_ofertas_por_empresa(request.user)
-
-    return render(request, 'Ofertas/_lista-ofertas.html', {
-        'ofertas': ofertas,
-        'oferente': request.user.oferente, #temporalmente necesario para el template, se puede refactorizar para no necesitarlo
+    return render(request, 'Ofertas/confirmar-eliminar-oferta.html', {
+        'oferta': oferta,
+        'oferente': request.user.oferente,
     })
-
 
 @oferente_required
 def editar_perfil_empresa(request):
