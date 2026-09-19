@@ -55,7 +55,7 @@ async function openEditModal(pk) {
   document.querySelector('[name="titulo"]').value = data.titulo || '';
   document.querySelector('[name="nombre_puesto"]').value = data.nombre_puesto || '';
   document.querySelector('[name="categoria"]').value = data.categoria || '';
-  document.queryquerSelector('[name="ubicacion"]').value = data.ubicacion || '';
+  document.querySelector('[name="ubicacion"]').value = data.ubicacion || '';
   document.querySelector('[name="modalidad"]').value = data.modalidad || '';
   document.querySelector('[name="descripcion"]').value = data.descripcion || '';
   

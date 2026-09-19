@@ -26,6 +26,8 @@ class OfertaDTO:
     modalidad_display: str
     descripcion: str
     habilidades_requeridas: str
+    habilidades_duras: list[str]
+    habilidades_blandas: list[str]
     experiencia_requerida: str
     nivel_educativo: str
     nivel_educativo_display: str

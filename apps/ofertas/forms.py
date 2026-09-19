@@ -26,7 +26,6 @@ class OfertaForm(forms.ModelForm):
             "descripcion",
             "habilidades_duras",     
             "habilidades_blandas",
-            "habilidades_requeridas",
             "experiencia_requerida",
             "nivel_educativo",
             "es_confidencial",
@@ -37,7 +36,6 @@ class OfertaForm(forms.ModelForm):
             "fecha_cierre": forms.DateInput(attrs={"type": "date"}),
             "habilidades_duras": forms.HiddenInput(),      
             "habilidades_blandas": forms.HiddenInput(),
-            "habilidades_requeridas": forms.HiddenInput(),
         }
 
     def _validar_tags(self, value, es_duras=False):
@@ -46,7 +44,7 @@ class OfertaForm(forms.ModelForm):
         for t in tags:
             if len(t) < 2 or len(t) > 60:
                 raise forms.ValidationError(f"'{t}' debe tener entre 2 y 60 caracteres.")
-        if len(tags) != len(set(tags)):
+        if len(tags) != len({tag.casefold() for tag in tags}):
             raise forms.ValidationError("Hay habilidades repetidas en esta sección.")
         if len(tags) > self.MAX_POR_SECCION:
             raise forms.ValidationError(f"Máximo {self.MAX_POR_SECCION} habilidades por sección.")
@@ -54,35 +52,48 @@ class OfertaForm(forms.ModelForm):
             raise forms.ValidationError("Agregá al menos 1 habilidad técnica.")
         return tags
 
-def clean_habilidades_duras(self):
-    value = self.cleaned_data.get("habilidades_duras", "")
-    self._validar_tags(value, es_duras=True)
-    return value
+    def clean_habilidades_duras(self):
+        value = self.cleaned_data.get("habilidades_duras", "")
+        self._validar_tags(value, es_duras=True)
+        return value
 
-def clean_habilidades_blandas(self):
-    value = self.cleaned_data.get("habilidades_blandas", "")
-    tags_blandas = self._validar_tags(value)
-    # Cross-validation con duras
-    duras_value = self.cleaned_data.get("habilidades_duras", "")
-    tags_duras = [t.strip().lower() for t in duras_value.split(",") if t.strip()]
-    duplicadas = set(t.lower() for t in tags_blandas) & set (tags_duras)
-    if duplicadas:
-        raise forms.ValidationError(
-            "Estas habilidades ya están en la sección técnica: " + ", ".join(sorted(duplicadas))
+    def clean_habilidades_blandas(self):
+        value = self.cleaned_data.get("habilidades_blandas", "")
+        tags_blandas = self._validar_tags(value)
+        # Cross-validation con duras
+        duras_value = self.cleaned_data.get("habilidades_duras", "")
+        tags_duras = [t.strip().casefold() for t in duras_value.split(",") if t.strip()]
+        duplicadas = {t.casefold() for t in tags_blandas} & set(tags_duras)
+        if duplicadas:
+            raise forms.ValidationError(
+                "Estas habilidades ya están en la sección técnica: " + ", ".join(sorted(duplicadas))
+            )
+        return value
+
+    def clean_titulo(self):
+        titulo = self.cleaned_data.get("titulo")
+        if titulo and (len(titulo) < 5 or len(titulo) > 100):
+            raise forms.ValidationError("El título debe tener entre 5 y 100 caracteres.")
+        return titulo
+
+    def clean_fecha_cierre(self):
+        fecha_cierre = self.cleaned_data.get("fecha_cierre")
+        if fecha_cierre and fecha_cierre <= timezone.now():
+            raise forms.ValidationError("La fecha de cierre debe ser posterior a la fecha actual del sistema.")
+        return fecha_cierre
+
+    def save(self, commit=True):
+        """Mantiene el campo heredado a partir de las dos secciones nuevas."""
+        oferta = super().save(commit=False)
+        oferta.habilidades_requeridas = ", ".join(
+            filter(
+                None,
+                [oferta.habilidades_duras, oferta.habilidades_blandas],
+            )
         )
-    return value
-
-def clean_titulo(self):
-    titulo = self.cleaned_data.get("titulo")
-    if titulo and (len(titulo) < 5 or len(titulo) > 100):
-        raise forms.ValidationError("El título debe tener entre 5 y 100 caracteres.")
-    return titulo
-
-def clean_fecha_cierre(self):
-    fecha_cierre = self.cleaned_data.get("fecha_cierre")
-    if fecha_cierre and fecha_cierre <= timezone.now():
-        raise forms.ValidationError("La fecha de cierre debe ser posterior a la fecha actual del sistema.")
-    return fecha_cierre
+        if commit:
+            oferta.save()
+        return oferta
 
 
 

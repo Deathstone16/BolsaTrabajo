@@ -76,25 +76,53 @@
     {% if form.descripcion.errors %}<p class="text-sm text-red-500">{{ form.descripcion.errors.0 }}</p>{% endif %}
   </div>
 
-  <div class="space-y-2">
-    <label class="block text-sm font-medium">Habilidades requeridas</label>
+</div>
 
-    <div class="relative">
-      <input type="text" id="tags-input"
-            placeholder="Escribí una habilidad y seleccioná del listado..."
-            class="w-full px-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
-            autocomplete="off">
+<div class="space-y-4 pt-6">
+  <h3 class="font-medium flex items-center gap-2">
+    <i data-lucide="wrench" class="w-5 h-5 text-primary"></i>Habilidades
+  </h3>
 
-      <ul id="tags-dropdown"
-          class="absolute z-10 w-full bg-white border border-border rounded-lg mt-1 shadow-lg hidden max-h-48 overflow-y-auto">
-      </ul>
-    </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <fieldset class="border border-indigo-200 bg-indigo-50/40 rounded-lg p-4 space-y-3">
+      <legend class="px-2 text-sm font-semibold text-indigo-700 flex items-center gap-1">
+        <i data-lucide="wrench" class="w-4 h-4"></i> Habilidades técnicas (duras)
+      </legend>
+      <p class="text-xs text-muted-foreground">Mínimo 1, máximo 10 habilidades</p>
 
-    <div id="tags-container" class="flex flex-wrap gap-2 mt-2 min-h-0">
-    </div>
+      <div class="relative">
+        <input type="text" id="tags-input-duras"
+              placeholder="Ej. Python, SQL, Docker..."
+              class="w-full px-3 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-sm"
+              autocomplete="off">
+        <ul id="tags-dropdown-duras"
+            class="absolute z-10 w-full bg-white border border-border rounded-lg mt-1 shadow-lg hidden max-h-48 overflow-y-auto"></ul>
+      </div>
 
-    <input type="hidden" name="habilidades_requeridas" id="id_habilidades_requeridas"
-          value="{{ form.habilidades_requeridas.value|default:'' }}">
+      <div id="tags-container-duras" class="flex flex-wrap gap-2 min-h-[2rem]"></div>
+      {{ form.habilidades_duras }}
+      {% if form.habilidades_duras.errors %}<p class="text-sm text-red-500">{{ form.habilidades_duras.errors.0 }}</p>{% endif %}
+    </fieldset>
+
+    <fieldset class="border border-emerald-200 bg-emerald-50/40 rounded-lg p-4 space-y-3">
+      <legend class="px-2 text-sm font-semibold text-emerald-700 flex items-center gap-1">
+        <i data-lucide="users" class="w-4 h-4"></i> Habilidades blandas
+      </legend>
+      <p class="text-xs text-muted-foreground">Máximo 10 habilidades</p>
+
+      <div class="relative">
+        <input type="text" id="tags-input-blandas"
+              placeholder="Ej. Comunicación, Liderazgo..."
+              class="w-full px-3 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-sm"
+              autocomplete="off">
+        <ul id="tags-dropdown-blandas"
+            class="absolute z-10 w-full bg-white border border-border rounded-lg mt-1 shadow-lg hidden max-h-48 overflow-y-auto"></ul>
+      </div>
+
+      <div id="tags-container-blandas" class="flex flex-wrap gap-2 min-h-[2rem]"></div>
+      {{ form.habilidades_blandas }}
+      {% if form.habilidades_blandas.errors %}<p class="text-sm text-red-500">{{ form.habilidades_blandas.errors.0 }}</p>{% endif %}
+    </fieldset>
   </div>
 </div>
 
@@ -167,59 +195,4 @@
       </a>
     {% endif %}
   </div>
-</div>
-
-<div class="space-y-4 pt-6">
-  <h3 class="font-medium flex items-center gap-2">
-    <i data-lucide="wrench" class="w-5 h-5 text-primary"></i>Habilidades
-  </h3>
-
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <!-- 🔧 HABILIDADES DURAS -->
-    <fieldset class="border border-indigo-200 bg-indigo-50/40 rounded-lg p-4 space-y-3">
-      <legend class="px-2 text-sm font-semibold text-indigo-700 flex items-center gap-1">
-        <i data-lucide="wrench" class="w-4 h-4"></i> Habilidades técnicas (duras)
-      </legend>
-      <p class="text-xs text-muted-foreground">Mínimo 1, máximo 10 habilidades</p>
-
-      <div class="relative">
-        <input type="text" id="tags-input-duras"
-              placeholder="Ej. Python, SQL, Docker..."
-              class="w-full px-3 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-sm"
-              autocomplete="off">
-        <ul id="tags-dropdown-duras"
-            class="absolute z-10 w-full bg-white border border-border rounded-lg mt-1 shadow-lg hidden max-h-48 overflow-y-auto"></ul>
-      </div>
-
-      <div id="tags-container-duras" class="flex flex-wrap gap-2 min-h-[2rem]"></div>
-
-      {{ form.habilidades_duras }}
-      {% if form.habilidades_duras.errors %}<p class="text-sm text-red-500">{{ form.habilidades_duras.errors.0 }}</p>{% endif %}
-    </fieldset>
-
-    <!-- 🤝 HABILIDADES BLANDAS -->
-    <fieldset class="border border-emerald-200 bg-emerald-50/40 rounded-lg p-4 space-y-3">
-      <legend class="px-2 text-sm font-semibold text-emerald-700 flex items-center gap-1">
-        <i data-lucide="users" class="w-4 h-4"></i> Habilidades blandas
-      </legend>
-      <p class="text-xs text-muted-foreground">Máximo 10 habilidades</p>
-
-      <div class="relative">
-        <input type="text" id="tags-input-blandas"
-              placeholder="Ej. Comunicación, Liderazgo..."
-              class="w-full px-3 py-2 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-sm"
-              autocomplete="off">
-        <ul id="tags-dropdown-blandas"
-            class="absolute z-10 w-full bg-white border border-border rounded-lg mt-1 shadow-lg hidden max-h-48 overflow-y-auto"></ul>
-      </div>
-
-      <div id="tags-container-blandas" class="flex flex-wrap gap-2 min-h-[2rem]"></div>
-
-      {{ form.habilidades_blandas }}
-      {% if form.habilidades_blandas.errors %}<p class="text-sm text-red-500">{{ form.habilidades_blandas.errors.0 }}</p>{% endif %}
-    </fieldset>
-  </div>
-
-  <!-- Hidden field combinado (mantener para compatibilidad) -->
-  {{ form.habilidades_requeridas }}
 </div>
