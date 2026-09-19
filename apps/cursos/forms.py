@@ -1,9 +1,12 @@
+"""Formularios administrativos para cursos y categorías."""
+
 from django import forms
 from .models import Curso, Categoria
 
 INPUT_CLASS = "w-full px-4 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/30"
 
 class CursoForm(forms.ModelForm):
+    """Crea o edita los datos y la imagen de un curso."""
     class Meta:
         model = Curso
         fields = ['nombre', 'categoria', 'imagen', 'descripcion', 'duracion', 'horario', 'tipo', 'url_externa']
@@ -29,6 +32,7 @@ class CursoForm(forms.ModelForm):
         }
 
 class CategoriaForm(forms.ModelForm):
+    """Crea o modifica una categoría mediante su nombre."""
     class Meta:
         model = Categoria
         fields = ['nombre']

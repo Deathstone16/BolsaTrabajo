@@ -1,3 +1,5 @@
+"""Formularios y validaciones para ofertas y habilidades laborales."""
+
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -8,6 +10,7 @@ INPUT_CLASS = "w-full px-4 py-2 rounded-lg border border-border bg-input-backgro
 
 
 class OfertaForm(forms.ModelForm):
+    """Valida y persiste los datos utilizados para crear o editar una oferta."""
     
     categoria = forms.ModelChoiceField(
         queryset=Categoria.objects.all(),
@@ -37,6 +40,7 @@ class OfertaForm(forms.ModelForm):
         }
 
     def clean_titulo(self):
+        """Comprueba que el título tenga una longitud útil para publicación."""
         titulo = self.cleaned_data.get("titulo")
         if titulo and (len(titulo) < 5 or len(titulo) > 100):
             raise forms.ValidationError(
@@ -45,6 +49,7 @@ class OfertaForm(forms.ModelForm):
         return titulo
 
     def clean_fecha_cierre(self):
+        """Impide publicar una oferta cuya fecha de cierre ya haya pasado."""
         fecha_cierre = self.cleaned_data.get("fecha_cierre")
         if fecha_cierre and fecha_cierre <= timezone.now():
             raise forms.ValidationError(
@@ -55,6 +60,7 @@ class OfertaForm(forms.ModelForm):
 
 
 class HabilidadForm(forms.ModelForm):
+    """Formulario administrativo para crear o modificar una habilidad."""
     class Meta:
         model = Habilidad
         fields = ["nombre"]
@@ -66,6 +72,7 @@ class HabilidadForm(forms.ModelForm):
         }
 
     def clean_nombre(self):
+        """Valida la longitud mínima del nombre de la habilidad."""
         nombre = self.cleaned_data.get("nombre")
         if nombre and len(nombre) < 2:
             raise forms.ValidationError("El nombre debe tener al menos 2 caracteres.")

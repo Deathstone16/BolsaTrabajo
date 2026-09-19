@@ -1,3 +1,5 @@
+"""Vistas de registro, autenticación, perfiles y recuperación de acceso."""
+
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -22,6 +24,7 @@ from django.views.decorators.http import require_POST
 
 #vistas
 def registro(request):
+    """Registra postulantes u oferentes según el rol elegido."""
     tipo = request.GET.get('tipo', 'postulante')
     FormClass = RegistroOferenteForm if tipo == 'oferente' else RegistroPostulanteForm
     if request.method == 'POST':
@@ -52,6 +55,7 @@ def registro(request):
 
 
 def registro_exitoso(request):
+    """Confirma que el registro terminó correctamente."""
     return render(request, 'usuarios/exito.html', {
         'titulo': '¡Cuenta creada!',
         'mensaje': 'Tu cuenta fue creada exitosamente. Ya podés iniciar sesión.',
@@ -61,6 +65,7 @@ def registro_exitoso(request):
 
 
 def login_view(request):
+    """Autentica al usuario y redirige hacia su pantalla correspondiente."""
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -80,6 +85,7 @@ def login_view(request):
 
 @require_POST
 def logout_view(request):
+    """Cierra la sesión actual aceptando únicamente solicitudes POST."""
     services.cerrar_sesion(request)
     return redirect('login')
 
@@ -87,6 +93,7 @@ def logout_view(request):
 @login_required
 @postulante_required
 def datos_personales(request):
+    """Permite al postulante consultar y actualizar sus datos personales."""
     postulante = request.user.postulante
 
     if request.method == 'POST':
@@ -107,6 +114,7 @@ def datos_personales(request):
 @login_required
 @postulante_required
 def perfil_oferente(request, pk):
+    """Muestra el perfil público de una empresa aprobada."""
     oferente = get_object_or_404(Oferente, pk=pk)
     ofertas = oferente.usuario.ofertas.filter(estado='activa')
     return render(request, 'Ofertas/perfil_oferente_publico.html', {
@@ -116,6 +124,7 @@ def perfil_oferente(request, pk):
 
 
 def datos_personales_exitoso(request):
+    """Confirma la actualización de los datos personales."""
     return render(request, 'usuarios/exito.html', {
         'titulo': '¡Datos guardados!',
         'mensaje': 'Tu información personal fue actualizada correctamente.',
@@ -127,6 +136,7 @@ def datos_personales_exitoso(request):
 # ─── Recuperación de contraseña ───────────────────────────────────────────────
 
 def password_reset_request(request):
+    """Solicita un enlace de recuperación sin revelar si el email existe."""
     if request.method == 'POST':
         form = PasswordResetRequestForm(request.POST)
         if form.is_valid():
@@ -141,10 +151,12 @@ def password_reset_request(request):
 
 
 def recuperacion_enviada(request):
+    """Informa que la solicitud de recuperación fue procesada."""
     return render(request, 'usuarios/recuperar_enviado.html')
 
 
 def password_reset_confirm(request, uidb64, token):
+    """Valida el token y permite definir una contraseña nueva."""
     usuario = services.validar_token_recuperacion(uidb64, token)
 
     if usuario is None:
@@ -166,12 +178,14 @@ def password_reset_confirm(request, uidb64, token):
 
 
 def contrasena_restablecida(request):
+    """Confirma que la contraseña fue restablecida."""
     return render(request, 'usuarios/contrasena_exitosa.html')
 
 
 @login_required
 @postulante_required
 def mi_perfil(request):
+    """Muestra perfil, rol y herramientas propias del usuario autenticado."""
     postulante = request.user.postulante
     # El último análisis permite ofrecer el resultado al volver al perfil.
     ultimo_analisis = postulante.analisis_cv.first()
@@ -201,6 +215,7 @@ def mi_perfil(request):
 @login_required
 @postulante_required
 def eliminar_cv(request):
+    """Elimina por POST el CV del postulante autenticado."""
     if request.method == 'POST':
         services.eliminar_cv(request.user.postulante)
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':

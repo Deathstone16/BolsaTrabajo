@@ -1,3 +1,5 @@
+"""Vistas generales que no pertenecen a una aplicación específica."""
+
 from django.contrib import messages
 from django.shortcuts import redirect, render
 
@@ -22,8 +24,8 @@ def _contexto_home():
 
 
 def home(request):
+    """Renderiza la portada con cursos y ofertas destacadas."""
     return render(request, 'nueva_ui/home.html', _contexto_home())
-
 
 def ia(request):
     """Ruta temporal: evita ejecutar Groq dentro de Django."""

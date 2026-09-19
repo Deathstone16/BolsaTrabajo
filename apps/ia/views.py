@@ -1,3 +1,5 @@
+"""Vistas reservadas para la futura interfaz del módulo de IA."""
+
 import json
 
 import requests

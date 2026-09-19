@@ -13,6 +13,7 @@ from .estado_oferente import ESTADOS, Pendiente
 class UsuarioManager(BaseUserManager):
     """Manager personalizado para el modelo Usuario con email como campo principal."""
     def create_user(self, email, password=None, **extra_fields):
+        """Crea un usuario normalizando el email y cifrando la contraseña."""
         if not email:
             raise ValueError("El email es obligatorio")
         email = self.normalize_email(email)
@@ -22,6 +23,7 @@ class UsuarioManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
+        """Crea un usuario con permisos administrativos."""
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         return self.create_user(email, password, **extra_fields)

@@ -101,22 +101,27 @@ def actualizar_estado_oferta(oferta_id, nuevo_estado):
 
 #
 def listar_habilidades_por_tipo(tipo_id):
+    """Devuelve las habilidades asociadas a una categoría."""
     return Habilidad.objects.filter(categoria_id=tipo_id)
 #
 def crear_habilidad(form):
+    """Persiste una habilidad a partir de un formulario validado."""
     return form.save()
 #
 def modificar_habilidad(habilidad_id, form):
+    """Guarda los cambios del formulario de una habilidad existente."""
     habilidad = get_object_or_404(Habilidad, id=habilidad_id)
     return form.save()
 #
 def eliminar_habilidad(habilidad_id):
+    """Elimina una habilidad y devuelve su nombre para mensajes de interfaz."""
     habilidad = get_object_or_404(Habilidad, id=habilidad_id)
     nombre = habilidad.nombre
     habilidad.delete()
     return nombre
 #
 def puede_eliminar_habilidad(habilidad_id):
+    """Comprueba si una habilidad no aparece en ofertas existentes."""
     habilidad = get_object_or_404(Habilidad, id=habilidad_id)
     if Oferta.objects.filter(habilidades_requeridas__icontains=habilidad.nombre).exists():
         return False

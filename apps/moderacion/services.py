@@ -18,6 +18,7 @@ from cursos import services as cursos_services
 # ============================================================
 
 def listar_cursos_contexto():
+    """Construye el contexto del listado de cursos y su resumen por tipo."""
     cursos, resumen = cursos_services.listar_cursos_con_resumen()
     return {
         'cursos': cursos,
@@ -27,6 +28,7 @@ def listar_cursos_contexto():
 
 
 def obtener_curso(curso_id):
+    """Obtiene un curso o responde con HTTP 404 cuando no existe."""
     return get_object_or_404(Curso, id=curso_id)
 
 
@@ -35,6 +37,7 @@ def obtener_curso(curso_id):
 # ============================================================
 
 def listar_categorias_contexto():
+    """Construye el contexto con todas las categorías."""
     return {'categorias': Categoria.objects.all()}
 
 
@@ -43,6 +46,7 @@ def listar_categorias_contexto():
 # ============================================================
 
 def listar_empresas_contexto():
+    """Construye el contexto optimizado del listado de empresas."""
     empresas = Oferente.objects.select_related('usuario').order_by('-usuario__date_joined')
     return {
         'empresas': empresas,
@@ -51,6 +55,7 @@ def listar_empresas_contexto():
 
 
 def obtener_empresa(pk):
+    """Obtiene una empresa o responde con HTTP 404."""
     return get_object_or_404(Oferente, pk=pk)
 
 
@@ -59,6 +64,7 @@ def obtener_empresa(pk):
 # ============================================================
 
 def listar_ofertas_contexto(estado=''):
+    """Construye listado y estadísticas globales de ofertas para moderación."""
     # Base queryset optimizado
     base_qs = Oferta.objects.select_related('empresa__oferente', 'categoria').order_by('-fecha_publicacion')
     
@@ -83,6 +89,7 @@ def listar_ofertas_contexto(estado=''):
 
 
 def obtener_oferta(pk):
+    """Obtiene una oferta con sus relaciones principales precargadas."""
     return get_object_or_404(
         Oferta.objects.select_related('empresa__oferente', 'categoria'),
         pk=pk,
@@ -90,14 +97,17 @@ def obtener_oferta(pk):
 
 
 def aprobar_oferta(pk):
+    """Delega en el modelo la transición de una oferta a activa."""
     obtener_oferta(pk).aprobar()
 
 
 def rechazar_oferta(pk, motivo=None):
+    """Delega en el modelo el rechazo de una oferta y su motivo."""
     obtener_oferta(pk).rechazar(motivo=motivo)
 
 
 def finalizar_oferta(pk):
+    """Delega en el modelo la finalización de una oferta activa."""
     obtener_oferta(pk).finalizar()
 
 
