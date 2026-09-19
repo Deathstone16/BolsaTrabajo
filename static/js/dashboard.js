@@ -5,7 +5,7 @@
  */
 // Notificacion flotante del sitio (IenUI.aviso); si no cargo, el alert de siempre.
 function avisar(tipo, mensaje) {
-  if (window.IenUI && window.IenUI.aviso) window.IenUI.aviso(tipo, mensaje);
+  if (window.IenUI && typeof window.IenUI.aviso === 'function') window.IenUI.aviso(tipo, mensaje);
   else alert(mensaje);
 }
 

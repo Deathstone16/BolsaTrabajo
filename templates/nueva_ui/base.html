@@ -10,9 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="{% static 'css/ui/tailwind-ui.css' %}" />
-  <link rel="stylesheet" href="{% static 'css/ui/ien-theme.css' %}" />
-  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <link rel="stylesheet" href="{% static_v 'css/ui/tailwind-ui.css' %}" />
+  <link rel="stylesheet" href="{% static_v 'css/ui/ien-theme.css' %}" />
+  <link rel="stylesheet" href="{% static_v 'css/style.css' %}" />
   {% block extra_head %}{% endblock %}
 </head>
 <body class="bg-[#F8F3F0] text-[#26222E] antialiased">
@@ -48,7 +48,7 @@
     {% include "nueva_ui/partials/_footer.html" %}
   {% endblock %}
 
-  <script src="{% static 'js/ui/ien-ui.js' %}"></script>
+  <script src="{% static_v 'js/ui/ien-ui.js' %}"></script>
   {% include "nueva_ui/partials/_logout_modal.html" %}
   {% block extra_js %}{% endblock %}
 </body>

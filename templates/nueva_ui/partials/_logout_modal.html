@@ -9,7 +9,9 @@
     document.querySelectorAll('.form-logout').forEach(function (form) {
       var confirmado = false;
       form.addEventListener('submit', function (e) {
-        if (confirmado || !window.IenUI) return;
+        // Si IenUI.confirmar no esta (JS viejo cacheado, error de carga), no se frena
+        // el envio: se cierra sesion igual en vez de dejar el boton muerto.
+        if (confirmado || !window.IenUI || typeof window.IenUI.confirmar !== 'function') return;
         e.preventDefault();
         window.IenUI.confirmar({
           titulo: '¿Cerrar sesión?',

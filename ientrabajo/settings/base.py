@@ -71,6 +71,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            # {% static_v %} disponible en todas las plantillas: agrega la version
+            # del archivo a la URL para que el navegador no use JS/CSS viejo cacheado.
+            'builtins': ['ientrabajo.templatetags.ien_static'],
         },
     },
 ]

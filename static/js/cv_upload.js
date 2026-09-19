@@ -292,7 +292,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function pedirConfirmacionEliminar() {
-        if (!window.IenUI) return Promise.resolve(confirm('¿Estás seguro de que deseas eliminar tu CV?'));
+        if (!window.IenUI || typeof window.IenUI.confirmar !== 'function') {
+            return Promise.resolve(confirm('¿Estás seguro de que deseas eliminar tu CV?'));
+        }
         return window.IenUI.confirmar({
             titulo: '¿Eliminar tu CV?',
             mensaje: 'Vas a tener que volver a subirlo para postularte y para analizarlo con IA.',
@@ -304,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function mostrarFeedback(tipo, mensaje) {
         // Los avisos salen como notificacion flotante (IenUI.aviso).
-        if (window.IenUI) {
+        if (window.IenUI && typeof window.IenUI.aviso === 'function') {
             window.IenUI.aviso({ success: 'exito', error: 'error', loading: 'info' }[tipo] || 'info', mensaje);
             return;
         }

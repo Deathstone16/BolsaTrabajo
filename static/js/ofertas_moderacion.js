@@ -28,6 +28,7 @@ function dibujarIconos(scope) {
 
   // Misma firma de siempre; ahora es el aviso flotante comun del sitio (IenUI.aviso).
   function mostrarNotificacion(mensaje, tipo) {
+    if (!window.IenUI || typeof window.IenUI.aviso !== 'function') { alert(mensaje); return; }
     window.IenUI.aviso(tipo === 'error' || tipo === 'info' ? tipo : 'exito', mensaje);
   }
 
@@ -171,6 +172,10 @@ function dibujarIconos(scope) {
 
     // Misma firma de siempre; ahora usa el modal comun del sitio (IenUI.confirmar).
     function confirmarAccion(mensaje, detalle, textoBoton, colorBoton, callback) {
+      if (!window.IenUI || typeof window.IenUI.confirmar !== 'function') {
+        if (confirm(mensaje)) callback();
+        return;
+      }
       window.IenUI.confirmar({
         titulo: mensaje,
         mensaje: detalle,
