@@ -1,3 +1,5 @@
+"""Formularios de autenticación, perfiles y archivos de usuarios."""
+
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, SetPasswordForm as DjangoSetPasswordForm
 from .models import Usuario, Postulante, Oferente
@@ -8,12 +10,14 @@ CV_TAMANO_MAXIMO_MB = 5
 
 
 class RegistroBaseForm(UserCreationForm):
+    """Formulario base para crear usuarios cuyo identificador es el email."""
     class Meta:
         model = Usuario
         fields = ['email', 'password1', 'password2']
 
 
 class RegistroPostulanteForm(RegistroBaseForm):
+    """Registra un postulante junto con nombre y apellido."""
     class Meta(RegistroBaseForm.Meta):
         fields = ['first_name', 'last_name', 'email', 'password1', 'password2']
         labels = {
@@ -25,12 +29,14 @@ class RegistroPostulanteForm(RegistroBaseForm):
 
 
 class RegistroOferenteForm(RegistroBaseForm):
+    """Registra una cuenta empresarial con nombre comercial y CUIT."""
     nombre_empresa = forms.CharField(max_length=200, label='Nombre de la empresa')
     cuit = forms.CharField(max_length=13, label='CUIT')
 
 
 
 class LoginForm(forms.Form):
+    """Recibe las credenciales utilizadas por el servicio de autenticación."""
     email = forms.EmailField(label='Email')
     password = forms.CharField(
         label='Contraseña',
@@ -38,6 +44,7 @@ class LoginForm(forms.Form):
     )
     
 class OferenteForm(forms.ModelForm):
+    """Edita la información pública y de contacto de una empresa."""
     class Meta:
         model = Oferente
         fields = [
@@ -47,6 +54,7 @@ class OferenteForm(forms.ModelForm):
         ]
 
 class DatosPersonalesForm(forms.ModelForm):
+    """Actualiza datos del usuario y del perfil de postulante."""
     first_name = forms.CharField(max_length=150, label='Nombre')
     last_name = forms.CharField(max_length=150, label='Apellido')
     email = forms.EmailField(label="Email")
@@ -63,6 +71,7 @@ class DatosPersonalesForm(forms.ModelForm):
         fields = ['dni','fecha_nacimiento','telefono','direccion']
         
     def clean_dni(self):
+        """Exige un DNI compuesto exactamente por ocho dígitos."""
         dni = self.cleaned_data.get('dni')
         if not dni.isdigit():
             raise forms.ValidationError('El DNI solo puede contener números.')
@@ -71,6 +80,7 @@ class DatosPersonalesForm(forms.ModelForm):
         return dni
 
     def clean_telefono(self):
+        """Impide almacenar caracteres no numéricos en el teléfono."""
         telefono = self.cleaned_data.get('telefono')
         if not telefono.isdigit():
             raise forms.ValidationError('El teléfono solo puede contener números.')
@@ -132,9 +142,11 @@ class SetPasswordForm(DjangoSetPasswordForm):
 
 
 class CargaCVForm(forms.Form):
+    """Valida formato y tamaño del archivo de currículum."""
     cv = forms.FileField(label='Archivo CV')
 
     def clean_cv(self):
+        """Acepta PDF o documentos Word de hasta el tamaño configurado."""
         archivo = self.cleaned_data.get('cv')
         if not archivo:
             raise forms.ValidationError('Debes seleccionar un archivo.')

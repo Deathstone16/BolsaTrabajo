@@ -6,6 +6,7 @@ estadístico para el panel de administración.
 """
 
 from .models import Curso, Categoria
+from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404
 
 def crear_curso(form):
@@ -65,7 +66,7 @@ def modificar_categoria(categoria_id, form):
     return form.save()
 
 def dar_de_baja_categoria(categoria_id):
-    """Elimina físicamente una categoría.
+    """Elimina una categoría vacía sin borrar registros asociados.
 
     Args:
         categoria_id (int): ID de la categoría a eliminar.
@@ -75,7 +76,10 @@ def dar_de_baja_categoria(categoria_id):
     """
     categoria = get_object_or_404(Categoria, id=categoria_id)
     nombre = categoria.nombre
-    categoria.delete()
+    try:
+        categoria.delete()
+    except ProtectedError:
+        return None
     return nombre
 
 def listar_cursos_con_resumen():

@@ -1,0 +1,42 @@
+{% comment %}
+  Sidebar de la seccion del postulante. Lo comparten mi_perfil.html y
+  datos_personales.html para que las dos pantallas queden alineadas.
+  Espera `seccion` en el contexto del include: "perfil" o "datos".
+{% endcomment %}
+<aside>
+  <div class="panel sticky top-28 p-6">
+    <div class="flex flex-col items-center gap-2 border-b border-[rgba(110,85,55,0.16)] pb-6">
+      <div class="grid h-16 w-16 place-items-center rounded-full bg-[#512DA8]/10 text-xl font-bold text-[#512DA8]">
+        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+      </div>
+      <p class="text-center text-sm font-semibold text-[#26222E]">{{ request.user.get_full_name }}</p>
+      {% if postulante.dni %}
+        <p class="text-center font-mono text-xs text-[#6B645C]">{{ postulante.dni }}</p>
+      {% endif %}
+    </div>
+
+    <nav class="mt-6 flex flex-col gap-1.5">
+      <a href="{% url 'mi_perfil' %}"
+         class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors {% if seccion == 'perfil' %}bg-[#512DA8] font-semibold text-white shadow-md{% else %}text-[#6B645C] hover:bg-[#F3EDE5] hover:text-[#26222E]{% endif %}">
+        <span data-icon="user" class="h-4 w-4"></span> Perfil profesional
+      </a>
+      <a href="{% url 'datos_personales' %}"
+         class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors {% if seccion == 'datos' %}bg-[#512DA8] font-semibold text-white shadow-md{% else %}text-[#6B645C] hover:bg-[#F3EDE5] hover:text-[#26222E]{% endif %}">
+        <span data-icon="sliders" class="h-4 w-4"></span> Mis datos personales
+      </a>
+
+      {% comment %}
+        Estas dos venian del mockup con href="#": todavia no tienen vista ni
+        modelo. Se muestran sin enlace para no prometer una pantalla que no esta.
+      {% endcomment %}
+      <span class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#6B645C]/60">
+        <span data-icon="bookmark" class="h-4 w-4"></span> Empleos guardados
+        <span class="ml-auto font-mono text-[10px] uppercase">pronto</span>
+      </span>
+      <span class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#6B645C]/60">
+        <span data-icon="trending-up" class="h-4 w-4"></span> Brecha de habilidades
+        <span class="ml-auto font-mono text-[10px] uppercase">pronto</span>
+      </span>
+    </nav>
+  </div>
+</aside>

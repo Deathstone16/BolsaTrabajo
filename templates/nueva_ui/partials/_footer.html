@@ -1,0 +1,69 @@
+{% load static %}
+<footer class="relative overflow-hidden bg-[#2b1a55] text-white/80">
+  <div class="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-[#512DA8]/40 blur-[120px]" aria-hidden="true"></div>
+  <div class="pointer-events-none absolute -bottom-24 right-0 h-72 w-72 rounded-full bg-[#FFDE59]/20 blur-[120px]" aria-hidden="true"></div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col gap-6 border-b border-white/10 py-14 md:flex-row md:items-center md:justify-between">
+      <div class="max-w-md">
+        <p class="kicker !text-[#FFDE59] !text-[#FFDE59]">Alertas de empleo</p>
+        <h2 class="mt-3 text-2xl font-semibold text-white sm:text-3xl">Nuevas ofertas, directo a tu correo</h2>
+        <p class="mt-2 text-sm text-white/60">Recibí las oportunidades de la semana en Resistencia y toda la provincia.</p>
+      </div>
+      {# TODO: no hay backend de alertas por mail todavia; el formulario es decorativo. #}
+        <form onsubmit="return false;" class="flex w-full max-w-md items-center gap-2 rounded-full border border-white/15 bg-white/5 p-2 backdrop-blur">
+        <input type="email" placeholder="tu@email.com" class="min-w-0 flex-1 bg-transparent px-4 text-sm text-white placeholder:text-white/40 focus:outline-none" />
+        <button type="button" disabled class="btn-sun cursor-not-allowed opacity-70 !py-2.5 shrink-0">Suscribirme <span data-icon="arrow-right" class="h-4 w-4"></span></button>
+      </form>
+    </div>
+
+    <div class="grid grid-cols-1 gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#512DA8] to-[#43218F] text-base font-bold tracking-tight text-white">
+            <span class="-mt-0.5">IEN</span>
+            <span class="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#FFDE59]"></span>
+          </span>
+          <span class="text-lg font-semibold text-white">IEN Empleo</span>
+        </div>
+        <p class="text-sm leading-relaxed text-white/60">
+          La bolsa de trabajo oficial del Instituto Económico Nacional. Conectamos el talento del nordeste con las oportunidades de todo el país.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="mb-4 font-mono text-xs uppercase tracking-[0.18em] text-[#FFDE59]">Plataforma</h4>
+        <ul class="space-y-2.5 text-sm">
+          <li><a href="{% url 'buscar_empleo' %}" class="transition-colors hover:text-[#FFDE59]">Buscar empleo</a></li>
+          <li><a href="{% url 'crear_oferta' %}" class="transition-colors hover:text-[#FFDE59]">Publicar oferta</a></li>
+          <li><span class="text-white/60">Cursos del IEN <span class="font-mono text-[10px]">(pronto)</span></span></li>
+          <li><a href="{% url 'login' %}" class="transition-colors hover:text-[#FFDE59]">Ingresar</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="mb-4 font-mono text-xs uppercase tracking-[0.18em] text-[#FFDE59]">Instituto</h4>
+        <ul class="space-y-2.5 text-sm">
+          <li class="flex items-center gap-2 text-white/70"><span data-icon="graduation-cap" class="h-4 w-4 text-[#FFDE59]"></span> Educación Económica Nacional</li>
+          <li><span class="text-white/60">Programas educativos</span></li>
+          <li class="text-white/60">Alianzas con empresas</li>
+          <li class="text-white/60">Atención a graduados</li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="mb-4 font-mono text-xs uppercase tracking-[0.18em] text-[#FFDE59]">Contacto</h4>
+        <ul class="space-y-3 text-sm">
+          <li class="flex items-start gap-2"><span data-icon="map-pin" class="mt-0.5 h-4 w-4 shrink-0 text-[#FFDE59]"></span><span>Resistencia, Chaco, Argentina</span></li>
+          <li class="flex items-center gap-2"><span data-icon="mail" class="h-4 w-4 shrink-0 text-[#FFDE59]"></span><a href="mailto:contacto@ien.edu.ar" class="transition-colors hover:text-[#FFDE59]">contacto@ien.edu.ar</a></li>
+          <li class="flex items-center gap-2"><span data-icon="phone" class="h-4 w-4 shrink-0 text-[#FFDE59]"></span><span class="whitespace-nowrap">+54 362 445 8931</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="flex flex-col items-center justify-between gap-3 border-t border-white/10 py-6 text-xs text-white/50 sm:flex-row">
+      <span>© 2026 Instituto Económico Nacional · Todos los derechos reservados</span>
+      <span class="font-mono">Hecho en Resistencia, Chaco</span>
+    </div>
+  </div>
+</footer>

@@ -9,7 +9,7 @@ from .models import Oferta
 
 from django.shortcuts import get_object_or_404
 
-from categorias.models import TipoOferta, Habilidad
+from categorias.models import Habilidad
 
 
 def crear_oferta_laboral(usuario_empresa, form_oferta):
@@ -98,43 +98,30 @@ def actualizar_estado_oferta(oferta_id, nuevo_estado):
 
 
 
-def listar_tipos_oferta():
-    return TipoOferta.objects.all()
-#
-def crear_tipo_oferta(form):
-    return form.save()
-#
-def modificar_tipo_oferta(tipo_id, form):
-    tipo = get_object_or_404(TipoOferta, id=tipo_id)
-    return form.save()
-#
-def eliminar_tipo_oferta(tipo_id):
-    tipo = get_object_or_404(TipoOferta, id=tipo_id)
-    nombre = tipo.nombre
-    tipo.delete()
-    return nombre
 
-
-def puede_eliminar_tipo_oferta(tipo_id):
-    return not Oferta.objects.filter(tipo_oferta_id=tipo_id).exists()
 #
 def listar_habilidades_por_tipo(tipo_id):
-    return Habilidad.objects.filter(tipo_oferta_id=tipo_id)
+    """Devuelve las habilidades asociadas a una categoría."""
+    return Habilidad.objects.filter(categoria_id=tipo_id)
 #
 def crear_habilidad(form):
+    """Persiste una habilidad a partir de un formulario validado."""
     return form.save()
 #
 def modificar_habilidad(habilidad_id, form):
+    """Guarda los cambios del formulario de una habilidad existente."""
     habilidad = get_object_or_404(Habilidad, id=habilidad_id)
     return form.save()
 #
 def eliminar_habilidad(habilidad_id):
+    """Elimina una habilidad y devuelve su nombre para mensajes de interfaz."""
     habilidad = get_object_or_404(Habilidad, id=habilidad_id)
     nombre = habilidad.nombre
     habilidad.delete()
     return nombre
 #
 def puede_eliminar_habilidad(habilidad_id):
+    """Comprueba si una habilidad no aparece en ofertas existentes."""
     habilidad = get_object_or_404(Habilidad, id=habilidad_id)
     if Oferta.objects.filter(habilidades_requeridas__icontains=habilidad.nombre).exists():
         return False

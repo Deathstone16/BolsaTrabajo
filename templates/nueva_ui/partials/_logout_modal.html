@@ -1,0 +1,29 @@
+{% comment %}
+  Confirmacion antes de cerrar sesion (viene de templates/base.html, commit 3e856e7).
+  Usa el modal comun del sitio, IenUI.confirmar (static/js/ui/ien-ui.js), y
+  engancha todos los formularios .form-logout (escritorio y movil).
+  Sin JS los formularios siguen funcionando como antes.
+{% endcomment %}
+<script>
+  (function () {
+    document.querySelectorAll('.form-logout').forEach(function (form) {
+      var confirmado = false;
+      form.addEventListener('submit', function (e) {
+        // Si IenUI.confirmar no esta (JS viejo cacheado, error de carga), no se frena
+        // el envio: se cierra sesion igual en vez de dejar el boton muerto.
+        if (confirmado || !window.IenUI || typeof window.IenUI.confirmar !== 'function') return;
+        e.preventDefault();
+        window.IenUI.confirmar({
+          titulo: '¿Cerrar sesión?',
+          mensaje: 'Vas a tener que volver a ingresar con tu email y contraseña.',
+          confirmar: 'Cerrar sesión',
+          icono: 'log-out'
+        }).then(function (ok) {
+          if (!ok) return;
+          confirmado = true;
+          form.submit();
+        });
+      });
+    });
+  })();
+</script>

@@ -1,1 +1,1 @@
-# Create your views here.
+"""Vistas públicas de cursos; actualmente no define handlers propios."""

@@ -22,14 +22,14 @@ class OfertaDTO:
     titulo: str
     nombre_puesto: str
     categoria: Optional[int]
-    tipo_oferta: Optional[int]
-    tipo_oferta_nombre: str
     ubicacion: str
     modalidad: str
     modalidad_display: str
     descripcion: str
     habilidades_requeridas: str
-    experiencia_requerida: int
+    habilidades_duras: list[str]
+    habilidades_blandas: list[str]
+    experiencia_requerida: str
     nivel_educativo: str
     nivel_educativo_display: str
     es_confidencial: bool
@@ -53,6 +53,8 @@ class OfertaDTO:
             modalidad_display=oferta.get_modalidad_display(),
             descripcion=oferta.descripcion,
             habilidades_requeridas=oferta.habilidades_requeridas,
+            habilidades_duras=[h.strip() for h in (oferta.habilidades_duras or "").split(",") if h.strip()],
+            habilidades_blandas=[h.strip() for h in (oferta.habilidades_blandas or "").split(",") if h.strip()],
             experiencia_requerida=oferta.experiencia_requerida,
             nivel_educativo=oferta.nivel_educativo,
             nivel_educativo_display=oferta.get_nivel_educativo_display(),
@@ -65,4 +67,3 @@ class OfertaDTO:
             empresa_nombre=oferente.nombre_empresa if oferente else "",
             empresa_perfil_url="#",
         )
-

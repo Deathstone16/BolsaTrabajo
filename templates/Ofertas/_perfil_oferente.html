@@ -1,4 +1,4 @@
-<div class="bg-white rounded-2xl shadow-sm border border-border overflow-hidden mb-6">
+<div class="panel overflow-hidden mb-6">
   <div class="h-48 bg-gradient-to-r from-primary/20 to-primary/10">
     {% if oferente.banner %}
       <img src="{{ oferente.banner.url }}" class="w-full h-full object-cover">
@@ -15,24 +15,24 @@
         </div>
       {% endif %}
       <div class="flex-1 mt-16 md:mt-20">
-        <h1 class="text-3xl font-medium">{{ oferente.nombre_empresa }}</h1>
+        <h1 class="text-3xl font-bold tracking-tight text-[#26222E]">{{ oferente.nombre_empresa }}</h1>
         <div class="flex flex-wrap gap-3 text-sm text-muted-foreground mt-2">
           {% if oferente.industria %}
-            <span><i data-lucide="building2" class="w-4 h-4 inline"></i> {{ oferente.industria }}</span>
+            <span><span data-icon="building" class="h-4 w-4 inline"></span> {{ oferente.industria }}</span>
           {% endif %}
           {% if oferente.ubicacion %}
-            <span><i data-lucide="map-pin" class="w-4 h-4 inline"></i> {{ oferente.ubicacion }}</span>
+            <span><span data-icon="map-pin" class="h-4 w-4 inline"></span> {{ oferente.ubicacion }}</span>
           {% endif %}
           {% if oferente.tamano_empresa %}
-            <span><i data-lucide="users" class="w-4 h-4 inline"></i> {{ oferente.get_tamano_empresa_display }}</span>
+            <span><span data-icon="users" class="h-4 w-4 inline"></span> {{ oferente.get_tamano_empresa_display }}</span>
           {% endif %}
           {% if oferente.sitio_web %}
             <a href="{{ oferente.sitio_web }}" target="_blank" class="hover:text-primary transition-colors">
-              <i data-lucide="globe" class="w-4 h-4 inline"></i> {{ oferente.sitio_web }}
+              <span data-icon="globe" class="h-4 w-4 inline"></span> {{ oferente.sitio_web }}
             </a>
           {% endif %}
           {% if oferente.telefono %}
-            <span><i data-lucide="phone" class="w-4 h-4 inline"></i> {{ oferente.telefono }}</span>
+            <span><span data-icon="phone" class="h-4 w-4 inline"></span> {{ oferente.telefono }}</span>
           {% endif %}
         </div>
         {% if oferente.descripcion %}

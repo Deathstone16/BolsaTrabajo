@@ -1,21 +1,21 @@
-{% extends 'base.html' %}
+{% extends 'nueva_ui/base.html' %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
 
   <div class="mb-8 flex justify-between items-center">
     <div>
-      <h1 class="text-3xl font-medium mb-2">Gestion de Categorias</h1>
+      <h1 class="text-3xl font-bold tracking-tight text-[#26222E] mb-2">Gestion de Categorias</h1>
       <p class="text-muted-foreground">Administra las categorias de los cursos</p>
     </div>
     <a href="{% url 'mod_crear_categoria' %}"
-       class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
-      <i data-lucide="plus" class="w-5 h-5"></i>
+       class="btn-ien !py-2.5 text-sm">
+      <span data-icon="plus" class="h-5 w-5"></span>
       Añadir categoria
     </a>
   </div>
 
-  <div class="bg-white rounded-xl shadow-sm border border-border p-6">
+  <div class="panel p-6">
     <table class="w-full text-sm">
       <thead>
         <tr class="border-b border-border">
@@ -28,6 +28,10 @@
         <tr class="border-b border-border hover:bg-muted/50 transition-colors">
           <td class="py-3 px-4">{{ categoria.nombre }}</td>
           <td class="py-3 px-4 flex gap-2">
+            <a href="{% url 'mod_listar_habilidades' categoria.id %}"
+               class="px-3 py-1 bg-secondary/20 text-secondary-foreground rounded-lg hover:bg-secondary/30 transition-colors text-xs">
+              Habilidades
+            </a>
             <a href="{% url 'mod_modificar_categoria' categoria.id %}"
                class="px-3 py-1 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-xs">
               Editar

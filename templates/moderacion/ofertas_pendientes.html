@@ -1,23 +1,23 @@
-{% extends 'base.html' %}
+{% extends 'nueva_ui/base.html' %}
 {% load static %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
 
 <div class="mb-6">
-    <h1 class="text-3xl font-medium">Panel de Moderación</h1>
+    <h1 class="text-3xl font-bold tracking-tight text-[#26222E]">Panel de Moderación</h1>
     <p class="text-muted-foreground mt-1">Administra y modera las ofertas laborales publicadas. Haz clic en una fila para ver detalles completos.</p>
 </div>
 
 <!-- Búsqueda y filtro -->
-<div class="bg-white rounded-xl border border-border p-4 mb-6 flex flex-col sm:flex-row gap-3">
+<div class="panel p-4 mb-6 flex flex-col sm:flex-row gap-3">
     <div class="relative flex-1">
-      <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"></i>
+      <span data-icon="search" class="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"></span>
       <input type="text" id="buscar" placeholder="Buscar por puesto o empresa..."
             class="w-full pl-9 pr-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
     </div>
     <div class="relative">
-    <i data-lucide="filter" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"></i>
+    <span data-icon="filter" class="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"></span>
     <select id="filtro-estado" onchange="window.location.href=this.value"
             class="pl-9 pr-8 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none">
         <option value="{% url 'mod_listar_ofertas' %}" {% if not filtro_actual %}selected{% endif %}>Todos los estados</option>
@@ -29,7 +29,7 @@
 </div>
 
 <!-- Tabla -->
-  <div class="bg-white rounded-xl border border-border overflow-hidden mb-6">
+  <div class="panel overflow-hidden mb-6">
     <table class="w-full">
     <thead>
         <tr class="border-b border-border text-sm text-muted-foreground">
@@ -63,18 +63,18 @@
                 <button type="button" onclick="aprobarOferta({{oferta.id}})"
                         class="btn-accion-rapida p-1.5 rounded-lg border border-green-200 text-green-600 hover:bg-green-50 transition-colors"
                         title="Aprobar">
-                <i data-lucide="check" class="w-4 h-4"></i>
+                <span data-icon="check" class="h-4 w-4"></span>
                 </button>
-                <button type="button" onclick="rechazarOferta({{oferta.id}})"
+                <button type="button" onclick="abrirDetalle({{oferta.id}})"
                         class="btn-accion-rapida p-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition-colors"
                         title="Rechazar">
-                <i data-lucide="x" class="w-4 h-4"></i>
+                <span data-icon="x" class="h-4 w-4"></span>
                 </button>
                 {% elif oferta.estado == 'activa' %}
                 <button type="button" onclick="finalizarOferta({{oferta.id}})"
                         class="btn-accion-rapida px-3 py-1.5 rounded-lg border border-orange-200 text-orange-600 hover:bg-orange-50 transition-colors text-xs font-medium"
                         title="Dar de baja">
-                <i data-lucide="archive" class="w-4 h-4 inline"></i> Dar de baja
+                <span data-icon="archive" class="h-4 w-4 inline"></span> Dar de baja
                 </button>
                 {% else %}
                 <span class="text-xs text-muted-foreground">—</span>
@@ -93,17 +93,17 @@
 
   <!-- Stats -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-    <div class="bg-white rounded-xl border border-border p-6">
+    <div class="panel p-6">
       <p class="text-sm text-muted-foreground mb-1">Total de ofertas</p>
-      <p class="text-3xl font-medium">{{ total }}</p>
+      <p class="text-3xl font-bold tracking-tight text-[#26222E]">{{ total }}</p>
     </div>
-    <div class="bg-white rounded-xl border border-border p-6">
+    <div class="panel p-6">
       <p class="text-sm text-muted-foreground mb-1">Pendientes</p>
-      <p class="text-3xl font-medium">{{ pendientes }}</p>
+      <p class="text-3xl font-bold tracking-tight text-[#26222E]">{{ pendientes }}</p>
     </div>
-    <div class="bg-white rounded-xl border border-border p-6">
+    <div class="panel p-6">
       <p class="text-sm text-muted-foreground mb-1">Aprobadas</p>
-      <p class="text-3xl font-medium">{{ aprobadas }}</p>
+      <p class="text-3xl font-bold tracking-tight text-[#26222E]">{{ aprobadas }}</p>
     </div>
   </div>
 
@@ -113,5 +113,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/ofertas_moderacion.js' %}"></script>
+<script src="{% static_v 'js/ofertas_moderacion.js' %}"></script>
 {% endblock %}

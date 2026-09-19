@@ -1,21 +1,21 @@
-{% extends 'base.html' %}
+{% extends 'nueva_ui/base.html' %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
 
   <div class="mb-8 flex justify-between items-center">
     <div>
-      <h1 class="text-3xl font-medium mb-2">Habilidades — {{ tipo.nombre }}</h1>
-      <p class="text-muted-foreground">Administra las habilidades asociadas a este tipo de oferta</p>
+      <h1 class="text-3xl font-bold tracking-tight text-[#26222E] mb-2">Habilidades — {{ categoria.nombre }}</h1>
+      <p class="text-muted-foreground">Administra las habilidades asociadas a esta categoría</p>
     </div>
-    <a href="{% url 'mod_crear_habilidad' tipo.id %}"
-       class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
-      <i data-lucide="plus" class="w-5 h-5"></i>
+    <a href="{% url 'mod_crear_habilidad' categoria.id %}"
+       class="btn-ien !py-2.5 text-sm">
+      <span data-icon="plus" class="h-5 w-5"></span>
       Añadir habilidad
     </a>
   </div>
 
-  <div class="bg-white rounded-xl shadow-sm border border-border p-6">
+  <div class="panel p-6">
     <table class="w-full text-sm">
       <thead>
         <tr class="border-b border-border">
@@ -43,7 +43,7 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="2" class="py-8 text-center text-muted-foreground">No hay habilidades cargadas para este tipo de oferta.</td>
+          <td colspan="2" class="py-8 text-center text-muted-foreground">No hay habilidades cargadas para esta categoría.</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -51,7 +51,7 @@
   </div>
 
   <div class="mt-4">
-    <a href="{% url 'mod_listar_tipos_oferta' %}" class="text-sm text-primary hover:underline">← Volver a tipos de oferta</a>
+    <a href="{% url 'mod_listar_categorias' %}" class="text-sm text-primary hover:underline">← Volver a categorías</a>
   </div>
 
 </div>

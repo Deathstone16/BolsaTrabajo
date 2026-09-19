@@ -1,9 +1,19 @@
+"""Extracción y evaluación de currículums mediante PDF y el servicio Groq."""
+
 import os
 import json
 import time
 import pdfplumber
 from groq import Groq
 
+
+def extraer_texto_cv(ruta_pdf):
+    """Extrae el texto de un PDF sin ejecutar ningún análisis de IA."""
+    with pdfplumber.open(ruta_pdf) as pdf:
+        return '\n\n'.join(
+            pagina.extract_text() or ''
+            for pagina in pdf.pages
+        ).strip()
 
 
 def extraer_texto_por_bloques(ruta_pdf, paginas_por_bloque=4):
@@ -97,6 +107,7 @@ def consolidar_evaluacion_final(todos_los_hallazgos, client):
     
     return json.loads(response.choices[0].message.content)
 def pipeline_cv_completo(ruta_pdf):
+    """Ejecuta extracción, análisis por bloques y consolidación de un CV."""
     client = Groq()
     print("1. Dividiendo PDF en bloques de 4 páginas...")
     bloques = extraer_texto_por_bloques(ruta_pdf, paginas_por_bloque=4)
@@ -122,9 +133,9 @@ def pipeline_cv_completo(ruta_pdf):
 
 
 def call():
+    """Ejecuta manualmente el pipeline con el archivo de prueba configurado."""
     archivo = "CV.pdf"  # Reemplaza con el nombre de tu archivo PDF
     resultado = pipeline_cv_completo(archivo)
     
     print("\n=== RESULTADO FINAL CONSOLIDADO ===")
     print(json.dumps(resultado, ensure_ascii=False, indent=2))
-   

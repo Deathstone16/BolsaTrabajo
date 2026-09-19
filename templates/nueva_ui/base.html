@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}IEN Empleo · Bolsa de trabajo del Instituto Económico Nacional{% endblock %}</title>
+  <meta name="description" content="{% block description %}Conectamos el talento del nordeste con las oportunidades de todo el país.{% endblock %}" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23512DA8'/%3E%3Ctext x='32' y='42' font-family='Poppins,sans-serif' font-weight='700' font-size='24' fill='%23fff' text-anchor='middle'%3EIEN%3C/text%3E%3Ccircle cx='50' cy='14' r='4' fill='%23FFDE59'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static_v 'css/ui/tailwind-ui.css' %}" />
+  <link rel="stylesheet" href="{% static_v 'css/ui/ien-theme.css' %}" />
+  <link rel="stylesheet" href="{% static_v 'css/style.css' %}" />
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-[#F8F3F0] text-[#26222E] antialiased">
+
+  {% comment %}
+    Las pantallas de login y registro del diseno ocupan el alto completo y no
+    llevan nav ni footer: sobreescriben estos bloques con contenido vacio.
+  {% endcomment %}
+  {% block chrome_top %}
+    {% include "nueva_ui/partials/_aviso.html" %}
+    {% include "nueva_ui/partials/_nav.html" %}
+  {% endblock %}
+
+  <main>
+    {% comment %}
+      Los mensajes de Django salen como avisos flotantes (IenUI.aviso en
+      static/js/ui/ien-ui.js). Van en JSON para no depender del markup; escapejs
+      deja cada texto como string JSON valido. Sin JavaScript se ven en <noscript>.
+    {% endcomment %}
+    {% if messages %}
+      <script type="application/json" id="ien-mensajes">[{% for message in messages %}{"nivel": "{{ message.level_tag|escapejs }}", "texto": "{{ message|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]</script>
+      <noscript>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+          {% for message in messages %}<div class="panel mb-3 px-5 py-4 text-sm">{{ message }}</div>{% endfor %}
+        </div>
+      </noscript>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block chrome_bottom %}
+    {% include "nueva_ui/partials/_footer.html" %}
+  {% endblock %}
+
+  <script src="{% static_v 'js/ui/ien-ui.js' %}"></script>
+  {% include "nueva_ui/partials/_logout_modal.html" %}
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

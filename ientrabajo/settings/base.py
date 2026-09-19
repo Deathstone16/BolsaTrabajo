@@ -22,13 +22,20 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-o_x#_q$dcjiwx#72!#2*-+dvwz0z*0y+&r99!_&(h+vc$!lz8z'
+def env_bool(name, default=False):
+    return os.environ.get(name, str(default)).strip().lower() in {'1', 'true', 'yes', 'on'}
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = []
+# Los valores de desarrollo permiten iniciar el proyecto localmente. Producción
+# debe definir SECRET_KEY, DEBUG=False y ALLOWED_HOSTS en su entorno.
+DEBUG = env_bool('DEBUG', True)
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-local-development-only')
+if not DEBUG and SECRET_KEY.startswith('django-insecure-'):
+    raise RuntimeError('SECRET_KEY debe configurarse fuera del código cuando DEBUG=False.')
+
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', '').split(',') if host.strip()]
+if not DEBUG and not ALLOWED_HOSTS:
+    raise RuntimeError('ALLOWED_HOSTS debe configurarse cuando DEBUG=False.')
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
@@ -45,6 +52,7 @@ INSTALLED_APPS = [
     'ofertas',
     'categorias',
     'emails',
+    'ia',
 ]
 
 MIDDLEWARE = [
@@ -70,6 +78,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            # {% static_v %} disponible en todas las plantillas: agrega la version
+            # del archivo a la URL para que el navegador no use JS/CSS viejo cacheado.
+            'builtins': ['ientrabajo.templatetags.ien_static'],
         },
     },
 ]
@@ -119,7 +130,7 @@ USE_TZ = True
 # -----------------------
 
 STATIC_URL = '/static/'
-#STATIC_ROOT = BASE_DIR / 'static'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -138,3 +149,20 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 PASSWORD_RESET_TIMEOUT = 86400  # 24 horas en segundos
+
+# Configuración del servicio externo que analiza el texto del CV.
+# Definila en .env para no exponer datos sensibles en el repositorio.
+IA_API_URL = os.environ.get('IA_API_URL', '')
+IA_API_TOKEN = os.environ.get('IA_API_TOKEN', '')
+IA_CALLBACK_TOKEN = os.environ.get('IA_CALLBACK_TOKEN', '')
+# Opcional: URL pública fija para callbacks (útil si Django corre detrás de proxy o túnel).
+IA_CALLBACK_URL = os.environ.get('IA_CALLBACK_URL', '')
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = env_bool('SECURE_SSL_REDIRECT', True)
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '31536000'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

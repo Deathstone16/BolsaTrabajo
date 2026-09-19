@@ -1,23 +1,19 @@
-*, *::before, *::after {
-  box-sizing: border-box;
-}
-html { font-size: 16px; }
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
-input, select, textarea, button { font-family: inherit; }
-[data-lucide] { width: 1em; height: 1em; }
-.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/*
+ * Estilos propios del proyecto que no cubre el tema del rediseno.
+ *
+ * Se quitaron el reset de box-sizing, la fuente del body y .line-clamp-2
+ * porque ahora los define static/css/ui/ien-theme.css, y la regla
+ * [data-lucide] porque ya no se usan iconos de lucide.
+ */
 
+/* Scroll finito del modal de oferta en el panel del oferente */
 #modal-scroll {
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
   transition: scrollbar-color 0.2s;
 }
 #modal-scroll:hover {
-  scrollbar-color: #e5e7eb transparent;
+  scrollbar-color: rgba(110, 85, 55, 0.25) transparent;
 }
 #modal-scroll::-webkit-scrollbar {
   width: 4px;
@@ -31,8 +27,8 @@ input, select, textarea, button { font-family: inherit; }
   transition: background 0.2s;
 }
 #modal-scroll:hover::-webkit-scrollbar-thumb {
-  background: #e5e7eb;
+  background: rgba(110, 85, 55, 0.25);
 }
 #modal-scroll::-webkit-scrollbar-thumb:hover {
-  background: #d1d5db;
+  background: rgba(110, 85, 55, 0.45);
 }
