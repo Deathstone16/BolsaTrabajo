@@ -80,26 +80,41 @@
               class="input-ien resize-none" required>{{ form.descripcion.value|default:'' }}</textarea>
     {% if form.descripcion.errors %}<p class="text-sm text-[#d4183d]">{{ form.descripcion.errors.0 }}</p>{% endif %}
   </div>
+</div>
 
-  <div class="space-y-2">
-    <label class="block text-sm">Habilidades requeridas</label>
+<div class="space-y-4 border-t border-[rgba(110,85,55,0.16)] pt-8 mt-8">
+  <h3 class="flex items-center gap-2 text-lg font-semibold text-[#26222E]">
+    <span data-icon="wrench" class="h-5 w-5 text-[#512DA8]"></span>Habilidades
+  </h3>
 
-    <div class="relative">
-      <input type="text" id="tags-input"
-            placeholder="Escribí una habilidad y seleccioná del listado..."
-            class="input-ien"
-            autocomplete="off">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <fieldset class="space-y-3 rounded-2xl border border-[#512DA8]/25 bg-[#512DA8]/5 p-4">
+      <legend class="px-2 text-sm font-semibold text-[#512DA8]">Habilidades técnicas (duras)</legend>
+      <p class="text-xs text-[#6B645C]">Mínimo 1, máximo 10 habilidades</p>
+      <div class="relative">
+        <input type="text" id="tags-input-duras" placeholder="Ej. Python, SQL, Docker..."
+               class="input-ien" autocomplete="off">
+        <ul id="tags-dropdown-duras"
+            class="absolute z-10 mt-1 hidden max-h-48 w-full overflow-y-auto rounded-2xl border border-[rgba(110,85,55,0.16)] bg-white shadow-lg"></ul>
+      </div>
+      <div id="tags-container-duras" class="flex min-h-8 flex-wrap gap-2"></div>
+      {{ form.habilidades_duras }}
+      {% if form.habilidades_duras.errors %}<p class="text-sm text-[#d4183d]">{{ form.habilidades_duras.errors.0 }}</p>{% endif %}
+    </fieldset>
 
-      <ul id="tags-dropdown"
-          class="absolute z-10 mt-1 hidden max-h-48 w-full overflow-y-auto rounded-2xl border border-[rgba(110,85,55,0.16)] bg-white shadow-lg">
-      </ul>
-    </div>
-
-    <div id="tags-container" class="flex flex-wrap gap-2 mt-2 min-h-0">
-    </div>
-
-    <input type="hidden" name="habilidades_requeridas" id="id_habilidades_requeridas"
-          value="{{ form.habilidades_requeridas.value|default:'' }}">
+    <fieldset class="space-y-3 rounded-2xl border border-emerald-600/25 bg-emerald-600/5 p-4">
+      <legend class="px-2 text-sm font-semibold text-emerald-700">Habilidades blandas</legend>
+      <p class="text-xs text-[#6B645C]">Máximo 10 habilidades</p>
+      <div class="relative">
+        <input type="text" id="tags-input-blandas" placeholder="Ej. Comunicación, Liderazgo..."
+               class="input-ien" autocomplete="off">
+        <ul id="tags-dropdown-blandas"
+            class="absolute z-10 mt-1 hidden max-h-48 w-full overflow-y-auto rounded-2xl border border-[rgba(110,85,55,0.16)] bg-white shadow-lg"></ul>
+      </div>
+      <div id="tags-container-blandas" class="flex min-h-8 flex-wrap gap-2"></div>
+      {{ form.habilidades_blandas }}
+      {% if form.habilidades_blandas.errors %}<p class="text-sm text-[#d4183d]">{{ form.habilidades_blandas.errors.0 }}</p>{% endif %}
+    </fieldset>
   </div>
 </div>
 
@@ -116,7 +131,7 @@
           {% for value, label in form.fields.experiencia_requerida.choices %}
             <option value="{{ value }}" {% if form.experiencia_requerida.value == value %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
-      </select>
+        </select>
         <span class="text-sm text-[#6B645C]">años</span>
       </div>
       {% if form.experiencia_requerida.errors %}<p class="text-sm text-[#d4183d]">{{ form.experiencia_requerida.errors.0 }}</p>{% endif %}

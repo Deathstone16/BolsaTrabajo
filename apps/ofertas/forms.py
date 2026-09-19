@@ -11,7 +11,8 @@ INPUT_CLASS = "w-full px-4 py-2 rounded-lg border border-border bg-input-backgro
 
 class OfertaForm(forms.ModelForm):
     """Valida y persiste los datos utilizados para crear o editar una oferta."""
-    
+
+    MAX_POR_SECCION = 10
     categoria = forms.ModelChoiceField(
         queryset=Categoria.objects.all(),
         required=True,
@@ -27,7 +28,8 @@ class OfertaForm(forms.ModelForm):
             "ubicacion",
             "modalidad",
             "descripcion",
-            "habilidades_requeridas",
+            "habilidades_duras",
+            "habilidades_blandas",
             "experiencia_requerida",
             "nivel_educativo",
             "es_confidencial",
@@ -36,8 +38,41 @@ class OfertaForm(forms.ModelForm):
 
         widgets = {
             "fecha_cierre": forms.DateInput(attrs={"type": "date"}),
-            "habilidades_requeridas": forms.HiddenInput(),
+            "habilidades_duras": forms.HiddenInput(),
+            "habilidades_blandas": forms.HiddenInput(),
         }
+
+    def _validar_tags(self, value, es_duras=False):
+        """Valida las habilidades de una sección y devuelve sus nombres."""
+        tags = [t.strip() for t in value.split(",") if t.strip()]
+        for t in tags:
+            if len(t) < 2 or len(t) > 60:
+                raise forms.ValidationError(f"'{t}' debe tener entre 2 y 60 caracteres.")
+        if len(tags) != len({tag.casefold() for tag in tags}):
+            raise forms.ValidationError("Hay habilidades repetidas en esta sección.")
+        if len(tags) > self.MAX_POR_SECCION:
+            raise forms.ValidationError(f"Máximo {self.MAX_POR_SECCION} habilidades por sección.")
+        if es_duras and len(tags) < 1:
+            raise forms.ValidationError("Agregá al menos 1 habilidad técnica.")
+        return tags
+
+    def clean_habilidades_duras(self):
+        value = self.cleaned_data.get("habilidades_duras", "")
+        self._validar_tags(value, es_duras=True)
+        return value
+
+    def clean_habilidades_blandas(self):
+        value = self.cleaned_data.get("habilidades_blandas", "")
+        tags_blandas = self._validar_tags(value)
+        duras_value = self.cleaned_data.get("habilidades_duras", "")
+        tags_duras = {t.strip().casefold() for t in duras_value.split(",") if t.strip()}
+        duplicadas = {t.casefold() for t in tags_blandas} & tags_duras
+        if duplicadas:
+            raise forms.ValidationError(
+                "Estas habilidades ya están en la sección técnica: "
+                + ", ".join(sorted(duplicadas))
+            )
+        return value
 
     def clean_titulo(self):
         """Comprueba que el título tenga una longitud útil para publicación."""
@@ -57,7 +92,15 @@ class OfertaForm(forms.ModelForm):
             )
         return fecha_cierre
 
-
+    def save(self, commit=True):
+        """Mantiene el campo heredado a partir de las dos secciones nuevas."""
+        oferta = super().save(commit=False)
+        oferta.habilidades_requeridas = ", ".join(
+            filter(None, [oferta.habilidades_duras, oferta.habilidades_blandas])
+        )
+        if commit:
+            oferta.save()
+        return oferta
 
 class HabilidadForm(forms.ModelForm):
     """Formulario administrativo para crear o modificar una habilidad."""
@@ -93,7 +136,6 @@ class HabilidadForm(forms.ModelForm):
             self.instance.validate_unique(exclude=exclude)
         except ValidationError as e:
             self._update_errors(e)
-
 
 
 
