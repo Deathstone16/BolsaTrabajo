@@ -126,8 +126,8 @@ document.addEventListener('submit', async function(e) {
     await refrescarListaOfertas();
     // Crear y editar dejan la oferta en estado pendiente hasta que la apruebe moderacion.
     avisar('exito', esNueva
-      ? 'Oferta creada. Queda pendiente hasta que la apruebe el equipo del IEN.'
-      : 'Cambios guardados. La oferta vuelve a revisión antes de publicarse.');
+      ? 'Oferta creada.'
+      : 'Cambios guardados.');
   } else {
     mostrarErroresModal(result.errors);
   }
