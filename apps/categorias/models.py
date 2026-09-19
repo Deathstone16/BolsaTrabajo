@@ -29,7 +29,7 @@ class Habilidad(models.Model):
     ]
 
     
-    categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
+    categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT)
     nombre = models.CharField(max_length=100)
     tipo_habilidad = models.CharField(max_length=1, choices=HABILIDAD_CHOICES, default='D')
 

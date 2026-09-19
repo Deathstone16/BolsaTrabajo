@@ -49,20 +49,30 @@ function dibujarIconos(scope) {
     document.getElementById('modal-empresa-logo').textContent = data.empresa_nombre.charAt(0).toUpperCase();
     document.getElementById('modal-empresa-link').href = data.empresa_perfil_url || '#';
 
-    document.getElementById('modal-ubicacion').innerHTML = '<span data-icon="map-pin" class="w-3.5 h-3.5"></span> ' + data.ubicacion;
-    document.getElementById('modal-modalidad').innerHTML = '<span data-icon="building" class="w-3.5 h-3.5"></span> ' + data.modalidad_display;
-    document.getElementById('modal-fecha-cierre').innerHTML = '<span data-icon="calendar" class="w-3.5 h-3.5"></span> ' + data.fecha_cierre;
+    establecerDetalleConIcono('modal-ubicacion', 'map-pin', data.ubicacion);
+    establecerDetalleConIcono('modal-modalidad', 'building', data.modalidad_display);
+    establecerDetalleConIcono('modal-fecha-cierre', 'calendar', data.fecha_cierre);
 
     document.getElementById('modal-descripcion').textContent = data.descripcion;
 
     var habilidadesEl = document.getElementById('modal-habilidades');
-    habilidadesEl.innerHTML = data.habilidades_requeridas.split(',').map(function(h) {
-      return '<span class="px-3 py-1 bg-muted rounded-full text-sm text-muted-foreground">' + h.trim() + '</span>';
-    }).join('');
+    habilidadesEl.replaceChildren();
+    data.habilidades_requeridas.split(',').forEach(function(habilidad) {
+      var etiqueta = document.createElement('span');
+      etiqueta.className = 'px-3 py-1 bg-muted rounded-full text-sm text-muted-foreground';
+      etiqueta.textContent = habilidad.trim();
+      habilidadesEl.appendChild(etiqueta);
+    });
 
     document.getElementById('modal-experiencia').textContent = data.experiencia_requerida + ' años';
     document.getElementById('modal-educativo').textContent = data.nivel_educativo_display;
-        var botonesEl = document.getElementById('modal-botones');
+    var motivoContenedor = document.getElementById('motivo-rechazo-contenedor');
+    var motivoInput = document.getElementById('motivo-rechazo');
+    var motivoError = document.getElementById('motivo-rechazo-error');
+    motivoContenedor.classList.toggle('hidden', data.estado !== 'pendiente');
+    motivoInput.value = '';
+    motivoError.classList.add('hidden');
+    var botonesEl = document.getElementById('modal-botones');
     if (botonesEl) {
       if (data.estado === 'pendiente') {
         botonesEl.innerHTML =
@@ -88,6 +98,16 @@ function dibujarIconos(scope) {
     dibujarIconos();
   }
 
+  function establecerDetalleConIcono(id, icono, valor) {
+    var destino = document.getElementById(id);
+    destino.replaceChildren();
+    var iconoEl = document.createElement('span');
+    iconoEl.dataset.icon = icono;
+    iconoEl.className = 'w-3.5 h-3.5';
+    destino.appendChild(iconoEl);
+    destino.appendChild(document.createTextNode(' ' + (valor || '')));
+  }
+
    function aprobarOferta(pk) {
     confirmarAccion('¿Aprobar esta oferta?', '', 'Aprobar', 'green', function() {
       fetch('/moderacion/oferta/' + pk + '/aprobar/', {
@@ -109,13 +129,23 @@ function dibujarIconos(scope) {
   }
 
   function rechazarOferta(pk) {
-    confirmarAccion('¿Rechazar esta oferta?', '', 'Rechazar', 'red', function() {
+    var motivo = document.getElementById('motivo-rechazo').value.trim();
+    var error = document.getElementById('motivo-rechazo-error');
+    if (!motivo) {
+      error.textContent = 'Ingresá un motivo para rechazar la oferta.';
+      error.classList.remove('hidden');
+      return;
+    }
+    error.classList.add('hidden');
+    confirmarAccion('¿Rechazar esta oferta?', motivo, 'Rechazar', 'red', function() {
       fetch('/moderacion/oferta/' + pk + '/rechazar/', {
         method: 'POST',
         headers: {
           'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-          'X-Requested-With': 'XMLHttpRequest'
-        }
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({motivo: motivo})
       }).then(function(r) { return r.json(); }).then(function(data) {
         cerrarDetalle();
         if (data.success) {

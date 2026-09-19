@@ -11,6 +11,7 @@ from .models import AnalisisCV
 
 @override_settings(
     IA_API_URL='http://api-externa.test/analizar',
+    IA_API_TOKEN='token-de-servicio',
     IA_CALLBACK_TOKEN='token-de-callback',
 )
 class AnalisisCVViewsTests(TestCase):
@@ -41,6 +42,7 @@ class AnalisisCVViewsTests(TestCase):
         self.assertEqual(data['candidate_id'], self.postulante.id)
         self.assertTrue(files['cv'][0].endswith('.pdf'))
         self.assertEqual(files['cv'][2], 'application/pdf')
+        self.assertEqual(post.call_args.kwargs['headers']['Authorization'], 'Bearer token-de-servicio')
 
     def test_callback_guarda_json_de_api_externa(self):
         analisis = AnalisisCV.objects.create(postulante=self.postulante)

@@ -33,4 +33,9 @@ urlpatterns = [
     # Ruta temporal: no ejecuta análisis ni llama a Groq.
     path('prueba/', RedirectView.as_view(pattern_name='home', permanent=False), name='ia'),
 
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
+
+# En producción, los archivos subidos deben servirlos el servidor web/CDN.
+# Django solo los expone directamente durante el desarrollo.
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

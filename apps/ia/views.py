@@ -31,7 +31,7 @@ def solicitar_analisis(request):
             {'success': False, 'mensaje': 'Por el momento el análisis admite CV en formato PDF.'},
             status=400,
         )
-    if not settings.IA_API_URL:
+    if not settings.IA_API_URL or not settings.IA_API_TOKEN:
         return JsonResponse({'success': False, 'mensaje': 'El servicio de análisis no está configurado.'}, status=503)
 
     analisis_pendiente = (
@@ -47,9 +47,7 @@ def solicitar_analisis(request):
         }, status=202)
 
     analisis = AnalisisCV.objects.create(postulante=postulante)
-    headers = {}
-    if settings.IA_API_TOKEN:
-        headers['Authorization'] = f'Bearer {settings.IA_API_TOKEN}'
+    headers = {'Authorization': f'Bearer {settings.IA_API_TOKEN}'}
 
     try:
         with postulante.cv.open('rb') as cv_file:

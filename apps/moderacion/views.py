@@ -142,11 +142,17 @@ def dar_de_baja_categoria(request, categoria_id):
     categoria = get_object_or_404(Categoria, id=categoria_id)
     if request.method == 'POST':
         nombre = categoria.nombre
-        cursos_services.dar_de_baja_categoria(categoria_id)
-        messages.success(
-            request,
-            f"La categoría '{nombre}' fue dada de baja correctamente"
-        )
+        eliminada = cursos_services.dar_de_baja_categoria(categoria_id)
+        if eliminada:
+            messages.success(
+                request,
+                f"La categoría '{nombre}' fue dada de baja correctamente"
+            )
+        else:
+            messages.error(
+                request,
+                "No se puede eliminar una categoría con cursos, ofertas o habilidades asociadas."
+            )
         return redirect('mod_listar_categorias')
     return render(request, 'moderacion/confirmar_baja_categoria.html', {
         'categoria': categoria,

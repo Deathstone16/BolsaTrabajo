@@ -54,7 +54,7 @@ class Oferta(models.Model):
 
     
     empresa = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
+    categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT)
     titulo = models.CharField(max_length=100)
     nombre_puesto = models.CharField(max_length=150)
     ubicacion = models.CharField(max_length=100)

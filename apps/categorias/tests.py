@@ -1,6 +1,20 @@
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
-from django.test import TransactionTestCase
+from django.test import TestCase, TransactionTestCase
+
+from cursos import services as cursos_services
+from categorias.models import Categoria as CategoriaActual, Habilidad as HabilidadActual
+
+
+class CategoriaProtegidaTests(TestCase):
+    def test_no_elimina_categoria_que_tiene_habilidades(self):
+        categoria = CategoriaActual.objects.create(nombre='Tecnología')
+        HabilidadActual.objects.create(nombre='Python', categoria=categoria)
+
+        resultado = cursos_services.dar_de_baja_categoria(categoria.id)
+
+        self.assertIsNone(resultado)
+        self.assertTrue(CategoriaActual.objects.filter(id=categoria.id).exists())
 
 
 class HabilidadesHeredadasMigrationTests(TransactionTestCase):

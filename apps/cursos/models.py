@@ -17,7 +17,7 @@ class Curso(models.Model):
     PRESENCIAL = 'Presencial'
     VIRTUAL = 'Virtual'
     HIBRIDO = 'Hibrido'
-    
+
     TIPO_CHOICES= [
         (PRESENCIAL , 'Presencial'),
         (VIRTUAL , 'Virtual'),
@@ -26,7 +26,7 @@ class Curso(models.Model):
 
 
     nombre = models.CharField(max_length= 120)
-    categoria = models.ForeignKey(Categoria,on_delete=models.CASCADE)
+    categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT)
     imagen = models.ImageField(upload_to='cursos')
     descripcion = models.TextField()
     duracion = models.CharField(max_length=100)
@@ -37,4 +37,3 @@ class Curso(models.Model):
 
     def __str__(self):
         return self.nombre
-    
