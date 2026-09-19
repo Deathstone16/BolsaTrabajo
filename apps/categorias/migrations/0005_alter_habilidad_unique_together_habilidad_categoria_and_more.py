@@ -4,6 +4,38 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
+def conservar_habilidades(apps, schema_editor):
+    """Asocia cada habilidad con la categoría del tipo anterior."""
+    Categoria = apps.get_model('categorias', 'Categoria')
+    Habilidad = apps.get_model('categorias', 'Habilidad')
+    TipoOferta = apps.get_model('categorias', 'TipoOferta')
+    database = schema_editor.connection.alias
+    tipos = dict(TipoOferta.objects.using(database).values_list('id', 'nombre'))
+    categorias = {}
+    combinaciones = set()
+
+    for habilidad in Habilidad.objects.using(database).order_by('id'):
+        nombre_categoria = tipos.get(habilidad.tipo_oferta_id, 'Sin categoría')
+        if nombre_categoria not in categorias:
+            categoria, _ = Categoria.objects.using(database).get_or_create(
+                nombre=nombre_categoria,
+            )
+            categorias[nombre_categoria] = categoria.id
+        categoria_id = categorias[nombre_categoria]
+
+        # El esquema antiguo permitía repetir nombres con tipo_oferta NULL.
+        # Una categoría propia conserva cada fila sin violar la nueva unicidad.
+        if (habilidad.nombre, categoria_id) in combinaciones:
+            categoria, _ = Categoria.objects.using(database).get_or_create(
+                nombre=f'Sin categoría (habilidad {habilidad.id})',
+            )
+            categoria_id = categoria.id
+
+        habilidad.categoria_id = categoria_id
+        habilidad.save(using=database, update_fields=['categoria'])
+        combinaciones.add((habilidad.nombre, categoria_id))
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -15,8 +47,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='habilidad',
             name='categoria',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='categorias.categoria'),
-            preserve_default=False,
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='categorias.categoria'),
+        ),
+        migrations.RunPython(conservar_habilidades, migrations.RunPython.noop),
+        migrations.AlterField(
+            model_name='habilidad',
+            name='categoria',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='categorias.categoria'),
         ),
         migrations.AlterUniqueTogether(
             name='habilidad',
