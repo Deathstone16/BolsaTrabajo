@@ -26,25 +26,9 @@ function dibujarIconos(scope) {
     document.getElementById('detalle-modal').classList.add('hidden');
   }
 
+  // Misma firma de siempre; ahora es el aviso flotante comun del sitio (IenUI.aviso).
   function mostrarNotificacion(mensaje, tipo) {
-    tipo = tipo || 'exito';
-    var colores = tipo === 'exito'
-      ? 'bg-green-50 border-green-200 text-green-700'
-      : 'bg-red-50 border-red-200 text-red-700';
-    var icono = tipo === 'exito' ? 'check-circle' : 'x-circle';
-
-    var notif = document.createElement('div');
-    notif.className = 'fixed top-6 right-6 z-[100] flex items-center gap-3 px-5 py-4 border rounded-xl shadow-lg ' + colores + ' transition-all';
-    notif.innerHTML = '<span data-icon="' + icono + '" class="h-5 w-5 flex-shrink-0"></span><span class="text-sm font-medium">' + mensaje + '</span>';
-    document.body.appendChild(notif);
-    dibujarIconos();
-
-    setTimeout(function() {
-      notif.style.opacity = '0';
-      notif.style.transform = 'translateY(-8px)';
-      notif.style.transition = 'opacity 0.3s, transform 0.3s';
-      setTimeout(function() { notif.remove(); }, 300);
-    }, 3000);
+    window.IenUI.aviso(tipo === 'error' || tipo === 'info' ? tipo : 'exito', mensaje);
   }
 
   function renderizarModal(data) {
@@ -134,7 +118,7 @@ function dibujarIconos(scope) {
       }).then(function(r) { return r.json(); }).then(function(data) {
         cerrarDetalle();
         if (data.success) {
-          mostrarNotificacion('Oferta rechazada.', 'error');
+          mostrarNotificacion('Oferta rechazada.', 'info');  // la accion salio bien: no es un error
           actualizarFila(pk, 'rechazada', 'Rechazada', 'bg-red-100 text-red-700');
         } else {
           mostrarNotificacion(data.error || 'No se pudo rechazar la oferta.', 'error');
@@ -185,39 +169,16 @@ function dibujarIconos(scope) {
   }
 
 
+    // Misma firma de siempre; ahora usa el modal comun del sitio (IenUI.confirmar).
     function confirmarAccion(mensaje, detalle, textoBoton, colorBoton, callback) {
-        var overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4';
-        overlay.style.animation = 'fadeIn 0.2s ease';
-
-    var modal = document.createElement('div');
-    modal.className = 'bg-white rounded-2xl shadow-xl max-w-sm w-full p-6';
-    modal.onclick = function(e) { e.stopPropagation(); };
-
-    modal.innerHTML =
-      '<div class="text-center mb-4">' +
-        '<div class="w-12 h-12 mx-auto mb-3 rounded-full bg-' + (colorBoton === 'red' ? 'red' : 'green') + '-100 flex items-center justify-center">' +
-          '<span data-icon="' + (colorBoton === 'red' ? 'alert-triangle' : 'check-circle') + '" class="w-6 h-6 text-' + (colorBoton === 'red' ? 'red' : 'green') + '-600"></span>' +
-        '</div>' +
-        '<h3 class="text-lg font-medium mb-1">' + mensaje + '</h3>' +
-        (detalle ? '<p class="text-sm text-muted-foreground">' + detalle + '</p>' : '') +
-      '</div>' +
-      '<div class="flex gap-3">' +
-        '<button id="btn-cancelar-confirm" type="button" class="flex-1 px-4 py-2.5 border border-border rounded-lg text-sm font-medium hover:bg-muted transition-colors">Cancelar</button>' +
-        '<button id="btn-confirmar-accion" type="button" class="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium text-white bg-' + (colorBoton === 'red' ? 'red' : 'green') + '-600 hover:bg-' + (colorBoton === 'red' ? 'red' : 'green') + '-700 transition-colors">' + textoBoton + '</button>' +
-      '</div>';
-
-    overlay.appendChild(modal);
-    document.body.appendChild(overlay);
-    dibujarIconos();
-
-    document.getElementById('btn-cancelar-confirm').onclick = function() { overlay.remove(); };
-    overlay.onclick = function() { overlay.remove(); };
-    document.getElementById('btn-confirmar-accion').onclick = function() {
-      overlay.remove();
-      callback();
-    };
-  }
+      window.IenUI.confirmar({
+        titulo: mensaje,
+        mensaje: detalle,
+        confirmar: textoBoton,
+        peligro: colorBoton === 'red',
+        icono: colorBoton === 'red' ? 'triangle-alert' : 'check-circle'
+      }).then(function(ok) { if (ok) callback(); });
+    }
 
 
   // ====== Event listeners (al cargar la página) ======

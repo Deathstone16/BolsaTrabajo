@@ -3,6 +3,12 @@
  * <i data-lucide> + lucide. Este helper dibuja los iconos con el sistema que
  * este disponible, para que dashboard.js sirva en las dos bases.
  */
+// Notificacion flotante del sitio (IenUI.aviso); si no cargo, el alert de siempre.
+function avisar(tipo, mensaje) {
+  if (window.IenUI && window.IenUI.aviso) window.IenUI.aviso(tipo, mensaje);
+  else alert(mensaje);
+}
+
 function dibujarIconos(scope) {
   if (window.IenUI && window.IenUI.injectIcons) window.IenUI.injectIcons(scope || document);
   else if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -57,7 +63,7 @@ async function openEditModal(pk) {
   const data = await response.json();
 
   if (data.error) {
-    alert(data.error);
+    avisar('error', data.error);
     return;
   }
 
@@ -107,8 +113,13 @@ document.addEventListener('submit', async function(e) {
   const result = await response.json();
 
   if (result.success) {
+    const esNueva = form.action.endsWith(window.URLS.crearOferta);
     closeOfertaModal();
     await refrescarListaOfertas();
+    // Crear y editar dejan la oferta en estado pendiente hasta que la apruebe moderacion.
+    avisar('exito', esNueva
+      ? 'Oferta creada. Queda pendiente hasta que la apruebe el equipo del IEN.'
+      : 'Cambios guardados. La oferta vuelve a revisión antes de publicarse.');
   } else {
     mostrarErroresModal(result.errors);
   }
@@ -184,8 +195,9 @@ document.getElementById('confirm-delete-btn').addEventListener('click', async fu
 
   if (result.success) {
     await refrescarListaOfertas();
+    avisar('exito', 'Oferta eliminada.');
   } else {
-    alert('Error al eliminar la oferta');
+    avisar('error', 'No se pudo eliminar la oferta.');
   }
 });
 

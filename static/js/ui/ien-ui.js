@@ -156,16 +156,179 @@
     renderSavedButtons();
   }
 
+  /* ------------------------------------------------------------------------
+   * Popups del sitio. Reemplazan a confirm() / alert() del navegador.
+   *
+   *   IenUI.confirmar({ titulo, mensaje, confirmar, cancelar, peligro })
+   *     -> Promise<boolean>. peligro:true pinta el boton en rojo.
+   *   IenUI.aviso(tipo, mensaje)
+   *     -> notificacion flotante que se cierra sola. tipo: exito | error | info
+   *
+   * Los textos se insertan con textContent: no hace falta escapar HTML.
+   * --------------------------------------------------------------------- */
+  function crearIcono(nombre, clases) {
+    var span = document.createElement("span");
+    span.setAttribute("data-icon", nombre);
+    span.className = clases;
+    return span;
+  }
+
+  function confirmar(opciones) {
+    opciones = opciones || {};
+    return new Promise(function (resolver) {
+      var peligro = !!opciones.peligro;
+      var previo = document.activeElement;
+
+      var overlay = document.createElement("div");
+      overlay.className = "ien-overlay";
+
+      var modal = document.createElement("div");
+      modal.className = "ien-modal panel";
+      modal.setAttribute("role", "alertdialog");
+      modal.setAttribute("aria-modal", "true");
+
+      var burbuja = document.createElement("div");
+      burbuja.className = "ien-modal-icono " + (peligro ? "es-peligro" : "es-info");
+      burbuja.appendChild(crearIcono(opciones.icono || (peligro ? "triangle-alert" : "info"), "h-6 w-6"));
+
+      var titulo = document.createElement("h3");
+      titulo.className = "ien-modal-titulo";
+      titulo.id = "ien-modal-titulo-" + Date.now();
+      titulo.textContent = opciones.titulo || "¿Confirmás esta acción?";
+      modal.setAttribute("aria-labelledby", titulo.id);
+
+      modal.appendChild(burbuja);
+      modal.appendChild(titulo);
+      if (opciones.mensaje) {
+        var texto = document.createElement("p");
+        texto.className = "ien-modal-texto";
+        texto.textContent = opciones.mensaje;
+        modal.appendChild(texto);
+      }
+
+      var botones = document.createElement("div");
+      botones.className = "ien-modal-botones";
+      var cancelar = document.createElement("button");
+      cancelar.type = "button";
+      cancelar.className = "btn-ghost";
+      cancelar.textContent = opciones.cancelar || "Cancelar";
+      var aceptar = document.createElement("button");
+      aceptar.type = "button";
+      aceptar.className = peligro ? "btn-ien btn-peligro" : "btn-ien";
+      aceptar.textContent = opciones.confirmar || "Confirmar";
+      botones.appendChild(cancelar);
+      botones.appendChild(aceptar);
+      modal.appendChild(botones);
+
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+      injectIcons(modal);
+      requestAnimationFrame(function () { overlay.classList.add("abierto"); });
+
+      function cerrar(valor) {
+        document.removeEventListener("keydown", onTecla);
+        overlay.classList.remove("abierto");
+        setTimeout(function () { overlay.remove(); }, 180);
+        if (previo && previo.focus) previo.focus();
+        resolver(valor);
+      }
+      function onTecla(e) {
+        if (e.key === "Escape") cerrar(false);
+        if (e.key === "Tab") {  // el foco no se escapa del modal
+          if (document.activeElement === aceptar && !e.shiftKey) { e.preventDefault(); cancelar.focus(); }
+          else if (document.activeElement === cancelar && e.shiftKey) { e.preventDefault(); aceptar.focus(); }
+        }
+      }
+      overlay.addEventListener("click", function (e) { if (e.target === overlay) cerrar(false); });
+      cancelar.addEventListener("click", function () { cerrar(false); });
+      aceptar.addEventListener("click", function () { cerrar(true); });
+      document.addEventListener("keydown", onTecla);
+      // en acciones peligrosas el foco arranca en Cancelar, para no confirmar con un Enter distraido
+      (peligro ? cancelar : aceptar).focus();
+    });
+  }
+
+  function contenedorAvisos() {
+    var c = document.getElementById("ien-avisos");
+    if (!c) {
+      c = document.createElement("div");
+      c.id = "ien-avisos";
+      c.setAttribute("aria-live", "polite");
+      document.body.appendChild(c);
+    }
+    return c;
+  }
+
+  function aviso(tipo, mensaje, duracion) {
+    var iconos = { exito: "check-circle", error: "x-circle", info: "info" };
+    if (!iconos[tipo]) tipo = "info";
+    var el = document.createElement("div");
+    el.className = "ien-aviso es-" + tipo;
+    el.setAttribute("role", tipo === "error" ? "alert" : "status");
+    el.appendChild(crearIcono(iconos[tipo], "h-5 w-5 shrink-0"));
+    var texto = document.createElement("p");
+    texto.textContent = mensaje;
+    el.appendChild(texto);
+    var cerrarBtn = document.createElement("button");
+    cerrarBtn.type = "button";
+    cerrarBtn.className = "ien-aviso-cerrar";
+    cerrarBtn.setAttribute("aria-label", "Cerrar aviso");
+    cerrarBtn.appendChild(crearIcono("x", "h-4 w-4"));
+    el.appendChild(cerrarBtn);
+
+    contenedorAvisos().appendChild(el);
+    injectIcons(el);
+    requestAnimationFrame(function () { el.classList.add("abierto"); });
+
+    function quitar() {
+      el.classList.remove("abierto");
+      setTimeout(function () { el.remove(); }, 250);
+    }
+    cerrarBtn.addEventListener("click", quitar);
+    setTimeout(quitar, duracion || (tipo === "error" ? 7000 : 4500));
+  }
+
+  // Para acciones que terminan en location.reload(): el aviso se guarda y se
+  // muestra despues de recargar. Si sessionStorage no esta disponible, se pierde.
+  var CLAVE_AVISO = "ien-aviso-pendiente";
+  function avisoTrasRecarga(tipo, mensaje) {
+    try { sessionStorage.setItem(CLAVE_AVISO, JSON.stringify({ tipo: tipo, mensaje: mensaje })); } catch (e) {}
+  }
+  function initAvisoPendiente() {
+    var guardado = null;
+    try {
+      guardado = JSON.parse(sessionStorage.getItem(CLAVE_AVISO) || "null");
+      sessionStorage.removeItem(CLAVE_AVISO);
+    } catch (e) {}
+    if (guardado && guardado.mensaje) aviso(guardado.tipo, guardado.mensaje);
+  }
+
+  // Mensajes de Django (django.contrib.messages): la base los deja en un
+  // <script type="application/json" id="ien-mensajes"> y aca se muestran como avisos.
+  function initMensajesDjango() {
+    var nodo = document.getElementById("ien-mensajes");
+    if (!nodo) return;
+    var lista;
+    try { lista = JSON.parse(nodo.textContent || "[]"); } catch (e) { lista = []; }
+    var mapa = { success: "exito", error: "error", warning: "error", info: "info", debug: "info" };
+    lista.forEach(function (m, i) {
+      setTimeout(function () { aviso(mapa[m.nivel] || "info", m.texto); }, i * 150);
+    });
+  }
+
   function init() {
     injectIcons(document);
     initReveal(document);
     startCounters(document);
     initBurger();
     initSaved();
+    initMensajesDjango();
+    initAvisoPendiente();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
 
-  window.IenUI = { injectIcons: injectIcons, initReveal: initReveal, startCounters: startCounters };
+  window.IenUI = { injectIcons: injectIcons, initReveal: initReveal, startCounters: startCounters,
+                  confirmar: confirmar, aviso: aviso, avisoTrasRecarga: avisoTrasRecarga };
 })();

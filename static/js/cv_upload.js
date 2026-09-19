@@ -50,7 +50,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (formEliminar) {
         formEliminar.addEventListener('submit', function(e) {
             e.preventDefault();
-            if (confirm('¿Estás seguro de que deseas eliminar tu CV?')) {
+            // Modal del sitio (IenUI.confirmar) en vez del confirm() del navegador.
+            pedirConfirmacionEliminar().then(function(ok) {
+                if (!ok) return;
                 fetch(formEliminar.action, {
                     method: 'POST',
                     headers: {
@@ -61,6 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        if (window.IenUI) window.IenUI.avisoTrasRecarga('exito', data.mensaje || 'CV eliminado.');
                         location.reload();
                     } else {
                         mostrarFeedback('error', data.mensaje || 'Error al eliminar el CV.');
@@ -69,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .catch(() => {
                     mostrarFeedback('error', 'Error de conexión.');
                 });
-            }
+            });
         });
     }
 
@@ -203,8 +206,8 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                mostrarFeedback('success', data.mensaje || 'CV cargado con éxito.');
-                setTimeout(() => location.reload(), 1500);
+                if (window.IenUI) window.IenUI.avisoTrasRecarga('exito', data.mensaje || 'CV cargado con éxito.');
+                location.reload();
             } else {
                 mostrarFeedback('error', data.mensaje || 'Error al cargar el CV.');
                 cvInput.value = '';
@@ -233,8 +236,8 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                mostrarFeedback('success', data.mensaje || 'CV reemplazado con éxito.');
-                setTimeout(() => location.reload(), 1500);
+                if (window.IenUI) window.IenUI.avisoTrasRecarga('exito', data.mensaje || 'CV reemplazado con éxito.');
+                location.reload();
             } else {
                 mostrarFeedback('error', data.mensaje || 'Error al reemplazar el CV.');
                 cvInput.value = '';
@@ -288,7 +291,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function pedirConfirmacionEliminar() {
+        if (!window.IenUI) return Promise.resolve(confirm('¿Estás seguro de que deseas eliminar tu CV?'));
+        return window.IenUI.confirmar({
+            titulo: '¿Eliminar tu CV?',
+            mensaje: 'Vas a tener que volver a subirlo para postularte y para analizarlo con IA.',
+            confirmar: 'Eliminar CV',
+            peligro: true,
+            icono: 'trash'
+        });
+    }
+
     function mostrarFeedback(tipo, mensaje) {
+        // Los avisos salen como notificacion flotante (IenUI.aviso).
+        if (window.IenUI) {
+            window.IenUI.aviso({ success: 'exito', error: 'error', loading: 'info' }[tipo] || 'info', mensaje);
+            return;
+        }
+        mostrarFeedbackEnLinea(tipo, mensaje);
+    }
+
+    // Respaldo si ien-ui.js no cargo: el aviso en linea de siempre.
+    function mostrarFeedbackEnLinea(tipo, mensaje) {
         feedback.classList.remove('hidden');
         let icono = '';
         let clases = '';

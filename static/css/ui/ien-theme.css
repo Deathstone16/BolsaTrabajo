@@ -456,3 +456,74 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
   .barra-indeterminada > span { animation-duration: 3s; }
 }
 .text-green-800 { color: #1B6B42; }
+
+/* ---------------------------------------------------------------------------
+ * Popups: IenUI.confirmar() y IenUI.aviso() (static/js/ui/ien-ui.js)
+ * ------------------------------------------------------------------------ */
+.ien-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem;
+  background: rgba(38, 34, 46, 0.45);
+  backdrop-filter: blur(3px);
+  opacity: 0; transition: opacity 0.18s ease;
+}
+.ien-overlay.abierto { opacity: 1; }
+.ien-modal {
+  width: 100%; max-width: 24rem;
+  padding: 1.75rem 1.5rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 30px 80px -30px rgba(38, 34, 46, 0.45);
+  transform: translateY(10px) scale(0.97);
+  transition: transform 0.18s ease;
+}
+.ien-overlay.abierto .ien-modal { transform: none; }
+.ien-modal-icono {
+  margin: 0 auto 1rem; display: grid; place-items: center;
+  height: 3rem; width: 3rem; border-radius: 9999px;
+}
+.ien-modal-icono.es-info    { background: rgba(81, 45, 168, 0.1); color: var(--primary); }
+.ien-modal-icono.es-peligro { background: rgba(212, 24, 61, 0.1); color: var(--destructive); }
+.ien-modal-titulo { margin: 0; font-size: 1.125rem; font-weight: 600; color: var(--foreground); }
+.ien-modal-texto  { margin: 0.4rem 0 0; font-size: 0.875rem; line-height: 1.5; color: var(--muted-foreground); }
+.ien-modal-botones { margin-top: 1.5rem; display: flex; gap: 0.75rem; }
+.ien-modal-botones > * { flex: 1; font-size: 0.875rem; padding-top: 0.65rem; padding-bottom: 0.65rem; }
+.btn-peligro { background: var(--destructive); box-shadow: 0 10px 24px -10px rgba(212, 24, 61, 0.55); }
+.btn-peligro:hover { background: #b01333; box-shadow: 0 16px 32px -12px rgba(212, 24, 61, 0.6); }
+
+#ien-avisos {
+  position: fixed; z-index: 310;
+  top: 1.25rem; right: 1.25rem; left: 1.25rem;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 0.6rem;
+  pointer-events: none;
+}
+.ien-aviso {
+  pointer-events: auto;
+  display: flex; align-items: flex-start; gap: 0.75rem;
+  width: 100%; max-width: 24rem;
+  padding: 0.9rem 0.9rem 0.9rem 1rem;
+  border-radius: 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  box-shadow: 0 20px 50px -24px rgba(38, 34, 46, 0.45);
+  font-size: 0.875rem; line-height: 1.45; color: var(--foreground);
+  opacity: 0; transform: translateY(-8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.ien-aviso.abierto { opacity: 1; transform: none; }
+.ien-aviso > p { margin: 0; flex: 1; padding-top: 0.05rem; }
+.ien-aviso.es-exito { border-left-color: #27AE60; }
+.ien-aviso.es-exito > .ic { color: #27AE60; }
+.ien-aviso.es-error { border-left-color: var(--destructive); }
+.ien-aviso.es-error > .ic { color: var(--destructive); }
+.ien-aviso.es-info  { border-left-color: var(--primary); }
+.ien-aviso.es-info > .ic  { color: var(--primary); }
+.ien-aviso-cerrar {
+  border: 0; background: transparent; cursor: pointer;
+  color: var(--muted-foreground); padding: 0.1rem; border-radius: 9999px;
+}
+.ien-aviso-cerrar:hover { color: var(--foreground); }
+@media (prefers-reduced-motion: reduce) {
+  .ien-overlay, .ien-modal, .ien-aviso { transition: none; }
+}
