@@ -1,7 +1,7 @@
-from django.shortcuts import render
+from django.contrib import messages
+from django.shortcuts import redirect, render
 
 from cursos.models import Curso
-from ia.services import call
 from ofertas.models import Oferta
 from usuarios.models import Oferente
 
@@ -26,5 +26,6 @@ def home(request):
 
 
 def ia(request):
-    call()
-    return render(request, 'nueva_ui/home.html', _contexto_home())
+    """Ruta temporal: evita ejecutar Groq dentro de Django."""
+    messages.info(request, "El análisis de CV se solicita desde Mi perfil.")
+    return redirect('home')

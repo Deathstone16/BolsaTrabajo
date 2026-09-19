@@ -1,0 +1,78 @@
+{% extends 'nueva_ui/base.html' %}
+
+{% block title %}Resultado del análisis de CV · IEN Empleo{% endblock %}
+
+{% block content %}
+{# Misma seccion que mi_perfil.html: contenedor max-w-7xl y sidebar del postulante. #}
+<div class="min-h-screen bg-[#F8F3F0] py-12">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid gap-8 lg:grid-cols-[16rem_1fr]">
+
+      {% include "usuarios/_sidebar_postulante.html" with seccion="perfil" postulante=analisis.postulante %}
+
+      <div class="min-w-0">
+        <a href="{% url 'mi_perfil' %}" class="inline-flex items-center gap-2 text-sm text-[#6B645C] transition-colors hover:text-[#512DA8]">
+          <span data-icon="arrow-left" class="h-4 w-4"></span> Volver a mi perfil
+        </a>
+
+        {# .kicker es inline-flex: sin el div queda en la misma linea que el enlace de volver #}
+        <div class="mt-6"><p class="kicker">Análisis con IA</p></div>
+        <h1 class="mt-3 text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">Resultado del análisis de CV</h1>
+        {% if analisis.respondido_en %}
+          <p class="mt-2 font-mono text-xs uppercase tracking-wider text-[#6B645C]">
+            Analizado el {{ analisis.respondido_en|date:"d/m/Y" }} a las {{ analisis.respondido_en|date:"H:i" }}
+          </p>
+        {% endif %}
+
+        {% if analisis.estado == 'completado' %}
+          <div class="panel mt-8 p-8">
+            <div class="flex items-center gap-3">
+              <div class="grid h-11 w-11 place-items-center rounded-2xl bg-[#512DA8]/10">
+                <span data-icon="file-text" class="h-5 w-5 text-[#512DA8]"></span>
+              </div>
+              <h2 class="text-xl font-bold text-[#26222E]">Resumen profesional</h2>
+            </div>
+            <p class="mt-4 whitespace-pre-line leading-relaxed text-[#6B645C]">{{ analisis.respuesta.result.resumen_ejecutivo }}</p>
+          </div>
+
+          <div class="panel mt-6 p-8">
+            <div class="flex items-center gap-3">
+              <div class="grid h-11 w-11 place-items-center rounded-2xl bg-[#FFDE59]/35">
+                <span data-icon="sparkles" class="h-5 w-5 text-[#43218F]"></span>
+              </div>
+              <h2 class="text-xl font-bold text-[#26222E]">Habilidades detectadas</h2>
+            </div>
+
+            <div class="mt-6 grid gap-4 md:grid-cols-2">
+              {% for habilidad in analisis.respuesta.result.habilidades_analizadas %}
+                <article class="rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#F8F3F0] p-5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h3 class="font-semibold text-[#26222E]">{{ habilidad.tecnologia }}</h3>
+                    <span class="chip shrink-0">{{ habilidad.nivel_evaluado }}</span>
+                  </div>
+                  <p class="mt-3 text-sm leading-relaxed text-[#6B645C]">{{ habilidad.justificacion_evidencia }}</p>
+                </article>
+              {% empty %}
+                <p class="text-[#6B645C]">No se detectaron habilidades técnicas.</p>
+              {% endfor %}
+            </div>
+          </div>
+
+        {% elif analisis.estado == 'error' %}
+          <div class="mt-8 flex items-start gap-3 rounded-2xl border border-[#d4183d]/30 bg-[#d4183d]/10 p-5 text-[#d4183d]">
+            <span data-icon="x-circle" class="mt-0.5 h-5 w-5 shrink-0"></span>
+            <p class="text-sm">{{ analisis.error }}</p>
+          </div>
+
+        {% else %}
+          <div class="panel mt-8 flex items-start gap-3 p-5">
+            <span data-icon="clock" class="mt-0.5 h-5 w-5 shrink-0 text-[#512DA8]"></span>
+            <p class="text-sm text-[#6B645C]">El análisis todavía está en proceso. Volvé a cargar esta página en unos instantes.</p>
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

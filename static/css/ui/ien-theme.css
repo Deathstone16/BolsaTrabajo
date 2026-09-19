@@ -426,3 +426,9 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 .opacity-25 { opacity: 0.25; }
 .opacity-75 { opacity: 0.75; }
 .text-blue-600 { color: #512DA8; }
+
+/* Botones de analisis de CV (rama ia). cv_upload.js agrega y saca estas clases. */
+.border-\[1\.5px\] { border-width: 1.5px; border-style: solid; }
+.cursor-wait { cursor: wait; }
+.mr-2 { margin-right: 0.5rem; }
+.hover\:bg-primary\/5:hover { background-color: rgba(81, 45, 168, 0.05); }

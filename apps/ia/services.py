@@ -5,6 +5,14 @@ import pdfplumber
 from groq import Groq
 
 
+def extraer_texto_cv(ruta_pdf):
+    """Extrae el texto de un PDF sin ejecutar ningún análisis de IA."""
+    with pdfplumber.open(ruta_pdf) as pdf:
+        return '\n\n'.join(
+            pagina.extract_text() or ''
+            for pagina in pdf.pages
+        ).strip()
+
 
 def extraer_texto_por_bloques(ruta_pdf, paginas_por_bloque=4):
     """Lee el PDF y genera bloques pequeños para no superar los 8,000 tokens."""
@@ -127,4 +135,3 @@ def call():
     
     print("\n=== RESULTADO FINAL CONSOLIDADO ===")
     print(json.dumps(resultado, ensure_ascii=False, indent=2))
-   

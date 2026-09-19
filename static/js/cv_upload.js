@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const uploadArea = document.getElementById('cv-upload-area');
     const formUpload = document.getElementById('form-cv-upload');
     const formEliminar = document.getElementById('form-eliminar-cv');
+    const formAnalizar = document.getElementById('form-analizar-cv');
+    const botonResultado = document.getElementById('boton-ver-resultado');
+    let pollingAnalisisActivo = false;
 
     if (!cvInput) return;
 
@@ -62,6 +65,117 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         });
+    }
+
+    if (formAnalizar) {
+        const ultimoAnalisisId = formAnalizar.dataset.ultimoAnalisisId;
+        const ultimoAnalisisEstado = formAnalizar.dataset.ultimoAnalisisEstado;
+        const botonInicial = formAnalizar.querySelector('button[type="submit"]');
+        const textoInicial = botonInicial ? botonInicial.innerHTML : '';
+
+        if (ultimoAnalisisId && ultimoAnalisisEstado === 'pendiente') {
+            marcarBotonAnalisisPendiente(botonInicial);
+            mostrarFeedback('loading', 'Tu CV se está analizando en segundo plano. Podés seguir usando la plataforma.');
+            consultarEstadoAnalisis(ultimoAnalisisId, botonInicial, textoInicial);
+        }
+
+        formAnalizar.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const boton = formAnalizar.querySelector('button[type="submit"]');
+            const textoOriginal = boton.innerHTML;
+            boton.disabled = true;
+            boton.classList.add('opacity-70', 'cursor-wait');
+            boton.innerHTML = '<svg class="w-4 h-4 inline-block mr-2 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Enviando...';
+            mostrarFeedback('loading', 'Enviando CV para iniciar el análisis...');
+
+            fetch(formAnalizar.action, {
+                method: 'POST',
+                keepalive: true,
+                headers: {
+                    'X-CSRFToken': formAnalizar.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    marcarBotonAnalisisPendiente(boton);
+                    deshabilitarBotonResultado();
+                    mostrarFeedback('loading', 'Listo, el CV quedó en análisis. Podés seguir usando la plataforma; te avisamos acá cuando termine.');
+                    consultarEstadoAnalisis(data.analisis_id, boton, textoOriginal);
+                } else {
+                    mostrarFeedback('error', data.mensaje || 'No se pudo enviar el CV.');
+                    restaurarBotonAnalizar(boton, textoOriginal);
+                }
+            })
+            .catch(() => {
+                mostrarFeedback('error', 'Error de conexión. Intentá nuevamente.');
+                restaurarBotonAnalizar(boton, textoOriginal);
+            });
+        });
+    }
+
+    function consultarEstadoAnalisis(analisisId, boton, textoOriginal) {
+        if (pollingAnalisisActivo) return;
+        pollingAnalisisActivo = true;
+        const url = formAnalizar.dataset.estadoUrl.replace('/0/', '/' + analisisId + '/');
+
+        function consultar() {
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.estado === 'pendiente') {
+                        mostrarFeedback('loading', data.mensaje || 'El análisis sigue en segundo plano. Podés navegar sin esperar.');
+                        setTimeout(consultar, 5000);
+                        return;
+                    }
+
+                    pollingAnalisisActivo = false;
+                    restaurarBotonAnalizar(boton, textoOriginal);
+                    if (data.estado === 'completado') {
+                        mostrarFeedback('success', data.mensaje || 'El análisis del CV está listo.');
+                        habilitarBotonResultado(data.resultado_url);
+                    } else {
+                        mostrarFeedback('error', data.mensaje || 'No se pudo analizar el CV.');
+                    }
+                })
+                .catch(() => {
+                    pollingAnalisisActivo = false;
+                    restaurarBotonAnalizar(boton, textoOriginal);
+                    mostrarFeedback('error', 'No se pudo consultar el estado del análisis.');
+                });
+        }
+
+        consultar();
+    }
+
+    function restaurarBotonAnalizar(boton, textoOriginal) {
+        boton.disabled = false;
+        boton.classList.remove('opacity-70', 'cursor-wait', 'cursor-not-allowed');
+        boton.innerHTML = textoOriginal;
+    }
+
+    function marcarBotonAnalisisPendiente(boton) {
+        boton.disabled = true;
+        boton.classList.remove('cursor-wait');
+        boton.classList.add('opacity-70', 'cursor-not-allowed');
+        boton.innerHTML = 'Análisis en proceso';
+    }
+
+    function deshabilitarBotonResultado() {
+        if (!botonResultado) return;
+        botonResultado.href = '#';
+        botonResultado.setAttribute('aria-disabled', 'true');
+        botonResultado.classList.remove('text-primary', 'border-primary', 'hover:bg-primary/5');
+        botonResultado.classList.add('text-muted-foreground', 'border-border', 'opacity-50', 'pointer-events-none');
+    }
+
+    function habilitarBotonResultado(resultadoUrl) {
+        if (!botonResultado) return;
+        botonResultado.href = resultadoUrl;
+        botonResultado.setAttribute('aria-disabled', 'false');
+        botonResultado.classList.remove('text-muted-foreground', 'border-border', 'opacity-50', 'pointer-events-none');
+        botonResultado.classList.add('text-primary', 'border-primary', 'hover:bg-primary/5');
     }
 
     function enviarCV(archivo) {

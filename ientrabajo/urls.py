@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic.base import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
 from . import views
@@ -27,8 +28,9 @@ urlpatterns = [
     path('usuarios/', include('usuarios.urls')),
     path('moderacion/', include('moderacion.urls')),
     path('ofertas/', include('ofertas.urls')),
+    path('ia/', include('ia.urls')),
 
-    #url solo para probar ia hasta que este completa la pantalla
-    path    ('prueba/', views.ia, name='ia')
+    # Ruta temporal: no ejecuta análisis ni llama a Groq.
+    path('prueba/', RedirectView.as_view(pattern_name='home', permanent=False), name='ia'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

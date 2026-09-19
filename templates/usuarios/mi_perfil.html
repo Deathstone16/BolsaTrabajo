@@ -43,7 +43,7 @@
                   {% endif %}
                 </div>
               </div>
-              <div class="flex items-center gap-2">
+              <div class="flex flex-wrap items-center gap-2">
                 <a href="{{ postulante.cv.url }}" target="_blank" rel="noopener" class="btn-ghost !py-2 text-sm">
                   Ver CV <span data-icon="external-link" class="h-4 w-4"></span>
                 </a>
@@ -54,6 +54,29 @@
                     Eliminar
                   </button>
                 </form>
+                {% comment %}
+                  Analisis de CV (rama ia). Los ids, data-* y las clases que
+                  cv_upload.js agrega y saca (text-primary, border-primary,
+                  text-muted-foreground, opacity-50, pointer-events-none...) no se tocan.
+                {% endcomment %}
+                <form method="post"
+                      action="{% url 'ia:solicitar_analisis' %}"
+                      class="inline"
+                      id="form-analizar-cv"
+                      data-estado-url="{% url 'ia:estado_analisis' 0 %}"
+                      data-ultimo-analisis-id="{% if ultimo_analisis %}{{ ultimo_analisis.id }}{% endif %}"
+                      data-ultimo-analisis-estado="{% if ultimo_analisis %}{{ ultimo_analisis.estado }}{% endif %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-ien !py-2 text-sm">
+                    <span data-icon="sparkles" class="h-4 w-4"></span> Analizar CV
+                  </button>
+                </form>
+                <a id="boton-ver-resultado"
+                   href="{% if ultimo_analisis and ultimo_analisis.estado == 'completado' %}{% url 'ia:ver_resultado' ultimo_analisis.id %}{% else %}#{% endif %}"
+                   aria-disabled="{% if not ultimo_analisis or ultimo_analisis.estado != 'completado' %}true{% else %}false{% endif %}"
+                   class="inline-flex items-center gap-2 rounded-full border-[1.5px] px-5 py-2 text-sm font-semibold transition-colors {% if ultimo_analisis and ultimo_analisis.estado == 'completado' %}text-primary border-primary hover:bg-primary/5{% else %}text-muted-foreground border-border opacity-50 pointer-events-none{% endif %}">
+                  Ver resultado
+                </a>
               </div>
             </div>
           </div>
