@@ -34,19 +34,17 @@ def solicitar_analisis(request):
     if not settings.IA_API_URL or not settings.IA_API_TOKEN:
         return JsonResponse({'success': False, 'mensaje': 'El servicio de análisis no está configurado.'}, status=503)
 
-    analisis_pendiente = (
-        AnalisisCV.objects
-        .filter(postulante=postulante, estado=AnalisisCV.Estado.PENDIENTE)
-        .first()
+    analisis, creado = AnalisisCV.objects.get_or_create(
+        postulante=postulante,
+        estado=AnalisisCV.Estado.PENDIENTE,
     )
-    if analisis_pendiente:
+    if not creado:
         return JsonResponse({
             'success': True,
             'mensaje': 'Ya hay un análisis de CV en proceso.',
-            'analisis_id': analisis_pendiente.id,
+            'analisis_id': analisis.id,
         }, status=202)
 
-    analisis = AnalisisCV.objects.create(postulante=postulante)
     headers = {'Authorization': f'Bearer {settings.IA_API_TOKEN}'}
 
     try:

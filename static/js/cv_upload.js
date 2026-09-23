@@ -6,7 +6,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const formEliminar = document.getElementById('form-eliminar-cv');
     const formAnalizar = document.getElementById('form-analizar-cv');
     const botonResultado = document.getElementById('boton-ver-resultado');
+    const AVISO_DEMORA_MS = 20000;
     let pollingAnalisisActivo = false;
+    let temporizadorDemora = null;
     // Tienen que estar arriba: el codigo de inicio usa mostrarEstadoAnalisis
     // cuando la pagina carga con un analisis pendiente.
     const panelAnalisis = document.getElementById('analisis-estado');
@@ -85,6 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (ultimoAnalisisId && ultimoAnalisisEstado === 'pendiente') {
             marcarBotonAnalisisPendiente(botonInicial);
             mostrarEstadoAnalisis('pendiente');
+            iniciarTemporizadorDemora();
             consultarEstadoAnalisis(ultimoAnalisisId, botonInicial, textoInicial);
         }
 
@@ -111,6 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     marcarBotonAnalisisPendiente(boton);
                     deshabilitarBotonResultado();
                     mostrarEstadoAnalisis('pendiente');
+                    iniciarTemporizadorDemora();
                     consultarEstadoAnalisis(data.analisis_id, boton, textoOriginal);
                 } else {
                     mostrarEstadoAnalisis('error', data.mensaje || 'No se pudo enviar el CV.');
@@ -124,6 +128,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    function iniciarTemporizadorDemora() {
+        if (temporizadorDemora) return;
+
+        temporizadorDemora = setTimeout(function () {
+            mostrarEstadoAnalisis(
+                'pendiente',
+                'Está tardando un poco más de lo habitual, pero seguimos analizando tu CV.'
+            );
+        }, AVISO_DEMORA_MS);
+    }
+
+    function cancelarTemporizadorDemora() {
+        if (!temporizadorDemora) return;
+
+        clearTimeout(temporizadorDemora);
+        temporizadorDemora = null;
+    }
+
     function consultarEstadoAnalisis(analisisId, boton, textoOriginal) {
         if (pollingAnalisisActivo) return;
         pollingAnalisisActivo = true;
@@ -134,12 +156,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     if (data.estado === 'pendiente') {
-                        mostrarEstadoAnalisis('pendiente');
                         setTimeout(consultar, 5000);
                         return;
                     }
 
                     pollingAnalisisActivo = false;
+                    cancelarTemporizadorDemora();
                     restaurarBotonAnalizar(boton, textoOriginal);
                     if (data.estado === 'completado') {
                         mostrarEstadoAnalisis('completado', data.mensaje || 'El análisis del CV está listo.', data.resultado_url);
@@ -150,6 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .catch(() => {
                     pollingAnalisisActivo = false;
+                    cancelarTemporizadorDemora();
                     restaurarBotonAnalizar(boton, textoOriginal);
                     mostrarEstadoAnalisis('error', 'No se pudo consultar el estado del análisis.');
                 });
