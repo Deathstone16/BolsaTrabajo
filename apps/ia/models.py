@@ -23,6 +23,13 @@ class AnalisisCV(models.Model):
 
     class Meta:
         ordering = ['-creado_en']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['postulante'],
+                condition=models.Q(estado='pendiente'),
+                name='ia_unico_analisis_pendiente_por_postulante',
+            ),
+        ]
 
     def __str__(self):
         return f'Análisis {self.pk} - {self.postulante}'
