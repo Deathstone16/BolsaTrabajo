@@ -1,0 +1,38 @@
+{% extends 'nueva_ui/base.html' %}
+{% load static %}
+
+{% block title %}Editar oferta · IEN Empleo{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-[#F8F3F0] py-12">
+  <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+    <div class="mb-8">
+      <a href="{% url 'dashboard_empresa' %}#ofertas" class="inline-flex items-center gap-2 text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">
+        <span data-icon="arrow-left" class="h-4 w-4"></span> Volver a mi panel
+      </a>
+      <div class="mt-6 flex items-center gap-3">
+        <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[#512DA8]/10">
+          <span data-icon="pencil" class="h-6 w-6 text-[#512DA8]"></span>
+        </div>
+        <div>
+          <h1 class="text-3xl font-bold tracking-tight text-[#26222E]">Editar oferta</h1>
+          <p class="mt-1 text-[#6B645C]">Modificá los datos y guardá. La oferta volverá a revisión.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel p-8">
+      <form method="post" action="{% url 'editar_oferta' oferta.pk %}">
+        {% csrf_token %}
+        {% include 'Ofertas/_form-oferta.html' with submit_text="Guardar cambios" %}
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static_v 'js/habilidades.js' %}"></script>
+  <script src="{% static_v 'js/dashboard.js' %}"></script>
+  <script src="{% static_v 'js/autocompletar_ubicacion.js' %}"></script>
+{% endblock %}

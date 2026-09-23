@@ -23,14 +23,14 @@
             {{ oferta.get_estado_display }}
           </span>
 
-          <button type="button" onclick="openEditModal({{ oferta.id }})" title="Editar oferta"
+          <a href="{% url 'editar_oferta' oferta.id %}" title="Editar oferta"
                   class="grid h-9 w-9 place-items-center rounded-full border border-[rgba(110,85,55,0.16)] text-[#6B645C] transition-colors hover:border-[#512DA8] hover:text-[#512DA8]">
             <span data-icon="pencil" class="h-4 w-4"></span>
-          </button>
-          <button type="button" onclick="confirmDelete({{ oferta.id }})" title="Eliminar oferta"
+          </a>
+          <a href="{% url 'eliminar_oferta' oferta.id %}" title="Eliminar oferta"
                   class="grid h-9 w-9 place-items-center rounded-full border border-[rgba(110,85,55,0.16)] text-[#6B645C] transition-colors hover:border-[#d4183d] hover:text-[#d4183d]">
             <span data-icon="trash" class="h-4 w-4"></span>
-          </button>
+          </a>
         </div>
       </div>
 
@@ -48,9 +48,9 @@
     <h3 class="mt-6 text-lg font-semibold text-[#26222E]">No hay ofertas publicadas</h3>
     <p class="mt-2 text-sm text-[#6B645C]">Publicá tu primera oferta para atraer talento.</p>
     {% if oferente.estado_obj.puede_publicar %}
-      <button type="button" onclick="openCreateModal()" class="btn-ien mt-6">
-        Publicar primera oferta <span data-icon="arrow-right" class="h-4 w-4"></span>
-      </button>
+      <a href="{% url 'crear_oferta' %}" class="btn-ien mt-6">
+  Publicar primera oferta <span data-icon="arrow-right" class="h-4 w-4"></span>
+  </a>
     {% endif %}
   </div>
 {% endif %}

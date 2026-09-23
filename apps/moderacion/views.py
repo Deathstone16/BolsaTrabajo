@@ -5,7 +5,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
-from dataclasses import asdict
+
 from cursos.models import Curso
 from categorias.models import Categoria, Habilidad
 from cursos.forms import CursoForm, CategoriaForm
@@ -17,7 +17,6 @@ from django.contrib import messages
 from ofertas.models import Oferta
 from ofertas.forms import HabilidadForm
 from ofertas import services as ofertas_services
-from ofertas.dtos import OfertaDTO
 from .forms import RechazarEmpresaForm
 from . import services
 
@@ -220,75 +219,53 @@ def listar_ofertas(request):
 
 
 @staff_required
-def detalle_oferta_json(request, pk):
-    """Serializa una oferta como JSON para el modal de moderación."""
+def detalle_oferta(request, pk):
+    """Presenta los datos completos de una oferta para su moderación."""
     oferta = services.obtener_oferta(pk)
-    dto = OfertaDTO.desde_modelo(oferta)
-    return JsonResponse(asdict(dto))
-
+    return render(request, 'moderacion/detalle_oferta.html', {
+        'oferta': oferta,
+        'habilidades_duras': [h.strip() for h in (oferta.habilidades_duras or "").split(",") if h.strip()],
+        'habilidades_blandas': [h.strip() for h in (oferta.habilidades_blandas or "").split(",") if h.strip()],
+    })
 
 @staff_required
 def aprobar_oferta(request, pk):
-    """Aprueba por POST una oferta pendiente y comunica errores de estado."""
-    if request.method != 'POST':
-        return JsonResponse(
-            {'success': False, 'error': 'Método no permitido'},
-            status=405
-        )
-    try:
-        services.aprobar_oferta(pk)
-        return JsonResponse({'success': True})
-    except ValueError as e:
-        return JsonResponse(
-            {'success': False, 'error': str(e)},
-            status=400
-        )
-
+    """Aprueba una oferta pendiente y vuelve a su detalle."""
+    if request.method == 'POST':
+        try:
+            services.aprobar_oferta(pk)
+            messages.success(request, 'Oferta aprobada correctamente.')
+        except ValueError as e:
+            messages.error(request, str(e))
+    return redirect('mod_detalle_oferta', pk=pk)
 
 @staff_required
 def rechazar_oferta(request, pk):
-    """Rechaza por POST una oferta indicando un motivo obligatorio."""
-    if request.method != 'POST':
-        return JsonResponse(
-            {'success': False, 'error': 'Método no permitido'},
-            status=405
-        )
-    motivo = request.POST.get('motivo', '').strip()
-    if not motivo: 
-        return JsonResponse(
-            {'success': False, 'error': 'Se requiere un motivo para rechazar la oferta'},
-            status=400
-        )
-    try:
-        services.rechazar_oferta(pk, motivo=motivo)
-        return JsonResponse({'success': True})
-    except ValueError as e:
-        return JsonResponse(
-            {'success': False, 'error': str(e)},
-            status=400
-        )
-
+    """Rechaza una oferta; GET muestra página con motivo, POST la procesa."""
+    oferta = services.obtener_oferta(pk)
+    if request.method == 'POST':
+        motivo = request.POST.get('motivo', '').strip()
+        if not motivo:
+            messages.error(request, 'Se requiere un motivo para rechazar la oferta.')
+            return render(request, 'moderacion/rechazar_oferta.html', {'oferta': oferta, 'motivo': motivo})
+        try:
+            services.rechazar_oferta(pk, motivo=motivo)
+            messages.success(request, 'Oferta rechazada.')
+        except ValueError as e:
+            messages.error(request, str(e))
+        return redirect('mod_detalle_oferta', pk=pk)
+    return render(request, 'moderacion/rechazar_oferta.html', {'oferta': oferta})
 
 @staff_required
 def finalizar_oferta(request, pk):
-    """Finaliza por POST una oferta activa."""
-    if request.method != 'POST':
-        return JsonResponse(
-            {'success': False, 'error': 'Método no permitido'},
-            status=405
-        )
-    try:
-        services.finalizar_oferta(pk)
-        return JsonResponse({'success': True})
-    except ValueError as e:
-        return JsonResponse(
-            {'success': False, 'error': str(e)},
-            status=400
-        )
-
-
-
-
+    """Da de baja una oferta activa y vuelve a su detalle."""
+    if request.method == 'POST':
+        try:
+            services.finalizar_oferta(pk)
+            messages.success(request, 'Oferta dada de baja.')
+        except ValueError as e:
+            messages.error(request, str(e))
+    return redirect('mod_detalle_oferta', pk=pk)
 # ============================================================
 # HABILIDADES
 # ============================================================

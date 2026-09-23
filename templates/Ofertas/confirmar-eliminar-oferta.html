@@ -1,0 +1,33 @@
+{% extends 'nueva_ui/base.html' %}
+{% load static %}
+
+{% block title %}Eliminar oferta · IEN Empleo{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-10">
+  <div class="panel p-6 text-center space-y-4">
+    <div class="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-[#d4183d]/10">
+      <span data-icon="trash" class="h-8 w-8 text-[#d4183d]"></span>
+    </div>
+
+    <h1 class="text-2xl font-bold tracking-tight text-[#26222E]">¿Eliminar oferta?</h1>
+    <p class="text-[#6B645C]">
+      Vas a eliminar <b>{{ oferta.nombre_puesto }}</b>.
+      Esta acción no se puede deshacer.
+    </p>
+
+    <div class="flex gap-3 pt-4">
+      <form method="post" action="{% url 'eliminar_oferta' oferta.pk %}" class="flex-1">
+        {% csrf_token %}
+        <button type="submit" class="w-full rounded-full bg-[#d4183d] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#b01333]">
+          Eliminar oferta
+        </button>
+      </form>
+      <a href="{% url 'dashboard_empresa' %}#ofertas"
+         class="flex-1 rounded-full bg-[#F0E9E1] px-5 py-2.5 text-center text-sm font-medium text-[#26222E] transition-colors hover:bg-[#E5DCCE]">
+        Cancelar
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -6,7 +6,7 @@
 
 <div class="mb-6">
     <h1 class="text-3xl font-bold tracking-tight text-[#26222E]">Panel de Moderación</h1>
-    <p class="text-muted-foreground mt-1">Administra y modera las ofertas laborales publicadas. Haz clic en una fila para ver detalles completos.</p>
+    <p class="text-muted-foreground mt-1">Administra y modera las ofertas laborales publicadas. Abrí cada oferta para ver el detalle completo o moderarla.</p>
 </div>
 
 <!-- Búsqueda y filtro -->
@@ -42,11 +42,12 @@
     </thead>
     <tbody id="tabla-ofertas">
         {% for oferta in ofertas %}
-        <tr class="fila-oferta border-b border-border last:border-0 hover:bg-muted/40 cursor-pointer transition-colors"
-            data-oferta-id="{{ oferta.id }}"
-            onclick="abrirDetalle({{oferta.id}})">
+        <tr class="fila-oferta border-b border-border last:border-0 hover:bg-muted/40 transition-colors"
+            data-oferta-id="{{ oferta.id }}">
             <td class="px-6 py-4 text-sm text-muted-foreground">{{ oferta.fecha_publicacion|date:"d/m/Y" }}</td>
-            <td class="px-6 py-4 text-sm font-medium">{{ oferta.nombre_puesto }}</td>
+            <td class="px-6 py-4 text-sm font-medium">
+              <a href="{% url 'mod_detalle_oferta' oferta.id %}" class="text-primary hover:underline">{{ oferta.nombre_puesto }}</a>
+            </td>
             <td class="px-6 py-4 text-sm text-muted-foreground">{{ oferta.empresa.oferente.nombre_empresa }}</td>
             <td class="px-6 py-4">
             <span class="px-3 py-1 rounded-full text-xs font-medium
@@ -57,25 +58,32 @@
                 {{ oferta.get_estado_display }}
             </span>
             </td>
-                <td class="px-6 py-4" onclick="event.stopPropagation()">
+                <td class="px-6 py-4">
             <div class="flex items-center gap-2">
                 {% if oferta.estado == 'pendiente' %}
-                <button type="button" onclick="aprobarOferta({{oferta.id}})"
-                        class="btn-accion-rapida p-1.5 rounded-lg border border-green-200 text-green-600 hover:bg-green-50 transition-colors"
-                        title="Aprobar">
-                <span data-icon="check" class="h-4 w-4"></span>
-                </button>
-                <button type="button" onclick="abrirDetalle({{oferta.id}})"
-                        class="btn-accion-rapida p-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition-colors"
-                        title="Rechazar">
-                <span data-icon="x" class="h-4 w-4"></span>
-                </button>
+                <a href="{% url 'mod_detalle_oferta' oferta.id %}" title="Ver detalles"
+                   class="btn-accion-rapida p-1.5 rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors">
+                  <span data-icon="eye" class="h-4 w-4"></span>
+                </a>
+                <form method="post" action="{% url 'mod_aprobar_oferta' oferta.id %}">
+                  {% csrf_token %}
+                  <button type="submit" title="Aprobar"
+                          class="btn-accion-rapida p-1.5 rounded-lg border border-green-200 text-green-600 hover:bg-green-50 transition-colors">
+                    <span data-icon="check" class="h-4 w-4"></span>
+                  </button>
+                </form>
+                <a href="{% url 'mod_rechazar_oferta' oferta.id %}" title="Rechazar"
+                   class="btn-accion-rapida p-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition-colors">
+                  <span data-icon="x" class="h-4 w-4"></span>
+                </a>
                 {% elif oferta.estado == 'activa' %}
-                <button type="button" onclick="finalizarOferta({{oferta.id}})"
-                        class="btn-accion-rapida px-3 py-1.5 rounded-lg border border-orange-200 text-orange-600 hover:bg-orange-50 transition-colors text-xs font-medium"
-                        title="Dar de baja">
-                <span data-icon="archive" class="h-4 w-4 inline"></span> Dar de baja
-                </button>
+                <form method="post" action="{% url 'mod_finalizar_oferta' oferta.id %}">
+                  {% csrf_token %}
+                  <button type="submit" title="Dar de baja"
+                          class="btn-accion-rapida px-3 py-1.5 rounded-lg border border-orange-200 text-orange-600 hover:bg-orange-50 transition-colors text-xs font-medium">
+                    <span data-icon="archive" class="h-4 w-4 inline"></span> Dar de baja
+                  </button>
+                </form>
                 {% else %}
                 <span class="text-xs text-muted-foreground">—</span>
             {% endif %}
@@ -108,10 +116,21 @@
   </div>
 
 </div>
-
-{% include 'moderacion/_detalle_oferta_modal.html' %}
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static_v 'js/ofertas_moderacion.js' %}"></script>
+<script>
+  (function() {
+    var input = document.getElementById('buscar');
+    if (!input) return;
+    input.addEventListener('input', function() {
+      var texto = this.value.toLowerCase().trim();
+      document.querySelectorAll('.fila-oferta').forEach(function(fila) {
+        var puesto = fila.children[1].textContent.toLowerCase();
+        var empresa = fila.children[2].textContent.toLowerCase();
+        fila.style.display = puesto.indexOf(texto) >= 0 || empresa.indexOf(texto) >= 0 ? '' : 'none';
+      });
+    });
+  })();
+</script>
 {% endblock %}

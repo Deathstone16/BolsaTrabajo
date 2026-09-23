@@ -1,0 +1,32 @@
+{% extends 'nueva_ui/base.html' %}
+
+{% block title %}Rechazar oferta · IEN Empleo{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl px-4 py-8">
+  <h1 class="mb-2 text-2xl font-bold text-[#26222E]">Rechazar oferta</h1>
+  <p class="mb-6 text-muted-foreground">
+    Vas a rechazar la oferta <strong>{{ oferta.nombre_puesto }}</strong> de
+    <strong>{{ oferta.empresa.oferente.nombre_empresa }}</strong>.
+    Explicá el motivo para que el oferente sepa qué corregir.
+  </p>
+
+  <form method="post" action="{% url 'mod_rechazar_oferta' oferta.pk %}">
+    {% csrf_token %}
+    <div class="mb-4">
+      <label for="motivo" class="mb-1 block text-sm font-medium">Motivo del rechazo</label>
+      <textarea name="motivo" id="motivo" rows="3" class="w-full rounded-lg border border-border bg-input-background p-3 text-sm"
+                placeholder="Explicá por qué se rechaza la oferta.">{{ motivo }}</textarea>
+    </div>
+
+    <div class="flex gap-4">
+      <a href="{% url 'mod_detalle_oferta' oferta.pk %}"
+         class="rounded-lg border border-border px-6 py-3 transition-colors hover:bg-muted">Cancelar</a>
+      <button type="submit"
+              class="flex-1 rounded-lg bg-destructive px-6 py-3 font-medium text-white transition-colors hover:bg-destructive/90">
+        Confirmar rechazo
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -7,8 +7,8 @@
 {% comment %}
   Repintado con los tokens del rediseno. NO tocar, los usa static/js/dashboard.js:
     ids     -> ofertas-list, oferta-modal, oferta-modal-overlay, oferta-form,
-               modal-title, modal-errors, modal-scroll, delete-modal,
-               confirm-delete-btn
+              modal-title, modal-errors, modal-scroll, delete-modal,
+              confirm-delete-btn
     clases  -> tab-link, tab-content (y los ids tab-ofertas / tab-empresa)
     handler -> cambiarTab, openCreateModal, closeOfertaModal, closeDeleteModal
   dashboard.js ademas agrega y saca border-primary/text-primary y
@@ -81,9 +81,9 @@
             <h2 class="mt-2 text-2xl font-bold tracking-tight text-[#26222E]">Mis ofertas publicadas</h2>
           </div>
           {% if oferente.estado_obj.puede_publicar %}
-            <button type="button" onclick="openCreateModal()" class="btn-ien !py-2.5 text-sm">
+            <a href="{% url 'crear_oferta' %}" class="btn-ien !py-2.5 text-sm">
               <span data-icon="plus" class="h-4 w-4"></span> Nueva oferta
-            </button>
+            </a>
           {% endif %}
         </div>
 
@@ -171,57 +171,9 @@
   </div>
 </div>
 
-<div id="oferta-modal-overlay" class="fixed inset-0 z-50 hidden bg-black/50" onclick="closeOfertaModal()"></div>
-
-<div id="oferta-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-  <div class="panel flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden" onclick="event.stopPropagation()">
-    <div class="overflow-y-auto p-8" id="modal-scroll">
-
-      <div class="mb-8 flex items-center justify-between">
-        <h2 id="modal-title" class="text-2xl font-bold tracking-tight text-[#26222E]"></h2>
-        <button type="button" onclick="closeOfertaModal()"
-                class="grid h-10 w-10 place-items-center rounded-full text-[#6B645C] transition-colors hover:bg-[#F3EDE5] hover:text-[#26222E]">
-          <span data-icon="x" class="h-5 w-5"></span>
-        </button>
-      </div>
-
-      <div id="modal-errors" class="mb-6 hidden rounded-2xl border border-[#d4183d]/30 bg-[#d4183d]/10 p-4 text-[#d4183d]"></div>
-
-      <form id="oferta-form" method="post">
-        {% csrf_token %}
-        {% include 'Ofertas/_form-oferta.html' with submit_text="Guardar oferta" modal_mode=True %}
-      </form>
-
-    </div>
-  </div>
-</div>
-
-<div id="delete-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-  <div class="panel w-full max-w-sm p-6">
-    <div class="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-[#d4183d]/10">
-      <span data-icon="trash" class="h-6 w-6 text-[#d4183d]"></span>
-    </div>
-    <h3 class="text-center text-lg font-semibold text-[#26222E]">¿Eliminar oferta?</h3>
-    <p class="mt-1 text-center text-sm text-[#6B645C]">Esta acción no se puede deshacer.</p>
-    <div class="mt-6 flex gap-3">
-      <button type="button" onclick="closeDeleteModal()" class="btn-ghost flex-1 !py-2.5 text-sm">Cancelar</button>
-      <button type="button" id="confirm-delete-btn"
-              class="flex-1 rounded-full bg-[#d4183d] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#b01333]">
-        Eliminar
-      </button>
-    </div>
-  </div>
-</div>
 {% endblock %}
 
 {% block extra_js %}
-  <script>
-    window.URLS = {
-      crearOferta: "{% url 'crear_oferta' %}",
-      listaOfertasParcial: "{% url 'lista_ofertas_parcial' %}",
-    };
-  </script>
   <script src="{% static_v 'js/habilidades.js' %}"></script>
   <script src="{% static_v 'js/dashboard.js' %}"></script>
-  <script src="{% static_v 'js/autocompletar_ubicacion.js' %}"></script>
 {% endblock %}
