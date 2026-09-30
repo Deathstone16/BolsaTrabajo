@@ -47,8 +47,12 @@
           </div>
         </div>
 
-        <button type="button" data-save="{{ oferta.pk }}" class="btn-ghost !py-2.5 text-sm">
-          <span data-icon="bookmark" class="h-4 w-4"></span> Guardar
+        <button type="button" data-save="{{ oferta.pk }}"
+                data-url="{% url 'alternar_favorita' oferta.pk %}"
+                data-save-on="{{ favorita|yesno:'true,false' }}"
+                class="btn-ghost !py-2.5 text-sm">
+          <span data-icon="bookmark" class="h-4 w-4"></span>
+          <span data-save-label>Guardar</span>
         </button>
       </div>
 

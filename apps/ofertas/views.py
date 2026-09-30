@@ -1,15 +1,15 @@
 """Vistas MVT para publicar, administrar y consultar ofertas laborales."""
-
+from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.urls import reverse
 from .forms import OfertaForm
 from .models import Oferta
-from .services import crear_oferta_laboral, obtener_ofertas_por_empresa, obtener_oferta_por_id, eliminar_oferta_por_id, obtener_ofertas_activas
+from .services import crear_oferta_laboral, obtener_ofertas_por_empresa, obtener_oferta_por_id, eliminar_oferta_por_id, obtener_ofertas_activas, es_oferta_favorita, obtener_ids_ofertas_favoritas, obtener_ofertas_favoritas, alternar_oferta_favorita
 from usuarios.forms import OferenteForm
 from usuarios.services import obtener_url_contacto
 from usuarios import services as usuarios_service
-from usuarios.decorators import oferente_required, oferente_validado_required
+from usuarios.decorators import oferente_required, oferente_validado_required,postulante_required
 
 
 @oferente_required
@@ -133,15 +133,18 @@ def detalle_oferta_postulante(request, pk):
     """Muestra el detalle público de una oferta activa."""
     oferta = get_object_or_404(Oferta, pk=pk, estado='activa')
     habilidades = [h.strip() for h in oferta.habilidades_requeridas.split(',') if h.strip()]
+    favorita = es_oferta_favorita(request.user.postulante, oferta.id) if hasattr(request.user, 'postulante') else False
     return render(request, 'nueva_ui/detalle_oferta.html', {
         'vista_activa': 'buscar',
         'oferta': oferta,
         'habilidades': habilidades,
+        'favorita': favorita,
     })
 
 
 def buscar_empleo(request):
     """Lista ofertas activas aplicando filtros recibidos por query string."""
+    ids_favoritas = obtener_ids_ofertas_favoritas(request.user.postulante) if hasattr(request.user, 'postulante') else []
     busqueda = request.GET.get('q', '')
     modalidad = request.GET.get('modalidad', '')
     experiencia = request.GET.get('experiencia', '')
@@ -156,5 +159,26 @@ def buscar_empleo(request):
         'experiencia': experiencia,
         'modalidad_choices': Oferta.MODALIDAD_CHOICES,
         'experiencia_choices': Oferta.EXPERIENCIA_CHOICES,
+        'total': ofertas.count(),
+        'ids_favoritas': ids_favoritas,
+    })
+
+@require_POST
+@postulante_required
+def alternar_favorita(request, pk):
+    """Alterna el estado de favorito de una oferta (POST)."""
+    resultado = alternar_oferta_favorita(request.user.postulante, pk)
+    if resultado is None:
+        return JsonResponse({'success': False, 'mensaje': 'La oferta no existe.'}, status=404)
+    return JsonResponse({'success': True, 'favorita': resultado})
+
+
+@postulante_required
+def favoritos(request):
+    """Lista las ofertas guardadas por el postulante."""
+    ofertas = obtener_ofertas_favoritas(request.user.postulante)
+    return render(request, 'nueva_ui/favoritos.html', {
+        'vista_activa': 'favoritos',
+        'ofertas': ofertas,
         'total': ofertas.count(),
     })

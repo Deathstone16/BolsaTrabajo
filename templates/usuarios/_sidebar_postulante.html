@@ -29,10 +29,11 @@
         Estas dos venian del mockup con href="#": todavia no tienen vista ni
         modelo. Se muestran sin enlace para no prometer una pantalla que no esta.
       {% endcomment %}
-      <span class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#6B645C]/60">
-        <span data-icon="bookmark" class="h-4 w-4"></span> Empleos guardados
-        <span class="ml-auto font-mono text-[10px] uppercase">pronto</span>
-      </span>
+      <a href="{% url 'favoritos' %}"
+        class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors {% if seccion == 'favoritos' %}bg-[#512DA8] font-semibold text-white shadow-md{% else %}text-[#6B645C] hover:bg-[#F3EDE5] hover:text-[#26222E]{% endif %}">
+        <span data-icon="bookmark" class="h-4 w-4"></span> Favoritos
+        <span class="ml-auto font-mono text-[10px] uppercase">guardados</span>
+      </a>
       <span class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#6B645C]/60">
         <span data-icon="trending-up" class="h-4 w-4"></span> Brecha de habilidades
         <span class="ml-auto font-mono text-[10px] uppercase">pronto</span>

@@ -10,7 +10,7 @@ from django.conf import settings
 from django.utils import timezone
 from .state import ESTADOS
 from categorias.models import Categoria
-
+from usuarios.models import Postulante
 
 
 
@@ -105,3 +105,30 @@ class Oferta(models.Model):
     def puede_editarse(self):
         """Indica si la oferta puede ser editada (solo en estado pendiente)."""
         return self.get_state().puede_editarse()
+
+class OfertaFavorita(models.Model):
+    postulante = models.ForeignKey(
+        Postulante,
+        on_delete=models.CASCADE,
+        related_name='favoritas',
+    )
+    oferta = models.ForeignKey(
+        Oferta,
+        on_delete=models.CASCADE,
+        related_name='favorita_por',
+    )
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-creado_en']
+        verbose_name = "Oferta favorita"
+        verbose_name_plural = "Ofertas favoritas"
+        constraints = [
+            models.UniqueConstraint(
+                fields=['postulante', 'oferta'],
+                name='unico_postulante_oferta_favorita',
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.postulante} → {self.oferta}"

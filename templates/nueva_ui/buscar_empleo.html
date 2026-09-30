@@ -18,8 +18,8 @@
         <div class="flex flex-1 items-center gap-3 rounded-2xl bg-[#F3EDE5] px-4 py-3">
           <span data-icon="search" class="h-5 w-5 shrink-0 text-[#512DA8]"></span>
           <input type="text" name="q" value="{{ busqueda }}"
-                 placeholder="Buscar por título, empresa o palabra clave…"
-                 class="min-w-0 flex-1 bg-transparent text-sm focus:outline-none" />
+                placeholder="Buscar por título, empresa o palabra clave…"
+                class="min-w-0 flex-1 bg-transparent text-sm focus:outline-none" />
         </div>
         <button type="submit" class="btn-ien !py-3">Buscar <span data-icon="arrow-right" class="h-4 w-4"></span></button>
       </form>
@@ -100,10 +100,11 @@
                     </div>
                   </div>
 
-                  {# Guardar ofertas todavia se persiste en localStorage (ver static/js/ui/ien-ui.js) #}
                   <button type="button" data-save="{{ oferta.pk }}"
-                          class="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[rgba(110,85,55,0.16)] bg-white text-[#6B645C] transition-all hover:border-[#512DA8]/40 hover:text-[#512DA8]">
-                    <span data-icon="bookmark" class="h-4 w-4"></span>
+                          data-url="{% url 'alternar_favorita' oferta.pk %}"
+                          data-save-on="{% if oferta.pk in ids_favoritas %}true{% else %}false{% endif %}"
+                          class="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[#512DA8]/30 bg-white text-[#512DA8]/45 transition-colors hover:border-[#512DA8] hover:bg-[#512DA8] hover:text-white">
+                  <span data-icon="bookmark" class="h-4 w-4"></span>
                   </button>
                 </div>
 
@@ -114,7 +115,7 @@
                   <span class="chip"><span data-icon="clock" class="h-3 w-3"></span> {{ oferta.get_modalidad_display }}</span>
                   <span class="chip">{{ oferta.get_experiencia_requerida_display }}</span>
                   <a href="{% url 'detalle_oferta' oferta.pk %}"
-                     class="ml-auto hidden items-center gap-1 font-mono text-xs font-semibold text-[#512DA8] sm:flex">
+                    class="ml-auto hidden items-center gap-1 font-mono text-xs font-semibold text-[#512DA8] sm:flex">
                     Ver oferta <span data-icon="arrow-right" class="h-3.5 w-3.5"></span>
                   </a>
                 </div>

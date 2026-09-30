@@ -8,6 +8,8 @@ urlpatterns = [
     path('eliminar/<int:pk>/', views.eliminar_oferta, name='eliminar_oferta'),
     path('editar-perfil/', views.editar_perfil_empresa, name='editar_perfil_empresa'),
     path('buscar/', views.buscar_empleo, name='buscar_empleo'),
+    path('favoritos/', views.favoritos, name='favoritos'),
+    path('guardar/<int:pk>/', views.alternar_favorita, name='alternar_favorita'),
     path('<int:pk>/', views.detalle_oferta_postulante, name='detalle_oferta'),
     path('validacion-pendiente/', views.validacion_pendiente, name='validacion_pendiente'),
 ]
