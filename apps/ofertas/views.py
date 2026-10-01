@@ -131,12 +131,24 @@ def editar_perfil_empresa(request):
 
 def detalle_oferta_postulante(request, pk):
     """Muestra el detalle público de una oferta activa."""
-    oferta = get_object_or_404(Oferta, pk=pk, estado='activa')
+    oferta = get_object_or_404(Oferta, pk=pk, estado='activa', perfil_ia__estado='ready')
     habilidades = [h.strip() for h in oferta.habilidades_requeridas.split(',') if h.strip()]
+    match = None
+    perfil_cv = None
+    if request.user.is_authenticated and hasattr(request.user, 'postulante'):
+        from matching.models import ResultadoCompatibilidad
+        perfil_cv = getattr(request.user.postulante, 'perfil_ia', None)
+        match = ResultadoCompatibilidad.objects.filter(
+            postulante=request.user.postulante,
+            oferta=oferta,
+        ).order_by('-actualizado_en').first()
     return render(request, 'nueva_ui/detalle_oferta.html', {
         'vista_activa': 'buscar',
         'oferta': oferta,
         'habilidades': habilidades,
+        'match': match,
+        'perfil_cv': perfil_cv,
+        'perfil_oferta': getattr(oferta, 'perfil_ia', None),
     })
 
 

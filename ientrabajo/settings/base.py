@@ -18,6 +18,8 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
+CONTRACTS_DIR = BASE_DIR.parent.parent / 'contracts'
+sys.path.insert(0, str(CONTRACTS_DIR))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -53,6 +55,8 @@ INSTALLED_APPS = [
     'categorias',
     'emails',
     'ia',
+    'matching',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -86,6 +90,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'ientrabajo.wsgi.application'
+ASGI_APPLICATION = 'ientrabajo.asgi.application'
+
+CHANNEL_REDIS_URL = os.environ.get('CHANNEL_REDIS_URL', 'redis://127.0.0.1:6379/3')
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {'hosts': [CHANNEL_REDIS_URL]},
+    },
+}
 
 
 # Database
@@ -157,6 +170,14 @@ IA_API_TOKEN = os.environ.get('IA_API_TOKEN', '')
 IA_CALLBACK_TOKEN = os.environ.get('IA_CALLBACK_TOKEN', '')
 # Opcional: URL pública fija para callbacks (útil si Django corre detrás de proxy o túnel).
 IA_CALLBACK_URL = os.environ.get('IA_CALLBACK_URL', '')
+IA_CALLBACK_HMAC_SECRET = os.environ.get('IA_CALLBACK_HMAC_SECRET', IA_CALLBACK_TOKEN)
+IA_OFFER_API_URL = os.environ.get('IA_OFFER_API_URL', '')
+MATCH_API_URL = os.environ.get('MATCH_API_URL', 'ws://127.0.0.1:8002/api/v1/ws/v1/matches')
+MATCH_API_HTTP_URL = os.environ.get('MATCH_API_HTTP_URL', 'http://127.0.0.1:8002/api/v1')
+MATCH_API_TOKEN = os.environ.get('MATCH_API_TOKEN', '')
+MATCH_CACHE_REDIS_URL = os.environ.get('MATCH_CACHE_REDIS_URL', 'redis://127.0.0.1:6379/6')
+MATCH_CACHE_TTL_SECONDS = int(os.environ.get('MATCH_CACHE_TTL_SECONDS', str(60 * 60 * 24 * 7)))
+MATCH_REQUESTS_PER_HOUR = int(os.environ.get('MATCH_REQUESTS_PER_HOUR', '20'))
 
 if not DEBUG:
     SECURE_SSL_REDIRECT = env_bool('SECURE_SSL_REDIRECT', True)

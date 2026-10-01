@@ -189,6 +189,7 @@ def mi_perfil(request):
     postulante = request.user.postulante
     # El último análisis permite ofrecer el resultado al volver al perfil.
     ultimo_analisis = postulante.analisis_cv.first()
+    perfil_cv = getattr(postulante, 'perfil_ia', None)
 
     if request.method == 'POST':
         form = CargaCVForm(request.POST, request.FILES)
@@ -209,6 +210,7 @@ def mi_perfil(request):
         'postulante': postulante,
         'form': form,
         'ultimo_analisis': ultimo_analisis,
+        'perfil_cv': perfil_cv,
     })
 
 

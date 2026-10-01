@@ -25,7 +25,8 @@ class EstadoOferta(ABC):
 class Pendiente(EstadoOferta):
     """Estado de oferta pendiente de aprobación. Puede aprobarse o rechazarse."""
     def aprobar(self, oferta):
-        oferta.estado = 'activa'; oferta.save()
+        from .services import activar_y_programar_analisis
+        activar_y_programar_analisis(oferta)
     def rechazar(self, oferta):
         oferta.estado = 'rechazada'; oferta.save()
     def finalizar(self, oferta):

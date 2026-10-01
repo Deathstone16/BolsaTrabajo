@@ -94,21 +94,33 @@
       </div>
 
       <div class="space-y-6">
-        {# Match inteligente: placeholder, igual que en templates/Ofertas/detalle_oferta.html #}
-        <div class="panel select-none p-6 text-center opacity-50">
+        <div class="panel p-6 text-center" id="match-card">
           <h3 class="font-mono text-xs uppercase tracking-widest text-[#6B645C]">Match inteligente</h3>
           <div class="relative mx-auto mt-6 h-36 w-36">
             <svg class="h-36 w-36 -rotate-90" viewBox="0 0 120 120" aria-hidden="true">
               <circle cx="60" cy="60" r="54" stroke="#F0E9E1" stroke-width="12" fill="none"></circle>
-              <circle cx="60" cy="60" r="54" stroke="#512DA8" stroke-width="12" fill="none"
+              <circle id="match-progress" data-value="{% if match and match.match_percentage %}{{ match.match_percentage }}{% else %}0{% endif %}" cx="60" cy="60" r="54" stroke="#512DA8" stroke-width="12" fill="none"
                       stroke-dasharray="339.29" stroke-dashoffset="339.29" stroke-linecap="round"></circle>
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center">
-              <span class="text-3xl font-bold text-[#26222E]">0%</span>
+              <span id="match-percentage" class="text-3xl font-bold text-[#26222E]">{% if match and match.match_percentage %}{{ match.match_percentage|floatformat:0 }}%{% else %}—{% endif %}</span>
               <span class="font-mono text-[10px] uppercase tracking-widest text-[#6B645C]">match</span>
             </div>
           </div>
-          <span class="chip mt-5 inline-flex">Próximamente</span>
+          <p id="match-message" class="mt-5 text-sm text-[#6B645C]">
+            {% if not user.is_authenticated %}Iniciá sesión para calcular tu compatibilidad.
+            {% elif not perfil_cv or perfil_cv.estado != 'ready' %}Primero completá el análisis de tu perfil.
+            {% elif not perfil_oferta or perfil_oferta.estado != 'ready' %}Esta oferta está siendo analizada.
+            {% elif match and match.estado == 'completed' %}Compatibilidad calculada según tu perfil y esta oferta.
+            {% elif match %}Calculando compatibilidad…
+            {% else %}Compará tu perfil guardado con esta oferta.{% endif %}
+          </p>
+          {% if user.is_authenticated and perfil_cv and perfil_cv.estado == 'ready' and perfil_oferta and perfil_oferta.estado == 'ready' %}
+            <form id="match-form" method="post" action="{% url 'matching:calcular' oferta.pk %}" class="mt-5">
+              {% csrf_token %}
+              <button id="match-button" class="btn-ien w-full" type="submit" {% if match and match.estado != 'error' and match.estado != 'completed' %}disabled{% endif %}>{% if match and match.estado == 'completed' %}Ver compatibilidad actualizada{% else %}Calcular compatibilidad{% endif %}</button>
+            </form>
+          {% endif %}
         </div>
 
         {# TODO: todavia no existe el modelo de postulaciones. #}
@@ -160,4 +172,42 @@
     </div>
   </div>
 </section>
+<script>
+(() => {
+  const form = document.getElementById('match-form');
+  if (!form) return;
+  const button = document.getElementById('match-button');
+  const message = document.getElementById('match-message');
+  const percentage = document.getElementById('match-percentage');
+  const progress = document.getElementById('match-progress');
+  let pollTimer;
+  function render(data) {
+    if (data.match_percentage !== null && data.match_percentage !== undefined) { percentage.textContent = Math.round(data.match_percentage) + '%'; progress.style.strokeDashoffset = String(339.29 * (1 - Number(data.match_percentage) / 100)); }
+    if (data.status === 'completed') { message.textContent = 'Compatibilidad calculada según tu perfil y esta oferta.'; button.disabled = false; button.textContent = 'Calcular de nuevo'; clearInterval(pollTimer); }
+    else if (data.status === 'error') { message.textContent = data.error || 'No se pudo calcular la compatibilidad.'; button.disabled = false; button.textContent = 'Reintentar'; clearInterval(pollTimer); }
+    else { message.textContent = 'Calculando compatibilidad…'; button.disabled = true; }
+  }
+  function watch(requestId) {
+    const stateUrl = `{% url 'matching:estado' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', requestId);
+    pollTimer = setInterval(() => fetch(stateUrl).then(r => r.ok ? r.json() : null).then(data => data && render(data)).catch(() => {}), 3000);
+    const scheme = location.protocol === 'https:' ? 'wss' : 'ws';
+    try {
+      const socket = new WebSocket(`${scheme}://${location.host}/ws/matches/${requestId}/`);
+      socket.onmessage = event => render(JSON.parse(event.data));
+      socket.onclose = () => {};
+    } catch (_) {}
+  }
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    button.disabled = true;
+    fetch(form.action, {method: 'POST', headers: {'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value, 'X-Requested-With': 'XMLHttpRequest'}})
+      .then(response => response.json()).then(data => {
+        if (!data.success) { message.textContent = data.mensaje || 'No se pudo iniciar el cálculo.'; button.disabled = false; return; }
+        render(data); watch(data.request_id);
+      }).catch(() => { message.textContent = 'No se pudo iniciar el cálculo.'; button.disabled = false; });
+  });
+  const initial = Number(progress.dataset.value || 0);
+  if (initial) progress.style.strokeDashoffset = String(339.29 * (1 - initial / 100));
+})();
+</script>
 {% endblock %}

@@ -1,12 +1,14 @@
 """Vistas reservadas para la futura interfaz del módulo de IA."""
 
+import hashlib
+import hmac
 import json
-
-import requests
+import time
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseNotAllowed, JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -14,7 +16,10 @@ from django.views.decorators.http import require_POST
 
 from usuarios.decorators import postulante_required
 
-from .models import AnalisisCV
+from .models import AnalisisCV, TrabajoExtraccion
+from .workflow import receive_extraction_event, request_cv_extraction, request_profile_normalization
+from .forms import PerfilCVForm
+from .models import PerfilCV
 
 
 @login_required
@@ -33,48 +38,14 @@ def solicitar_analisis(request):
         )
     if not settings.IA_API_URL or not settings.IA_API_TOKEN:
         return JsonResponse({'success': False, 'mensaje': 'El servicio de análisis no está configurado.'}, status=503)
-
-    analisis, creado = AnalisisCV.objects.get_or_create(
-        postulante=postulante,
-        estado=AnalisisCV.Estado.PENDIENTE,
-    )
-    if not creado:
-        return JsonResponse({
-            'success': True,
-            'mensaje': 'Ya hay un análisis de CV en proceso.',
-            'analisis_id': analisis.id,
-        }, status=202)
-
-    headers = {'Authorization': f'Bearer {settings.IA_API_TOKEN}'}
-
     try:
-        with postulante.cv.open('rb') as cv_file:
-            respuesta = requests.post(
-                settings.IA_API_URL,
-                data={
-                    'analysis_id': analisis.id,
-                    'candidate_id': postulante.id,
-                },
-                files={
-                    'cv': (
-                        postulante.cv.name.rsplit('/', 1)[-1],
-                        cv_file,
-                        'application/pdf',
-                    ),
-                },
-                headers=headers,
-                timeout=30,
-            )
-        respuesta.raise_for_status()
-    except (OSError, requests.RequestException) as exc:
-        analisis.estado = AnalisisCV.Estado.ERROR
-        analisis.error = str(exc)
-        analisis.save(update_fields=['estado', 'error'])
-        return JsonResponse({'success': False, 'mensaje': 'No se pudo enviar el CV al servicio de análisis.'}, status=502)
+        analisis, _, creado = request_cv_extraction(postulante)
+    except OSError:
+        return JsonResponse({'success': False, 'mensaje': 'No se pudo preparar el CV para analizar.'}, status=502)
 
     return JsonResponse({
         'success': True,
-        'mensaje': 'CV enviado para analizar.',
+        'mensaje': 'CV preparado para analizar.' if creado else 'Ya hay un análisis de CV en proceso.',
         'analisis_id': analisis.id,
     }, status=202)
 
@@ -112,7 +83,33 @@ def ver_resultado(request, analisis_id):
         pk=analisis_id,
         postulante=request.user.postulante,
     )
-    return render(request, 'ia/resultado_analisis.html', {'analisis': analisis})
+    perfil = PerfilCV.objects.filter(postulante=analisis.postulante).first()
+    return render(request, 'ia/resultado_analisis.html', {'analisis': analisis, 'perfil': perfil})
+
+
+@login_required
+@postulante_required
+def editar_perfil_cv(request):
+    profile = get_object_or_404(PerfilCV, postulante=request.user.postulante)
+    if profile.estado == 'processing':
+        messages.info(request, 'La edición anterior todavía se está normalizando.')
+        return redirect('mi_perfil')
+    if not profile.contenido:
+        messages.error(request, 'Todavía no hay un perfil para editar.')
+        return redirect('mi_perfil')
+    if request.method == 'POST':
+        form = PerfilCVForm(request.POST)
+        if form.is_valid():
+            if form.cleaned_data['version'] != profile.version:
+                form.add_error(None, 'Tu perfil cambió en otra sesión. Recargá la página antes de guardar.')
+            else:
+                content = form.apply_to(profile.contenido)
+                request_profile_normalization(request.user.postulante, content, profile.version)
+                messages.info(request, 'Guardamos tu edición. La estamos normalizando para usarla en compatibilidad.')
+                return redirect('mi_perfil')
+    else:
+        form = PerfilCVForm(initial=PerfilCVForm.initial_from_profile(profile))
+    return render(request, 'ia/editar_perfil_cv.html', {'form': form, 'perfil': profile})
 
 
 @csrf_exempt
@@ -121,27 +118,31 @@ def llegue(request):
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
 
-    if not settings.IA_CALLBACK_TOKEN or request.headers.get('X-IA-Callback-Token') != settings.IA_CALLBACK_TOKEN:
+    timestamp = request.headers.get('X-IA-Event-Timestamp', '')
+    signature = request.headers.get('X-IA-Callback-Signature', '')
+    try:
+        timestamp_value = int(timestamp)
+    except ValueError:
+        return JsonResponse({'detail': 'Timestamp de callback inválido.'}, status=401)
+    if abs(time.time() - timestamp_value) > 300:
+        return JsonResponse({'detail': 'Callback vencido.'}, status=401)
+    secret = settings.IA_CALLBACK_HMAC_SECRET
+    expected = hmac.new(
+        secret.encode('utf-8'), timestamp.encode('ascii') + b'.' + request.body, hashlib.sha256
+    ).hexdigest() if secret else ''
+    if not secret or not signature or not hmac.compare_digest(signature, expected):
         return JsonResponse({'detail': 'No autorizado.'}, status=401)
 
     try:
         respuesta = json.loads(request.body)
-        analisis_id = respuesta['analysis_id']
+        respuesta['event_id']
+        respuesta['request_id']
+        respuesta['source_hash']
     except (json.JSONDecodeError, KeyError, TypeError):
-        return JsonResponse({'detail': 'JSON inválido: falta analysis_id.'}, status=400)
+        return JsonResponse({'detail': 'JSON inválido.'}, status=400)
 
     try:
-        analisis = AnalisisCV.objects.get(pk=analisis_id)
-    except AnalisisCV.DoesNotExist:
-        return JsonResponse({'detail': 'Solicitud de análisis inexistente.'}, status=404)
-
-    analisis.respuesta = respuesta
-    if respuesta.get('status') == 'completed':
-        analisis.estado = AnalisisCV.Estado.COMPLETADO
-        analisis.error = ''
-    else:
-        analisis.estado = AnalisisCV.Estado.ERROR
-        analisis.error = respuesta.get('error') or 'El servicio de análisis informó un error.'
-    analisis.respondido_en = timezone.now()
-    analisis.save(update_fields=['respuesta', 'estado', 'error', 'respondido_en'])
-    return JsonResponse({'success': True, 'analisis_id': analisis.id})
+        applied = receive_extraction_event(respuesta)
+    except (TrabajoExtraccion.DoesNotExist, ValueError):
+        return JsonResponse({'detail': 'Solicitud de extracción inexistente o inválida.'}, status=404)
+    return JsonResponse({'success': True, 'duplicado': not applied})

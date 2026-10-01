@@ -27,6 +27,30 @@
 
         {# Los mensajes los renderiza nueva_ui/base.html, no hace falta repetirlos aca. #}
 
+        {% if perfil_cv and perfil_cv.estado == 'ready' %}
+          <div class="panel mt-8 p-6">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p class="text-sm font-semibold text-[#26222E]">Perfil para compatibilidad</p>
+                <p class="mt-1 text-sm text-[#6B645C]">Versión {{ perfil_cv.version }} · actualizado {{ perfil_cv.actualizado_en|date:"d/m/Y H:i" }}</p>
+                {% if perfil_cv.contenido.summary %}<p class="mt-3 max-w-2xl text-sm text-[#6B645C]">{{ perfil_cv.contenido.summary }}</p>{% endif %}
+              </div>
+              <a class="btn-ghost !py-2 text-sm" href="{% url 'ia:editar_perfil_cv' %}">Editar información</a>
+            </div>
+          </div>
+        {% elif perfil_cv and perfil_cv.estado == 'processing' %}
+          <div class="panel mt-8 p-6" role="status">
+            <p class="text-sm font-semibold text-[#26222E]">Actualizando tu perfil para compatibilidad</p>
+            <p class="mt-1 text-sm text-[#6B645C]">Estamos normalizando tu edición. Podés seguir usando la plataforma mientras termina.</p>
+          </div>
+        {% elif perfil_cv and perfil_cv.estado == 'error' %}
+          <div class="panel mt-8 p-6">
+            <p class="text-sm font-semibold text-[#26222E]">No pudimos actualizar el perfil</p>
+            <p class="mt-1 text-sm text-[#6B645C]">Podés revisar la información y enviarla nuevamente.</p>
+            <a class="btn-ghost mt-4 !py-2 text-sm" href="{% url 'ia:editar_perfil_cv' %}">Editar información</a>
+          </div>
+        {% endif %}
+
         {% if postulante.cv %}
           <div class="panel mt-8 p-6">
             <div class="flex flex-wrap items-center justify-between gap-4">

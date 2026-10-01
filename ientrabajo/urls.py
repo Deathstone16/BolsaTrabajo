@@ -29,6 +29,7 @@ urlpatterns = [
     path('moderacion/', include('moderacion.urls')),
     path('ofertas/', include('ofertas.urls')),
     path('ia/', include('ia.urls')),
+    path('matching/', include('matching.urls')),
 
     # Ruta temporal: no ejecuta análisis ni llama a Groq.
     path('prueba/', RedirectView.as_view(pattern_name='home', permanent=False), name='ia'),
