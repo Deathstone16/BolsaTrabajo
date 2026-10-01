@@ -21,6 +21,7 @@ from .models import AnalisisCV
 @postulante_required
 @require_POST
 def solicitar_analisis(request):
+
     """Envía el PDF a FastAPI, que lo encola para extraerlo y analizarlo."""
     postulante = request.user.postulante
 
@@ -31,7 +32,8 @@ def solicitar_analisis(request):
             {'success': False, 'mensaje': 'Por el momento el análisis admite CV en formato PDF.'},
             status=400,
         )
-    if not settings.IA_API_URL or not settings.IA_API_TOKEN:
+
+    if not settings.IA_API_URL:
         return JsonResponse({'success': False, 'mensaje': 'El servicio de análisis no está configurado.'}, status=503)
 
     analisis, creado = AnalisisCV.objects.get_or_create(
@@ -118,14 +120,16 @@ def ver_resultado(request, analisis_id):
 @csrf_exempt
 def llegue(request):
     """Callback que recibe y persiste el JSON generado por la API externa."""
+    
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
 
     if not settings.IA_CALLBACK_TOKEN or request.headers.get('X-IA-Callback-Token') != settings.IA_CALLBACK_TOKEN:
         return JsonResponse({'detail': 'No autorizado.'}, status=401)
-
+    
     try:
         respuesta = json.loads(request.body)
+        print(respuesta['analysis_id'])
         analisis_id = respuesta['analysis_id']
     except (json.JSONDecodeError, KeyError, TypeError):
         return JsonResponse({'detail': 'JSON inválido: falta analysis_id.'}, status=400)
