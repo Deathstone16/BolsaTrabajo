@@ -33,7 +33,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-local-development-onl
 if not DEBUG and SECRET_KEY.startswith('django-insecure-'):
     raise RuntimeError('SECRET_KEY debe configurarse fuera del código cuando DEBUG=False.')
 
-ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', '').split(',') if host.strip()]
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', '*').split(',') if host.strip()]
 if not DEBUG and not ALLOWED_HOSTS:
     raise RuntimeError('ALLOWED_HOSTS debe configurarse cuando DEBUG=False.')
 
@@ -152,9 +152,11 @@ PASSWORD_RESET_TIMEOUT = 86400  # 24 horas en segundos
 
 # Configuración del servicio externo que analiza el texto del CV.
 # Definila en .env para no exponer datos sensibles en el repositorio.
-IA_API_URL = os.environ.get('IA_API_URL', '')
+#IA_API_URL poner la direccion y puerto de la api (si corre en esta pc poner localhost)
+IA_API_URL = os.environ.get('IA_API_URL', 'http://192.168.100.82:8001/api/v1/cv-analyses')
 IA_API_TOKEN = os.environ.get('IA_API_TOKEN', '')
-IA_CALLBACK_TOKEN = os.environ.get('IA_CALLBACK_TOKEN', '')
+# ACA VA CV_RESULT_CALLBACK_SECRET que esta en la /backend de la api
+IA_CALLBACK_TOKEN = os.environ.get('IA_CALLBACK_TOKEN', 'HgjB1ZeMMpRo3W9ehIsYqg71l0Ageo3OyRhtSOCLeDr0Mr_m6E3ia03bDjGVntdr')
 # Opcional: URL pública fija para callbacks (útil si Django corre detrás de proxy o túnel).
 IA_CALLBACK_URL = os.environ.get('IA_CALLBACK_URL', '')
 

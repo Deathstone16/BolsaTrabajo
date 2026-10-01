@@ -48,9 +48,10 @@ def listar_categorias_contexto():
 def listar_empresas_contexto():
     """Construye el contexto optimizado del listado de empresas."""
     empresas = Oferente.objects.select_related('usuario').order_by('-usuario__date_joined')
+    
     return {
         'empresas': empresas,
-        'total': empresas.count(),
+        'total': empresas.filter(estado_validacion = "PENDIENTE").count(),
     }
 
 
