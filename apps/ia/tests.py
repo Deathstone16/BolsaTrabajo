@@ -128,26 +128,34 @@ class AnalisisCVViewsTests(TestCase):
         self.assertEqual(analisis.estado, AnalisisCV.Estado.ERROR)
         self.assertEqual(analisis.error, 'No se pudo procesar el CV.')
 
-    def test_postulante_puede_corregir_nivel_y_opinion_sin_perder_sugerencia_ia(self):
+    def test_postulante_guarda_todas_las_habilidades_sin_perder_sugerencia_ia(self):
         analisis = AnalisisCV.objects.create(
             postulante=self.postulante,
             estado=AnalisisCV.Estado.COMPLETADO,
             respuesta={'result': {'habilidades_analizadas': [
                 {'tecnologia': 'Python', 'nivel_evaluado': 'Principiante'},
+                {'tecnologia': 'Django', 'nivel_evaluado': 'Intermedio'},
             ]}},
         )
+        resultado_url = reverse('ia:ver_resultado', args=[analisis.id])
+        editar_url = reverse('ia:editar_habilidades', args=[analisis.id])
 
+        self.assertContains(self.client.get(resultado_url), editar_url)
+        self.assertNotContains(self.client.get(resultado_url), 'name="nivel_0"')
+        self.assertContains(self.client.get(editar_url), 'name="nivel_0"')
         response = self.client.post(
-            reverse('ia:guardar_opinion_habilidad', args=[analisis.id, 0]),
-            {'opinion': 'no', 'nivel': 'Avanzado'},
+            editar_url,
+            {'opinion_0': 'no', 'nivel_0': 'Avanzado', 'opinion_1': 'si', 'nivel_1': 'Intermedio'},
         )
 
-        self.assertRedirects(response, reverse('ia:ver_resultado', args=[analisis.id]))
+        self.assertRedirects(response, resultado_url)
         analisis.refresh_from_db()
-        habilidad = analisis.respuesta['result']['habilidades_analizadas'][0]
-        self.assertEqual(habilidad['nivel_evaluado'], 'Principiante')
-        self.assertEqual(habilidad['nivel_usuario'], 'Avanzado')
-        self.assertEqual(habilidad['acuerdo_usuario'], 'no')
+        primera, segunda = analisis.respuesta['result']['habilidades_analizadas']
+        self.assertEqual(primera['nivel_evaluado'], 'Principiante')
+        self.assertEqual(primera['nivel_usuario'], 'Avanzado')
+        self.assertEqual(primera['acuerdo_usuario'], 'no')
+        self.assertEqual(segunda['nivel_usuario'], 'Intermedio')
+        self.assertEqual(segunda['acuerdo_usuario'], 'si')
 
     def test_no_se_puede_editar_analisis_ajeno_ni_nivel_invalido(self):
         otro_usuario = Usuario.objects.create_user(email='otro@example.com', password='clave-segura')
@@ -159,8 +167,27 @@ class AnalisisCVViewsTests(TestCase):
                 {'tecnologia': 'Python', 'nivel_evaluado': 'Principiante'},
             ]}},
         )
-        url = reverse('ia:guardar_opinion_habilidad', args=[analisis.id, 0])
+        url = reverse('ia:editar_habilidades', args=[analisis.id])
 
-        self.assertEqual(self.client.post(url, {'opinion': 'si', 'nivel': 'Intermedio'}).status_code, 404)
+        self.assertEqual(self.client.get(url).status_code, 404)
         self.client.force_login(otro_usuario)
-        self.assertEqual(self.client.post(url, {'opinion': 'si', 'nivel': 'Experto'}).status_code, 400)
+        self.assertEqual(self.client.post(url, {'opinion_0': 'si', 'nivel_0': 'Experto'}).status_code, 400)
+
+    def test_nivel_invalido_no_guarda_ninguna_habilidad(self):
+        analisis = AnalisisCV.objects.create(
+            postulante=self.postulante,
+            estado=AnalisisCV.Estado.COMPLETADO,
+            respuesta={'result': {'habilidades_analizadas': [
+                {'tecnologia': 'Python', 'nivel_evaluado': 'Principiante'},
+                {'tecnologia': 'Django', 'nivel_evaluado': 'Intermedio'},
+            ]}},
+        )
+
+        response = self.client.post(
+            reverse('ia:editar_habilidades', args=[analisis.id]),
+            {'opinion_0': 'no', 'nivel_0': 'Avanzado', 'opinion_1': 'si', 'nivel_1': 'Experto'},
+        )
+
+        self.assertEqual(response.status_code, 400)
+        analisis.refresh_from_db()
+        self.assertNotIn('nivel_usuario', analisis.respuesta['result']['habilidades_analizadas'][0])

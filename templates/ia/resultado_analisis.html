@@ -52,29 +52,22 @@
                   </div>
                   <p class="mt-3 text-sm leading-relaxed text-[#6B645C]">{{ habilidad.justificacion_evidencia }}</p>
                   <p class="mt-3 text-xs text-[#6B645C]">Nivel sugerido por la IA: {{ habilidad.nivel_evaluado }}</p>
-                  <form method="post" action="{% url 'ia:guardar_opinion_habilidad' analisis.id forloop.counter0 %}" class="mt-4 space-y-3 border-t border-[rgba(110,85,55,0.16)] pt-4">
-                    {% csrf_token %}
-                    <fieldset>
-                      <legend class="text-sm font-medium text-[#26222E]">¿Estás de acuerdo con esta evaluación?</legend>
-                      <div class="mt-2 flex gap-5 text-sm text-[#6B645C]">
-                        <label class="flex items-center gap-2"><input type="radio" name="opinion" value="si" {% if habilidad.acuerdo_usuario == 'si' %}checked{% endif %} required> Sí</label>
-                        <label class="flex items-center gap-2"><input type="radio" name="opinion" value="no" {% if habilidad.acuerdo_usuario == 'no' %}checked{% endif %} required> No</label>
-                      </div>
-                    </fieldset>
-                    <label class="block text-sm font-medium text-[#26222E]" for="nivel-{{ forloop.counter0 }}">Tu nivel</label>
-                    <select id="nivel-{{ forloop.counter0 }}" name="nivel" class="input-ien w-full" required>
-                      {% for nivel in niveles_habilidad %}
-                        <option value="{{ nivel }}" {% if habilidad.nivel_usuario == nivel or not habilidad.nivel_usuario and habilidad.nivel_evaluado == nivel %}selected{% endif %}>{{ nivel }}</option>
-                      {% endfor %}
-                    </select>
-                    <button type="submit" class="btn-ien !py-2 text-sm">Guardar mi evaluación</button>
-                  </form>
                 </article>
               {% empty %}
                 <p class="text-[#6B645C]">No se detectaron habilidades técnicas.</p>
               {% endfor %}
             </div>
           </div>
+
+          {% if analisis.respuesta.result.habilidades_analizadas %}
+            <div class="panel mt-6 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 class="font-semibold text-[#26222E]">¿Revisamos tus habilidades?</h2>
+                <p class="mt-1 text-sm text-[#6B645C]">Podés indicar si estás de acuerdo y ajustar tus niveles.</p>
+              </div>
+              <a href="{% url 'ia:editar_habilidades' analisis.id %}" class="btn-ien shrink-0 text-center">Revisar habilidades</a>
+            </div>
+          {% endif %}
 
         {% elif analisis.estado == 'error' %}
           <div class="mt-8 flex items-start gap-3 rounded-2xl border border-[#d4183d]/30 bg-[#d4183d]/10 p-5 text-[#d4183d]">

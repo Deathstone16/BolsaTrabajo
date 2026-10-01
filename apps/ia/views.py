@@ -4,13 +4,14 @@ import json
 
 import requests
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseBadRequest, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods, require_POST
 
 from usuarios.decorators import postulante_required
 
@@ -117,41 +118,50 @@ def ver_resultado(request, analisis_id):
         pk=analisis_id,
         postulante=request.user.postulante,
     )
-    return render(request, 'ia/resultado_analisis.html', {
-        'analisis': analisis,
-        'niveles_habilidad': NIVELES_HABILIDAD,
-    })
+    return render(request, 'ia/resultado_analisis.html', {'analisis': analisis})
 
 
 @login_required
 @postulante_required
-@require_POST
-def guardar_opinion_habilidad(request, analisis_id, indice):
-    """Guarda la opinión y el nivel declarado por el dueño del análisis."""
+@require_http_methods(['GET', 'POST'])
+def editar_habilidades(request, analisis_id):
+    """Permite revisar y guardar todas las habilidades en una sola página."""
     analisis = get_object_or_404(
         AnalisisCV,
         pk=analisis_id,
         postulante=request.user.postulante,
         estado=AnalisisCV.Estado.COMPLETADO,
     )
-    opinion = request.POST.get('opinion')
-    nivel = request.POST.get('nivel')
-    if opinion not in ('si', 'no') or nivel not in NIVELES_HABILIDAD:
-        return HttpResponseBadRequest('Seleccioná una opinión y un nivel válidos.')
-
     respuesta = analisis.respuesta
     resultado = respuesta.get('result') if isinstance(respuesta, dict) else None
     habilidades = resultado.get('habilidades_analizadas') if isinstance(resultado, dict) else None
-    if not isinstance(habilidades, list) or indice >= len(habilidades):
-        return HttpResponseBadRequest('La habilidad seleccionada no existe.')
-    habilidad = habilidades[indice]
-    if not isinstance(habilidad, dict):
-        return HttpResponseBadRequest('La habilidad seleccionada no es válida.')
+    if not isinstance(habilidades, list) or any(not isinstance(h, dict) for h in habilidades):
+        return HttpResponseBadRequest('El análisis no contiene una lista de habilidades válida.')
 
-    habilidad['acuerdo_usuario'] = opinion
-    habilidad['nivel_usuario'] = nivel
-    analisis.save(update_fields=['respuesta'])
-    return redirect('ia:ver_resultado', analisis_id=analisis.id)
+    if request.method == 'POST':
+        cambios = []
+        for indice, _ in enumerate(habilidades):
+            opinion = request.POST.get(f'opinion_{indice}', '')
+            nivel = request.POST.get(f'nivel_{indice}')
+            if opinion not in ('', 'si', 'no') or nivel not in NIVELES_HABILIDAD:
+                return HttpResponseBadRequest('Seleccioná una opinión y un nivel válidos.')
+            cambios.append((opinion, nivel))
+
+        for habilidad, (opinion, nivel) in zip(habilidades, cambios):
+            if opinion:
+                habilidad['acuerdo_usuario'] = opinion
+            else:
+                habilidad.pop('acuerdo_usuario', None)
+            habilidad['nivel_usuario'] = nivel
+        analisis.save(update_fields=['respuesta'])
+        messages.success(request, 'Tus habilidades se guardaron correctamente.')
+        return redirect('ia:ver_resultado', analisis_id=analisis.id)
+
+    return render(request, 'ia/editar_habilidades.html', {
+        'analisis': analisis,
+        'habilidades': habilidades,
+        'niveles_habilidad': NIVELES_HABILIDAD,
+    })
 
 
 @csrf_exempt
