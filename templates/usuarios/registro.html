@@ -1,4 +1,5 @@
 {% extends 'nueva_ui/base.html' %}
+{% load static %}
 
 {% block title %}Crear cuenta · IEN Empleo{% endblock %}
 
@@ -74,4 +75,8 @@
   </div>
 
 </section>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static_v 'js/cuit-input.js' %}"></script>
 {% endblock %}

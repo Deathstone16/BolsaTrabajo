@@ -59,8 +59,8 @@
 
           <div class="space-y-2">
             <label class="block text-sm font-medium">CUIT</label>
-            <input type="text" name="cuit" value="{{ form.cuit.value|default:'' }}"
-                   placeholder="Ej. 30-12345678-9" maxlength="13"
+            <input type="text" name="cuit" value="{{ form.cuit.value|default:'' }}" data-cuit-input
+                   placeholder="Ej. 30-12345678-9" maxlength="13" inputmode="numeric" pattern="[0-9]{11}|[0-9]{2}-[0-9]{8}-[0-9]"
                    class="input-ien focus:outline-none focus:ring-2 focus:ring-ring" required>
             {% if form.cuit.errors %}<p class="text-sm text-red-500">{{ form.cuit.errors.0 }}</p>{% endif %}
           </div>
@@ -176,4 +176,8 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static_v 'js/cuit-input.js' %}"></script>
 {% endblock %}

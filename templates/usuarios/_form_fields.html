@@ -11,6 +11,7 @@
          name="{{ field.html_name }}"
          class="input-ien text-sm"
          placeholder="{{ field.label }}"
+         {% if field.html_name == 'cuit' %}data-cuit-input inputmode="numeric" pattern="[0-9]{11}|[0-9]{2}-[0-9]{8}-[0-9]" maxlength="13"{% endif %}
          {% if field.value %}value="{{ field.value }}"{% endif %}>
   {% if field.errors %}
     <p class="text-xs text-[#d4183d]">{{ field.errors|join:", " }}</p>

@@ -1,11 +1,31 @@
 """Formularios de autenticación, perfiles y archivos de usuarios."""
 
+import re
+
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, SetPasswordForm as DjangoSetPasswordForm
 from .models import Usuario, Postulante, Oferente
 
 CV_FORMATOS_PERMITIDOS = ['pdf', 'doc', 'docx']
 CV_TAMANO_MAXIMO_MB = 5
+
+
+class CuitField(forms.CharField):
+    """Acepta CUIT/CUIL de 11 dígitos, con o sin guiones."""
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault('max_length', 13)
+        kwargs.setdefault('label', 'CUIT/CUIL')
+        kwargs.setdefault('widget', forms.TextInput(attrs={
+            'inputmode': 'numeric',
+            'autocomplete': 'off',
+        }))
+        super().__init__(**kwargs)
+
+    def validate(self, value):
+        super().validate(value)
+        if value and not re.fullmatch(r'(?:[0-9]{11}|[0-9]{2}-[0-9]{8}-[0-9])', value):
+            raise forms.ValidationError('Ingresá 11 números, con o sin guiones (ej. 30-12345678-9).')
 
 
 
@@ -31,7 +51,7 @@ class RegistroPostulanteForm(RegistroBaseForm):
 class RegistroOferenteForm(RegistroBaseForm):
     """Registra una cuenta empresarial con nombre comercial y CUIT."""
     nombre_empresa = forms.CharField(max_length=200, label='Nombre de la empresa')
-    cuit = forms.CharField(max_length=13, label='CUIT')
+    cuit = CuitField()
 
 
 
@@ -45,6 +65,8 @@ class LoginForm(forms.Form):
     
 class OferenteForm(forms.ModelForm):
     """Edita la información pública y de contacto de una empresa."""
+    cuit = CuitField()
+
     class Meta:
         model = Oferente
         fields = [

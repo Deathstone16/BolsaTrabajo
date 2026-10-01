@@ -127,3 +127,40 @@ class AnalisisCVViewsTests(TestCase):
         analisis.refresh_from_db()
         self.assertEqual(analisis.estado, AnalisisCV.Estado.ERROR)
         self.assertEqual(analisis.error, 'No se pudo procesar el CV.')
+
+    def test_postulante_puede_corregir_nivel_y_opinion_sin_perder_sugerencia_ia(self):
+        analisis = AnalisisCV.objects.create(
+            postulante=self.postulante,
+            estado=AnalisisCV.Estado.COMPLETADO,
+            respuesta={'result': {'habilidades_analizadas': [
+                {'tecnologia': 'Python', 'nivel_evaluado': 'Principiante'},
+            ]}},
+        )
+
+        response = self.client.post(
+            reverse('ia:guardar_opinion_habilidad', args=[analisis.id, 0]),
+            {'opinion': 'no', 'nivel': 'Avanzado'},
+        )
+
+        self.assertRedirects(response, reverse('ia:ver_resultado', args=[analisis.id]))
+        analisis.refresh_from_db()
+        habilidad = analisis.respuesta['result']['habilidades_analizadas'][0]
+        self.assertEqual(habilidad['nivel_evaluado'], 'Principiante')
+        self.assertEqual(habilidad['nivel_usuario'], 'Avanzado')
+        self.assertEqual(habilidad['acuerdo_usuario'], 'no')
+
+    def test_no_se_puede_editar_analisis_ajeno_ni_nivel_invalido(self):
+        otro_usuario = Usuario.objects.create_user(email='otro@example.com', password='clave-segura')
+        otro_postulante = Postulante.objects.create(usuario=otro_usuario)
+        analisis = AnalisisCV.objects.create(
+            postulante=otro_postulante,
+            estado=AnalisisCV.Estado.COMPLETADO,
+            respuesta={'result': {'habilidades_analizadas': [
+                {'tecnologia': 'Python', 'nivel_evaluado': 'Principiante'},
+            ]}},
+        )
+        url = reverse('ia:guardar_opinion_habilidad', args=[analisis.id, 0])
+
+        self.assertEqual(self.client.post(url, {'opinion': 'si', 'nivel': 'Intermedio'}).status_code, 404)
+        self.client.force_login(otro_usuario)
+        self.assertEqual(self.client.post(url, {'opinion': 'si', 'nivel': 'Experto'}).status_code, 400)

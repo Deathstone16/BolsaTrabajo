@@ -51,7 +51,7 @@ def listar_empresas_contexto():
     
     return {
         'empresas': empresas,
-        'total': empresas.filter(estado_validacion = "PENDIENTE").count(),
+        'total': empresas.filter(estado_validacion=Oferente.EstadoValidacion.PENDIENTE).count(),
     }
 
 
@@ -110,5 +110,4 @@ def rechazar_oferta(pk, motivo=None):
 def finalizar_oferta(pk):
     """Delega en el modelo la finalización de una oferta activa."""
     obtener_oferta(pk).finalizar()
-
 

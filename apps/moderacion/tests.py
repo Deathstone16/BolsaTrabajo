@@ -8,6 +8,8 @@ from categorias.models import Categoria
 from ofertas.models import Oferta
 from usuarios.models import Oferente, Usuario
 
+from .services import listar_empresas_contexto
+
 
 class ModeracionOfertasTests(TestCase):
     def setUp(self):
@@ -77,3 +79,31 @@ class ModeracionOfertasTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.oferta.refresh_from_db()
         self.assertEqual(self.oferta.estado, 'finalizada')
+
+    def test_total_empresas_pendientes_usa_estado_real(self):
+        usuario = Usuario.objects.create_user(email='pendiente@example.com', password='clave-segura')
+        Oferente.objects.create(
+            usuario=usuario,
+            nombre_empresa='Empresa pendiente',
+            cuit='30-12345678-9',
+        )
+
+        contexto = listar_empresas_contexto()
+
+        self.assertEqual(contexto['total'], 1)
+
+    def test_empresa_aprobada_ve_estado_validado_en_su_panel(self):
+        empresa = Oferente.objects.get(nombre_empresa='Empresa de prueba')
+        self.client.force_login(empresa.usuario)
+
+        response = self.client.get(reverse('dashboard_empresa'))
+
+        self.assertContains(response, 'Empresa Validada')
+
+    def test_empresa_aprobada_no_ve_pantalla_pendiente(self):
+        empresa = Oferente.objects.get(nombre_empresa='Empresa de prueba')
+        self.client.force_login(empresa.usuario)
+
+        response = self.client.get(reverse('validacion_pendiente'))
+
+        self.assertRedirects(response, reverse('dashboard_empresa'))

@@ -48,9 +48,27 @@
                 <article class="rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#F8F3F0] p-5">
                   <div class="flex items-start justify-between gap-3">
                     <h3 class="font-semibold text-[#26222E]">{{ habilidad.tecnologia }}</h3>
-                    <span class="chip shrink-0">{{ habilidad.nivel_evaluado }}</span>
+                    <span class="chip shrink-0">{{ habilidad.nivel_usuario|default:habilidad.nivel_evaluado }}</span>
                   </div>
                   <p class="mt-3 text-sm leading-relaxed text-[#6B645C]">{{ habilidad.justificacion_evidencia }}</p>
+                  <p class="mt-3 text-xs text-[#6B645C]">Nivel sugerido por la IA: {{ habilidad.nivel_evaluado }}</p>
+                  <form method="post" action="{% url 'ia:guardar_opinion_habilidad' analisis.id forloop.counter0 %}" class="mt-4 space-y-3 border-t border-[rgba(110,85,55,0.16)] pt-4">
+                    {% csrf_token %}
+                    <fieldset>
+                      <legend class="text-sm font-medium text-[#26222E]">¿Estás de acuerdo con esta evaluación?</legend>
+                      <div class="mt-2 flex gap-5 text-sm text-[#6B645C]">
+                        <label class="flex items-center gap-2"><input type="radio" name="opinion" value="si" {% if habilidad.acuerdo_usuario == 'si' %}checked{% endif %} required> Sí</label>
+                        <label class="flex items-center gap-2"><input type="radio" name="opinion" value="no" {% if habilidad.acuerdo_usuario == 'no' %}checked{% endif %} required> No</label>
+                      </div>
+                    </fieldset>
+                    <label class="block text-sm font-medium text-[#26222E]" for="nivel-{{ forloop.counter0 }}">Tu nivel</label>
+                    <select id="nivel-{{ forloop.counter0 }}" name="nivel" class="input-ien w-full" required>
+                      {% for nivel in niveles_habilidad %}
+                        <option value="{{ nivel }}" {% if habilidad.nivel_usuario == nivel or not habilidad.nivel_usuario and habilidad.nivel_evaluado == nivel %}selected{% endif %}>{{ nivel }}</option>
+                      {% endfor %}
+                    </select>
+                    <button type="submit" class="btn-ien !py-2 text-sm">Guardar mi evaluación</button>
+                  </form>
                 </article>
               {% empty %}
                 <p class="text-[#6B645C]">No se detectaron habilidades técnicas.</p>
