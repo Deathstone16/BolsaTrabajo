@@ -5,6 +5,7 @@ import re
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, SetPasswordForm as DjangoSetPasswordForm
 from .models import Usuario, Postulante, Oferente
+from .validators import normalizar_cuit, validar_cuit
 
 CV_FORMATOS_PERMITIDOS = ['pdf', 'doc', 'docx']
 CV_TAMANO_MAXIMO_MB = 5
@@ -53,6 +54,11 @@ class RegistroOferenteForm(RegistroBaseForm):
     nombre_empresa = forms.CharField(max_length=200, label='Nombre de la empresa')
     cuit = CuitField()
 
+    def clean_cuit(self):
+        cuit = self.cleaned_data['cuit']
+        validar_cuit(cuit)
+        return normalizar_cuit(cuit)
+
 
 
 class LoginForm(forms.Form):
@@ -74,6 +80,11 @@ class OferenteForm(forms.ModelForm):
             'tamano_empresa', 'ubicacion', 'anio_fundacion',
             'sitio_web', 'telefono', 'logo', 'banner'
         ]
+
+    def clean_cuit(self):
+        cuit = self.cleaned_data['cuit']
+        validar_cuit(cuit)
+        return normalizar_cuit(cuit)
 
 class DatosPersonalesForm(forms.ModelForm):
     """Actualiza datos del usuario y del perfil de postulante."""

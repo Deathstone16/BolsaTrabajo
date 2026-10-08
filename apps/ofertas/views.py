@@ -3,13 +3,16 @@ from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.urls import reverse
+from django.contrib import messages
 from .forms import OfertaForm
 from .models import Oferta
+from ia.matching import guardar_comparacion, ultimo_analisis_completado
+from ia.models import ComparacionOfertaCV
 from .services import crear_oferta_laboral, obtener_ofertas_por_empresa, obtener_oferta_por_id, eliminar_oferta_por_id, obtener_ofertas_activas, es_oferta_favorita, obtener_ids_ofertas_favoritas, obtener_ofertas_favoritas, alternar_oferta_favorita
 from usuarios.forms import OferenteForm
 from usuarios.services import obtener_url_contacto
 from usuarios import services as usuarios_service
-from usuarios.decorators import oferente_required, oferente_validado_required,postulante_required
+from usuarios.decorators import oferente_required, oferente_validado_required, postulante_required
 
 
 @oferente_required
@@ -136,12 +139,48 @@ def detalle_oferta_postulante(request, pk):
     oferta = get_object_or_404(Oferta, pk=pk, estado='activa')
     habilidades = [h.strip() for h in oferta.habilidades_requeridas.split(',') if h.strip()]
     favorita = es_oferta_favorita(request.user.postulante, oferta.id) if hasattr(request.user, 'postulante') else False
+    analisis_cv = None
+    comparacion = None
+    if request.user.is_authenticated and hasattr(request.user, 'postulante'):
+        analisis_cv = ultimo_analisis_completado(request.user.postulante)
+        if analisis_cv:
+            comparacion = (
+                ComparacionOfertaCV.objects
+                .filter(
+                    postulante=request.user.postulante,
+                    oferta=oferta,
+                    analisis=analisis_cv,
+                )
+                .first()
+            )
+            if (
+                comparacion
+                and comparacion.resultado.get('oferta_habilidades_requeridas', '')
+                != (oferta.habilidades_requeridas or '')
+            ):
+                comparacion = None
     return render(request, 'nueva_ui/detalle_oferta.html', {
         'vista_activa': 'buscar',
         'oferta': oferta,
         'habilidades': habilidades,
         'favorita': favorita,
+        'analisis_cv': analisis_cv,
+        'comparacion': comparacion,
     })
+
+
+@postulante_required
+@require_POST
+def comparar_oferta_cv(request, pk):
+    """Calcula el match sólo cuando el postulante lo solicita."""
+    oferta = get_object_or_404(Oferta, pk=pk, estado='activa')
+    analisis = ultimo_analisis_completado(request.user.postulante)
+    if not analisis:
+        messages.info(request, 'Primero analizá tu CV para poder compararlo con una oferta.')
+        return redirect('mi_perfil')
+
+    guardar_comparacion(request.user.postulante, oferta, analisis)
+    return redirect('detalle_oferta', pk=oferta.pk)
 
 
 def buscar_empleo(request):
