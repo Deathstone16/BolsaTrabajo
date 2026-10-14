@@ -33,3 +33,39 @@ class AnalisisCV(models.Model):
 
     def __str__(self):
         return f'Análisis {self.pk} - {self.postulante}'
+
+
+class ComparacionOfertaCV(models.Model):
+    """Match solicitado por un postulante usando un análisis de CV guardado."""
+
+    postulante = models.ForeignKey(
+        Postulante,
+        on_delete=models.CASCADE,
+        related_name='comparaciones_ofertas',
+    )
+    oferta = models.ForeignKey(
+        'ofertas.Oferta',
+        on_delete=models.CASCADE,
+        related_name='comparaciones_cv',
+    )
+    analisis = models.ForeignKey(
+        AnalisisCV,
+        on_delete=models.CASCADE,
+        related_name='comparaciones_ofertas',
+    )
+    porcentaje = models.PositiveSmallIntegerField(default=0)
+    resultado = models.JSONField(default=dict)
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-actualizado_en']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['postulante', 'oferta', 'analisis'],
+                name='ia_comparacion_unica_por_oferta_y_analisis',
+            ),
+        ]
+
+    def __str__(self):
+        return f'{self.postulante} - {self.oferta} ({self.porcentaje}%)'

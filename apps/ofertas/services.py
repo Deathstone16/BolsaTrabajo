@@ -5,7 +5,7 @@ CRUD de ofertas, búsqueda con filtros, cambio de estados
 y funciones de utilidad para el dominio de ofertas.
 """
 
-from .models import Oferta
+from .models import Oferta, OfertaFavorita
 
 from django.shortcuts import get_object_or_404
 
@@ -126,3 +126,69 @@ def puede_eliminar_habilidad(habilidad_id):
     if Oferta.objects.filter(habilidades_requeridas__icontains=habilidad.nombre).exists():
         return False
     return True
+
+
+def es_oferta_favorita(postulante, id_oferta):
+    """Indica si una oferta está en los favoritos del postulante.
+
+    Args:
+        postulante: Instancia del modelo Postulante.
+        id_oferta (int): ID de la oferta.
+
+    Returns:
+        bool: True si el postulante ya la guardó en favoritos.
+    """
+    return OfertaFavorita.objects.filter(
+        postulante=postulante,
+        oferta_id=id_oferta,
+    ).exists()
+
+
+def obtener_ids_ofertas_favoritas(postulante):
+    """Devuelve los IDs de las ofertas guardadas por un postulante.
+
+    Args:
+        postulante: Instancia del modelo Postulante.
+
+    Returns:
+        list[int]: IDs de las ofertas favoritas, sin orden específico.
+    """
+    return list(
+        OfertaFavorita.objects
+        .filter(postulante=postulante)
+        .values_list('oferta_id', flat=True)
+    )
+
+
+def obtener_ofertas_favoritas(postulante):
+    return Oferta.objects.filter(
+        favorita_por__postulante=postulante,
+    ).select_related(
+        'empresa__oferente',
+        'categoria',
+    ).order_by(
+        '-favorita_por__creado_en'
+    )
+
+
+def alternar_oferta_favorita(postulante, id_oferta):
+    """Alterna el estado de favorito de una oferta para un postulante.
+
+    Args:
+        postulante: Instancia del modelo Postulante.
+        id_oferta (int): ID de la oferta.
+
+    Returns:
+        bool: True si la oferta quedó en favoritos, False si se quitó.
+        None: Si la oferta no existe.
+    """
+    if not Oferta.objects.filter(pk=id_oferta).exists():
+        return None
+    favorita, creada = OfertaFavorita.objects.get_or_create(
+        postulante=postulante,
+        oferta_id=id_oferta,
+    )
+    if creada:
+        return True
+    favorita.delete()
+    return False

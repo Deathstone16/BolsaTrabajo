@@ -47,8 +47,12 @@
           </div>
         </div>
 
-        <button type="button" data-save="{{ oferta.pk }}" class="btn-ghost !py-2.5 text-sm">
-          <span data-icon="bookmark" class="h-4 w-4"></span> Guardar
+        <button type="button" data-save="{{ oferta.pk }}"
+                data-url="{% url 'alternar_favorita' oferta.pk %}"
+                data-save-on="{{ favorita|yesno:'true,false' }}"
+                class="btn-ghost !py-2.5 text-sm">
+          <span data-icon="bookmark" class="h-4 w-4"></span>
+          <span data-save-label>Guardar</span>
         </button>
       </div>
 
@@ -94,21 +98,58 @@
       </div>
 
       <div class="space-y-6">
-        {# Match inteligente: placeholder, igual que en templates/Ofertas/detalle_oferta.html #}
-        <div class="panel select-none p-6 text-center opacity-50">
+        <div class="panel p-6 text-center">
           <h3 class="font-mono text-xs uppercase tracking-widest text-[#6B645C]">Match inteligente</h3>
-          <div class="relative mx-auto mt-6 h-36 w-36">
-            <svg class="h-36 w-36 -rotate-90" viewBox="0 0 120 120" aria-hidden="true">
-              <circle cx="60" cy="60" r="54" stroke="#F0E9E1" stroke-width="12" fill="none"></circle>
-              <circle cx="60" cy="60" r="54" stroke="#512DA8" stroke-width="12" fill="none"
-                      stroke-dasharray="339.29" stroke-dashoffset="339.29" stroke-linecap="round"></circle>
-            </svg>
-            <div class="absolute inset-0 flex flex-col items-center justify-center">
-              <span class="text-3xl font-bold text-[#26222E]">0%</span>
+          {% if comparacion %}
+          <div class="relative mx-auto mt-6 grid h-36 w-36 place-items-center rounded-full" style="background: conic-gradient(#512DA8 {{ comparacion.porcentaje }}%, #F0E9E1 0);">
+            <div class="absolute inset-3 rounded-full bg-[#FEFCF9]"></div>
+            <div class="relative flex flex-col items-center justify-center">
+              <span class="text-3xl font-bold text-[#26222E]">{{ comparacion.porcentaje }}%</span>
               <span class="font-mono text-[10px] uppercase tracking-widest text-[#6B645C]">match</span>
             </div>
           </div>
-          <span class="chip mt-5 inline-flex">Próximamente</span>
+          <p class="mt-5 text-sm text-[#6B645C]">
+            {{ comparacion.resultado.coincidencias|length }} de {{ comparacion.resultado.total_requisitos }} habilidades coinciden.
+          </p>
+          {% if comparacion.resultado.coincidencias %}
+            <div class="mt-4 text-left">
+              <p class="text-xs font-semibold uppercase tracking-wider text-[#27AE60]">Coincidencias</p>
+              <ul class="mt-2 space-y-1 text-sm text-[#26222E]">
+                {% for item in comparacion.resultado.coincidencias %}<li>✓ {{ item.requisito }}</li>{% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+          {% if comparacion.resultado.habilidades_faltantes %}
+            <div class="mt-4 text-left">
+              <p class="text-xs font-semibold uppercase tracking-wider text-[#d97706]">Por desarrollar</p>
+              <ul class="mt-2 space-y-1 text-sm text-[#6B645C]">
+                {% for habilidad in comparacion.resultado.habilidades_faltantes %}<li>• {{ habilidad }}</li>{% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+          <form method="post" action="{% url 'comparar_oferta_cv' oferta.pk %}" class="mt-5">
+            {% csrf_token %}
+            <button type="submit" class="btn-ghost w-full justify-center text-sm">Volver a comparar</button>
+          </form>
+          {% elif user.is_authenticated and user.postulante %}
+            {% if analisis_cv %}
+              <p class="mt-4 text-sm leading-relaxed text-[#6B645C]">Usaremos las habilidades que la IA ya extrajo de tu último CV.</p>
+              <form method="post" action="{% url 'comparar_oferta_cv' oferta.pk %}" class="mt-5">
+                {% csrf_token %}
+                <button type="submit" class="btn-ien w-full justify-center text-sm">
+                  <span data-icon="sparkles" class="h-4 w-4"></span> Comparar con mi CV
+                </button>
+              </form>
+            {% else %}
+              <p class="mt-4 text-sm leading-relaxed text-[#6B645C]">Primero necesitás analizar tu CV para calcular el match.</p>
+              <a href="{% url 'mi_perfil' %}" class="btn-ien mt-5 w-full justify-center text-sm">Analizar mi CV</a>
+            {% endif %}
+          {% elif not user.is_authenticated %}
+            <p class="mt-4 text-sm leading-relaxed text-[#6B645C]">Iniciá sesión como postulante para comparar esta oferta con tu CV.</p>
+            <a href="{% url 'login' %}" class="btn-ien mt-5 w-full justify-center text-sm">Iniciar sesión</a>
+          {% else %}
+            <p class="mt-4 text-sm leading-relaxed text-[#6B645C]">La comparación está disponible para postulantes.</p>
+          {% endif %}
         </div>
 
         {# TODO: todavia no existe el modelo de postulaciones. #}

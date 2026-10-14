@@ -1,21 +1,26 @@
 """Vistas MVT para publicar, administrar y consultar ofertas laborales."""
-
+from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.urls import reverse
+from django.contrib import messages
 from .forms import OfertaForm
 from .models import Oferta
-from .services import crear_oferta_laboral, obtener_ofertas_por_empresa, obtener_oferta_por_id, eliminar_oferta_por_id, obtener_ofertas_activas
+from ia.matching import guardar_comparacion, ultimo_analisis_completado
+from ia.models import ComparacionOfertaCV
+from .services import crear_oferta_laboral, obtener_ofertas_por_empresa, obtener_oferta_por_id, eliminar_oferta_por_id, obtener_ofertas_activas, es_oferta_favorita, obtener_ids_ofertas_favoritas, obtener_ofertas_favoritas, alternar_oferta_favorita
 from usuarios.forms import OferenteForm
 from usuarios.services import obtener_url_contacto
 from usuarios import services as usuarios_service
-from usuarios.decorators import oferente_required, oferente_validado_required
+from usuarios.decorators import oferente_required, oferente_validado_required, postulante_required
 
 
 @oferente_required
 def validacion_pendiente(request):
     """Muestra a la empresa el estado pendiente de validación de su perfil."""
     oferente = request.user.oferente
+    if oferente.estado_validacion == oferente.EstadoValidacion.APROBADO:
+        return redirect('dashboard_empresa')
     email_contacto_url = obtener_url_contacto(request.user.email)
     return render(request, 'Ofertas/validacion_pendiente.html', {
         'email_contacto_url': email_contacto_url,
@@ -133,15 +138,54 @@ def detalle_oferta_postulante(request, pk):
     """Muestra el detalle público de una oferta activa."""
     oferta = get_object_or_404(Oferta, pk=pk, estado='activa')
     habilidades = [h.strip() for h in oferta.habilidades_requeridas.split(',') if h.strip()]
+    favorita = es_oferta_favorita(request.user.postulante, oferta.id) if hasattr(request.user, 'postulante') else False
+    analisis_cv = None
+    comparacion = None
+    if request.user.is_authenticated and hasattr(request.user, 'postulante'):
+        analisis_cv = ultimo_analisis_completado(request.user.postulante)
+        if analisis_cv:
+            comparacion = (
+                ComparacionOfertaCV.objects
+                .filter(
+                    postulante=request.user.postulante,
+                    oferta=oferta,
+                    analisis=analisis_cv,
+                )
+                .first()
+            )
+            if (
+                comparacion
+                and comparacion.resultado.get('oferta_habilidades_requeridas', '')
+                != (oferta.habilidades_requeridas or '')
+            ):
+                comparacion = None
     return render(request, 'nueva_ui/detalle_oferta.html', {
         'vista_activa': 'buscar',
         'oferta': oferta,
         'habilidades': habilidades,
+        'favorita': favorita,
+        'analisis_cv': analisis_cv,
+        'comparacion': comparacion,
     })
+
+
+@postulante_required
+@require_POST
+def comparar_oferta_cv(request, pk):
+    """Calcula el match sólo cuando el postulante lo solicita."""
+    oferta = get_object_or_404(Oferta, pk=pk, estado='activa')
+    analisis = ultimo_analisis_completado(request.user.postulante)
+    if not analisis:
+        messages.info(request, 'Primero analizá tu CV para poder compararlo con una oferta.')
+        return redirect('mi_perfil')
+
+    guardar_comparacion(request.user.postulante, oferta, analisis)
+    return redirect('detalle_oferta', pk=oferta.pk)
 
 
 def buscar_empleo(request):
     """Lista ofertas activas aplicando filtros recibidos por query string."""
+    ids_favoritas = obtener_ids_ofertas_favoritas(request.user.postulante) if hasattr(request.user, 'postulante') else []
     busqueda = request.GET.get('q', '')
     modalidad = request.GET.get('modalidad', '')
     experiencia = request.GET.get('experiencia', '')
@@ -156,5 +200,26 @@ def buscar_empleo(request):
         'experiencia': experiencia,
         'modalidad_choices': Oferta.MODALIDAD_CHOICES,
         'experiencia_choices': Oferta.EXPERIENCIA_CHOICES,
+        'total': ofertas.count(),
+        'ids_favoritas': ids_favoritas,
+    })
+
+@require_POST
+@postulante_required
+def alternar_favorita(request, pk):
+    """Alterna el estado de favorito de una oferta (POST)."""
+    resultado = alternar_oferta_favorita(request.user.postulante, pk)
+    if resultado is None:
+        return JsonResponse({'success': False, 'mensaje': 'La oferta no existe.'}, status=404)
+    return JsonResponse({'success': True, 'favorita': resultado})
+
+
+@postulante_required
+def favoritos(request):
+    """Lista las ofertas guardadas por el postulante."""
+    ofertas = obtener_ofertas_favoritas(request.user.postulante)
+    return render(request, 'nueva_ui/favoritos.html', {
+        'vista_activa': 'favoritos',
+        'ofertas': ofertas,
         'total': ofertas.count(),
     })

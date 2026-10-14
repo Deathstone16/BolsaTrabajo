@@ -14,7 +14,7 @@
     "map-pin": '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"></path><circle cx="12" cy="10" r="3"></circle>',
     "clock": '<circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path>',
     "bookmark": '<path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1Z"></path>',
-    "bookmark-check": '<path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1Z"></path><path d="M9 11l2 2 4-4"></path>',
+    "bookmark-full": '<path fill="currentColor" stroke="none" d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1Z"></path>',
     "check-circle": '<circle cx="12" cy="12" r="9"></circle><path d="M8.5 12.5l2.5 2.5 5-5"></path>',
     "x-circle": '<circle cx="12" cy="12" r="9"></circle><path d="M9 9l6 6"></path><path d="M15 9l-6 6"></path>',
     "alert": '<circle cx="12" cy="12" r="9"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path>',
@@ -72,6 +72,7 @@
       svg.setAttribute("viewBox", "0 0 24 24");
       svg.setAttribute("aria-hidden", "true");
       svg.className.baseVal = "ic " + (el.getAttribute("class") || "");
+      svg.setAttribute("data-icon", el.getAttribute("data-icon"));
       svg.innerHTML = inner;
       el.replaceWith(svg);
     });
@@ -119,41 +120,80 @@
     });
   }
 
-  /*
-   * Guardados: por ahora se persisten en localStorage, igual que en el mockup.
-   * Cuando exista el modelo de ofertas guardadas hay que reemplazar esto por
-   * un POST al backend.
+    /*
+   * Favoritos: se persisten en el backend via POST a data-url. El estado
+   * inicial viene de data-save-on (servidor); al alternar se re-renderiza.
    */
-  function initSaved() {
-    var saved;
-    try { saved = JSON.parse(localStorage.getItem("ien-saved") || "[]"); } catch (e) { saved = []; }
-
-    function isSaved(id) { return saved.indexOf(id) !== -1; }
-
-    function renderSavedButtons() {
-      document.querySelectorAll("[data-save]").forEach(function (btn) {
-        var id = parseInt(btn.getAttribute("data-save"), 10);
-        var on = isSaved(id);
-        btn.classList.toggle("bg-[#512DA8]", on);
-        btn.classList.toggle("text-white", on);
-        btn.classList.toggle("border-[#512DA8]", on);
-        btn.title = on ? "Quitar de guardados" : "Guardar oferta";
-        var ic = btn.querySelector("[data-icon]");
-        if (ic) { ic.setAttribute("data-icon", on ? "bookmark-check" : "bookmark"); injectIcons(btn); }
-      });
+  function initFavoritos() {
+    var csrf = "";
+    var cookies = document.cookie.split("; ");
+    for (var i = 0; i < cookies.length; i++) {
+      if (cookies[i].indexOf("csrftoken=") === 0) { csrf = cookies[i].split("=")[1]; break; }
     }
+
+    function marcar(btn) {
+            var on = btn.getAttribute("data-save-on") === "true";
+      if (on) {
+        btn.style.backgroundColor = "#512DA8";
+        btn.style.borderColor = "#512DA8";
+        btn.style.color = "#ffffff";
+      } else {
+        btn.style.backgroundColor = "";
+        btn.style.borderColor = "";
+        btn.style.color = "";
+      }
+      btn.title = on ? "Quitar de favoritos" : "Guardar oferta";
+      var etiqueta = btn.querySelector("[data-save-label]");
+      if (etiqueta) etiqueta.textContent = on ? "Guardado" : "Guardar";
+      var ic = btn.querySelector("[data-icon]");
+      if (ic) { ic.setAttribute("data-icon", on ? "bookmark-full" : "bookmark"); injectIcons(btn); }
+    }
+    function irAlogin() {
+      window.location.href = "/usuarios/login/?next=" + encodeURIComponent(window.location.pathname);
+    }
+
+    document.querySelectorAll("[data-save]").forEach(marcar);
 
     document.addEventListener("click", function (e) {
       var btn = e.target.closest("[data-save]");
       if (!btn) return;
-      var id = parseInt(btn.getAttribute("data-save"), 10);
-      if (isSaved(id)) saved = saved.filter(function (x) { return x !== id; });
-      else saved.push(id);
-      try { localStorage.setItem("ien-saved", JSON.stringify(saved)); } catch (err) {}
-      renderSavedButtons();
-    });
+      e.preventDefault();
 
-    renderSavedButtons();
+      fetch(btn.getAttribute("data-url"), {
+        method: "POST",
+        headers: { "X-CSRFToken": csrf, "X-Requested-With": "XMLHttpRequest" },
+        credentials: "same-origin"
+      }).then(function (r) {
+        if (r.redirected) { irAlogin(); return null; }
+        return r.json();
+      }).then(function (datos) {
+        if (!datos) return;
+        if (!datos.success) { aviso("error", datos.mensaje || "No se pudo guardar."); return; }
+
+        btn.setAttribute("data-save-on", datos.favorita ? "true" : "false");
+        marcar(btn);
+
+        var lista = btn.closest("[data-save-removes]");
+        if (lista && !datos.favorita) {
+          var tarjeta = btn.closest("[data-save-card]");
+          if (tarjeta) {
+            tarjeta.style.opacity = "0";
+            tarjeta.style.transition = "opacity .3s";
+            setTimeout(function () {
+              tarjeta.remove();
+              var vacio = document.getElementById("favoritos-vacio");
+              if (vacio && !lista.querySelector("[data-save-card]")) vacio.classList.remove("hidden");
+            }, 300);
+          }
+        } else if (datos.favorita) {
+          aviso("exito", "Oferta guardada en favoritos.");
+        } else {
+          aviso("info", "Oferta quitada de favoritos.");
+        }
+      }).catch(function () {
+        aviso("error", "Error de conexión al guardar.");
+      });
+    });
   }
 
   /* ------------------------------------------------------------------------
@@ -321,7 +361,7 @@
     initReveal(document);
     startCounters(document);
     initBurger();
-    initSaved();
+    initFavoritos();
     initMensajesDjango();
     initAvisoPendiente();
   }

@@ -1,13 +1,18 @@
 from unittest.mock import Mock, patch
+from datetime import timedelta
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError, transaction
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
+from categorias.models import Categoria
+from ofertas.models import Oferta
 from usuarios.models import Postulante, Usuario
 
-from .models import AnalisisCV
+from .matching import comparar_oferta_con_analisis
+from .models import AnalisisCV, ComparacionOfertaCV
 
 
 @override_settings(
@@ -127,3 +132,175 @@ class AnalisisCVViewsTests(TestCase):
         analisis.refresh_from_db()
         self.assertEqual(analisis.estado, AnalisisCV.Estado.ERROR)
         self.assertEqual(analisis.error, 'No se pudo procesar el CV.')
+
+    def test_postulante_guarda_todas_las_habilidades_sin_perder_sugerencia_ia(self):
+        analisis = AnalisisCV.objects.create(
+            postulante=self.postulante,
+            estado=AnalisisCV.Estado.COMPLETADO,
+            respuesta={'result': {'habilidades_analizadas': [
+                {'tecnologia': 'Python', 'nivel_evaluado': 'Principiante'},
+                {'tecnologia': 'Django', 'nivel_evaluado': 'Intermedio'},
+            ]}},
+        )
+        resultado_url = reverse('ia:ver_resultado', args=[analisis.id])
+        editar_url = reverse('ia:editar_habilidades', args=[analisis.id])
+
+        self.assertContains(self.client.get(resultado_url), editar_url)
+        self.assertNotContains(self.client.get(resultado_url), 'name="nivel_0"')
+        self.assertContains(self.client.get(editar_url), 'name="nivel_0"')
+        response = self.client.post(
+            editar_url,
+            {'opinion_0': 'no', 'nivel_0': 'Avanzado', 'opinion_1': 'si', 'nivel_1': 'Intermedio'},
+        )
+
+        self.assertRedirects(response, resultado_url)
+        analisis.refresh_from_db()
+        primera, segunda = analisis.respuesta['result']['habilidades_analizadas']
+        self.assertEqual(primera['nivel_evaluado'], 'Principiante')
+        self.assertEqual(primera['nivel_usuario'], 'Avanzado')
+        self.assertEqual(primera['acuerdo_usuario'], 'no')
+        self.assertEqual(segunda['nivel_usuario'], 'Intermedio')
+        self.assertEqual(segunda['acuerdo_usuario'], 'si')
+
+    def test_no_se_puede_editar_analisis_ajeno_ni_nivel_invalido(self):
+        otro_usuario = Usuario.objects.create_user(email='otro@example.com', password='clave-segura')
+        otro_postulante = Postulante.objects.create(usuario=otro_usuario)
+        analisis = AnalisisCV.objects.create(
+            postulante=otro_postulante,
+            estado=AnalisisCV.Estado.COMPLETADO,
+            respuesta={'result': {'habilidades_analizadas': [
+                {'tecnologia': 'Python', 'nivel_evaluado': 'Principiante'},
+            ]}},
+        )
+        url = reverse('ia:editar_habilidades', args=[analisis.id])
+
+        self.assertEqual(self.client.get(url).status_code, 404)
+        self.client.force_login(otro_usuario)
+        self.assertEqual(self.client.post(url, {'opinion_0': 'si', 'nivel_0': 'Experto'}).status_code, 400)
+
+    def test_nivel_invalido_no_guarda_ninguna_habilidad(self):
+        analisis = AnalisisCV.objects.create(
+            postulante=self.postulante,
+            estado=AnalisisCV.Estado.COMPLETADO,
+            respuesta={'result': {'habilidades_analizadas': [
+                {'tecnologia': 'Python', 'nivel_evaluado': 'Principiante'},
+                {'tecnologia': 'Django', 'nivel_evaluado': 'Intermedio'},
+            ]}},
+        )
+
+        response = self.client.post(
+            reverse('ia:editar_habilidades', args=[analisis.id]),
+            {'opinion_0': 'no', 'nivel_0': 'Avanzado', 'opinion_1': 'si', 'nivel_1': 'Experto'},
+        )
+
+        self.assertEqual(response.status_code, 400)
+        analisis.refresh_from_db()
+        self.assertNotIn('nivel_usuario', analisis.respuesta['result']['habilidades_analizadas'][0])
+
+class ComparacionOfertaCVTests(TestCase):
+    def setUp(self):
+        self.usuario = Usuario.objects.create_user(
+            email='match@example.com',
+            password='clave-segura',
+        )
+        self.postulante = Postulante.objects.create(usuario=self.usuario)
+        self.empresa = Usuario.objects.create_user(
+            email='empresa-match@example.com',
+            password='clave-segura',
+        )
+        self.categoria = Categoria.objects.create(nombre='Tecnología')
+        self.oferta = Oferta.objects.create(
+            empresa=self.empresa,
+            categoria=self.categoria,
+            titulo='Desarrollador backend',
+            nombre_puesto='Backend Developer',
+            ubicacion='Resistencia',
+            descripcion='Desarrollo de aplicaciones.',
+            habilidades_duras='Python, Django, SQL',
+            habilidades_blandas='Comunicación',
+            habilidades_requeridas='Python, Django, SQL, Comunicación',
+            nivel_educativo='universitario',
+            estado='activa',
+            fecha_cierre=timezone.now() + timedelta(days=10),
+        )
+        self.analisis = AnalisisCV.objects.create(
+            postulante=self.postulante,
+            estado=AnalisisCV.Estado.COMPLETADO,
+            respuesta={
+                'status': 'completed',
+                'result': {
+                    'habilidades_analizadas': [
+                        {'tecnologia': 'Python', 'nivel_evaluado': 'Intermedio'},
+                        {'tecnologia': 'Django REST Framework', 'nivel_evaluado': 'Principiante'},
+                    ],
+                },
+            },
+        )
+
+    def test_calcula_porcentaje_con_datos_guardados_del_cv(self):
+        resultado = comparar_oferta_con_analisis(self.oferta, self.analisis)
+
+        self.assertEqual(resultado['porcentaje'], 50)
+        self.assertEqual(
+            [item['requisito'] for item in resultado['coincidencias']],
+            ['Python', 'Django'],
+        )
+        self.assertEqual(resultado['habilidades_faltantes'], ['SQL', 'Comunicación'])
+
+    @patch('ia.views.requests.post')
+    def test_comparar_oferta_no_vuelve_a_llamar_al_analizador_de_cv(self, post):
+        self.client.force_login(self.usuario)
+
+        response = self.client.post(reverse('comparar_oferta_cv', args=[self.oferta.pk]))
+
+        self.assertRedirects(response, reverse('detalle_oferta', args=[self.oferta.pk]))
+        comparacion = ComparacionOfertaCV.objects.get(
+            postulante=self.postulante,
+            oferta=self.oferta,
+            analisis=self.analisis,
+        )
+        self.assertEqual(comparacion.porcentaje, 50)
+        post.assert_not_called()
+
+    def test_detalle_no_calcula_match_automaticamente(self):
+        self.client.force_login(self.usuario)
+
+        response = self.client.get(reverse('detalle_oferta', args=[self.oferta.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Comparar con mi CV')
+        self.assertFalse(ComparacionOfertaCV.objects.exists())
+
+    def test_repetir_comparacion_actualiza_el_resultado_guardado(self):
+        self.client.force_login(self.usuario)
+        url = reverse('comparar_oferta_cv', args=[self.oferta.pk])
+
+        self.client.post(url)
+        self.oferta.habilidades_requeridas = 'Python'
+        self.oferta.save(update_fields=['habilidades_requeridas'])
+        self.client.post(url)
+
+        self.assertEqual(ComparacionOfertaCV.objects.count(), 1)
+        self.assertEqual(ComparacionOfertaCV.objects.get().porcentaje, 100)
+
+    def test_no_usa_analisis_de_un_cv_anterior(self):
+        self.postulante.cv_fecha_carga = timezone.now() + timedelta(seconds=1)
+        self.postulante.save(update_fields=['cv_fecha_carga'])
+        self.client.force_login(self.usuario)
+
+        response = self.client.get(reverse('detalle_oferta', args=[self.oferta.pk]))
+
+        self.assertIsNone(response.context['analisis_cv'])
+        self.assertContains(response, 'Primero necesitás analizar tu CV')
+
+    def test_no_muestra_comparacion_si_cambiaron_los_requisitos(self):
+        self.client.force_login(self.usuario)
+        url = reverse('comparar_oferta_cv', args=[self.oferta.pk])
+        self.client.post(url)
+        self.oferta.habilidades_requeridas = 'Python, Docker'
+        self.oferta.save(update_fields=['habilidades_requeridas'])
+
+        response = self.client.get(reverse('detalle_oferta', args=[self.oferta.pk]))
+
+        self.assertIsNone(response.context['comparacion'])
+        self.assertContains(response, 'Comparar con mi CV')

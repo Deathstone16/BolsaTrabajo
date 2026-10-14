@@ -8,6 +8,7 @@ con su manager y patrón de estados de validación.
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from .estado_oferente import ESTADOS, Pendiente
+from .validators import validar_cuit
 
 
 class UsuarioManager(BaseUserManager):
@@ -91,7 +92,7 @@ class Oferente(models.Model):
     )
     motivo_rechazo = models.TextField(blank=True, null=True)
     nombre_empresa = models.CharField(max_length=200)
-    cuit = models.CharField(max_length=13)
+    cuit = models.CharField(max_length=13, validators=[validar_cuit])
     logo = models.ImageField(upload_to="empresas/logos/", null=True, blank=True)
     banner = models.ImageField(upload_to="empresas/banners/", null=True, blank=True)
     descripcion = models.TextField(null=True, blank=True)
