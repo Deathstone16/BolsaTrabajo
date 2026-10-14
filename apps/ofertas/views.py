@@ -137,7 +137,11 @@ def editar_perfil_empresa(request):
 def detalle_oferta_postulante(request, pk):
     """Muestra el detalle público de una oferta activa."""
     oferta = get_object_or_404(Oferta, pk=pk, estado='activa')
-    habilidades = [h.strip() for h in oferta.habilidades_requeridas.split(',') if h.strip()]
+    habilidades_duras = [h.strip() for h in (oferta.habilidades_duras or '').split(',') if h.strip()]
+    habilidades_blandas = [h.strip() for h in (oferta.habilidades_blandas or '').split(',') if h.strip()]
+    # Las ofertas antiguas sólo tienen el campo heredado.
+    if not habilidades_duras and not habilidades_blandas:
+        habilidades_duras = [h.strip() for h in (oferta.habilidades_requeridas or '').split(',') if h.strip()]
     favorita = es_oferta_favorita(request.user.postulante, oferta.id) if hasattr(request.user, 'postulante') else False
     analisis_cv = None
     comparacion = None
@@ -162,7 +166,8 @@ def detalle_oferta_postulante(request, pk):
     return render(request, 'nueva_ui/detalle_oferta.html', {
         'vista_activa': 'buscar',
         'oferta': oferta,
-        'habilidades': habilidades,
+        'habilidades_duras': habilidades_duras,
+        'habilidades_blandas': habilidades_blandas,
         'favorita': favorita,
         'analisis_cv': analisis_cv,
         'comparacion': comparacion,

@@ -20,12 +20,14 @@ from django.views.generic.base import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
 from . import views
+from usuarios.views import mi_perfil
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',views.home,name='home'),
     path('usuarios/', include('usuarios.urls')),
+    path('perfil/', mi_perfil, name='perfil_cv'),
     path('moderacion/', include('moderacion.urls')),
     path('ofertas/', include('ofertas.urls')),
     path('ia/', include('ia.urls')),

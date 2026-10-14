@@ -60,6 +60,7 @@ def solicitar_analisis(request):
                 data={
                     'analysis_id': analisis.id,
                     'candidate_id': postulante.id,
+                    'user_id': request.user.id,
                 },
                 files={
                     'cv': (
@@ -176,7 +177,6 @@ def llegue(request):
     
     try:
         respuesta = json.loads(request.body)
-        print(respuesta['analysis_id'])
         analisis_id = respuesta['analysis_id']
     except (json.JSONDecodeError, KeyError, TypeError):
         return JsonResponse({'detail': 'JSON inválido: falta analysis_id.'}, status=400)

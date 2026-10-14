@@ -107,3 +107,38 @@ class OfertaFormTests(TestCase):
         self.assertEqual(oferta.habilidades_duras, "SQL")
         self.assertEqual(oferta.habilidades_blandas, "Liderazgo")
         self.assertEqual(oferta.habilidades_requeridas, "SQL, Liderazgo")
+
+    def test_detalle_distingue_habilidades_blandas_y_muestra_vacio(self):
+        oferta = Oferta.objects.create(
+            empresa=self.usuario, categoria=self.categoria,
+            titulo="Desarrollador backend", nombre_puesto="Backend Developer",
+            descripcion="Descripción de prueba", estado="activa",
+            habilidades_requeridas="Python, Comunicación",
+            habilidades_duras="Python", habilidades_blandas="Comunicación",
+            fecha_cierre=timezone.now() + timedelta(days=7),
+        )
+        url = reverse("detalle_oferta", args=[oferta.pk])
+        response = self.client.get(url)
+        self.assertContains(response, 'id="habilidades-blandas"')
+        self.assertContains(response, 'bg-emerald-50')
+        self.assertContains(response, 'Comunicación')
+        self.assertNotContains(response, 'No especificadas')
+
+        oferta.habilidades_blandas = ""
+        oferta.save(update_fields=["habilidades_blandas"])
+        self.assertContains(self.client.get(url), 'No especificadas')
+
+    def test_edicion_precarga_valor_para_chips_blandos(self):
+        self.client.force_login(self.usuario)
+        oferta = Oferta.objects.create(
+            empresa=self.usuario, categoria=self.categoria,
+            titulo="Desarrollador backend", nombre_puesto="Backend Developer",
+            descripcion="Descripción de prueba", habilidades_duras="Python",
+            habilidades_blandas="Comunicación, Liderazgo",
+            habilidades_requeridas="Python, Comunicación, Liderazgo",
+            fecha_cierre=timezone.now() + timedelta(days=7),
+        )
+        response = self.client.get(reverse("editar_oferta", args=[oferta.pk]))
+        self.assertContains(response, 'id="id_habilidades_blandas"')
+        self.assertContains(response, 'value="Comunicación, Liderazgo"')
+        self.assertContains(response, 'id="tags-container-blandas"')

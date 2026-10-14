@@ -7,7 +7,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const formAnalizar = document.getElementById('form-analizar-cv');
     const botonResultado = document.getElementById('boton-ver-resultado');
     const AVISO_DEMORA_MS = 20000;
-    let pollingAnalisisActivo = false;
+    let analisisActualId = null;
+    let botonAnalisisActual = null;
+    let textoBotonOriginal = '';
     let temporizadorDemora = null;
     // Tienen que estar arriba: el codigo de inicio usa mostrarEstadoAnalisis
     // cuando la pagina carga con un analisis pendiente.
@@ -126,6 +128,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 restaurarBotonAnalizar(boton, textoOriginal);
             });
         });
+
+        document.addEventListener('cv:analysis-complete', function(event) {
+            const payload = event.detail || {};
+            if (analisisActualId && Number(payload.analysis_id) !== analisisActualId) return;
+            cancelarTemporizadorDemora();
+            restaurarBotonAnalizar(botonAnalisisActual || botonInicial, textoBotonOriginal || textoInicial);
+            if (payload.status === 'completado') {
+                const resultadoUrl = payload.resultado_url || formAnalizar.dataset.estadoUrl.replace('/0/', '/' + payload.analysis_id + '/').replace('/estado/', '/');
+                mostrarEstadoAnalisis('completado', payload.mensaje, resultadoUrl);
+                habilitarBotonResultado(resultadoUrl);
+            } else {
+                mostrarEstadoAnalisis('error', payload.mensaje || 'No se pudo analizar el CV.');
+            }
+            analisisActualId = null;
+        });
     }
 
     function iniciarTemporizadorDemora() {
@@ -147,38 +164,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function consultarEstadoAnalisis(analisisId, boton, textoOriginal) {
-        if (pollingAnalisisActivo) return;
-        pollingAnalisisActivo = true;
-        const url = formAnalizar.dataset.estadoUrl.replace('/0/', '/' + analisisId + '/');
-
-        function consultar() {
-            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.estado === 'pendiente') {
-                        setTimeout(consultar, 5000);
-                        return;
-                    }
-
-                    pollingAnalisisActivo = false;
-                    cancelarTemporizadorDemora();
-                    restaurarBotonAnalizar(boton, textoOriginal);
-                    if (data.estado === 'completado') {
-                        mostrarEstadoAnalisis('completado', data.mensaje || 'El análisis del CV está listo.', data.resultado_url);
-                        habilitarBotonResultado(data.resultado_url);
-                    } else {
-                        mostrarEstadoAnalisis('error', data.mensaje || 'No se pudo analizar el CV.');
-                    }
-                })
-                .catch(() => {
-                    pollingAnalisisActivo = false;
-                    cancelarTemporizadorDemora();
-                    restaurarBotonAnalizar(boton, textoOriginal);
-                    mostrarEstadoAnalisis('error', 'No se pudo consultar el estado del análisis.');
-                });
-        }
-
-        consultar();
+        analisisActualId = Number(analisisId);
+        botonAnalisisActual = boton;
+        textoBotonOriginal = textoOriginal;
+        if (window.CVNotifications) window.CVNotifications.watch(analisisId);
     }
 
     function restaurarBotonAnalizar(boton, textoOriginal) {
