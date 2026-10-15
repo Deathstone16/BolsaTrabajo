@@ -8,7 +8,7 @@ function Stop-IAChildren($parentId) {
 if (Test-Path -LiteralPath $pidPath) {
     foreach ($entry in (Get-Content -LiteralPath $pidPath -Raw | ConvertFrom-Json)) {
         $process = Get-Process -Id $entry.id -ErrorAction SilentlyContinue
-        if ($process -and $process.StartTime.ToUniversalTime().ToString('o') -eq $entry.started) {
+        if ($process -and $process.StartTime.ToUniversalTime().Ticks -eq ([datetime]$entry.started).ToUniversalTime().Ticks) {
             Stop-IAChildren $entry.id
             Stop-Process -Id $entry.id
         }

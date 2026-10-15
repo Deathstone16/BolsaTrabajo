@@ -8,7 +8,7 @@ $pidPath = Join-Path $bolsaPath '.ia-match-processes.json'
 if (Test-Path -LiteralPath $pidPath) {
     $running = @(Get-Content -LiteralPath $pidPath -Raw | ConvertFrom-Json | Where-Object {
         $process = Get-Process -Id $_.id -ErrorAction SilentlyContinue
-        $process -and $process.StartTime.ToUniversalTime().ToString('o') -eq $_.started
+        $process -and $process.StartTime.ToUniversalTime().Ticks -eq ([datetime]$_.started).ToUniversalTime().Ticks
     })
     if ($running.Count) { throw 'Hay procesos ia-match activos. Ejecutá scripts\stop_ia_match.ps1 primero.' }
 }
