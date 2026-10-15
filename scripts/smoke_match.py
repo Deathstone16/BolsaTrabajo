@@ -23,12 +23,12 @@ payload = {
                  'rubric_version': 'match-rubric.v1', 'matcher_prompt_version': 'match-rubric.v1',
                  'model': env['MATCH_MODEL_VERSION']},
 }
-with connect('ws://127.0.0.1:8002/api/v1/ws/v1/matches', additional_headers=headers, open_timeout=10) as socket:
+with connect(env['MATCH_API_URL'], additional_headers=headers, open_timeout=10) as socket:
     socket.send(json.dumps({'type': 'match.start', 'payload': payload}))
     socket.recv(timeout=15)
 deadline = time.monotonic() + 120
 while time.monotonic() < deadline:
-    response = requests.get(f'http://127.0.0.1:8002/api/v1/matches/{request_id}', headers=headers, timeout=10)
+    response = requests.get(f"{env['MATCH_API_HTTP_URL']}/matches/{request_id}", headers=headers, timeout=10)
     response.raise_for_status()
     job = response.json()
     if job['status'] == 'completed':

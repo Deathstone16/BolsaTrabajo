@@ -1,9 +1,7 @@
 # Rama ia-match: comparación CV–oferta con Groq
 
 Las ramas anteriores se conservan. Django parte de `ia-aplicada`; la API integra
-esa rama con `feature/habilidades-blandas-y-notificacion-cv` de Benja. El servicio
-en `C:\IEN\jev-match-api` también usa `ia-match`; su nombre es histórico, pero
-utiliza Groq.
+esa rama con `feature/habilidades-blandas-y-notificacion-cv` de Benja. La comparación vive dentro de la misma API de CV, en `api/ia_api/backend`. No se inicia un servicio de compatibilidad separado.
 
 ## Windows
 
@@ -17,13 +15,12 @@ cd C:\IEN\repositorio\BolsaTrabajo
 ```
 
 El inicio respalda SQLite, aplica migraciones, sincroniza tokens locales e inicia
-Django ASGI, extractor, comparador, dos workers Celery y dos despachadores.
+Django ASGI, una API de CV y compatibilidad, un worker Celery compartido y dos despachadores.
 Los workers usan `--pool=solo` para Windows. Redis queda en Docker al detener
 los procesos. Logs en cada repositorio; no subir `.env`, PID ni bases de datos.
 
 - Web: http://127.0.0.1:8000/
-- Extracción: http://127.0.0.1:8001/docs
-- Compatibilidad: http://127.0.0.1:8002/docs
+- API única de CV y compatibilidad: http://127.0.0.1:8001/docs
 
 ## Probar como postulante
 
@@ -56,6 +53,6 @@ contratación. La confianza proviene del modelo y se presenta como estimación.
 .\.venv\Scripts\python.exe manage.py test ia matching ofertas moderacion usuarios -v 1
 ```
 
-Ejecutar también `python -m unittest discover -s tests -v` con el entorno de cada
-API. Las pruebas no llaman a proveedores reales. Para una prueba real usar
+Ejecutar también `python -m unittest discover -s tests -v` con el entorno de la
+API unificada. Las pruebas no llaman a proveedores reales. Para una prueba real usar
 datos sintéticos o un CV que el usuario decida analizar.
