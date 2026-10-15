@@ -5,6 +5,7 @@
 {% block content %}
 <div class="mx-auto max-w-2xl px-4 py-8">
   <h1 class="mb-2 text-2xl font-bold text-[#26222E]">Rechazar oferta</h1>
+        {% include "nueva_ui/partials/_breadcrumbs.html" with current="Rechazar oferta" parent_url="mod_listar_ofertas" parent_label="Ofertas" only %}
   <p class="mb-6 text-muted-foreground">
     Vas a rechazar la oferta <strong>{{ oferta.nombre_puesto }}</strong> de
     <strong>{{ oferta.empresa.oferente.nombre_empresa }}</strong>.

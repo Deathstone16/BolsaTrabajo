@@ -57,7 +57,6 @@ body {
   text-transform: uppercase;
   color: var(--primary);
 }
-.kicker::before { content: ""; width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: var(--sun); box-shadow: 0 0 0 3px rgba(255, 222, 89, 0.35); }
 
 .btn-ien {
   display: inline-flex;
@@ -137,7 +136,7 @@ body {
   border: 1px solid rgba(81, 45, 168, 0.12);
 }
 
-.hero-dots { background-image: radial-gradient(rgba(81, 45, 168, 0.14) 1.5px, transparent 1.5px); background-size: 26px 26px; }
+.hero-dots { background-image: none; }
 
 .hero-grid-fade {
   background-image: linear-gradient(rgba(81, 45, 168, 0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(81, 45, 168, 0.07) 1px, transparent 1px);
@@ -526,4 +525,71 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 .ien-aviso-cerrar:hover { color: var(--foreground); }
 @media (prefers-reduced-motion: reduce) {
   .ien-overlay, .ien-modal, .ien-aviso { transition: none; }
+}
+
+/* Portada: distribución propia para no depender de regenerar Tailwind. */
+.ien-home-container { width: 100%; max-width: 80rem; margin: 0 auto; padding: 0 2rem; }
+.ien-home-section { padding: 4.5rem 0; }
+.ien-home-section-alt { background: var(--card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.ien-home-hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: center; gap: 5rem; }
+.ien-home-title { max-width: 12ch; margin-top: 1.25rem; font-size: clamp(2.4rem, 4.2vw, 3.75rem); line-height: 1.12; letter-spacing: -0.035em; }
+.ien-home-intro { max-width: 42rem; margin-top: 1rem; color: var(--muted-foreground); line-height: 1.8; }
+.ien-home-stats { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 2rem; color: var(--muted-foreground); font-size: 0.875rem; }
+.ien-home-stats strong { color: var(--primary); font-size: 1.25rem; }
+.ien-home-search { display: grid; gap: 1.25rem; padding: 2rem; box-shadow: 0 18px 50px -30px rgba(60, 40, 80, 0.25); }
+.ien-home-search h2 { font-size: 1.35rem; }
+.ien-home-search label { display: block; margin-bottom: 0.5rem; font-size: 0.875rem; }
+.ien-home-search input, .ien-home-search select { min-height: 3rem; }
+.ien-home-filter-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.ien-home-search .btn-ien { margin-top: 0.25rem; }
+.ien-section-title { margin-top: 0.75rem; font-size: clamp(1.75rem, 3vw, 2.25rem); }
+.ien-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 1.5rem; }
+.ien-section-heading .btn-ghost { font-size: 0.875rem; flex-shrink: 0; }
+.ien-course-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+.ien-course-card { display: flex; flex-direction: column; align-items: start; padding: 1.75rem; }
+.ien-card-meta { color: var(--muted-foreground); font-size: 0.75rem; line-height: 1.6; }
+.ien-course-card h3 { margin-top: 0.75rem; font-size: 1.125rem; }
+.ien-course-description { margin-top: 0.75rem; font-size: 0.875rem; color: var(--muted-foreground); line-height: 1.7; }
+.ien-course-details { display: grid; gap: 0.6rem; margin: 1.5rem 0; font-size: 0.8125rem; line-height: 1.6; }
+.ien-course-details dt { font-weight: 600; }
+.ien-course-details dd { color: var(--muted-foreground); }
+.ien-text-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--primary); font-weight: 600; font-size: 0.875rem; }
+.ien-text-link:hover { text-decoration: underline; }
+.ien-course-card .ien-text-link { margin-top: auto; }
+.ien-steps-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.5rem; margin-top: 2.5rem; }
+.ien-step { border-top: 2px solid var(--border); padding-top: 1.5rem; }
+.ien-step-number { color: var(--primary); font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; }
+.ien-step h3 { margin-top: 1rem; font-size: 1.125rem; }
+.ien-step p { margin-top: 0.75rem; color: var(--muted-foreground); font-size: 0.875rem; line-height: 1.8; }
+.ien-step .ien-text-link { margin-top: 1.25rem; }
+.ien-home-offers { margin-top: 2rem; overflow: hidden; }
+.ien-home-offer { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; padding: 1.5rem 2rem; }
+.ien-home-offer + .ien-home-offer { border-top: 1px solid var(--border); }
+.ien-home-offer:hover { background: var(--background); }
+.ien-home-offer h3 { font-size: 1.0625rem; }
+.ien-home-offer p { margin-top: 0.35rem; color: var(--muted-foreground); font-size: 0.875rem; }
+.ien-home-offer .ien-card-meta { font-size: 0.75rem; }
+.ien-offer-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; color: var(--muted-foreground); font-size: 0.8125rem; }
+.ien-home-empty { grid-column: 1 / -1; padding: 2rem; color: var(--muted-foreground); }
+.ien-breadcrumbs { margin-top: 0.875rem; font-size: 0.8125rem; color: var(--muted-foreground); }
+.ien-breadcrumbs ol { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; padding: 0; }
+.ien-breadcrumbs li { display: inline-flex; align-items: baseline; gap: 0.5rem; }
+.ien-breadcrumbs a { color: var(--primary); }
+.ien-breadcrumbs a:hover { text-decoration: underline; }
+.ien-breadcrumbs [aria-current] { overflow-wrap: anywhere; }
+@media (max-width: 1023px) {
+  .ien-home-hero { gap: 2.5rem; }
+  .ien-course-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767px) {
+  .ien-home-container { padding: 0 1.25rem; }
+  .ien-home-section { padding: 3rem 0; }
+  .ien-home-hero, .ien-course-grid, .ien-steps-grid { grid-template-columns: minmax(0, 1fr); }
+  .ien-home-title { max-width: 16ch; }
+  .ien-home-search { padding: 1.5rem; }
+  .ien-section-heading { align-items: start; flex-direction: column; }
+  .ien-home-offer { align-items: start; flex-direction: column; padding: 1.5rem; }
+}
+@media (max-width: 399px) {
+  .ien-home-filter-pair { grid-template-columns: minmax(0, 1fr); }
 }

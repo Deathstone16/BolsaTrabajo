@@ -10,6 +10,7 @@
     </div>
 
     <h1 class="text-2xl font-bold tracking-tight text-[#26222E]">Dar de baja curso</h1>
+        {% include "nueva_ui/partials/_breadcrumbs.html" with current="Dar de baja curso" parent_url="mod_listar_cursos" parent_label="Cursos" only %}
     <p class="text-muted-foreground">
       Estas por dar de baja el curso <b>{{ curso.nombre }}</b>. 
       Ya no sera visible para los postulantes.

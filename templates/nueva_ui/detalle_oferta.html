@@ -7,11 +7,8 @@
 <section class="bg-[#F8F3F0] pb-16">
 
   <div class="relative overflow-hidden border-b border-[rgba(110,85,55,0.16)] bg-[#F8F3F0] pb-10 pt-10">
-    <div class="absolute inset-0 hero-dots opacity-30" aria-hidden="true"></div>
+
     <div class="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-      <a href="{% url 'buscar_empleo' %}" class="inline-flex items-center gap-2 text-sm text-[#6B645C] transition-colors hover:text-[#512DA8]">
-        <span data-icon="arrow-left" class="h-4 w-4"></span> Volver a las ofertas
-      </a>
 
       <div class="mt-6 flex flex-wrap items-start justify-between gap-6">
         <div class="flex items-center gap-5">
@@ -30,6 +27,7 @@
               <h1 class="text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">{{ oferta.titulo }}</h1>
               <span class="chip">Publicado el {{ oferta.fecha_publicacion|date:"d/m/Y" }}</span>
             </div>
+            {% include "nueva_ui/partials/_breadcrumbs.html" with current=oferta.titulo parent_url="buscar_empleo" parent_label="Buscar empleo" only %}
             <p class="mt-2 flex flex-wrap items-center gap-2 text-[#6B645C]">
               <span data-icon="building" class="h-4 w-4 text-[#512DA8]"></span>
               {% if oferta.es_confidencial %}

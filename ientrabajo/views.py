@@ -11,15 +11,18 @@ from usuarios.models import Oferente
 def _contexto_home():
     """Datos de la portada: ofertas reales y contadores de la base."""
     ofertas_activas = Oferta.objects.filter(estado='activa').select_related('empresa__oferente')
-    destacadas = list(ofertas_activas[:3])
+    destacadas = list(ofertas_activas[:6])
+    cursos = Curso.objects.filter(activo=True).select_related('categoria').order_by('nombre')
 
     return {
         'vista_activa': 'inicio',
         'ofertas_destacadas': destacadas,
-        'oferta_destacada': destacadas[0] if destacadas else None,
+        'cursos': cursos,
+        'modalidad_choices': Oferta.MODALIDAD_CHOICES,
+        'experiencia_choices': Oferta.EXPERIENCIA_CHOICES,
         'total_ofertas': ofertas_activas.count(),
         'total_empresas': Oferente.objects.aprobados().count(),
-        'total_cursos': Curso.objects.count(),
+        'total_cursos': cursos.count(),
     }
 
 

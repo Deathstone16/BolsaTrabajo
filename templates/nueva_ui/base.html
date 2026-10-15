@@ -22,7 +22,6 @@
     llevan nav ni footer: sobreescriben estos bloques con contenido vacio.
   {% endcomment %}
   {% block chrome_top %}
-    {% include "nueva_ui/partials/_aviso.html" %}
     {% include "nueva_ui/partials/_nav.html" %}
   {% endblock %}
 
@@ -45,7 +44,6 @@
   </main>
 
   {% block chrome_bottom %}
-    {% include "nueva_ui/partials/_footer.html" %}
   {% endblock %}
 
   <script src="{% static_v 'js/ui/ien-ui.js' %}"></script>
