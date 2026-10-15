@@ -163,6 +163,8 @@ def publish_candidate_profile(postulante, content: dict[str, Any], source_hash: 
     profile, _ = PerfilCV.objects.select_for_update().get_or_create(postulante=postulante)
     new_hash = content_hash(validated)
     if profile.contenido and profile.source_hash == new_hash:
+        profile.estado = EstadoPerfil.LISTO
+        profile.save(update_fields=['estado', 'actualizado_en'])
         return profile
     profile.version += 1
     profile.contenido = validated
@@ -188,6 +190,8 @@ def publish_offer_profile(oferta, content: dict[str, Any], source_hash: str) -> 
     profile, _ = PerfilOferta.objects.select_for_update().get_or_create(oferta=oferta)
     profile_hash = content_hash(validated)
     if profile.contenido and profile.source_hash == profile_hash:
+        profile.estado = EstadoPerfil.LISTO
+        profile.save(update_fields=['estado', 'actualizado_en'])
         return profile
     profile.version += 1
     profile.contenido = validated
@@ -210,7 +214,8 @@ def receive_extraction_event(payload: dict[str, Any]) -> bool:
 
     event_id = payload['event_id']
     try:
-        EventoRecepcion.objects.create(event_id=event_id)
+        with transaction.atomic():
+            EventoRecepcion.objects.create(event_id=event_id)
     except IntegrityError:
         return False
     job = TrabajoExtraccion.objects.select_for_update().filter(

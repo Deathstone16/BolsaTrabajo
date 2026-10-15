@@ -64,7 +64,7 @@ class Command(BaseCommand):
                     response = requests.post(
                         settings.IA_API_URL,
                         headers=headers,
-                        data={'analysis_id': analysis.pk, 'candidate_id': analysis.postulante_id},
+                        data={'analysis_id': analysis.pk, 'candidate_id': analysis.postulante_id, 'user_id': analysis.postulante.usuario_id},
                         files={'cv': (cv_source.name.rsplit('/', 1)[-1], cv_file, 'application/pdf')},
                         timeout=20,
                     )

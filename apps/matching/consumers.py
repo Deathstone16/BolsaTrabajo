@@ -1,19 +1,25 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from channels.db import database_sync_to_async
 
 from .models import ResultadoCompatibilidad
 from .services import status_payload
 
 
 class MatchConsumer(AsyncJsonWebsocketConsumer):
+    @database_sync_to_async
+    def owned_match(self, user_id, request_id):
+        return ResultadoCompatibilidad.objects.filter(
+            request_id=request_id, postulante__usuario_id=user_id,
+        ).first()
+
     async def connect(self):
         user = self.scope['user']
         request_id = self.scope['url_route']['kwargs']['request_id']
-        if not user.is_authenticated or not hasattr(user, 'postulante'):
+        if not user.is_authenticated:
             await self.close(code=4401)
             return
-        try:
-            match = await ResultadoCompatibilidad.objects.aget(request_id=request_id, postulante=user.postulante)
-        except ResultadoCompatibilidad.DoesNotExist:
+        match = await self.owned_match(user.pk, request_id)
+        if match is None:
             await self.close(code=4404)
             return
         self.group_name = f'match-{request_id}'

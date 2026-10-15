@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 import time
 from uuid import uuid4
 from decimal import Decimal
@@ -67,10 +68,14 @@ def _notify(match: ResultadoCompatibilidad) -> None:
     layer = get_channel_layer()
     if layer is None:
         return
-    async_to_sync(layer.group_send)(
-        f"match-{match.request_id}",
-        {"type": "match.update", "payload": status_payload(match)},
-    )
+    try:
+        async_to_sync(layer.group_send)(
+            f"match-{match.request_id}",
+            {"type": "match.update", "payload": status_payload(match)},
+        )
+    except (redis.RedisError, OSError):
+        # La consulta HTTP recupera el resultado persistido si falla Channels.
+        pass
 
 
 def status_payload(match: ResultadoCompatibilidad) -> dict:
@@ -87,18 +92,23 @@ def status_payload(match: ResultadoCompatibilidad) -> dict:
 
 @transaction.atomic
 def get_or_create_match(postulante, oferta) -> tuple[ResultadoCompatibilidad, bool]:
-    candidate = postulante.perfil_ia
-    offer = oferta.perfil_ia
-    if candidate.estado != EstadoPerfil.LISTO or not candidate.contenido:
+    candidate = getattr(postulante, 'perfil_ia', None)
+    offer = getattr(oferta, 'perfil_ia', None)
+    if candidate is None or candidate.estado != EstadoPerfil.LISTO or not candidate.contenido:
         raise ValueError('Tu perfil todavía no está listo para calcular compatibilidad.')
-    if offer.estado != EstadoPerfil.LISTO or not offer.contenido:
+    if offer is None or offer.estado != EstadoPerfil.LISTO or not offer.contenido:
         raise ValueError('La oferta todavía está siendo analizada.')
     cache_key = content_hash({
+        'candidate_id': postulante.pk,
+        'offer_id': oferta.pk,
+        'candidate_version': candidate.version,
+        'offer_version': offer.version,
         'candidate': candidate.source_hash,
         'offer': offer.source_hash,
         'rubric': 'match-rubric.v1',
         'schema': 'match-result.v1',
-        'model': 'jev-latest',
+        'model': settings.MATCH_MODEL_VERSION,
+        'prompt': 'match-rubric.v1',
     })
     cached = _read_cache(cache_key)
     match, created = ResultadoCompatibilidad.objects.get_or_create(
@@ -110,6 +120,9 @@ def get_or_create_match(postulante, oferta) -> tuple[ResultadoCompatibilidad, bo
             'perfil_oferta_version': offer.version,
             'perfil_cv_hash': candidate.source_hash,
             'perfil_oferta_hash': offer.source_hash,
+            'candidate_snapshot': deepcopy(candidate.contenido),
+            'offer_snapshot': deepcopy(offer.contenido),
+            'model_version': settings.MATCH_MODEL_VERSION,
         },
     )
     if cached and match.estado != ResultadoCompatibilidad.Estado.COMPLETADO:
@@ -122,6 +135,12 @@ def get_or_create_match(postulante, oferta) -> tuple[ResultadoCompatibilidad, bo
     if match.estado == ResultadoCompatibilidad.Estado.COMPLETADO:
         _save_cache(cache_key, match.resultado)
         return match, False
+    if match.estado == ResultadoCompatibilidad.Estado.ERROR:
+        match.request_id = uuid4()
+        match.estado = ResultadoCompatibilidad.Estado.PENDIENTE
+        match.error = ''
+        match.save(update_fields=['request_id', 'estado', 'error', 'actualizado_en'])
+        created = True
     if created:
         if not _allow_new_request(postulante.pk):
             raise ValueError('Alcanzaste el límite de nuevas compatibilidades por hora. Intentá más tarde.')
@@ -134,12 +153,12 @@ def get_or_create_match(postulante, oferta) -> tuple[ResultadoCompatibilidad, bo
 
 
 def match_request_payload(match: ResultadoCompatibilidad) -> dict:
-    candidate = match.postulante.perfil_ia
-    offer = match.oferta.perfil_ia
+    if not match.candidate_snapshot or not match.offer_snapshot:
+        raise ValueError('Esta solicitud no conserva sus perfiles. Calculá una nueva compatibilidad.')
     request = MatchRequest(
         request_id=match.request_id,
-        candidate_profile=candidate.contenido,
-        job_offer=offer.contenido,
+        candidate_profile=match.candidate_snapshot,
+        job_offer=match.offer_snapshot,
         metadata=MatchMetadata(
             candidate_profile_hash=match.perfil_cv_hash,
             candidate_profile_version=match.perfil_cv_version,
@@ -156,6 +175,8 @@ def match_request_payload(match: ResultadoCompatibilidad) -> dict:
 @transaction.atomic
 def complete_match(request_id: str, result: dict) -> ResultadoCompatibilidad:
     validated = MatchResult.model_validate(result).model_dump(mode='json')
+    if validated['request_id'] != str(request_id):
+        raise ValueError('El resultado no corresponde a esta solicitud.')
     match = ResultadoCompatibilidad.objects.select_for_update().get(request_id=request_id)
     if match.estado == ResultadoCompatibilidad.Estado.COMPLETADO:
         return match

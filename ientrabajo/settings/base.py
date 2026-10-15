@@ -178,6 +178,7 @@ MATCH_API_TOKEN = os.environ.get('MATCH_API_TOKEN', '')
 MATCH_CACHE_REDIS_URL = os.environ.get('MATCH_CACHE_REDIS_URL', 'redis://127.0.0.1:6379/6')
 MATCH_CACHE_TTL_SECONDS = int(os.environ.get('MATCH_CACHE_TTL_SECONDS', str(60 * 60 * 24 * 7)))
 MATCH_REQUESTS_PER_HOUR = int(os.environ.get('MATCH_REQUESTS_PER_HOUR', '20'))
+MATCH_MODEL_VERSION = os.environ.get('MATCH_MODEL_VERSION', 'groq:llama-3.3-70b-versatile')
 
 if not DEBUG:
     SECURE_SSL_REDIRECT = env_bool('SECURE_SSL_REDIRECT', True)

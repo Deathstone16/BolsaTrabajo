@@ -83,6 +83,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const ultimoAnalisisEstado = formAnalizar.dataset.ultimoAnalisisEstado;
         const botonInicial = formAnalizar.querySelector('button[type="submit"]');
         const textoInicial = botonInicial ? botonInicial.innerHTML : '';
+        // El callback ya guardó el resultado antes de que llegue este aviso.
+        try {
+            const scheme = location.protocol === 'https:' ? 'wss' : 'ws';
+            const cvSocket = new WebSocket(`${scheme}://${location.host}/ws/cv/`);
+            cvSocket.onmessage = () => location.reload();
+            window.addEventListener('pagehide', () => cvSocket.close());
+        } catch (_) { /* El polling sigue disponible. */ }
 
         if (ultimoAnalisisId && ultimoAnalisisEstado === 'pendiente') {
             marcarBotonAnalisisPendiente(botonInicial);

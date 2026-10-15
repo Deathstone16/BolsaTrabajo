@@ -18,7 +18,7 @@ from matching.services import complete_match, match_request_payload, update_matc
 
 
 class Command(BaseCommand):
-    help = 'Despacha solicitudes pendientes de compatibilidad al matcher Jev.'
+    help = 'Despacha solicitudes pendientes al comparador Groq.'
 
     def add_arguments(self, parser):
         parser.add_argument('--once', action='store_true')
