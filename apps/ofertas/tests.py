@@ -9,6 +9,8 @@ from usuarios.models import Oferente, Usuario
 
 from .forms import OfertaForm
 from .models import Oferta
+from .models import OfertaFavorita
+from usuarios.models import Postulante
 
 
 class OfertaFormTests(TestCase):
@@ -107,3 +109,59 @@ class OfertaFormTests(TestCase):
         self.assertEqual(oferta.habilidades_duras, "SQL")
         self.assertEqual(oferta.habilidades_blandas, "Liderazgo")
         self.assertEqual(oferta.habilidades_requeridas, "SQL, Liderazgo")
+class EmpleosGuardadosTests(TestCase):
+    def setUp(self):
+        self.user = Usuario.objects.create_user(email='saved@example.com', password='test-password')
+        self.candidate = Postulante.objects.create(usuario=self.user)
+        company = Usuario.objects.create_user(email='saved-company@example.com', password='test-password')
+        category = Categoria.objects.create(nombre='Pruebas favoritos')
+        self.offer = Oferta.objects.create(
+            empresa=company, categoria=category, titulo='Oferta guardable', nombre_puesto='Backend',
+            ubicacion='Córdoba', descripcion='Oferta de prueba', habilidades_requeridas='Python',
+            nivel_educativo='secundario', estado='activa', fecha_cierre=timezone.now() + timedelta(days=5),
+        )
+        self.toggle = reverse('alternar_favorita', args=[self.offer.pk])
+        self.client.force_login(self.user)
+
+    def test_guardar_listar_y_quitar_oferta(self):
+        self.assertTrue(self.client.post(self.toggle).json()['favorita'])
+        self.assertContains(self.client.get(reverse('favoritos')), self.offer.titulo)
+        detail = self.client.get(reverse('detalle_oferta', args=[self.offer.pk]))
+        self.assertContains(detail, 'data-save-on="true"')
+        self.assertContains(self.client.get(reverse('buscar_empleo')), self.offer.titulo)
+        self.assertFalse(self.client.post(self.toggle).json()['favorita'])
+        self.assertFalse(OfertaFavorita.objects.filter(postulante=self.candidate).exists())
+        self.assertContains(self.client.get(reverse('favoritos')), 'Todavía no guardaste ofertas')
+
+    def test_favoritos_son_privados_por_postulante(self):
+        self.client.post(self.toggle)
+        other = Usuario.objects.create_user(email='saved-other@example.com', password='test-password')
+        Postulante.objects.create(usuario=other)
+        self.client.force_login(other)
+        self.assertNotContains(self.client.get(reverse('favoritos')), self.offer.titulo)
+
+    def test_guardar_requiere_post_y_sesion(self):
+        self.assertEqual(self.client.get(self.toggle).status_code, 405)
+        self.client.logout()
+        self.assertEqual(self.client.post(self.toggle).status_code, 302)
+        self.assertFalse(OfertaFavorita.objects.exists())
+
+    def test_oferta_inexistente_devuelve_404(self):
+        self.assertEqual(self.client.post(reverse('alternar_favorita', args=[999999])).status_code, 404)
+
+    def test_oferta_finalizada_se_conserva_y_puede_quitarse(self):
+        self.client.post(self.toggle)
+        self.offer.estado = 'finalizada'
+        self.offer.save()
+        page = self.client.get(reverse('favoritos'))
+        self.assertContains(page, 'Esta oferta ya no está disponible')
+        self.assertFalse(self.client.post(self.toggle).json()['favorita'])
+
+    def test_proteccion_csrf_en_guardado(self):
+        from django.test import Client
+        client = Client(enforce_csrf_checks=True)
+        client.force_login(self.user)
+        client.get(reverse('detalle_oferta', args=[self.offer.pk]))
+        self.assertEqual(client.post(self.toggle).status_code, 403)
+        token = client.cookies['csrftoken'].value
+        self.assertEqual(client.post(self.toggle, HTTP_X_CSRFTOKEN=token).status_code, 200)

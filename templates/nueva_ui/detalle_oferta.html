@@ -47,8 +47,12 @@
           </div>
         </div>
 
-        <button type="button" data-save="{{ oferta.pk }}" class="btn-ghost !py-2.5 text-sm">
-          <span data-icon="bookmark" class="h-4 w-4"></span> Guardar
+        <button type="button" data-save="{{ oferta.pk }}"
+                data-url="{% url 'alternar_favorita' oferta.pk %}"
+                data-save-on="{{ favorita|yesno:'true,false' }}"
+                class="btn-ghost !py-2.5 text-sm">
+          <span data-icon="bookmark" class="h-4 w-4"></span>
+          <span data-save-label>Guardar</span>
         </button>
       </div>
 
@@ -96,6 +100,9 @@
       <div class="space-y-6">
         <div class="panel p-6 text-center" id="match-card" data-request-id="{% if match %}{{ match.request_id }}{% endif %}" data-status="{% if match %}{{ match.estado }}{% endif %}">
           <h3 class="font-mono text-xs uppercase tracking-widest text-[#6B645C]">Match inteligente</h3>
+          {% if user.is_authenticated and user.postulante and not perfil_cv %}
+            {% include 'ia/comparacion_historica.html' %}
+          {% else %}
           <div class="relative mx-auto mt-6 h-36 w-36">
             <svg class="h-36 w-36 -rotate-90" viewBox="0 0 120 120" aria-hidden="true">
               <circle cx="60" cy="60" r="54" stroke="#F0E9E1" stroke-width="12" fill="none"></circle>
@@ -138,6 +145,7 @@
               {% csrf_token %}
               <button id="match-button" class="btn-ien w-full" type="submit" {% if match and match.estado != 'error' and match.estado != 'completed' %}disabled{% endif %}>{% if match and match.estado == 'completed' %}Ver compatibilidad{% else %}Calcular compatibilidad{% endif %}</button>
             </form>
+          {% endif %}
           {% endif %}
         </div>
 

@@ -19,6 +19,7 @@ Contraseña común: `DemoIEN2026!`
 Hay 12 ofertas (9 activas, 1 pendiente, 1 rechazada y 1 finalizada), 6 cursos
 con imágenes y 27 resultados de compatibilidad ficticios para los 3 postulantes.
 Cada postulante tiene un perfil estructurado listo y un análisis de ejemplo.
+También tiene dos empleos guardados en `/ofertas/favoritos/` para probar el listado y quitarlos.
 Los porcentajes preguardados son simulados y no consumen Groq. Las modificaciones
 y nuevos análisis solicitados desde la aplicación siguen el flujo real.
 

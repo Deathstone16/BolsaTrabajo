@@ -6,6 +6,8 @@ esa rama con `feature/habilidades-blandas-y-notificacion-cv` de Benja. La compar
 ## Windows
 
 Requiere Docker Desktop iniciado y los entornos `.venv` con sus requirements.
+Cada repositorio incluye `ien_contracts/` con los modelos JSON versionados usados
+por el protocolo; no hace falta copiar archivos desde `C:\IEN\contracts`.
 
 ```powershell
 cd C:\IEN\repositorio\BolsaTrabajo

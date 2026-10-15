@@ -16,7 +16,7 @@ from ia.models import AnalisisCV, EventoSalida
 from ia.workflow import publish_candidate_profile, publish_offer_profile
 from matching.services import get_or_create_match
 from usuarios.models import Usuario, Postulante, Oferente
-from ofertas.models import Oferta
+from ofertas.models import Oferta, OfertaFavorita
 from ien_contracts.models import MatchResult
 
 
@@ -139,6 +139,10 @@ class Command(BaseCommand):
                 buffer = BytesIO()
                 picture.save(buffer, format='PNG')
                 course.imagen.save(f'demo-curso-{index}.png', ContentFile(buffer.getvalue()), save=True)
+
+        for candidate, indexes in zip(candidates, [(0, 3), (4, 5), (6, 7)]):
+            for index in indexes:
+                OfertaFavorita.objects.get_or_create(postulante=candidate, oferta=offers[index][0])
 
         with patch('matching.services._read_cache', return_value=None), patch('matching.services._allow_new_request', return_value=True):
             for candidate in candidates:
