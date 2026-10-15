@@ -500,3 +500,5 @@ db.sqlite3
 # Procesos y respaldos de desarrollo local.
 .ia-match-processes.json
 db.sqlite3.ia-match-*.bak
+media/cursos/demo-curso-*.png
+db.sqlite3-journal
