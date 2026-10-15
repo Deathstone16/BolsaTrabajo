@@ -99,7 +99,7 @@
           <div class="relative mx-auto mt-6 h-36 w-36">
             <svg class="h-36 w-36 -rotate-90" viewBox="0 0 120 120" aria-hidden="true">
               <circle cx="60" cy="60" r="54" stroke="#F0E9E1" stroke-width="12" fill="none"></circle>
-              <circle id="match-progress" data-value="{% if match and match.match_percentage %}{{ match.match_percentage }}{% else %}0{% endif %}" cx="60" cy="60" r="54" stroke="#512DA8" stroke-width="12" fill="none"
+              <circle id="match-progress" data-value="{% if match and match.match_percentage %}{{ match.match_percentage|floatformat:'2u' }}{% else %}0{% endif %}" cx="60" cy="60" r="54" stroke="#512DA8" stroke-width="12" fill="none"
                       stroke-dasharray="339.29" stroke-dashoffset="339.29" stroke-linecap="round"></circle>
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center">
@@ -117,6 +117,17 @@
             {% else %}Compará tu perfil guardado con esta oferta.{% endif %}
           </p>
           <p class="mt-3 text-xs text-[#6B645C]">El porcentaje compara tu perfil con los requisitos de la oferta. No representa una probabilidad de contratación.</p>
+          <details class="mt-4 text-left text-xs text-[#6B645C]">
+            <summary class="cursor-pointer font-semibold text-[#512DA8]">¿Cómo se calcula mi match?</summary>
+            <p class="mt-3 leading-relaxed">Comparamos tu perfil guardado con esta oferta. La IA evalúa cada área de 0 a 4 y combinamos los puntajes con estos pesos:</p>
+            <ul class="mt-2 space-y-1">
+              <li>Habilidades obligatorias: 45%</li>
+              <li>Experiencia: 25%</li>
+              <li>Formación e idiomas: 15%</li>
+              <li>Preferencias y requisitos deseables: 15%</li>
+            </ul>
+            <p class="mt-2 leading-relaxed">Un requisito excluyente sin respaldo limita el resultado a 40%. La cobertura indica cuántos requisitos tienen una habilidad con el mismo nombre en tu perfil; la confianza es una estimación de la IA. Los resultados de las cuentas demo son simulados.</p>
+          </details>
           <div id="match-details" class="mt-4 text-left text-sm text-[#6B645C]" hidden>
             <p id="match-coverage"></p>
             <p id="match-confidence" class="mt-1"></p>
@@ -179,6 +190,20 @@
     </div>
   </div>
 </section>
+<style>
+  #match-percentage { font-variant-numeric: tabular-nums; }
+  #match-card.is-calculating #match-progress {
+    stroke-dasharray: 65 274.29;
+    transform-origin: 60px 60px;
+    animation: match-spin 1.6s linear infinite;
+  }
+  #match-card.match-arrived #match-percentage { animation: match-settle .45s ease-out; }
+  @keyframes match-spin { to { transform: rotate(360deg); } }
+  @keyframes match-settle { 50% { transform: scale(1.08); } }
+  @media (prefers-reduced-motion: reduce) {
+    #match-card.is-calculating #match-progress, #match-card.match-arrived #match-percentage { animation: none; }
+  }
+</style>
 <script>
 (() => {
   const form = document.getElementById('match-form');
@@ -190,13 +215,43 @@
   const card = document.getElementById('match-card');
   let pollTimer;
   let socket;
+  let animationFrame;
+  let displayedValue = 0;
+  let lastTarget = null;
+  const circumference = 2 * Math.PI * 54;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  function paint(value) {
+    displayedValue = value;
+    percentage.textContent = Math.round(value) + '%';
+    progress.style.strokeDashoffset = String(circumference * (1 - value / 100));
+  }
+  function animatePercentage(rawTarget) {
+    const target = Math.min(100, Math.max(0, Number(rawTarget)));
+    if (!Number.isFinite(target) || target === lastTarget) return;
+    lastTarget = target;
+    cancelAnimationFrame(animationFrame);
+    card.classList.remove('is-calculating', 'match-arrived');
+    if (reducedMotion.matches) { paint(target); return; }
+    const from = displayedValue;
+    const duration = 1400;
+    let started;
+    function tick(timestamp) {
+      if (started === undefined) started = timestamp;
+      const elapsed = Math.min(1, (timestamp - started) / duration);
+      const eased = 1 - Math.pow(1 - elapsed, 3);
+      paint(from + (target - from) * eased);
+      if (elapsed < 1) animationFrame = requestAnimationFrame(tick);
+      else { paint(target); card.classList.add('match-arrived'); }
+    }
+    animationFrame = requestAnimationFrame(tick);
+  }
   function stopWatching() {
     clearInterval(pollTimer);
     if (socket) { socket.close(); socket = null; }
   }
   function render(data) {
-    if (data.match_percentage !== null && data.match_percentage !== undefined) { percentage.textContent = Math.round(data.match_percentage) + '%'; progress.style.strokeDashoffset = String(339.29 * (1 - Number(data.match_percentage) / 100)); }
     if (data.status === 'completed') {
+      animatePercentage(data.match_percentage);
       message.textContent = 'Compatibilidad calculada según tu perfil y esta oferta.';
       button.disabled = false; button.textContent = 'Ver compatibilidad'; stopWatching();
       document.getElementById('match-details').hidden = false;
@@ -211,8 +266,8 @@
         list.appendChild(row);
       }
     }
-    else if (data.status === 'error') { message.textContent = data.error || 'No se pudo calcular la compatibilidad.'; button.disabled = false; button.textContent = 'Reintentar'; stopWatching(); }
-    else { message.textContent = data.status === 'rate_limited' ? 'Esperando disponibilidad para calcular tu compatibilidad…' : 'Calculando compatibilidad…'; button.disabled = true; }
+    else if (data.status === 'error') { card.classList.remove('is-calculating'); message.textContent = data.error || 'No se pudo calcular la compatibilidad.'; button.disabled = false; button.textContent = 'Reintentar'; stopWatching(); }
+    else { card.classList.add('is-calculating'); percentage.textContent = '…'; message.textContent = data.status === 'rate_limited' ? 'Esperando disponibilidad para calcular tu compatibilidad…' : 'Calculando compatibilidad…'; button.disabled = true; }
   }
   function watch(requestId) {
     stopWatching();
@@ -230,17 +285,22 @@
   form.addEventListener('submit', event => {
     event.preventDefault();
     button.disabled = true;
+    cancelAnimationFrame(animationFrame);
+    lastTarget = null;
+    paint(0);
+    card.classList.remove('match-arrived');
+    card.classList.add('is-calculating');
     fetch(form.action, {method: 'POST', headers: {'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value, 'X-Requested-With': 'XMLHttpRequest'}})
       .then(response => response.json()).then(data => {
-        if (!data.success) { message.textContent = data.mensaje || 'No se pudo iniciar el cálculo.'; button.disabled = false; return; }
+        if (!data.success) { card.classList.remove('is-calculating'); message.textContent = data.mensaje || 'No se pudo iniciar el cálculo.'; button.disabled = false; return; }
         render(data);
         if (data.status !== 'completed' && data.status !== 'error') watch(data.request_id);
-      }).catch(() => { message.textContent = 'No se pudo iniciar el cálculo.'; button.disabled = false; });
+      }).catch(() => { card.classList.remove('is-calculating'); message.textContent = 'No se pudo iniciar el cálculo.'; button.disabled = false; });
   });
   const initial = Number(progress.dataset.value || 0);
-  if (initial) progress.style.strokeDashoffset = String(339.29 * (1 - initial / 100));
+  if (card.dataset.status === 'completed') { paint(0); animatePercentage(initial); }
   if (card.dataset.requestId && card.dataset.status !== 'error') watch(card.dataset.requestId);
-  window.addEventListener('pagehide', stopWatching);
+  window.addEventListener('pagehide', () => { stopWatching(); cancelAnimationFrame(animationFrame); });
 })();
 </script>
 {% endblock %}
