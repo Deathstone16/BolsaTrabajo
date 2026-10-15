@@ -23,6 +23,7 @@ from .models import AnalisisCV, TrabajoExtraccion
 from .workflow import receive_extraction_event, request_cv_extraction, request_profile_normalization
 from .forms import PerfilCVForm
 from .models import PerfilCV
+from .profile_skills import split_profile_skills
 
 
 NIVELES_HABILIDAD = ('Teórico', 'Principiante', 'Intermedio', 'Avanzado')
@@ -93,7 +94,13 @@ def ver_resultado(request, analisis_id):
         postulante=request.user.postulante,
     )
     perfil = PerfilCV.objects.filter(postulante=analisis.postulante).first()
-    return render(request, 'ia/resultado_analisis.html', {'analisis': analisis, 'perfil': perfil})
+    habilidades_duras, habilidades_blandas = split_profile_skills(perfil.contenido if perfil else {})
+    return render(request, 'ia/resultado_analisis.html', {
+        'analisis': analisis,
+        'perfil': perfil,
+        'habilidades_duras': habilidades_duras,
+        'habilidades_blandas': habilidades_blandas,
+    })
 
 
 @login_required

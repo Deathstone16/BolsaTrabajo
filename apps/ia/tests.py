@@ -23,6 +23,7 @@ from usuarios.models import Postulante, Usuario
 from .models import AnalisisCV, ComparacionOfertaCV, EventoSalida, PerfilCV, TrabajoExtraccion
 from .workflow import publish_candidate_profile, request_cv_extraction, request_profile_normalization
 from .consumers import CVAnalysisConsumer, TOKEN_SALT
+from .profile_skills import split_profile_skills
 
 
 @override_settings(
@@ -167,6 +168,28 @@ class AnalisisCVViewsTests(TestCase):
         profile.refresh_from_db()
         self.assertEqual(profile.origen, 'extraction')
         self.assertEqual(profile.contenido['summary'], replacement['summary'])
+
+    def test_perfil_y_resultado_muestran_habilidades_blandas_separadas(self):
+        analysis = AnalisisCV.objects.create(
+            postulante=self.postulante, estado=AnalisisCV.Estado.COMPLETADO,
+        )
+        result = self._result()
+        result['skills'] += [
+            {'name': 'Analytical Thinking', 'level': 'unknown', 'evidence': []},
+            {'name': 'Teamwork', 'level': 'unknown', 'evidence': []},
+        ]
+        publish_candidate_profile(self.postulante, result, 'a' * 64, 'extraction', analysis)
+
+        hard, soft = split_profile_skills(result)
+        self.assertEqual([skill['name'] for skill in hard], ['Python'])
+        self.assertEqual([skill['name'] for skill in soft], ['Analytical Thinking', 'Teamwork'])
+
+        detail = self.client.get(reverse('ia:ver_resultado', args=[analysis.pk]))
+        profile_page = self.client.get(reverse('mi_perfil'))
+        self.assertContains(detail, 'id="habilidades-blandas-cv"')
+        self.assertContains(detail, 'Teamwork')
+        self.assertContains(profile_page, 'id="habilidades-blandas-perfil"')
+        self.assertContains(profile_page, 'Analytical Thinking')
 
 
     def test_postulante_guarda_todas_las_habilidades_sin_perder_sugerencia_ia(self):

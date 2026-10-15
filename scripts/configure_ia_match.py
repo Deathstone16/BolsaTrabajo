@@ -5,7 +5,10 @@ from dotenv import dotenv_values, set_key
 
 root = Path(__file__).resolve().parents[3]
 bolsa = Path(__file__).resolve().parents[1]
-api = root / 'api' / 'ia_api' / 'backend'
+api_candidates = (root / 'api' / 'ia_api' / 'backend', root / 'ia_api' / 'backend')
+api = next((candidate for candidate in api_candidates if (candidate / 'app').is_dir()), None)
+if api is None:
+    raise FileNotFoundError('No se encontró el backend de ia_api junto al proyecto.')
 
 
 def update(path, values):
