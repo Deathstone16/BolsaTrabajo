@@ -143,6 +143,8 @@
         btn.style.color = "";
       }
       btn.title = on ? "Quitar de favoritos" : "Guardar oferta";
+      btn.setAttribute("aria-label", btn.title);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
       var etiqueta = btn.querySelector("[data-save-label]");
       if (etiqueta) etiqueta.textContent = on ? "Guardado" : "Guardar";
       var ic = btn.querySelector("[data-icon]");
@@ -158,6 +160,8 @@
       var btn = e.target.closest("[data-save]");
       if (!btn) return;
       e.preventDefault();
+      if (btn.disabled) return;
+      btn.disabled = true;
 
       fetch(btn.getAttribute("data-url"), {
         method: "POST",
@@ -181,6 +185,9 @@
             tarjeta.style.transition = "opacity .3s";
             setTimeout(function () {
               tarjeta.remove();
+              var contador = document.querySelector("[data-save-count]");
+              var cantidad = lista.querySelectorAll("[data-save-card]").length;
+              if (contador) contador.textContent = cantidad + (cantidad === 1 ? " oferta guardada" : " ofertas guardadas");
               var vacio = document.getElementById("favoritos-vacio");
               if (vacio && !lista.querySelector("[data-save-card]")) vacio.classList.remove("hidden");
             }, 300);
@@ -192,6 +199,8 @@
         }
       }).catch(function () {
         aviso("error", "Error de conexión al guardar.");
+      }).finally(function () {
+        btn.disabled = false;
       });
     });
   }

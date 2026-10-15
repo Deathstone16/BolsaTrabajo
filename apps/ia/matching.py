@@ -43,6 +43,8 @@ def _habilidades_del_analisis(analisis):
     respuesta = analisis.respuesta or {}
     resultado = respuesta.get('result') or {}
     habilidades = resultado.get('habilidades_analizadas') or []
+    if not habilidades and resultado.get('skills'):
+        return [item['name'] for item in resultado['skills'] if isinstance(item, dict) and item.get('name')]
     return [
         item.get('tecnologia', '').strip()
         for item in habilidades

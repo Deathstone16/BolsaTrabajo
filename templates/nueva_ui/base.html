@@ -49,6 +49,14 @@
   {% endblock %}
 
   <script src="{% static_v 'js/ui/ien-ui.js' %}"></script>
+  {% if cv_notification_token %}
+    <script id="cv-notifications-config"
+            data-token="{{ cv_notification_token }}"
+            data-analysis-id="{{ cv_pending_analysis_id }}"
+            data-status-url="{{ cv_analysis_status_url }}"
+            data-profile-url="{% url 'perfil_cv' %}#cv-analysis"></script>
+    <script src="{% static_v 'js/cv_notifications.js' %}"></script>
+  {% endif %}
   {% include "nueva_ui/partials/_logout_modal.html" %}
   {% block extra_js %}{% endblock %}
 </body>
