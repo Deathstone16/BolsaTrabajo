@@ -110,6 +110,7 @@
             mientras el servicio externo procesa; si al cargar la pagina ya hay un
             analisis pendiente, se pinta desde el servidor para que se vea de entrada.
           {% endcomment %}
+          <div id="cv-analysis"></div>
           <div id="analisis-estado"
                class="panel mt-4 overflow-hidden {% if not ultimo_analisis or ultimo_analisis.estado != 'pendiente' %}hidden{% endif %}"
                role="status" aria-live="polite">

@@ -78,21 +78,29 @@
           <p class="mt-4 whitespace-pre-line leading-relaxed text-[#6B645C]">{{ oferta.descripcion }}</p>
         </div>
 
-        {% if habilidades %}
+        {% if habilidades_duras or habilidades_blandas %}
           <div class="panel p-8">
             <h2 class="text-xl font-bold text-[#26222E]">Habilidades requeridas</h2>
-            {% comment %}
-              El mockup marcaba en verde/rojo el match contra el perfil. Eso depende de la IA
-              de matching, que todavia no esta; por ahora se listan todas por igual.
-            {% endcomment %}
-            <ul class="mt-5 space-y-4">
-              {% for habilidad in habilidades %}
-                <li class="flex items-start gap-3">
-                  <span data-icon="check-circle" class="mt-0.5 h-5 w-5 shrink-0 text-[#27AE60]"></span>
-                  <span class="text-[#26222E]">{{ habilidad }}</span>
-                </li>
-              {% endfor %}
-            </ul>
+            {% if habilidades_duras %}
+              <h3 class="mt-5 text-sm font-semibold text-[#512DA8]">Habilidades técnicas</h3>
+              <div class="mt-3 flex flex-wrap gap-2">
+                {% for habilidad in habilidades_duras %}
+                  <span class="rounded-full border border-[#512DA8]/25 bg-[#512DA8]/10 px-3 py-1 text-sm font-medium text-[#512DA8]">{{ habilidad }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+            <section aria-label="Habilidades blandas" class="mt-6" id="habilidades-blandas">
+              <h3 class="text-sm font-semibold text-emerald-700">Habilidades blandas</h3>
+              {% if habilidades_blandas %}
+                <div class="mt-3 flex flex-wrap gap-2">
+                  {% for habilidad in habilidades_blandas %}
+                    <span class="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">{{ habilidad }}</span>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <p class="mt-2 text-sm text-[#6B645C]">No especificadas</p>
+              {% endif %}
+            </section>
           </div>
         {% endif %}
       </div>

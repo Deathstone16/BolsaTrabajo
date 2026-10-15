@@ -1,3 +1,4 @@
+import asyncio
 from unittest.mock import patch
 from datetime import timedelta
 from django.utils import timezone
@@ -9,6 +10,9 @@ import hmac
 import json
 import time
 
+from channels.layers import get_channel_layer
+from channels.testing import WebsocketCommunicator
+from django.core import signing
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError, transaction
 from django.test import TestCase, override_settings
@@ -18,6 +22,7 @@ from usuarios.models import Postulante, Usuario
 
 from .models import AnalisisCV, ComparacionOfertaCV, EventoSalida, PerfilCV, TrabajoExtraccion
 from .workflow import publish_candidate_profile, request_cv_extraction, request_profile_normalization
+from .consumers import CVAnalysisConsumer, TOKEN_SALT
 
 
 @override_settings(
@@ -25,6 +30,7 @@ from .workflow import publish_candidate_profile, request_cv_extraction, request_
     IA_API_TOKEN='token-de-servicio',
     IA_CALLBACK_TOKEN='token-de-callback',
     IA_CALLBACK_HMAC_SECRET='token-de-callback',
+    CHANNEL_LAYERS={'default': {'BACKEND': 'channels.layers.InMemoryChannelLayer'}},
 )
 class AnalisisCVViewsTests(TestCase):
     def setUp(self):
@@ -226,6 +232,36 @@ class AnalisisCVViewsTests(TestCase):
         self.assertEqual(response.status_code, 400)
         analisis.refresh_from_db()
         self.assertNotIn('nivel_usuario', analisis.respuesta['result']['habilidades_analizadas'][0])
+
+@override_settings(CHANNEL_LAYERS={'default': {'BACKEND': 'channels.layers.InMemoryChannelLayer'}})
+class CVAnalysisConsumerTests(TestCase):
+    def setUp(self):
+        self.usuario = Usuario.objects.create_user(email='ws@example.com', password='clave-segura')
+
+    def test_consumer_recibe_broadcast_solo_con_token_del_usuario(self):
+        async def scenario():
+            token = signing.dumps(self.usuario.pk, salt=TOKEN_SALT)
+            socket = WebsocketCommunicator(CVAnalysisConsumer.as_asgi(), f'/ws/cv-analysis/?token={token}')
+            socket.scope['user'] = self.usuario
+            connected, _ = await socket.connect()
+            self.assertTrue(connected)
+            await get_channel_layer().group_send(f'user_{self.usuario.pk}', {
+                'type': 'cv.analysis.complete',
+                'payload': {'analysis_id': 42, 'status': 'completado'},
+            })
+            self.assertEqual(await socket.receive_json_from(), {
+                'type': 'cv.analyzed',
+                'payload': {'analysis_id': 42, 'status': 'completado'},
+            })
+            await socket.disconnect()
+
+            bad = WebsocketCommunicator(CVAnalysisConsumer.as_asgi(), '/ws/cv-analysis/?token=invalid')
+            bad.scope['user'] = self.usuario
+            connected, _ = await bad.connect()
+            self.assertFalse(connected)
+
+        asyncio.run(scenario())
+
 
 class ComparacionOfertaCVTests(TestCase):
     def setUp(self):

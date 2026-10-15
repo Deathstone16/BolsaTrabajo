@@ -16,9 +16,10 @@
     </div>
 
     <nav class="mt-6 flex flex-col gap-1.5">
-      <a href="{% url 'mi_perfil' %}"
+      <a href="{% url 'mi_perfil' %}#cv-analysis"
          class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors {% if seccion == 'perfil' %}bg-[#512DA8] font-semibold text-white shadow-md{% else %}text-[#6B645C] hover:bg-[#F3EDE5] hover:text-[#26222E]{% endif %}">
         <span data-icon="user" class="h-4 w-4"></span> Perfil profesional
+        <span id="cv-analysis-badge" class="ml-auto hidden rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">CV listo</span>
       </a>
       <a href="{% url 'datos_personales' %}"
          class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors {% if seccion == 'datos' %}bg-[#512DA8] font-semibold text-white shadow-md{% else %}text-[#6B645C] hover:bg-[#F3EDE5] hover:text-[#26222E]{% endif %}">

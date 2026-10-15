@@ -23,11 +23,16 @@ from django.contrib.staticfiles.handlers import ASGIStaticFilesHandler
 if settings.DEBUG:
     django_asgi_app = ASGIStaticFilesHandler(django_asgi_app)
 
-from matching.routing import websocket_urlpatterns
+from matching.routing import websocket_urlpatterns as match_websocket_urlpatterns
+from ia.routing import websocket_urlpatterns as cv_websocket_urlpatterns
 from django.urls import path
 from ia.consumers import CVNotificationConsumer
 
-websocket_urlpatterns = [*websocket_urlpatterns, path('ws/cv/', CVNotificationConsumer.as_asgi())]
+websocket_urlpatterns = [
+    *match_websocket_urlpatterns,
+    *cv_websocket_urlpatterns,
+    path('ws/cv/', CVNotificationConsumer.as_asgi()),
+]
 
 application = ProtocolTypeRouter({
     'http': django_asgi_app,

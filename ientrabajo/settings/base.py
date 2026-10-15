@@ -40,6 +40,7 @@ if not DEBUG and not ALLOWED_HOSTS:
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -79,6 +80,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'ia.context_processors.cv_notifications',
             ],
             # {% static_v %} disponible en todas las plantillas: agrega la version
             # del archivo a la URL para que el navegador no use JS/CSS viejo cacheado.
@@ -89,7 +91,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ientrabajo.wsgi.application'
 ASGI_APPLICATION = 'ientrabajo.asgi.application'
-
 CHANNEL_REDIS_URL = os.environ.get('CHANNEL_REDIS_URL', 'redis://127.0.0.1:6379/3')
 CHANNEL_LAYERS = {
     'default': {

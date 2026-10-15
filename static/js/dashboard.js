@@ -53,13 +53,20 @@ function dibujarPildora(texto, sufijo) {
   const container = document.getElementById('tags-container-' + sufijo);
   if (!container) return;
   const pildora = document.createElement('span');
-  pildora.className = 'chip !text-sm';
-  pildora.innerHTML = `${escapeHtml(texto)}
-    <button type="button" data-tag="${escapeHtml(texto)}"
-            class="rounded-full p-0.5 transition-opacity hover:opacity-60">
-      <span data-icon="x" class="h-3 w-3"></span>
-    </button>`;
-  pildora.querySelector('button').addEventListener('click', function() {
+  pildora.className = sufijo === 'blandas'
+    ? 'chip !text-sm !border-emerald-300 !bg-emerald-50 !text-emerald-800'
+    : 'chip !text-sm';
+  pildora.appendChild(document.createTextNode(texto));
+  const quitar = document.createElement('button');
+  quitar.type = 'button';
+  quitar.dataset.tag = texto;
+  quitar.className = 'rounded-full p-0.5 transition-opacity hover:opacity-60';
+  const icono = document.createElement('span');
+  icono.dataset.icon = 'x';
+  icono.className = 'h-3 w-3';
+  quitar.appendChild(icono);
+  pildora.appendChild(quitar);
+  quitar.addEventListener('click', function() {
     pildora.remove();
     actualizarHiddenInput(sufijo);
   });
@@ -73,20 +80,14 @@ function actualizarHiddenInput(sufijo) {
   if (!container) return;
   const hiddenInput = document.getElementById('id_habilidades_' + sufijo);
   if (!hiddenInput) return;
-  const tags = Array.from(container.children).map(el => el.childNodes[0].textContent.trim());
+  const tags = Array.from(container.children).map(el => el.querySelector('button').dataset.tag);
   hiddenInput.value = tags.join(', ');
-}
-
-function escapeHtml(texto) {
-  const div = document.createElement('div');
-  div.textContent = texto;
-  return div.innerHTML;
 }
 
 function obtenerTagsSeleccionados(sufijo) {
   const container = document.getElementById('tags-container-' + sufijo);
   if (!container) return [];
-  return Array.from(container.children).map(el => el.childNodes[0].textContent.trim().toLowerCase());
+  return Array.from(container.children).map(el => el.querySelector('button').dataset.tag.toLowerCase());
 }
 
 document.addEventListener('input', function(e) {

@@ -3,7 +3,10 @@
 import hashlib
 import hmac
 import json
+import logging
 import time
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -23,6 +26,7 @@ from .models import PerfilCV
 
 
 NIVELES_HABILIDAD = ('Teórico', 'Principiante', 'Intermedio', 'Avanzado')
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -194,4 +198,27 @@ def llegue(request):
         applied = receive_extraction_event(respuesta)
     except (TrabajoExtraccion.DoesNotExist, ValueError):
         return JsonResponse({'detail': 'Solicitud de extracción inexistente o inválida.'}, status=404)
+    if applied:
+        job = TrabajoExtraccion.objects.select_related('analisis_cv__postulante').filter(
+            clave_idempotencia=respuesta['request_id'],
+            source_hash=respuesta['source_hash'],
+            tipo=TrabajoExtraccion.Tipo.CV,
+        ).first()
+        if job and job.analisis_cv:
+            analysis = job.analisis_cv
+            notification = {
+                'analysis_id': analysis.pk,
+                'status': analysis.estado,
+                'mensaje': 'El análisis del CV está listo.' if analysis.estado == AnalisisCV.Estado.COMPLETADO
+                           else (analysis.error or 'No se pudo analizar el CV.'),
+                'resultado_url': reverse('ia:ver_resultado', args=[analysis.pk])
+                                 if analysis.estado == AnalisisCV.Estado.COMPLETADO else None,
+            }
+            try:
+                async_to_sync(get_channel_layer().group_send)(
+                    f'user_{analysis.postulante.usuario_id}',
+                    {'type': 'cv.analysis.complete', 'payload': notification},
+                )
+            except Exception:
+                logger.exception('No se pudo emitir la notificación del análisis de CV %s', analysis.pk)
     return JsonResponse({'success': True, 'duplicado': not applied})

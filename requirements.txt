@@ -1,4 +1,6 @@
 Django>=5.2,<6.0
+channels[daphne]>=4.2,<5.0
+channels-redis>=4.2,<5.0
 python-dotenv>=1.0
 Pillow>=10.0
 sphinx>=7.0
