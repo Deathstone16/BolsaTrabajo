@@ -10,7 +10,7 @@ if (Test-Path -LiteralPath $pidPath) {
         $process = Get-Process -Id $entry.id -ErrorAction SilentlyContinue
         if ($process -and $process.StartTime.ToUniversalTime().Ticks -eq ([datetime]$entry.started).ToUniversalTime().Ticks) {
             Stop-IAChildren $entry.id
-            Stop-Process -Id $entry.id
+            Stop-Process -Id $entry.id -ErrorAction SilentlyContinue
         }
     }
     Remove-Item -LiteralPath $pidPath
