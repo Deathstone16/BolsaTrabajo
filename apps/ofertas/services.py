@@ -5,6 +5,7 @@ CRUD de ofertas, búsqueda con filtros, cambio de estados
 y funciones de utilidad para el dominio de ofertas.
 """
 
+from django.db import transaction
 from .models import Oferta, OfertaFavorita
 
 from django.shortcuts import get_object_or_404
@@ -12,6 +13,17 @@ from django.shortcuts import get_object_or_404
 from categorias.models import Habilidad
 
 
+@transaction.atomic
+def activar_y_programar_analisis(oferta):
+    """Único punto de transición a activa y de creación del outbox IA."""
+    oferta.estado = 'activa'
+    oferta.save()
+    from ia.workflow import request_offer_extraction
+    request_offer_extraction(oferta)
+    return oferta
+
+
+@transaction.atomic
 def crear_oferta_laboral(usuario_empresa, form_oferta):
     """Crea una oferta laboral asociada a una empresa.
 
@@ -25,10 +37,7 @@ def crear_oferta_laboral(usuario_empresa, form_oferta):
     
     oferta = form_oferta.save(commit=False)
     oferta.empresa = usuario_empresa
-    oferta.estado = 'activa'
-    oferta.save()
-    
-    return oferta
+    return activar_y_programar_analisis(oferta)
 
 
 def obtener_ofertas_por_empresa(usuario_empresa):
@@ -72,7 +81,9 @@ def obtener_ofertas_activas(busqueda='', modalidad='', experiencia=''):
     Returns:
         QuerySet de ofertas activas filtradas.
     """
-    ofertas = Oferta.objects.filter(estado='activa').select_related('empresa__oferente', 'categoria').order_by('-fecha_publicacion')
+    ofertas = Oferta.objects.filter(
+        estado='activa',
+    ).select_related('empresa__oferente', 'categoria').order_by('-fecha_publicacion')
     if busqueda:
         ofertas = ofertas.filter(titulo__icontains=busqueda) | ofertas.filter(nombre_puesto__icontains=busqueda)
     if modalidad:

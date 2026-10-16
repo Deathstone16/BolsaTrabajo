@@ -76,77 +76,82 @@
           <p class="mt-4 whitespace-pre-line leading-relaxed text-[#6B645C]">{{ oferta.descripcion }}</p>
         </div>
 
-        {% if habilidades %}
+        {% if habilidades_duras or habilidades_blandas %}
           <div class="panel p-8">
             <h2 class="text-xl font-bold text-[#26222E]">Habilidades requeridas</h2>
-            {% comment %}
-              El mockup marcaba en verde/rojo el match contra el perfil. Eso depende de la IA
-              de matching, que todavia no esta; por ahora se listan todas por igual.
-            {% endcomment %}
-            <ul class="mt-5 space-y-4">
-              {% for habilidad in habilidades %}
-                <li class="flex items-start gap-3">
-                  <span data-icon="check-circle" class="mt-0.5 h-5 w-5 shrink-0 text-[#27AE60]"></span>
-                  <span class="text-[#26222E]">{{ habilidad }}</span>
-                </li>
-              {% endfor %}
-            </ul>
+            {% if habilidades_duras %}
+              <h3 class="mt-5 text-sm font-semibold text-[#512DA8]">Habilidades técnicas</h3>
+              <div class="mt-3 flex flex-wrap gap-2">
+                {% for habilidad in habilidades_duras %}
+                  <span class="rounded-full border border-[#512DA8]/25 bg-[#512DA8]/10 px-3 py-1 text-sm font-medium text-[#512DA8]">{{ habilidad }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+            <section aria-label="Habilidades blandas" class="mt-6" id="habilidades-blandas">
+              <h3 class="text-sm font-semibold text-emerald-700">Habilidades blandas</h3>
+              {% if habilidades_blandas %}
+                <div class="mt-3 flex flex-wrap gap-2">
+                  {% for habilidad in habilidades_blandas %}
+                    <span class="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">{{ habilidad }}</span>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <p class="mt-2 text-sm text-[#6B645C]">No especificadas</p>
+              {% endif %}
+            </section>
           </div>
         {% endif %}
       </div>
 
       <div class="space-y-6">
-        <div class="panel p-6 text-center">
+        <div class="panel p-6 text-center" id="match-card" data-request-id="{% if match %}{{ match.request_id }}{% endif %}" data-status="{% if match %}{{ match.estado }}{% endif %}">
           <h3 class="font-mono text-xs uppercase tracking-widest text-[#6B645C]">Match inteligente</h3>
-          {% if comparacion %}
-          <div class="relative mx-auto mt-6 grid h-36 w-36 place-items-center rounded-full" style="background: conic-gradient(#512DA8 {{ comparacion.porcentaje }}%, #F0E9E1 0);">
-            <div class="absolute inset-3 rounded-full bg-[#FEFCF9]"></div>
-            <div class="relative flex flex-col items-center justify-center">
-              <span class="text-3xl font-bold text-[#26222E]">{{ comparacion.porcentaje }}%</span>
+          {% if user.is_authenticated and user.postulante and not perfil_cv %}
+            {% include 'ia/comparacion_historica.html' %}
+          {% else %}
+          <div class="relative mx-auto mt-6 h-36 w-36">
+            <svg class="h-36 w-36 -rotate-90" viewBox="0 0 120 120" aria-hidden="true">
+              <circle cx="60" cy="60" r="54" stroke="#F0E9E1" stroke-width="12" fill="none"></circle>
+              <circle id="match-progress" data-value="{% if match and match.match_percentage %}{{ match.match_percentage|floatformat:'2u' }}{% else %}0{% endif %}" cx="60" cy="60" r="54" stroke="#512DA8" stroke-width="12" fill="none"
+                      stroke-dasharray="339.29" stroke-dashoffset="339.29" stroke-linecap="round"></circle>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span id="match-percentage" class="text-3xl font-bold text-[#26222E]">{% if match and match.estado == 'completed' %}{{ match.match_percentage|floatformat:0 }}%{% else %}—{% endif %}</span>
               <span class="font-mono text-[10px] uppercase tracking-widest text-[#6B645C]">match</span>
             </div>
           </div>
-          <p class="mt-5 text-sm text-[#6B645C]">
-            {{ comparacion.resultado.coincidencias|length }} de {{ comparacion.resultado.total_requisitos }} habilidades coinciden.
+          <p id="match-message" class="mt-5 text-sm text-[#6B645C]" role="status" aria-live="polite">
+            {% if not user.is_authenticated %}Iniciá sesión para calcular tu compatibilidad.
+            {% elif not perfil_cv or perfil_cv.estado != 'ready' %}Primero completá el análisis de tu perfil.
+            {% elif not perfil_oferta or perfil_oferta.estado != 'ready' %}Esta oferta está siendo analizada.
+            {% elif match and match.estado == 'completed' %}Compatibilidad calculada según tu perfil y esta oferta.
+            {% elif match.estado == 'error' %}No se pudo calcular la compatibilidad. Podés reintentar.
+            {% elif match %}Calculando compatibilidad…
+            {% else %}Compará tu perfil guardado con esta oferta.{% endif %}
           </p>
-          {% if comparacion.resultado.coincidencias %}
-            <div class="mt-4 text-left">
-              <p class="text-xs font-semibold uppercase tracking-wider text-[#27AE60]">Coincidencias</p>
-              <ul class="mt-2 space-y-1 text-sm text-[#26222E]">
-                {% for item in comparacion.resultado.coincidencias %}<li>✓ {{ item.requisito }}</li>{% endfor %}
-              </ul>
-            </div>
+          <p class="mt-3 text-xs text-[#6B645C]">El porcentaje compara tu perfil con los requisitos de la oferta. No representa una probabilidad de contratación.</p>
+          <details class="mt-4 text-left text-xs text-[#6B645C]">
+            <summary class="cursor-pointer font-semibold text-[#512DA8]">¿Cómo se calcula mi match?</summary>
+            <p class="mt-3 leading-relaxed">Comparamos tu perfil guardado con esta oferta. La IA evalúa cada área de 0 a 4 y combinamos los puntajes con estos pesos:</p>
+            <ul class="mt-2 space-y-1">
+              <li>Habilidades obligatorias: 45%</li>
+              <li>Experiencia: 25%</li>
+              <li>Formación e idiomas: 15%</li>
+              <li>Preferencias y requisitos deseables: 15%</li>
+            </ul>
+            <p class="mt-2 leading-relaxed">Un requisito excluyente sin respaldo limita el resultado a 40%. La cobertura indica cuántos requisitos tienen una habilidad con el mismo nombre en tu perfil; la confianza es una estimación de la IA. Los resultados de las cuentas demo son simulados.</p>
+          </details>
+          <div id="match-details" class="mt-4 text-left text-sm text-[#6B645C]" hidden>
+            <p id="match-coverage"></p>
+            <p id="match-confidence" class="mt-1"></p>
+            <ul id="match-assessments" class="mt-3 space-y-2"></ul>
+          </div>
+          {% if user.is_authenticated and perfil_cv and perfil_cv.estado == 'ready' and perfil_oferta and perfil_oferta.estado == 'ready' %}
+            <form id="match-form" method="post" action="{% url 'matching:calcular' oferta.pk %}" class="mt-5">
+              {% csrf_token %}
+              <button id="match-button" class="btn-ien w-full" type="submit" {% if match and match.estado != 'error' and match.estado != 'completed' %}disabled{% endif %}>{% if match and match.estado == 'completed' %}Ver compatibilidad{% else %}Calcular compatibilidad{% endif %}</button>
+            </form>
           {% endif %}
-          {% if comparacion.resultado.habilidades_faltantes %}
-            <div class="mt-4 text-left">
-              <p class="text-xs font-semibold uppercase tracking-wider text-[#d97706]">Por desarrollar</p>
-              <ul class="mt-2 space-y-1 text-sm text-[#6B645C]">
-                {% for habilidad in comparacion.resultado.habilidades_faltantes %}<li>• {{ habilidad }}</li>{% endfor %}
-              </ul>
-            </div>
-          {% endif %}
-          <form method="post" action="{% url 'comparar_oferta_cv' oferta.pk %}" class="mt-5">
-            {% csrf_token %}
-            <button type="submit" class="btn-ghost w-full justify-center text-sm">Volver a comparar</button>
-          </form>
-          {% elif user.is_authenticated and user.postulante %}
-            {% if analisis_cv %}
-              <p class="mt-4 text-sm leading-relaxed text-[#6B645C]">Usaremos las habilidades que la IA ya extrajo de tu último CV.</p>
-              <form method="post" action="{% url 'comparar_oferta_cv' oferta.pk %}" class="mt-5">
-                {% csrf_token %}
-                <button type="submit" class="btn-ien w-full justify-center text-sm">
-                  <span data-icon="sparkles" class="h-4 w-4"></span> Comparar con mi CV
-                </button>
-              </form>
-            {% else %}
-              <p class="mt-4 text-sm leading-relaxed text-[#6B645C]">Primero necesitás analizar tu CV para calcular el match.</p>
-              <a href="{% url 'mi_perfil' %}" class="btn-ien mt-5 w-full justify-center text-sm">Analizar mi CV</a>
-            {% endif %}
-          {% elif not user.is_authenticated %}
-            <p class="mt-4 text-sm leading-relaxed text-[#6B645C]">Iniciá sesión como postulante para comparar esta oferta con tu CV.</p>
-            <a href="{% url 'login' %}" class="btn-ien mt-5 w-full justify-center text-sm">Iniciar sesión</a>
-          {% else %}
-            <p class="mt-4 text-sm leading-relaxed text-[#6B645C]">La comparación está disponible para postulantes.</p>
           {% endif %}
         </div>
 
@@ -199,4 +204,117 @@
     </div>
   </div>
 </section>
+<style>
+  #match-percentage { font-variant-numeric: tabular-nums; }
+  #match-card.is-calculating #match-progress {
+    stroke-dasharray: 65 274.29;
+    transform-origin: 60px 60px;
+    animation: match-spin 1.6s linear infinite;
+  }
+  #match-card.match-arrived #match-percentage { animation: match-settle .45s ease-out; }
+  @keyframes match-spin { to { transform: rotate(360deg); } }
+  @keyframes match-settle { 50% { transform: scale(1.08); } }
+  @media (prefers-reduced-motion: reduce) {
+    #match-card.is-calculating #match-progress, #match-card.match-arrived #match-percentage { animation: none; }
+  }
+</style>
+<script>
+(() => {
+  const form = document.getElementById('match-form');
+  if (!form) return;
+  const button = document.getElementById('match-button');
+  const message = document.getElementById('match-message');
+  const percentage = document.getElementById('match-percentage');
+  const progress = document.getElementById('match-progress');
+  const card = document.getElementById('match-card');
+  let pollTimer;
+  let socket;
+  let animationFrame;
+  let displayedValue = 0;
+  let lastTarget = null;
+  const circumference = 2 * Math.PI * 54;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  function paint(value) {
+    displayedValue = value;
+    percentage.textContent = Math.round(value) + '%';
+    progress.style.strokeDashoffset = String(circumference * (1 - value / 100));
+  }
+  function animatePercentage(rawTarget) {
+    const target = Math.min(100, Math.max(0, Number(rawTarget)));
+    if (!Number.isFinite(target) || target === lastTarget) return;
+    lastTarget = target;
+    cancelAnimationFrame(animationFrame);
+    card.classList.remove('is-calculating', 'match-arrived');
+    if (reducedMotion.matches) { paint(target); return; }
+    const from = displayedValue;
+    const duration = 1400;
+    let started;
+    function tick(timestamp) {
+      if (started === undefined) started = timestamp;
+      const elapsed = Math.min(1, (timestamp - started) / duration);
+      const eased = 1 - Math.pow(1 - elapsed, 3);
+      paint(from + (target - from) * eased);
+      if (elapsed < 1) animationFrame = requestAnimationFrame(tick);
+      else { paint(target); card.classList.add('match-arrived'); }
+    }
+    animationFrame = requestAnimationFrame(tick);
+  }
+  function stopWatching() {
+    clearInterval(pollTimer);
+    if (socket) { socket.close(); socket = null; }
+  }
+  function render(data) {
+    if (data.status === 'completed') {
+      animatePercentage(data.match_percentage);
+      message.textContent = 'Compatibilidad calculada según tu perfil y esta oferta.';
+      button.disabled = false; button.textContent = 'Ver compatibilidad'; stopWatching();
+      document.getElementById('match-details').hidden = false;
+      document.getElementById('match-coverage').textContent = 'Requisitos con información: ' + Math.round(data.coverage_percentage) + '%';
+      document.getElementById('match-confidence').textContent = 'Confianza estimada de la evaluación: ' + Math.round(data.confidence_percentage) + '%';
+      const list = document.getElementById('match-assessments');
+      list.replaceChildren();
+      const labels = {met: 'Coincide', partial: 'Coincide parcialmente', not_met: 'No alcanza el nivel requerido', unknown: 'Sin información suficiente'};
+      for (const item of data.result?.assessments || []) {
+        const row = document.createElement('li');
+        row.textContent = item.name + ': ' + (labels[item.status] || item.status);
+        list.appendChild(row);
+      }
+    }
+    else if (data.status === 'error') { card.classList.remove('is-calculating'); message.textContent = data.error || 'No se pudo calcular la compatibilidad.'; button.disabled = false; button.textContent = 'Reintentar'; stopWatching(); }
+    else { card.classList.add('is-calculating'); percentage.textContent = '…'; message.textContent = data.status === 'rate_limited' ? 'Esperando disponibilidad para calcular tu compatibilidad…' : 'Calculando compatibilidad…'; button.disabled = true; }
+  }
+  function watch(requestId) {
+    stopWatching();
+    const stateUrl = `{% url 'matching:estado' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', requestId);
+    const poll = () => fetch(stateUrl).then(r => r.ok ? r.json() : null).then(data => data && render(data)).catch(() => { message.textContent = 'Reconectando con tu resultado…'; });
+    pollTimer = setInterval(poll, 3000);
+    const scheme = location.protocol === 'https:' ? 'wss' : 'ws';
+    try {
+      socket = new WebSocket(`${scheme}://${location.host}/ws/matches/${requestId}/`);
+      socket.onmessage = event => render(JSON.parse(event.data));
+      socket.onclose = () => {};
+    } catch (_) {}
+    poll();
+  }
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    button.disabled = true;
+    cancelAnimationFrame(animationFrame);
+    lastTarget = null;
+    paint(0);
+    card.classList.remove('match-arrived');
+    card.classList.add('is-calculating');
+    fetch(form.action, {method: 'POST', headers: {'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value, 'X-Requested-With': 'XMLHttpRequest'}})
+      .then(response => response.json()).then(data => {
+        if (!data.success) { card.classList.remove('is-calculating'); message.textContent = data.mensaje || 'No se pudo iniciar el cálculo.'; button.disabled = false; return; }
+        render(data);
+        if (data.status !== 'completed' && data.status !== 'error') watch(data.request_id);
+      }).catch(() => { card.classList.remove('is-calculating'); message.textContent = 'No se pudo iniciar el cálculo.'; button.disabled = false; });
+  });
+  const initial = Number(progress.dataset.value || 0);
+  if (card.dataset.status === 'completed') { paint(0); animatePercentage(initial); }
+  if (card.dataset.requestId && card.dataset.status !== 'error') watch(card.dataset.requestId);
+  window.addEventListener('pagehide', () => { stopWatching(); cancelAnimationFrame(animationFrame); });
+})();
+</script>
 {% endblock %}

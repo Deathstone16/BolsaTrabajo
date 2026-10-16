@@ -40,6 +40,7 @@ if not DEBUG and not ALLOWED_HOSTS:
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -53,6 +54,8 @@ INSTALLED_APPS = [
     'categorias',
     'emails',
     'ia',
+    'matching',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -77,6 +80,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'ia.context_processors.cv_notifications',
             ],
             # {% static_v %} disponible en todas las plantillas: agrega la version
             # del archivo a la URL para que el navegador no use JS/CSS viejo cacheado.
@@ -86,6 +90,14 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'ientrabajo.wsgi.application'
+ASGI_APPLICATION = 'ientrabajo.asgi.application'
+CHANNEL_REDIS_URL = os.environ.get('CHANNEL_REDIS_URL', 'redis://127.0.0.1:6379/3')
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {'hosts': [CHANNEL_REDIS_URL]},
+    },
+}
 
 
 # Database
@@ -159,6 +171,15 @@ IA_API_TOKEN = os.environ.get('IA_API_TOKEN', '')
 IA_CALLBACK_TOKEN = os.environ.get('IA_CALLBACK_TOKEN', 'HgjB1ZeMMpRo3W9ehIsYqg71l0Ageo3OyRhtSOCLeDr0Mr_m6E3ia03bDjGVntdr')
 # Opcional: URL pública fija para callbacks (útil si Django corre detrás de proxy o túnel).
 IA_CALLBACK_URL = os.environ.get('IA_CALLBACK_URL', '')
+IA_CALLBACK_HMAC_SECRET = os.environ.get('IA_CALLBACK_HMAC_SECRET', IA_CALLBACK_TOKEN)
+IA_OFFER_API_URL = os.environ.get('IA_OFFER_API_URL', '')
+MATCH_API_URL = os.environ.get('MATCH_API_URL', 'ws://127.0.0.1:8001/api/v1/ws/v1/matches')
+MATCH_API_HTTP_URL = os.environ.get('MATCH_API_HTTP_URL', 'http://127.0.0.1:8001/api/v1')
+MATCH_API_TOKEN = os.environ.get('MATCH_API_TOKEN', '')
+MATCH_CACHE_REDIS_URL = os.environ.get('MATCH_CACHE_REDIS_URL', 'redis://127.0.0.1:6379/6')
+MATCH_CACHE_TTL_SECONDS = int(os.environ.get('MATCH_CACHE_TTL_SECONDS', str(60 * 60 * 24 * 7)))
+MATCH_REQUESTS_PER_HOUR = int(os.environ.get('MATCH_REQUESTS_PER_HOUR', '20'))
+MATCH_MODEL_VERSION = os.environ.get('MATCH_MODEL_VERSION', 'groq:llama-3.3-70b-versatile')
 
 if not DEBUG:
     SECURE_SSL_REDIRECT = env_bool('SECURE_SSL_REDIRECT', True)

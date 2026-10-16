@@ -74,6 +74,7 @@ En `BolsaTrabajo/.env`:
 | `SECURE_HSTS_SECONDS` | Tiempo que el navegador recordará usar HTTPS. `31536000` equivale a un año; usá `0` temporalmente al probar una migración HTTPS. |
 | `IA_API_URL` | Dirección de FastAPI más `/api/v1/cv-analyses`. Con `make run-api` local, usá `http://127.0.0.1:8001/api/v1/cv-analyses`. Si FastAPI corre en otra máquina o contenedor, usá una dirección alcanzable desde Django. |
 | `IA_CALLBACK_TOKEN` | Secreto aleatorio generado con el comando anterior. Debe ser idéntico a `CV_RESULT_CALLBACK_SECRET` de FastAPI; Django lo verifica en el header `X-IA-Callback-Token`. |
+| `CHANNEL_REDIS_URL` | Redis compartido para avisos WebSocket; debe apuntar a la misma instancia y base `/2` que FastAPI (por defecto `redis://localhost:6379/2`). |
 | `IA_API_TOKEN` | Generá un secreto aleatorio distinto del callback y copialo también en `SERVICE_API_TOKEN` de FastAPI. Django lo envía como `Authorization: Bearer ...` para autenticar su llamada al microservicio. |
 | `IA_CALLBACK_URL` | Reservada para una URL pública fija; el código actual no la utiliza. Dejala vacía. La URL efectiva del callback se configura en FastAPI con `CV_RESULT_CALLBACK_URL`. |
 | `EMAIL_HOST_USER` | Dirección de la cuenta Gmail que enviará correos. Puede quedar vacía si no necesitás email local. |
@@ -89,6 +90,7 @@ En `ia_api/backend/.env` se parte de la [plantilla del microservicio](../../ia_a
 | `CV_RESULT_CALLBACK_URL` | URL de Django que recibe el resultado: `http://127.0.0.1:8000/ia/llegue/` en local. Desde un contenedor debe ser una dirección que ese contenedor pueda alcanzar. |
 | `CV_RESULT_CALLBACK_SECRET` | Copiá exactamente el valor de `IA_CALLBACK_TOKEN`; no es una clave de Groq ni un JWT. |
 | `CELERY_BROKER_URL` / `CELERY_RESULT_BACKEND` | Direcciones de Redis para la cola y los resultados. Con Redis local del `docker compose` del microservicio, conservá `redis://localhost:6379/0` y `/1` respectivamente. |
+| `CHANNEL_REDIS_URL` | Redis del canal de notificaciones; misma instancia y base `/2` que Django (`redis://localhost:6379/2` en local). |
 | `JWT_SECRET_KEY` | Generá otro secreto aleatorio con `python3 -c "import secrets; print(secrets.token_urlsafe(48))"`. FastAPI exige esta variable al arrancar, pero el flujo actual de CV no genera ni comprueba JWT; no debe coincidir con `IA_CALLBACK_TOKEN`. |
 | `SERVICE_USER` / `SERVICE_PASSWORD` | Elegí un identificador y una contraseña local distinta. La configuración actual los exige, aunque ninguna ruta del análisis los usa para autenticarse. |
 | `PROJECT_NAME` | Nombre descriptivo que muestra FastAPI; puede quedar como en la plantilla. |
@@ -138,6 +140,10 @@ Luego inicia sesión como postulante, carga un PDF y pulsa **Analizar CV**. La
 solicitud responde sin esperar el análisis: FastAPI encola el PDF y Celery lo
 extrae y procesa en segundo plano. El resultado se guarda cuando Django recibe
 el callback.
+Con ambos servicios apuntando al mismo Redis, el worker también avisa por
+WebSocket al postulante conectado. Si la conexión en vivo falla, el navegador
+consulta el estado cada 10 segundos. El enlace del aviso lleva a
+`/perfil/#cv-analysis`.
 
 ## Puertos locales
 

@@ -137,7 +137,26 @@ def editar_perfil_empresa(request):
 def detalle_oferta_postulante(request, pk):
     """Muestra el detalle público de una oferta activa."""
     oferta = get_object_or_404(Oferta, pk=pk, estado='activa')
-    habilidades = [h.strip() for h in oferta.habilidades_requeridas.split(',') if h.strip()]
+    habilidades_duras = [h.strip() for h in (oferta.habilidades_duras or '').split(',') if h.strip()]
+    habilidades_blandas = [h.strip() for h in (oferta.habilidades_blandas or '').split(',') if h.strip()]
+    if not habilidades_duras and not habilidades_blandas:
+        habilidades_duras = [h.strip() for h in (oferta.habilidades_requeridas or '').split(',') if h.strip()]
+    match = None
+    perfil_cv = None
+    if request.user.is_authenticated and hasattr(request.user, 'postulante'):
+        from matching.models import ResultadoCompatibilidad
+        from django.conf import settings
+        perfil_cv = getattr(request.user.postulante, 'perfil_ia', None)
+        match = ResultadoCompatibilidad.objects.filter(
+            postulante=request.user.postulante,
+            oferta=oferta,
+            model_version=settings.MATCH_MODEL_VERSION,
+            perfil_cv_version=perfil_cv.version if perfil_cv else 0,
+            perfil_oferta_version=oferta.perfil_ia.version if hasattr(oferta, 'perfil_ia') else 0,
+            perfil_cv_hash=perfil_cv.source_hash if perfil_cv else '',
+            perfil_oferta_hash=oferta.perfil_ia.source_hash if hasattr(oferta, 'perfil_ia') else '',
+        ).order_by('-actualizado_en').first()
+
     favorita = es_oferta_favorita(request.user.postulante, oferta.id) if hasattr(request.user, 'postulante') else False
     analisis_cv = None
     comparacion = None
@@ -162,7 +181,11 @@ def detalle_oferta_postulante(request, pk):
     return render(request, 'nueva_ui/detalle_oferta.html', {
         'vista_activa': 'buscar',
         'oferta': oferta,
-        'habilidades': habilidades,
+        'match': match,
+        'perfil_cv': perfil_cv,
+        'perfil_oferta': getattr(oferta, 'perfil_ia', None),
+        'habilidades_duras': habilidades_duras,
+        'habilidades_blandas': habilidades_blandas,
         'favorita': favorita,
         'analisis_cv': analisis_cv,
         'comparacion': comparacion,
