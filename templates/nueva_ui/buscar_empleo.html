@@ -41,7 +41,11 @@
           <input type="hidden" name="q" value="{{ busqueda }}" />
           <div class="flex items-center gap-2">
             <span data-icon="sliders" class="h-4 w-4 text-[#512DA8]"></span>
+<<<<<<< Updated upstream
             <h2 class="font-semibold text-[#26222E]">Filtros</h2>
+=======
+            <h2 class="text-base font-semibold text-[#26222E]">Filtros</h2>
+>>>>>>> Stashed changes
             <a href="{% url 'buscar_empleo' %}" class="ml-auto flex items-center gap-1 text-xs text-[#6B645C] hover:text-[#512DA8]">
               <span data-icon="x" class="h-3.5 w-3.5"></span> Limpiar
             </a>
@@ -72,7 +76,11 @@
       </aside>
 
       <div class="lg:col-span-3">
+<<<<<<< Updated upstream
         <h2 class="mb-2 text-xl font-semibold text-[#26222E]">Ofertas disponibles</h2>
+=======
+        <h2 class="sr-only">Resultados de búsqueda</h2>
+>>>>>>> Stashed changes
         <div class="mb-5 flex items-center justify-between">
           <p class="font-mono text-xs uppercase tracking-widest text-[#6B645C]">
             {{ total }} oferta{{ total|pluralize }} encontrada{{ total|pluralize }}
