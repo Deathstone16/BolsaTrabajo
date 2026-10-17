@@ -15,8 +15,8 @@ microservicio FastAPI ubicado en el repositorio `ia_api/backend`.
 Cloná ambos repositorios en carpetas vecinas o elegí las rutas que prefieras:
 
 ```bash
-git clone <URL-DEL-REPOSITORIO-DJANGO> BolsaTrabajo
-git clone <URL-DEL-REPOSITORIO-IA> ia_api
+git clone https://github.com/Deathstone16/BolsaTrabajo.git BolsaTrabajo
+git clone https://github.com/IENbolsa2026/ia_api.git ia_api
 ```
 
 ### 1. Preparar Django
@@ -51,8 +51,8 @@ Aplica la base de datos y, opcionalmente, crea un administrador:
 ### 2. Preparar el microservicio de IA
 
 Seguí la sección **Ejecutar la pila completa en local** del
-[README del microservicio](../../ia_api/backend/README.md). Copiá también su
-[`.env.example`](../../ia_api/backend/.env.example) a `ia_api/backend/.env`. Para
+[README del microservicio](https://github.com/IENbolsa2026/ia_api/blob/main/backend/README.md). Copiá también su
+[`.env.example`](https://github.com/IENbolsa2026/ia_api/blob/main/backend/.env.example) a `ia_api/backend/.env`. Para
 conectar ambos servicios, verificá estas dos líneas en el archivo de FastAPI:
 
 ```dotenv
@@ -79,7 +79,7 @@ En `BolsaTrabajo/.env`:
 | `EMAIL_HOST_USER` | Dirección de la cuenta Gmail que enviará correos. Puede quedar vacía si no necesitás email local. |
 | `EMAIL_HOST_PASSWORD` | [Contraseña de aplicación de Google](https://support.google.com/accounts/answer/185833?hl=es), no la contraseña habitual de Gmail. Requiere verificación en dos pasos; puede quedar vacía si no enviás correos. |
 
-En `ia_api/backend/.env` se parte de la [plantilla del microservicio](../../ia_api/backend/.env.example):
+En `ia_api/backend/.env` se parte de la [plantilla del microservicio](https://github.com/IENbolsa2026/ia_api/blob/main/backend/.env.example):
 
 | Variable | Cómo completarla |
 | --- | --- |
@@ -125,6 +125,37 @@ make run-api
 
 Abre `http://127.0.0.1:8000/`.
 
+Si usás **Windows PowerShell**, los comandos equivalentes para crear los
+entornos y arrancar cada proceso son los siguientes. Ejecutá cada servicio en
+su propia terminal, desde la carpeta indicada; no hace falta activar el
+entorno virtual:
+
+```powershell
+# Una sola vez, desde BolsaTrabajo
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+Copy-Item .env.example .env
+.\.venv\Scripts\python.exe manage.py migrate
+
+# Una sola vez, desde ia_api/backend
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+Copy-Item .env.example .env
+
+# Terminal 1, desde ia_api/backend: Redis
+docker compose up -d redis
+# Terminal 2, desde ia_api/backend: worker
+.\.venv\Scripts\celery.exe -A app.core.celery_app.celery_app worker --loglevel=info --pool=solo
+# Terminal 3, desde ia_api/backend: API
+.\.venv\Scripts\uvicorn.exe app.main:app --host 127.0.0.1 --port 8001 --reload
+# Terminal 4, desde BolsaTrabajo: web
+.\.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000
+```
+
+Antes de arrancar, completá **ambos** `.env` con la clave de Groq y los
+secretos compartidos explicados arriba. En PowerShell podés generar cada
+secreto con `py -3.12 -c "import secrets; print(secrets.token_urlsafe(48))"`.
+
 ## Comprobación rápida
 
 Con los servicios iniciados, estas rutas deben responder:
@@ -138,6 +169,50 @@ Luego inicia sesión como postulante, carga un PDF y pulsa **Analizar CV**. La
 solicitud responde sin esperar el análisis: FastAPI encola el PDF y Celery lo
 extrae y procesa en segundo plano. El resultado se guarda cuando Django recibe
 el callback.
+
+Para revisar la presentación de ofertas sin crear avisos reales, en un entorno
+local con `DEBUG=true` podés cargar cuatro ofertas ficticias y verosímiles:
+
+```bash
+.venv/bin/python manage.py seed_seo_offers
+```
+
+En Windows, usá `.\.venv\Scripts\python.exe manage.py seed_seo_offers`. El
+comando se puede ejecutar más de una vez sin duplicarlas; las ofertas indican
+que son de demostración y no deben utilizarse como búsquedas laborales reales.
+
+## Publicación
+
+El repositorio **no incluye una configuración de hosting ni un despliegue
+automático**. Los comandos `runserver`, `make run-api` y `make run-worker` son
+para desarrollo; publicar requiere configurar un servidor, HTTPS y procesos
+persistentes para Django, FastAPI, Celery y Redis.
+
+Antes de abrir el sitio al público:
+
+1. Revisá la [lista de despliegue de Django](https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/), configurá en Django `DEBUG=false`, un `SECRET_KEY` nuevo y `ALLOWED_HOSTS` con el dominio real. No publiques los `.env` ni la clave de Groq. Configurá también la URL de FastAPI y los tokens compartidos entre ambos servicios.
+2. Quitá los secretos de ejemplo y los valores de respaldo del código, en particular el valor por defecto de `IA_CALLBACK_TOKEN` en `ientrabajo/settings/base.py`. Verificá que el callback de la IA no pueda llamarse sin el token correcto.
+3. Definí almacenamiento persistente y copias de seguridad para `db.sqlite3` y los archivos de `media/`. La configuración actual usa SQLite; si el despliegue necesita múltiples instancias, primero hay que preparar una base de datos apta para ese esquema. Revisá especialmente el acceso a los CV subidos antes de exponer archivos multimedia.
+4. Con la configuración final, ejecutá `python manage.py check --deploy`, `python manage.py migrate` y `python manage.py collectstatic --noinput`. Configurá el servidor para servir `STATIC_ROOT` (`staticfiles/`).
+5. Ejecutá Django con un servidor WSGI de producción y un proxy HTTPS; configurá FastAPI, Celery y Redis como servicios persistentes, con direcciones alcanzables entre sí. Probá el análisis completo de un CV y el callback en el dominio final.
+
+Esta lista es una guía de preparación, **no confirma que el proyecto ya esté
+publicado o listo para producción**. El proveedor, la base de datos definitiva,
+el servidor de archivos y la protección de CV deben definirse para el entorno
+concreto.
+
+## Mejoras de SEO y evidencia
+
+- Inicio y búsqueda: descripciones y textos más claros para explicar qué ofrece la bolsa de trabajo.
+- Páginas públicas: jerarquía de encabezados revisada para facilitar lectura, accesibilidad e indexación.
+- Ofertas de prueba: comando `seed_seo_offers` con contenido ficticio realista para revisar la búsqueda y el detalle.
+
+Para repetir la evaluación, iniciá el sitio, abrí Inicio, Búsqueda y un detalle
+de oferta en Chrome, y ejecutá **Lighthouse** desde DevTools en cada página.
+Revisá rendimiento, accesibilidad, buenas prácticas y SEO; exportá el reporte
+HTML o JSON y guardalo junto con la fecha, URL, modo móvil/escritorio y cambios
+aplicados. Los puntajes dependen del equipo, la red y las ofertas disponibles:
+**no hay un reporte Lighthouse versionado en este repositorio**.
 
 ## Puertos locales
 

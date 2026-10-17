@@ -1,6 +1,7 @@
 {% extends 'nueva_ui/base.html' %}
 
-{% block title %}IEN Empleo · Ofertas laborales y cursos{% endblock %}
+{% block title %}Ofertas laborales y cursos en Argentina · IEN Empleo{% endblock %}
+{% block description %}Buscá ofertas de trabajo en el nordeste argentino y otras regiones. Filtrá por modalidad y experiencia, y conocé los cursos disponibles del IEN.{% endblock %}
 
 {% block content %}
 <div class="ien-home">
@@ -9,7 +10,7 @@
       <div>
         <p class="kicker">Bolsa de trabajo · IEN</p>
         <h1 id="inicio-titulo" class="ien-home-title">Tu próxima<br>oportunidad<br><span class="ien-home-title-accent">empieza acá</span></h1>
-        <p class="ien-home-intro">Consultá las ofertas laborales y explorá las capacitaciones del Instituto Económico Nacional.</p>
+        <p class="ien-home-intro">Buscá puestos en Chaco, Corrientes y otras provincias, revisá sus requisitos y explorá las capacitaciones del Instituto Económico Nacional.</p>
         <div class="ien-home-stats">
           <p><strong>{{ total_ofertas }}</strong> oferta{{ total_ofertas|pluralize }} activa{{ total_ofertas|pluralize }}</p>
           <p><strong>{{ total_empresas }}</strong> empresa{{ total_empresas|pluralize }} verificada{{ total_empresas|pluralize }}</p>
