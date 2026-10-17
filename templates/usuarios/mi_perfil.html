@@ -21,8 +21,9 @@
       <div class="min-w-0">
         <p class="kicker">Tu perfil</p>
         <h1 class="mt-3 text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">Mi perfil profesional</h1>
+        {% include "nueva_ui/partials/_breadcrumbs.html" with current="Mi perfil" %}
         <p class="mt-3 max-w-2xl leading-relaxed text-[#6B645C]">
-          Nuestra plataforma analizará tu trayectoria para conectarte con oportunidades que realmente encajan con tu perfil y aspiraciones profesionales.
+          Cargá o actualizá tu CV y analizá tus habilidades para compararlas con los requisitos de las ofertas.
         </p>
 
         {# Los mensajes los renderiza nueva_ui/base.html, no hace falta repetirlos aca. #}
@@ -136,16 +137,20 @@
             <div data-analisis-barra class="barra-indeterminada" aria-hidden="true"><span></span></div>
           </div>
 
-          <div class="panel mt-6 flex cursor-pointer flex-col items-center justify-center p-12 text-center transition-colors hover:border-[#512DA8]/40"
-               onclick="document.getElementById('cv-input').click()" id="cv-upload-area">
+          <form method="post" enctype="multipart/form-data" action="{% url 'mi_perfil' %}" id="form-cv-upload" class="mt-6">
+            {% csrf_token %}
+            <div class="panel flex flex-col items-center justify-center p-12 text-center" id="cv-upload-area">
             <span data-icon="upload" class="mb-4 h-10 w-10 text-[#6B645C]"></span>
-            <p class="font-semibold text-[#26222E]">Reemplazar CV</p>
-            <p class="mt-1 text-sm text-[#6B645C]">Hacé clic para seleccionar un nuevo archivo</p>
+            <p class="font-semibold text-[#26222E]">Actualizar CV</p>
+            <p class="mt-1 text-sm text-[#6B645C]">El nuevo archivo reemplazará tu CV actual.</p>
+            <button type="button" class="btn-ghost mt-5" onclick="document.getElementById('cv-input').click()">Seleccionar nuevo CV</button>
             <div class="mt-5 flex flex-wrap justify-center gap-2">
               <span class="chip">PDF</span><span class="chip">DOC</span><span class="chip">DOCX</span><span class="chip">Máx 5 MB</span>
             </div>
-            <input type="file" id="cv-input" class="hidden" accept=".pdf,.doc,.docx">
-          </div>
+            <input type="file" id="cv-input" name="cv" class="hidden" accept=".pdf,.doc,.docx">
+            <noscript><input type="file" name="cv" accept=".pdf,.doc,.docx" required><button type="submit" class="btn-ien mt-5">Actualizar CV</button></noscript>
+            </div>
+          </form>
 
         {% else %}
           <form method="post" enctype="multipart/form-data" action="{% url 'mi_perfil' %}" id="form-cv-upload" class="mt-8">

@@ -6,6 +6,7 @@
   <div class="mb-8 flex justify-between items-center">
     <div>
       <h1 class="text-3xl font-bold tracking-tight text-[#26222E] mb-2">Habilidades — {{ categoria.nombre }}</h1>
+        {% include "nueva_ui/partials/_breadcrumbs.html" with current=categoria.nombre parent_url="mod_listar_categorias" parent_label="Categorías" only %}
       <p class="text-muted-foreground">Administra las habilidades asociadas a esta categoría</p>
     </div>
     <a href="{% url 'mod_crear_habilidad' categoria.id %}"
@@ -48,10 +49,6 @@
         {% endfor %}
       </tbody>
     </table>
-  </div>
-
-  <div class="mt-4">
-    <a href="{% url 'mod_listar_categorias' %}" class="text-sm text-primary hover:underline">← Volver a categorías</a>
   </div>
 
 </div>
