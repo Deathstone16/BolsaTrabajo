@@ -117,7 +117,7 @@ def datos_personales(request):
 def perfil_oferente(request, pk):
     """Muestra el perfil público de una empresa aprobada."""
     oferente = get_object_or_404(Oferente, pk=pk)
-    ofertas = oferente.usuario.ofertas.filter(estado='activa')
+    ofertas = oferente.usuario.oferta_set.filter(estado='activa')
     return render(request, 'Ofertas/perfil_oferente_publico.html', {
         'oferente': oferente,
         'ofertas': ofertas,

@@ -5,16 +5,11 @@
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 lg:px-8 py-8">
 
-  <div class="mb-6">
-    <a href="{% url 'mod_listar_ofertas' %}" class="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-      <span data-icon="arrow-left" class="h-4 w-4"></span> Volver al listado
-    </a>
-  </div>
-
   <div class="panel p-8 mb-6">
     <div class="flex flex-wrap items-start justify-between gap-4">
       <div>
         <h1 class="text-2xl font-bold tracking-tight text-[#26222E]">{{ oferta.nombre_puesto }}</h1>
+        {% include "nueva_ui/partials/_breadcrumbs.html" with current=oferta.nombre_puesto parent_url="mod_listar_ofertas" parent_label="Ofertas" only %}
         <p class="text-muted-foreground mt-1">{{ oferta.titulo }}</p>
       </div>
       <span class="px-3 py-1 rounded-full text-xs font-medium

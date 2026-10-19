@@ -4,7 +4,7 @@
 
 {% block content %}
 <section class="relative flex min-h-[70vh] items-center justify-center overflow-hidden bg-[#F8F3F0] px-4 py-16">
-  <div class="absolute inset-0 hero-dots opacity-40" aria-hidden="true"></div>
+
   <div class="pointer-events-none absolute left-1/2 top-0 h-96 w-96 -translate-x-1/2 rounded-full bg-[#FFDE59]/40 blur-[140px]" aria-hidden="true"></div>
 
   <div class="panel relative w-full max-w-md p-10 text-center">
@@ -12,10 +12,10 @@
       <span data-icon="check" class="h-8 w-8 text-[#27AE60]"></span>
     </div>
     <h1 class="mt-6 text-2xl font-bold tracking-tight text-[#26222E]">{{ titulo }}</h1>
+        {% include "nueva_ui/partials/_breadcrumbs.html" with current=titulo only %}
     <p class="mt-2 text-sm text-[#6B645C]">{{ mensaje }}</p>
     <div class="mt-8 flex flex-col gap-3">
       <a href="{{ link_url }}" class="btn-ien w-full">{{ link_texto }} <span data-icon="arrow-right" class="h-4 w-4"></span></a>
-      <a href="{% url 'home' %}" class="text-sm text-[#6B645C] hover:text-[#512DA8]">Volver al inicio</a>
     </div>
   </div>
 </section>

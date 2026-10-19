@@ -10,6 +10,7 @@
     </div>
 
     <h1 class="text-2xl font-bold tracking-tight text-[#26222E]">Eliminar Categoria</h1>
+        {% include "nueva_ui/partials/_breadcrumbs.html" with current="Eliminar categoría" parent_url="mod_listar_categorias" parent_label="Categorías" only %}
     <p class="text-muted-foreground">
     Estas por eliminar la categoria <b>{{ categoria.nombre }}</b>. 
     Esta accion no se puede deshacer.
