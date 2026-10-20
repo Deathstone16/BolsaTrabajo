@@ -30,6 +30,7 @@ urlpatterns = [
     path('perfil/', mi_perfil, name='perfil_cv'),
     path('moderacion/', include('moderacion.urls')),
     path('ofertas/', include('ofertas.urls')),
+    path('cursos/', include('cursos.urls')),
     path('ia/', include('ia.urls')),
     path('matching/', include('matching.urls')),
 

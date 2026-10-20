@@ -143,26 +143,13 @@ def puede_publicar_ofertas(oferente):
     return oferente.estado_obj.puede_publicar()
 
 
-def obtener_url_contacto(email_usuario):
-    """Genera URL de contacto según el dominio del email (Gmail, Outlook, etc.).
-
-    Args:
-        email_usuario (str): Email del usuario.
-
-    Returns:
-        str: URL del cliente de correo con destinatario prellenado.
-    """
-    dominio = email_usuario.split("@")[1].lower()
-    destino = "contacto@ien.edu.ar"
-    asunto = "Solicitud de validación de empresa"
-    if "gmail" in dominio:
-        return f"https://mail.google.com/mail/?view=cm&fs=1&to={destino}&su={asunto}"
-    elif "outlook" in dominio or "hotmail" in dominio or "live" in dominio:
-        return f"https://outlook.live.com/mail/0/deeplink/compose?to={destino}&subject={asunto}"
-    elif "yahoo" in dominio:
-        return f"https://compose.mail.yahoo.com/?to={destino}&subject={asunto}"
-    else:
-        return f"mailto:{destino}?subject={asunto}"
+def obtener_url_contacto(email_usuario=None):
+    """Devuelve el contacto institucional configurado, sin depender del correo del usuario."""
+    from urllib.parse import urlencode
+    email = getattr(settings, 'IEN_CONTACT_EMAIL', '').strip()
+    if not email:
+        return ''
+    return f"mailto:{email}?{urlencode({'subject': 'Solicitud de validación de empresa'})}"
 
 
 # --- Recuperación de contraseña ---

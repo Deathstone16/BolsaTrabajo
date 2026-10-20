@@ -22,6 +22,7 @@
           <p class="text-xs text-muted-foreground mt-3">
             Publicada: {{ oferta.fecha_publicacion|date:"d/m/Y" }}
           </p>
+          <a href="{% url 'detalle_oferta' oferta.pk %}" class="btn-ghost mt-4 !py-2 text-sm" aria-label="Ver oferta: {{ oferta.titulo }}">Ver oferta <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
         </div>
       {% endfor %}
     {% else %}

@@ -44,26 +44,16 @@
 
   <section class="ien-home-section ien-home-section-alt" aria-labelledby="cursos-titulo">
     <div class="ien-home-container">
-      <p class="kicker">Capacitación</p>
-      <h2 id="cursos-titulo" class="ien-section-title">Cursos del IEN</h2>
-      <p class="ien-home-intro">Conocé las propuestas disponibles para seguir desarrollando tus habilidades.</p>
+      <div class="ien-section-heading">
+        <div>
+          <p class="kicker">Capacitación</p>
+          <h2 id="cursos-titulo" class="ien-section-title"><span data-icon="graduation-cap" class="inline h-7 w-7" aria-hidden="true"></span> Cursos del IEN</h2>
+          <p class="ien-home-intro">Seguí desarrollando tus habilidades. Consultá los contenidos, la duración y la modalidad de las propuestas del IEN.</p>
+        </div>
+        <a href="{% url 'cursos:listado' %}" class="btn-ghost">Ver todos los cursos <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+      </div>
       <div class="ien-course-grid">
-        {% for curso in cursos %}
-          <article class="panel ien-course-card">
-            <p class="ien-card-meta">{{ curso.categoria.nombre }} · {{ curso.get_tipo_display }}</p>
-            <h3>{{ curso.nombre }}</h3>
-            <p class="ien-course-description">{{ curso.descripcion|truncatewords:35 }}</p>
-            <dl class="ien-course-details">
-              <div><dt>Duración</dt><dd>{{ curso.duracion }}</dd></div>
-              <div><dt>Horario</dt><dd>{{ curso.horario }}</dd></div>
-            </dl>
-            {% if curso.url_externa %}
-              <a href="{{ curso.url_externa }}" target="_blank" rel="noopener noreferrer" class="ien-text-link">Ver curso <span data-icon="external-link" class="h-4 w-4"></span></a>
-            {% endif %}
-          </article>
-        {% empty %}
-          <p class="panel ien-home-empty">Todavía no hay cursos disponibles.</p>
-        {% endfor %}
+        {% for curso in cursos %}{% include 'cursos/_card.html' %}{% empty %}<p class="panel ien-home-empty">Todavía no hay cursos disponibles.</p>{% endfor %}
       </div>
     </div>
   </section>

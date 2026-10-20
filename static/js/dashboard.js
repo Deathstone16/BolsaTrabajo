@@ -59,6 +59,7 @@ function dibujarPildora(texto, sufijo) {
   pildora.appendChild(document.createTextNode(texto));
   const quitar = document.createElement('button');
   quitar.type = 'button';
+  quitar.ariaLabel = `Quitar ${texto}`;
   quitar.dataset.tag = texto;
   quitar.className = 'rounded-full p-0.5 transition-opacity hover:opacity-60';
   const icono = document.createElement('span');
@@ -140,6 +141,12 @@ document.addEventListener('keydown', function(e) {
   const sufijo = e.target.id === 'tags-input-duras' ? 'duras'
                  : e.target.id === 'tags-input-blandas' ? 'blandas' : null;
   if (!sufijo) return;
+
+  if (e.key === ',') {
+    e.preventDefault();
+    avisar('info', 'Agregá una habilidad por vez. Seleccioná una sugerencia con clic o Enter.');
+    return;
+  }
 
   if (e.key === 'Enter') {
     e.preventDefault();

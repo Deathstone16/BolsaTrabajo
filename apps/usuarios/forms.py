@@ -2,6 +2,7 @@
 
 import re
 
+from ientrabajo.form_fields import DescripcionField
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, SetPasswordForm as DjangoSetPasswordForm
 from .models import Usuario, Postulante, Oferente
@@ -12,21 +13,29 @@ CV_TAMANO_MAXIMO_MB = 5
 
 
 class CuitField(forms.CharField):
-    """Acepta CUIT/CUIL de 11 dígitos, con o sin guiones."""
+    """Acepta el CUIT de la empresa con o sin guiones y explica el formato."""
 
     def __init__(self, **kwargs):
         kwargs.setdefault('max_length', 13)
-        kwargs.setdefault('label', 'CUIT/CUIL')
+        kwargs.setdefault('label', 'CUIT de la empresa')
+        kwargs.setdefault('help_text', 'Ingresá el CUIT tal como figura en tu constancia de inscripción. Son 11 números y podés escribirlo con o sin guiones.')
+        kwargs.setdefault('error_messages', {
+            'required': 'Ingresá el CUIT de tu empresa.',
+            'max_length': 'El CUIT debe tener 11 números, con o sin guiones.',
+        })
         kwargs.setdefault('widget', forms.TextInput(attrs={
             'inputmode': 'numeric',
             'autocomplete': 'off',
+            'placeholder': 'XX-XXXXXXXX-X',
         }))
         super().__init__(**kwargs)
 
     def validate(self, value):
         super().validate(value)
         if value and not re.fullmatch(r'(?:[0-9]{11}|[0-9]{2}-[0-9]{8}-[0-9])', value):
-            raise forms.ValidationError('Ingresá 11 números, con o sin guiones (ej. 30-12345678-9).')
+            if len(re.sub(r'\D', '', value)) != 11:
+                raise forms.ValidationError('El CUIT debe tener 11 números. Revisá que esté completo.')
+            raise forms.ValidationError('Escribí el CUIT con o sin guiones, con el formato XX-XXXXXXXX-X.')
 
 
 
@@ -71,6 +80,7 @@ class LoginForm(forms.Form):
     
 class OferenteForm(forms.ModelForm):
     """Edita la información pública y de contacto de una empresa."""
+    descripcion = DescripcionField(required=False)
     cuit = CuitField()
 
     class Meta:

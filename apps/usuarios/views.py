@@ -45,6 +45,8 @@ def registro(request):
                     first_name=form.cleaned_data['first_name'],
                     last_name=form.cleaned_data['last_name'],
                 )
+            if tipo == 'oferente':
+                return redirect(reverse('registro_exitoso') + '?tipo=oferente')
             return redirect('registro_exitoso')
     else:
         form = FormClass()
@@ -56,7 +58,16 @@ def registro(request):
 
 
 def registro_exitoso(request):
-    """Confirma que el registro terminó correctamente."""
+    """Confirma el alta y explica la revisión pendiente de las empresas."""
+    if request.GET.get('tipo') == 'oferente':
+        return render(request, 'usuarios/exito.html', {
+            'titulo': 'Tu empresa quedó en revisión',
+            'mensaje': 'Tu cuenta fue creada y tu empresa quedó pendiente de validación por el equipo del IEN. Cuando sea aprobada, vas a poder acceder al panel de empresa y publicar ofertas laborales.',
+            'detalle_mensaje': 'Podés iniciar sesión para consultar el estado de la revisión.',
+            'pendiente_validacion': True,
+            'link_url': reverse('login'),
+            'link_texto': 'Consultar estado',
+        })
     return render(request, 'usuarios/exito.html', {
         'titulo': '¡Cuenta creada!',
         'mensaje': 'Tu cuenta fue creada exitosamente. Ya podés iniciar sesión.',

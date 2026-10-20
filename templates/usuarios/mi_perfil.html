@@ -32,6 +32,15 @@
           </p>
         </div>
 
+        <section id="perfil-siguiente-paso" class="panel ien-profile-next mt-6 p-6" aria-labelledby="siguiente-paso-titulo">
+          <h2 id="siguiente-paso-titulo" class="text-lg font-semibold text-[#26222E]">{% if postulante.cv %}Ya hiciste la primera parte{% else %}Empezá por cargar tu CV{% endif %}</h2>
+          <p class="mt-2 text-sm leading-relaxed text-[#6B645C]">{% if postulante.cv %}Tu CV ya está cargado. Ahora consultá los puestos disponibles y revisá sus requisitos. Desde el detalle de cada oferta podés comparar tu perfil.{% else %}Cargá tu CV para analizar tus habilidades. También podés explorar los empleos disponibles mientras completás tu perfil.{% endif %}</p>
+          <div class="mt-5 flex flex-wrap gap-3">
+            <a href="{% url 'buscar_empleo' %}" class="btn-ien">Ver empleos <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+            <a href="#form-cv-upload" class="btn-ghost">{% if postulante.cv %}Actualizar CV{% else %}Cargar CV{% endif %}</a>
+          </div>
+        </section>
+
         {# Los mensajes los renderiza nueva_ui/base.html, no hace falta repetirlos aca. #}
 
         {% if perfil_cv and perfil_cv.estado == 'ready' %}

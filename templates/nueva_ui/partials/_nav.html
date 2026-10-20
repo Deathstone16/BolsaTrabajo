@@ -17,6 +17,8 @@
       <div class="hidden md:flex items-center gap-7">
         <a href="{% url 'home' %}" class="nav-link text-sm font-medium transition-colors hover:text-[#512DA8] {% if vista_activa == 'inicio' %}text-[#512DA8]{% else %}text-[#6B645C]{% endif %}">Inicio</a>
 
+        <a href="{% url 'cursos:listado' %}" class="nav-link text-sm font-medium transition-colors hover:text-[#512DA8] {% if vista_activa == 'cursos' %}text-[#512DA8]{% else %}text-[#6B645C]{% endif %}">Cursos</a>
+
         {% if not user.is_authenticated or user.postulante %}
           <a href="{% url 'buscar_empleo' %}" class="nav-link text-sm font-medium transition-colors hover:text-[#512DA8] {% if vista_activa == 'buscar' %}text-[#512DA8]{% else %}text-[#6B645C]{% endif %}">Buscar empleo</a>
         {% endif %}
@@ -38,7 +40,7 @@
         {% if user.is_staff %}
           <a href="{% url 'mod_listar_empresas' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Empresas</a>
           <a href="{% url 'mod_listar_ofertas' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Ofertas</a>
-          <a href="{% url 'mod_listar_cursos' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Cursos</a>
+          <a href="{% url 'mod_listar_cursos' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Gestionar cursos</a>
           <a href="{% url 'mod_listar_categorias' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Habilidades</a>
         {% endif %}
 
@@ -68,6 +70,7 @@
   <div class="nav-mobile hidden border-t border-[rgba(110,85,55,0.16)] bg-[#F8F3F0] px-4 pb-6 pt-4 md:hidden">
     <div class="flex flex-col gap-2">
       <a href="{% url 'home' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Inicio</a>
+      <a href="{% url 'cursos:listado' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Cursos</a>
       {% if not user.is_authenticated or user.postulante %}
         <a href="{% url 'buscar_empleo' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Buscar empleo</a>
       {% endif %}

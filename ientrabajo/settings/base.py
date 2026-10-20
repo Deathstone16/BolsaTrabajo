@@ -81,6 +81,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'ia.context_processors.cv_notifications',
+                'ientrabajo.context_processors.contacto_ien',
             ],
             # {% static_v %} disponible en todas las plantillas: agrega la version
             # del archivo a la URL para que el navegador no use JS/CSS viejo cacheado.
@@ -189,3 +190,6 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Correo público de contacto. Definirlo en el entorno cuando el IEN lo confirme.
+IEN_CONTACT_EMAIL = os.environ.get('IEN_CONTACT_EMAIL', '').strip()

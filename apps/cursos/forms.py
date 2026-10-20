@@ -1,5 +1,6 @@
 """Formularios administrativos para cursos y categorías."""
 
+from ientrabajo.form_fields import DescripcionField
 from django import forms
 from .models import Curso, Categoria
 
@@ -7,6 +8,7 @@ INPUT_CLASS = "w-full px-4 py-2 rounded-lg border border-border bg-input-backgro
 
 class CursoForm(forms.ModelForm):
     """Crea o edita los datos y la imagen de un curso."""
+    descripcion = DescripcionField()
     class Meta:
         model = Curso
         fields = ['nombre', 'categoria', 'imagen', 'descripcion', 'duracion', 'horario', 'tipo', 'url_externa']

@@ -60,6 +60,17 @@
         </div>
       {% endif %}
 
+      {% if tipo == 'oferente' %}
+        <section class="panel ien-company-guide mt-6 p-5" aria-labelledby="empresa-pasos-titulo">
+          <h3 id="empresa-pasos-titulo" class="text-sm font-semibold">Cómo registrar tu empresa</h3>
+          <ol class="mt-3 space-y-3 text-sm text-[#6B645C]">
+            <li><strong class="text-[#512DA8]">1. Completá tus datos.</strong> Ingresá el nombre de la empresa, su CUIT y un correo de contacto.</li>
+            <li><strong class="text-[#512DA8]">2. Esperá la validación del IEN.</strong> Podés iniciar sesión para consultar el estado de la revisión.</li>
+            <li><strong class="text-[#512DA8]">3. Publicá tus ofertas.</strong> Cuando tu empresa sea aprobada, se habilita el panel para gestionar empleos.</li>
+          </ol>
+        </section>
+      {% endif %}
+
       <form method="POST" class="mt-6 space-y-4">
         {% csrf_token %}
 
@@ -79,4 +90,5 @@
 
 {% block extra_js %}
   <script src="{% static_v 'js/cuit-input.js' %}"></script>
+  <script src="{% static_v 'js/password-toggle.js' %}"></script>
 {% endblock %}

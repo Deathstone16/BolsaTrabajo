@@ -558,7 +558,7 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 .ien-course-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; margin-top: 2rem; }
 .ien-course-card { display: flex; flex-direction: column; align-items: start; padding: 1.75rem; }
 .ien-card-meta { color: var(--muted-foreground); font-size: 0.75rem; line-height: 1.6; }
-.ien-course-card h3 { margin-top: 0.75rem; font-size: 1.125rem; }
+.ien-course-card h2, .ien-course-card h3 { margin-top: 0.75rem; font-size: 1.125rem; }
 .ien-course-description { margin-top: 0.75rem; font-size: 0.875rem; color: var(--muted-foreground); line-height: 1.7; }
 .ien-course-details { display: grid; gap: 0.6rem; margin: 1.5rem 0; font-size: 0.8125rem; line-height: 1.6; }
 .ien-course-details dt { font-weight: 600; }
@@ -661,3 +661,53 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 @media (max-width: 399px) {
   .ien-home-filter-pair { grid-template-columns: minmax(0, 1fr); }
 }
+
+.password-field { position: relative; }
+.password-field > .password-input { padding-right: 3.5rem; }
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.25rem;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.625rem;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+.password-toggle:hover { color: var(--primary); background: rgba(81, 45, 168, 0.06); }
+.password-toggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.password-toggle[hidden], .password-toggle svg[hidden] { display: none; }
+
+.ien-profile-next { background: #f3edfb; border-color: rgba(81, 45, 168, 0.2); }
+
+.ien-home-search { background: #e7ddf6; border-color: rgba(81, 45, 168, 0.25); }
+.ien-company-guide { background: #f3edfb; border-color: rgba(81, 45, 168, 0.2); }
+
+.ien-course-card:nth-child(3n+1) { background: #e7ddf6; }
+.ien-course-card:nth-child(3n+2) { background: #ece3f8; }
+.ien-course-card:nth-child(3n) { background: #f3edfb; }
+.ien-course-card { border-color: rgba(81, 45, 168, 0.2); }
+.ien-course-card .btn-ghost { margin-top: auto; border-color: var(--primary); color: var(--primary); font-size: .875rem; }
+.ien-category-help { margin-top: .5rem; padding: .875rem; background: #f3edfb; border-radius: .75rem; color: var(--muted-foreground); font-size: .8125rem; line-height: 1.6; }
+.ien-category-help a { color: var(--primary); font-weight: 600; text-decoration: underline; }
+
+.description-counter { margin-top: .4rem; color: var(--muted-foreground); font-size: .75rem; line-height: 1.5; }
+.description-counter.is-over-limit { color: #b91c1c; font-weight: 600; }
+.character-limit-exceeded { border-color: #b91c1c !important; box-shadow: 0 0 0 2px rgba(185, 28, 28, .14); }
+.skill-picker { position: relative; margin-top: .5rem; }
+.skill-picker-entry { display: flex; gap: .5rem; align-items: center; }
+.skill-picker-entry .input-ien { flex: 1; }
+.skill-picker-options { position: absolute; z-index: 20; width: 100%; max-height: 13rem; overflow-y: auto; list-style: none; padding: .35rem; margin: .35rem 0 0; background: var(--card); border: 1px solid var(--border); border-radius: .75rem; box-shadow: 0 8px 24px rgba(38,34,46,.12); }
+.skill-picker-options[hidden] { display: none; }
+.skill-picker-options li { padding: .6rem; cursor: pointer; border-radius: .5rem; }
+.skill-picker-options li:hover, .skill-picker-options [aria-selected="true"] { background: #e7ddf6; color: var(--primary); }
+.skill-picker-tags { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
+.skill-picker-remove { padding: .25rem .4rem; border: 0; border-radius: 999px; background: transparent; color: var(--primary); cursor: pointer; }
+.skill-picker-remove:focus-visible { outline: 2px solid var(--primary); }

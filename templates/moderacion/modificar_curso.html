@@ -15,7 +15,7 @@
 
       {% for field in form %}
 <div class="space-y-1">
-  <label class="text-sm font-medium">{{ field.label }}</label>
+  <label class="text-sm font-medium" for="{{ field.id_for_label }}">{{ field.label }}</label>
   {% if field.name == 'imagen' %}
     <div class="flex items-center gap-3">
       <label for="imagen-input"
@@ -30,6 +30,7 @@
     {% endif %}
   {% else %}
     {{ field }}
+      {% if field.name == 'categoria' %}{% include 'cursos/_category_help.html' %}{% endif %}
     {% if field.errors %}
       <p class="text-destructive text-xs">{{ field.errors }}</p>
     {% endif %}

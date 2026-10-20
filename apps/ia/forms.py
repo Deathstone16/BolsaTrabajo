@@ -5,9 +5,15 @@ class PerfilCVForm(forms.Form):
     version = forms.IntegerField(widget=forms.HiddenInput)
     headline = forms.CharField(max_length=180, required=False, label='Título profesional')
     summary = forms.CharField(max_length=2000, required=False, widget=forms.Textarea(attrs={'rows': 5}), label='Resumen profesional')
-    skills = forms.CharField(max_length=2000, required=False, label='Habilidades', help_text='Separalas con comas.')
+    skills = forms.CharField(max_length=2000, required=False, widget=forms.HiddenInput(), label='Habilidades', help_text='Agregá una habilidad por vez. Elegí una sugerencia o escribí su nombre y presioná Agregar.')
     languages = forms.CharField(max_length=1000, required=False, label='Idiomas', help_text='Separalos con comas.')
     locations = forms.CharField(max_length=1000, required=False, label='Ubicaciones preferidas', help_text='Separalas con comas.')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if not field.widget.is_hidden:
+                field.widget.attrs.setdefault('class', 'input-ien')
 
     @classmethod
     def initial_from_profile(cls, profile):
