@@ -77,19 +77,19 @@
           <span class="ien-step-number">01</span>
           <h3>Creá tu perfil</h3>
           <p>Registrate como postulante y completá tus datos personales.</p>
-          <a href="{% url 'registro' %}" class="ien-text-link">Crear cuenta <span data-icon="arrow-right" class="h-4 w-4"></span></a>
+          <a href="{% url 'registro' %}" class="btn-ghost">Crear cuenta <span data-icon="arrow-right" class="h-4 w-4"></span></a>
         </article>
         <article class="ien-step">
           <span class="ien-step-number">02</span>
           <h3>Cargá o actualizá tu CV</h3>
           <p>Desde Mi perfil podés cargar tu currículum y solicitar un análisis de tus habilidades.</p>
-          <a href="{% url 'mi_perfil' %}" class="ien-text-link">Ir a Mi perfil <span data-icon="arrow-right" class="h-4 w-4"></span></a>
+          <a href="{% url 'mi_perfil' %}" class="btn-ghost">Ir a Mi perfil <span data-icon="arrow-right" class="h-4 w-4"></span></a>
         </article>
         <article class="ien-step">
           <span class="ien-step-number">03</span>
           <h3>Consultá las ofertas</h3>
           <p>Filtrá los puestos, revisá los requisitos y guardá los que te interesen. La postulación desde la plataforma estará disponible próximamente.</p>
-          <a href="{% url 'buscar_empleo' %}" class="ien-text-link">Buscar empleo <span data-icon="arrow-right" class="h-4 w-4"></span></a>
+          <a href="{% url 'buscar_empleo' %}" class="btn-ghost">Buscar empleo <span data-icon="arrow-right" class="h-4 w-4"></span></a>
         </article>
       </div>
     </div>
@@ -104,9 +104,9 @@
         </div>
         <a href="{% url 'buscar_empleo' %}" class="btn-ghost">Ver todas las ofertas <span data-icon="arrow-right" class="h-4 w-4"></span></a>
       </div>
-      <div class="panel ien-home-offers">
+      <div class="ien-home-offers">
         {% for oferta in ofertas_destacadas %}
-          <a href="{% url 'detalle_oferta' oferta.pk %}" class="ien-home-offer">
+          <article class="panel ien-home-offer">
             <div>
               <h3>{{ oferta.titulo }}</h3>
               <p>{% if oferta.es_confidencial %}Empresa confidencial{% elif oferta.empresa.oferente %}{{ oferta.empresa.oferente.nombre_empresa }}{% else %}Empresa{% endif %}</p>
@@ -115,11 +115,13 @@
             <div class="ien-offer-meta">
               {% if oferta.ubicacion %}<span>{{ oferta.ubicacion }}</span>{% endif %}
               <span class="chip">{{ oferta.get_modalidad_display }}</span>
-              <span data-icon="arrow-right" class="h-4 w-4"></span>
             </div>
-          </a>
+            <a href="{% url 'detalle_oferta' oferta.pk %}" class="btn-ghost" aria-label="Ver oferta: {{ oferta.titulo }}">
+              Ver oferta <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span>
+            </a>
+          </article>
         {% empty %}
-          <p class="ien-home-empty">Todavía no hay ofertas publicadas.</p>
+          <p class="panel ien-home-empty">Todavía no hay ofertas publicadas.</p>
         {% endfor %}
       </div>
     </div>

@@ -567,19 +567,77 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 .ien-text-link:hover { text-decoration: underline; }
 .ien-course-card .ien-text-link { margin-top: auto; }
 .ien-steps-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.5rem; margin-top: 2.5rem; }
-.ien-step { border-top: 2px solid var(--border); padding-top: 1.5rem; }
-.ien-step-number { color: var(--primary); font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; }
-.ien-step h3 { margin-top: 1rem; font-size: 1.125rem; }
-.ien-step p { margin-top: 0.75rem; color: var(--muted-foreground); font-size: 0.875rem; line-height: 1.8; }
-.ien-step .ien-text-link { margin-top: 1.25rem; }
-.ien-home-offers { margin-top: 2rem; overflow: hidden; }
-.ien-home-offer { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; padding: 1.5rem 2rem; }
-.ien-home-offer + .ien-home-offer { border-top: 1px solid var(--border); }
-.ien-home-offer:hover { background: var(--background); }
-.ien-home-offer h3 { font-size: 1.0625rem; }
+.ien-step {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1.75rem;
+  background: #eee8fa;
+  border: 1px solid rgba(81, 45, 168, 0.2);
+  border-radius: 1.5rem;
+  box-shadow: 0 1px 2px rgba(60, 40, 20, 0.04);
+}
+.ien-step:nth-child(1) { background: #e7ddf6; }
+.ien-step:nth-child(2) { background: #ece3f8; }
+.ien-step:nth-child(3) { background: #f3edfb; }
+.ien-step-number {
+  color: var(--primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+.ien-step h3 {
+  margin-top: 1rem;
+  color: #26222e;
+  font-size: 1.125rem;
+}
+.ien-step p {
+  margin-top: 0.75rem;
+  margin-bottom: 1.5rem;
+  color: #48414f;
+  font-size: 0.875rem;
+  line-height: 1.8;
+}
+.ien-step .btn-ghost {
+  margin-top: auto;
+  border-color: var(--primary);
+  color: var(--primary);
+  font-size: 0.875rem;
+}
+.ien-step .btn-ghost:focus-visible {
+  outline: 3px solid #26222e;
+  outline-offset: 4px;
+}
+.ien-home-offers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+.ien-home-offer {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1.25rem;
+  padding: 1.75rem;
+  background: #f3edfb;
+  border-color: rgba(81, 45, 168, 0.2);
+}
+.ien-home-offer h3 { font-size: 1.0625rem; overflow-wrap: anywhere; }
 .ien-home-offer p { margin-top: 0.35rem; color: var(--muted-foreground); font-size: 0.875rem; }
 .ien-home-offer .ien-card-meta { font-size: 0.75rem; }
 .ien-offer-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; color: var(--muted-foreground); font-size: 0.8125rem; }
+.ien-home-offer .btn-ghost {
+  align-self: flex-start;
+  margin-top: auto;
+  border-color: var(--primary);
+  color: var(--primary);
+  font-size: 0.875rem;
+}
+.ien-home-offer .btn-ghost:focus-visible {
+  outline: 3px solid var(--foreground);
+  outline-offset: 4px;
+}
 .ien-home-empty { grid-column: 1 / -1; padding: 2rem; color: var(--muted-foreground); }
 .ien-breadcrumbs { margin-top: 0.875rem; font-size: 0.8125rem; color: var(--muted-foreground); }
 .ien-breadcrumbs ol { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; padding: 0; }
@@ -589,16 +647,16 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 .ien-breadcrumbs [aria-current] { overflow-wrap: anywhere; }
 @media (max-width: 1023px) {
   .ien-home-hero { gap: 2.5rem; }
-  .ien-course-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ien-course-grid, .ien-home-offers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 767px) {
   .ien-home-container { padding: 0 1.25rem; }
   .ien-home-section { padding: 3rem 0; }
-  .ien-home-hero, .ien-course-grid, .ien-steps-grid { grid-template-columns: minmax(0, 1fr); }
+  .ien-home-hero, .ien-course-grid, .ien-steps-grid, .ien-home-offers { grid-template-columns: minmax(0, 1fr); }
   .ien-home-title { max-width: 16ch; }
   .ien-home-search { padding: 1.5rem; }
   .ien-section-heading { align-items: start; flex-direction: column; }
-  .ien-home-offer { align-items: start; flex-direction: column; padding: 1.5rem; }
+  .ien-home-offer { padding: 1.5rem; }
 }
 @media (max-width: 399px) {
   .ien-home-filter-pair { grid-template-columns: minmax(0, 1fr); }
