@@ -1,0 +1,16 @@
+{% extends 'nueva_ui/base.html' %}
+{% block title %}Cursos y formación del IEN · IEN Empleo{% endblock %}
+{% block description %}Conocé los cursos activos del IEN: contenidos, duración, horarios y modalidad para seguir desarrollando tus habilidades.{% endblock %}
+{% block content %}
+<section class="ien-home-section" aria-labelledby="cursos-listado-titulo">
+  <div class="ien-home-container">
+    <p class="kicker">Formación para tu próximo paso</p>
+    <h1 id="cursos-listado-titulo" class="ien-section-title"><span data-icon="graduation-cap" class="inline h-7 w-7" aria-hidden="true"></span> Cursos del IEN</h1>
+    {% include 'nueva_ui/partials/_breadcrumbs.html' with current='Cursos' only %}
+    <p class="ien-home-intro">Explorá las capacitaciones disponibles y consultá qué podés aprender, cuánto duran y cómo se cursan.</p>
+    <div class="ien-course-grid">
+      {% for curso in cursos %}{% include 'cursos/_card.html' with course_heading_level=2 %}{% empty %}<p class="panel ien-home-empty">Todavía no hay cursos disponibles. Volvé a consultar próximamente.</p>{% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

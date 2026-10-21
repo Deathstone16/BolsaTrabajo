@@ -22,9 +22,24 @@
         <p class="kicker">Tu perfil</p>
         <h1 class="mt-3 text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">Mi perfil profesional</h1>
         {% include "nueva_ui/partials/_breadcrumbs.html" with current="Mi perfil" %}
-        <p class="mt-3 max-w-2xl leading-relaxed text-[#6B645C]">
+        <p class="mt-3 max-w-2xl font-semibold leading-relaxed text-[#26222E]">
           Cargá o actualizá tu CV y analizá tus habilidades para compararlas con los requisitos de las ofertas.
         </p>
+
+        <div class="panel mt-6 p-5" role="note">
+          <p id="cv-analysis-description" class="text-sm leading-relaxed text-[#6B645C]">
+            Este análisis identifica las habilidades y la experiencia de tu CV. Para conocer tu compatibilidad con una oferta laboral, ingresá al detalle de esa oferta y seleccioná “Calcular compatibilidad”.
+          </p>
+        </div>
+
+        <section id="perfil-siguiente-paso" class="panel ien-profile-next mt-6 p-6" aria-labelledby="siguiente-paso-titulo">
+          <h2 id="siguiente-paso-titulo" class="text-lg font-semibold text-[#26222E]">{% if postulante.cv %}Ya hiciste la primera parte{% else %}Empezá por cargar tu CV{% endif %}</h2>
+          <p class="mt-2 text-sm leading-relaxed text-[#6B645C]">{% if postulante.cv %}Tu CV ya está cargado. Ahora consultá los puestos disponibles y revisá sus requisitos. Desde el detalle de cada oferta podés comparar tu perfil.{% else %}Cargá tu CV para analizar tus habilidades. También podés explorar los empleos disponibles mientras completás tu perfil.{% endif %}</p>
+          <div class="mt-5 flex flex-wrap gap-3">
+            <a href="{% url 'buscar_empleo' %}" class="btn-ien">Ver empleos <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+            <a href="#form-cv-upload" class="btn-ghost">{% if postulante.cv %}Actualizar CV{% else %}Cargar CV{% endif %}</a>
+          </div>
+        </section>
 
         {# Los mensajes los renderiza nueva_ui/base.html, no hace falta repetirlos aca. #}
 
@@ -100,7 +115,7 @@
                       data-ultimo-analisis-id="{% if ultimo_analisis %}{{ ultimo_analisis.id }}{% endif %}"
                       data-ultimo-analisis-estado="{% if ultimo_analisis %}{{ ultimo_analisis.estado }}{% endif %}">
                   {% csrf_token %}
-                  <button type="submit" class="btn-ien !py-2 text-sm">
+                  <button type="submit" aria-describedby="cv-analysis-description" class="btn-ien !py-2 text-sm">
                     <span data-icon="sparkles" class="h-4 w-4"></span> Analizar CV
                   </button>
                 </form>

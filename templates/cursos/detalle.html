@@ -1,0 +1,23 @@
+{% extends 'nueva_ui/base.html' %}
+{% block title %}{{ curso.nombre }} · Cursos del IEN{% endblock %}
+{% block description %}{{ curso.descripcion|striptags|truncatewords:25 }}{% endblock %}
+{% block content %}
+<section class="ien-home-section">
+  <div class="mx-auto max-w-3xl px-4 sm:px-6">
+    <p class="kicker">{{ curso.categoria.nombre }} · {{ curso.get_tipo_display }}</p>
+    <h1 class="ien-section-title">{{ curso.nombre }}</h1>
+    {% include 'nueva_ui/partials/_breadcrumbs.html' with current=curso.nombre parent_url='cursos:listado' parent_label='Cursos' only %}
+    <article class="panel mt-8 p-6 sm:p-8">
+      <h2 class="text-xl font-semibold">Sobre el curso</h2>
+      <p class="mt-4 whitespace-pre-line leading-relaxed text-[#6B645C]">{{ curso.descripcion }}</p>
+      <dl class="ien-course-details">
+        <div><dt><span data-icon="clock" class="inline h-4 w-4" aria-hidden="true"></span> Duración</dt><dd>{{ curso.duracion }}</dd></div>
+        <div><dt><span data-icon="calendar" class="inline h-4 w-4" aria-hidden="true"></span> Horario</dt><dd>{{ curso.horario }}</dd></div>
+        <div><dt>Modalidad</dt><dd>{{ curso.get_tipo_display }}</dd></div>
+      </dl>
+      {% if curso.url_externa %}<a href="{{ curso.url_externa }}" target="_blank" rel="noopener noreferrer" class="btn-ien">Consultar en el IEN <span data-icon="external-link" class="h-4 w-4" aria-hidden="true"></span></a>{% endif %}
+      <a href="{% url 'cursos:listado' %}" class="btn-ghost mt-4">Ver todos los cursos</a>
+    </article>
+  </div>
+</section>
+{% endblock %}

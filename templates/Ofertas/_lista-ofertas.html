@@ -23,6 +23,9 @@
             {{ oferta.get_estado_display }}
           </span>
 
+          {% if oferta.estado == 'activa' %}
+            <a href="{% url 'detalle_oferta' oferta.pk %}" class="ien-text-link" aria-label="Ver oferta: {{ oferta.titulo }}">Ver oferta <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+          {% endif %}
           <a href="{% url 'editar_oferta' oferta.id %}" title="Editar oferta"
                   class="grid h-9 w-9 place-items-center rounded-full border border-[rgba(110,85,55,0.16)] text-[#6B645C] transition-colors hover:border-[#512DA8] hover:text-[#512DA8]">
             <span data-icon="pencil" class="h-4 w-4"></span>

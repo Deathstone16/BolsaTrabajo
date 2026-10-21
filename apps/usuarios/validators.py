@@ -15,14 +15,14 @@ def validar_cuit(valor):
     """Valida longitud y dígito verificador de un CUIT argentino."""
     texto = (valor or "").strip()
     if not re.fullmatch(r"(?:\d{11}|\d{2}-\d{8}-\d)", texto):
-        raise ValidationError("Ingresá el CUIT con 11 dígitos, con o sin guiones.")
+        raise ValidationError("El CUIT debe tener 11 números. Podés escribirlo con o sin guiones.")
 
     digitos = re.sub(r"\D", "", texto)
     if len(digitos) != 11:
-        raise ValidationError("El CUIT debe tener 11 dígitos.")
+        raise ValidationError("El CUIT debe tener 11 números. Revisá que esté completo.")
 
     if digitos[:2] not in {'20', '23', '24', '27', '30', '33', '34'}:
-        raise ValidationError("El prefijo del CUIT no es válido.")
+        raise ValidationError("Revisá los primeros dos números del CUIT. Deben coincidir con tu constancia de inscripción.")
 
     multiplicadores = (5, 4, 3, 2, 7, 6, 5, 4, 3, 2)
     suma = sum(int(digito) * factor for digito, factor in zip(digitos[:10], multiplicadores))
@@ -30,7 +30,7 @@ def validar_cuit(valor):
     if verificador == 11:
         verificador = 0
     elif verificador == 10:
-        raise ValidationError("El CUIT no es válido.")
+        raise ValidationError("Revisá el CUIT ingresado, incluido el último número. Debe coincidir con tu constancia de inscripción.")
 
     if verificador != int(digitos[-1]):
-        raise ValidationError("El CUIT no es válido.")
+        raise ValidationError("Revisá el CUIT ingresado, incluido el último número. Debe coincidir con tu constancia de inscripción.")

@@ -11,15 +11,36 @@
     {% csrf_token %}
     {{ form.version }}
     {% if form.non_field_errors %}<div class="text-sm text-[#d4183d]">{{ form.non_field_errors }}</div>{% endif %}
-    {% for field in form.visible_fields %}
+    {% for field in form %}{% if field.name != 'version' %}
       <div>
-        <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-[#26222E]">{{ field.label }}</label>
-        {{ field }}
-        {% if field.help_text %}<p class="mt-1 text-xs text-[#6B645C]">{{ field.help_text }}</p>{% endif %}
+        {% if field.name == 'skills' %}
+          <label for="profile-skill-entry" class="block text-sm font-semibold text-[#26222E]">{{ field.label }}</label>
+          <div class="skill-picker" data-skill-picker>
+            {{ field }}
+            <div class="skill-picker-entry">
+              <input id="profile-skill-entry" type="text" class="input-ien" placeholder="Escribí una habilidad" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="profile-skill-options" aria-describedby="profile-skill-help">
+              <button type="button" class="btn-ghost" data-skill-add>Agregar</button>
+            </div>
+            <ul id="profile-skill-options" class="skill-picker-options" role="listbox" aria-label="Habilidades sugeridas" hidden></ul>
+            <div class="skill-picker-tags" data-skill-tags aria-label="Habilidades agregadas"></div>
+            <p id="profile-skill-help" class="mt-1 text-xs text-[#6B645C]">{{ field.help_text }}</p>
+            <p data-skill-message class="mt-1 text-sm text-[#512DA8]" role="status" aria-live="polite"></p>
+            <noscript><p>Activá JavaScript para agregar o quitar habilidades. Las habilidades guardadas se conservarán.</p></noscript>
+          </div>
+        {% else %}
+          <label for="{{ field.id_for_label }}" class="block text-sm font-semibold text-[#26222E]">{{ field.label }}</label>
+          {{ field }}
+        {% endif %}
+        {% if field.help_text and field.name != 'skills' %}<p class="mt-1 text-xs text-[#6B645C]">{{ field.help_text }}</p>{% endif %}
         {% for error in field.errors %}<p class="mt-1 text-sm text-[#d4183d]">{{ error }}</p>{% endfor %}
       </div>
-    {% endfor %}
+    {% endif %}{% endfor %}
     <button class="btn-ien" type="submit">Guardar perfil</button>
   </form>
 </main>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static_v 'js/habilidades.js' %}"></script>
+  <script src="{% static_v 'js/profile-skills.js' %}"></script>
 {% endblock %}

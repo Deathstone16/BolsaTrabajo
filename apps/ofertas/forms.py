@@ -1,5 +1,6 @@
 """Formularios y validaciones para ofertas y habilidades laborales."""
 
+from ientrabajo.form_fields import DescripcionField
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -11,6 +12,7 @@ INPUT_CLASS = "w-full px-4 py-2 rounded-lg border border-border bg-input-backgro
 
 class OfertaForm(forms.ModelForm):
     """Valida y persiste los datos utilizados para crear o editar una oferta."""
+    descripcion = DescripcionField()
 
     MAX_POR_SECCION = 10
     categoria = forms.ModelChoiceField(

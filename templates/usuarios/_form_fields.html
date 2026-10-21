@@ -4,17 +4,26 @@
   la logica de campos quedo igual para no cambiar el comportamiento.
 {% endcomment %}
 {% for field in form %}
-<div class="space-y-1.5 {% if field.html_name == 'email' or field.html_name == 'direccion' or field.html_name == 'nombre_empresa' %}col-span-2{% endif %}">
+<div class="space-y-1.5 {% if field.html_name == 'email' or field.html_name == 'direccion' or field.html_name == 'nombre_empresa' or field.html_name == 'cuit' %}col-span-2{% endif %}">
   <label class="block text-sm" for="{{ field.id_for_label }}">{{ field.label }}</label>
+  {% if field.field.widget.input_type == 'password' %}<div class="password-field">{% endif %}
   <input type="{{ field.field.widget.input_type }}"
          id="{{ field.id_for_label }}"
          name="{{ field.html_name }}"
-         class="input-ien text-sm"
-         placeholder="{{ field.label }}"
-         {% if field.html_name == 'cuit' %}data-cuit-input inputmode="numeric" pattern="[0-9]{11}|[0-9]{2}-[0-9]{8}-[0-9]" maxlength="13"{% endif %}
-         {% if field.value %}value="{{ field.value }}"{% endif %}>
+         class="input-ien text-sm{% if field.field.widget.input_type == 'password' %} password-input{% endif %}"
+         placeholder="{% if field.html_name == 'cuit' %}XX-XXXXXXXX-X{% else %}{{ field.label }}{% endif %}"
+         {% if field.html_name == 'cuit' %}data-cuit-input inputmode="numeric" pattern="[0-9]{11}|[0-9]{2}-[0-9]{8}-[0-9]" maxlength="13" aria-describedby="{{ field.id_for_label }}_help{% if field.errors %} {{ field.id_for_label }}_error{% endif %}"{% if field.field.required %} required{% endif %}{% if field.errors %} aria-invalid="true"{% endif %}{% endif %}
+         {% if field.field.widget.input_type == 'password' %}autocomplete="new-password"{% endif %}
+         {% if field.value and field.field.widget.input_type != 'password' %}value="{{ field.value }}"{% endif %}>
+  {% if field.field.widget.input_type == 'password' %}
+    {% include 'usuarios/_password_toggle.html' with input_id=field.id_for_label password_label=field.label only %}
+  </div>
+  {% endif %}
+  {% if field.html_name == 'cuit' %}
+    <p id="{{ field.id_for_label }}_help" class="text-xs leading-relaxed text-[#6B645C]">{{ field.help_text }}</p>
+  {% endif %}
   {% if field.errors %}
-    <p class="text-xs text-[#d4183d]">{{ field.errors|join:", " }}</p>
+    <p id="{{ field.id_for_label }}_error" class="text-xs text-[#d4183d]">{{ field.errors|join:", " }}</p>
   {% endif %}
 </div>
 {% endfor %}

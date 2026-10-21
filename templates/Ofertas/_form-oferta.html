@@ -75,8 +75,8 @@
   </h3>
 
   <div class="space-y-2">
-    <label class="block text-sm">Descripción</label>
-    <textarea name="descripcion" rows="5" placeholder="Describe las responsabilidades y actividades del puesto..."
+    <label class="block text-sm" for="id_oferta_descripcion">Descripción</label>
+    <textarea id="id_oferta_descripcion" data-character-limit="2000" name="descripcion" rows="5" placeholder="Describe las responsabilidades y actividades del puesto..."
               class="input-ien resize-none" required>{{ form.descripcion.value|default:'' }}</textarea>
     {% if form.descripcion.errors %}<p class="text-sm text-[#d4183d]">{{ form.descripcion.errors.0 }}</p>{% endif %}
   </div>
@@ -90,9 +90,9 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <fieldset class="space-y-3 rounded-2xl border border-[#512DA8]/25 bg-[#512DA8]/5 p-4">
       <legend class="px-2 text-sm font-semibold text-[#512DA8]">Habilidades técnicas (duras)</legend>
-      <p class="text-xs text-[#6B645C]">Mínimo 1, máximo 10 habilidades</p>
+      <p class="text-xs text-[#6B645C]">Mínimo 1, máximo 10. Elegí una sugerencia con clic o Enter.</p>
       <div class="relative">
-        <input type="text" id="tags-input-duras" placeholder="Ej. Python, SQL, Docker..."
+        <input type="text" id="tags-input-duras" placeholder="Escribí una habilidad técnica"
                class="input-ien" autocomplete="off">
         <ul id="tags-dropdown-duras"
             class="absolute z-10 mt-1 hidden max-h-48 w-full overflow-y-auto rounded-2xl border border-[rgba(110,85,55,0.16)] bg-white shadow-lg"></ul>
@@ -104,9 +104,9 @@
 
     <fieldset class="space-y-3 rounded-2xl border border-emerald-600/25 bg-emerald-600/5 p-4">
       <legend class="px-2 text-sm font-semibold text-emerald-700">Habilidades blandas</legend>
-      <p class="text-xs text-[#6B645C]">Máximo 10 habilidades</p>
+      <p class="text-xs text-[#6B645C]">Máximo 10. Elegí una sugerencia con clic o Enter.</p>
       <div class="relative">
-        <input type="text" id="tags-input-blandas" placeholder="Ej. Comunicación, Liderazgo..."
+        <input type="text" id="tags-input-blandas" placeholder="Escribí una habilidad blanda"
                class="input-ien" autocomplete="off">
         <ul id="tags-dropdown-blandas"
             class="absolute z-10 mt-1 hidden max-h-48 w-full overflow-y-auto rounded-2xl border border-[rgba(110,85,55,0.16)] bg-white shadow-lg"></ul>

@@ -104,6 +104,7 @@
       </div>
 
       <div class="space-y-6">
+        {% if not user.is_authenticated or user.postulante %}
         <div class="panel p-6 text-center" id="match-card" data-request-id="{% if match %}{{ match.request_id }}{% endif %}" data-status="{% if match %}{{ match.estado }}{% endif %}">
           <h3 class="font-mono text-xs uppercase tracking-widest text-[#6B645C]">Match inteligente</h3>
           {% if user.is_authenticated and user.postulante and not perfil_cv %}
@@ -155,8 +156,7 @@
           {% endif %}
         </div>
 
-        {# TODO: todavia no existe el modelo de postulaciones. #}
-        <button type="button" disabled class="btn-sun w-full cursor-not-allowed opacity-70">Postularme — Próximamente</button>
+        {% endif %}
 
         <div class="panel space-y-4 p-6">
           <h3 class="font-semibold text-[#26222E]">Información adicional</h3>

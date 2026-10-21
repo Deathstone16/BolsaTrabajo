@@ -8,12 +8,20 @@
   <div class="pointer-events-none absolute left-1/2 top-0 h-96 w-96 -translate-x-1/2 rounded-full bg-[#FFDE59]/40 blur-[140px]" aria-hidden="true"></div>
 
   <div class="panel relative w-full max-w-md p-10 text-center">
-    <div class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#27AE60]/15">
-      <span data-icon="check" class="h-8 w-8 text-[#27AE60]"></span>
-    </div>
+    {% if pendiente_validacion %}
+      <div class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#512DA8]/10">
+        <span data-icon="clock" class="h-8 w-8 text-[#512DA8]" aria-hidden="true"></span>
+      </div>
+      <p class="mt-4 inline-flex rounded-full border border-[#512DA8]/25 bg-[#512DA8]/10 px-3 py-1 text-xs font-semibold text-[#512DA8]">Pendiente de validación</p>
+    {% else %}
+      <div class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#27AE60]/15">
+        <span data-icon="check" class="h-8 w-8 text-[#27AE60]"></span>
+      </div>
+    {% endif %}
     <h1 class="mt-6 text-2xl font-bold tracking-tight text-[#26222E]">{{ titulo }}</h1>
         {% include "nueva_ui/partials/_breadcrumbs.html" with current=titulo only %}
-    <p class="mt-2 text-sm text-[#6B645C]">{{ mensaje }}</p>
+    <p class="mt-2 text-sm leading-relaxed text-[#6B645C]">{{ mensaje }}</p>
+    {% if detalle_mensaje %}<p class="mt-4 text-sm leading-relaxed text-[#6B645C]">{{ detalle_mensaje }}</p>{% endif %}
     <div class="mt-8 flex flex-col gap-3">
       <a href="{{ link_url }}" class="btn-ien w-full">{{ link_texto }} <span data-icon="arrow-right" class="h-4 w-4"></span></a>
     </div>
