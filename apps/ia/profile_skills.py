@@ -31,11 +31,20 @@ def _normalized_name(value):
 
 
 def split_profile_skills(content):
-    """Agrupa etiquetas blandas conocidas; conserva las demás sin inventar categorías."""
+    """Agrupa por tipo explícito y usa nombres conocidos para perfiles legacy."""
     hard, soft = [], []
     skills = content.get('skills', []) if isinstance(content, dict) else []
     for skill in skills if isinstance(skills, list) else []:
         if not isinstance(skill, dict):
             continue
-        (soft if _normalized_name(skill.get('name')) in SOFT_SKILL_NAMES else hard).append(skill)
+        raw_kind = skill.get('kind')
+        kind = str(getattr(raw_kind, 'value', raw_kind) or '').casefold()
+        if kind == 'soft':
+            soft.append(skill)
+        elif kind == 'technical':
+            hard.append(skill)
+        else:
+            is_legacy_kind = kind in {'', 'unknown'}
+            is_known_soft_name = _normalized_name(skill.get('name')) in SOFT_SKILL_NAMES
+            (soft if is_legacy_kind and is_known_soft_name else hard).append(skill)
     return hard, soft

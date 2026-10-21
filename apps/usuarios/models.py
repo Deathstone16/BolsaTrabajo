@@ -51,6 +51,8 @@ class Postulante(models.Model):
     direccion = models.CharField(max_length=200, blank=True, null=True)
     cv = models.FileField(upload_to='postulantes/cv/', blank=True, null=True)
     cv_fecha_carga = models.DateTimeField(blank=True, null=True)
+    cv_version_actual = models.ForeignKey('ia.CVVersion', null=True, blank=True, on_delete=models.SET_NULL, related_name='postulante_actual')
+    foto = models.ImageField(upload_to='postulantes/fotos/', blank=True, null=True)
 
     def __str__(self):
         return self.usuario.get_full_name() or self.usuario.email

@@ -6,8 +6,7 @@ from django.urls import reverse
 from django.contrib import messages
 from .forms import OfertaForm
 from .models import Oferta
-from ia.matching import guardar_comparacion, ultimo_analisis_completado
-from ia.models import ComparacionOfertaCV
+from ia.matching import ultimo_analisis_completado
 from .services import crear_oferta_laboral, obtener_ofertas_por_empresa, obtener_oferta_por_id, eliminar_oferta_por_id, obtener_ofertas_activas, es_oferta_favorita, obtener_ids_ofertas_favoritas, obtener_ofertas_favoritas, alternar_oferta_favorita
 from usuarios.forms import OferenteForm
 from usuarios.services import obtener_url_contacto
@@ -147,14 +146,24 @@ def detalle_oferta_postulante(request, pk):
         from matching.models import ResultadoCompatibilidad
         from django.conf import settings
         perfil_cv = getattr(request.user.postulante, 'perfil_ia', None)
+        if perfil_cv and perfil_cv.cv_version_id != request.user.postulante.cv_version_actual_id:
+            perfil_cv = None
+        from matching.configuration import scoring_hash
+        from django.utils import timezone
+        from matching.models import ConfiguracionActiva
+        active_config = ConfiguracionActiva.objects.select_related('configuracion').filter(singleton='actual', configuracion__es_borrador=False).first()
+        current_config_hash = scoring_hash(active_config.configuracion) if active_config else ''
         match = ResultadoCompatibilidad.objects.filter(
             postulante=request.user.postulante,
             oferta=oferta,
-            model_version=settings.MATCH_MODEL_VERSION,
+            provider_model_config=settings.MATCH_MODEL_VERSION,
             perfil_cv_version=perfil_cv.version if perfil_cv else 0,
             perfil_oferta_version=oferta.perfil_ia.version if hasattr(oferta, 'perfil_ia') else 0,
             perfil_cv_hash=perfil_cv.source_hash if perfil_cv else '',
             perfil_oferta_hash=oferta.perfil_ia.source_hash if hasattr(oferta, 'perfil_ia') else '',
+            configuracion=active_config.configuracion if active_config else None,
+            scoring_config_hash=current_config_hash,
+            evaluation_date=timezone.localdate(),
         ).order_by('-actualizado_en').first()
 
     favorita = es_oferta_favorita(request.user.postulante, oferta.id) if hasattr(request.user, 'postulante') else False
@@ -162,26 +171,11 @@ def detalle_oferta_postulante(request, pk):
     comparacion = None
     if request.user.is_authenticated and hasattr(request.user, 'postulante'):
         analisis_cv = ultimo_analisis_completado(request.user.postulante)
-        if analisis_cv:
-            comparacion = (
-                ComparacionOfertaCV.objects
-                .filter(
-                    postulante=request.user.postulante,
-                    oferta=oferta,
-                    analisis=analisis_cv,
-                )
-                .first()
-            )
-            if (
-                comparacion
-                and comparacion.resultado.get('oferta_habilidades_requeridas', '')
-                != (oferta.habilidades_requeridas or '')
-            ):
-                comparacion = None
     return render(request, 'nueva_ui/detalle_oferta.html', {
         'vista_activa': 'buscar',
         'oferta': oferta,
         'match': match,
+        'match_config_hash': current_config_hash if request.user.is_authenticated and hasattr(request.user, 'postulante') else '',
         'perfil_cv': perfil_cv,
         'perfil_oferta': getattr(oferta, 'perfil_ia', None),
         'habilidades_duras': habilidades_duras,
@@ -195,14 +189,13 @@ def detalle_oferta_postulante(request, pk):
 @postulante_required
 @require_POST
 def comparar_oferta_cv(request, pk):
-    """Calcula el match sólo cuando el postulante lo solicita."""
+    """Compatibilidad histórica adaptada al mismo servicio match.v2."""
     oferta = get_object_or_404(Oferta, pk=pk, estado='activa')
-    analisis = ultimo_analisis_completado(request.user.postulante)
-    if not analisis:
-        messages.info(request, 'Primero analizá tu CV para poder compararlo con una oferta.')
-        return redirect('mi_perfil')
-
-    guardar_comparacion(request.user.postulante, oferta, analisis)
+    from matching.services import get_or_create_match
+    try:
+        get_or_create_match(request.user.postulante, oferta)
+    except ValueError as exc:
+        messages.info(request, str(exc))
     return redirect('detalle_oferta', pk=oferta.pk)
 
 

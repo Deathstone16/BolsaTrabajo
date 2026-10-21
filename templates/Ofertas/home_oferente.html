@@ -106,8 +106,9 @@
               <input type="text" name="nombre_empresa" value="{{ form_perfil.nombre_empresa.value|default:'' }}" class="input-ien">
             </div>
             <div class="space-y-1.5">
-              <label class="block text-sm">CUIT</label>
-              <input type="text" name="cuit" value="{{ form_perfil.cuit.value|default:'' }}" data-cuit-input inputmode="numeric" pattern="[0-9]{11}|[0-9]{2}-[0-9]{8}-[0-9]" maxlength="13" class="input-ien">
+              <label class="block text-sm" for="id_panel_cuit">{{ form_perfil.cuit.label }}</label>
+              <input id="id_panel_cuit" type="text" name="cuit" value="{{ form_perfil.cuit.value|default:'' }}" placeholder="XX-XXXXXXXX-X" data-cuit-input inputmode="numeric" pattern="[0-9]{11}|[0-9]{2}-[0-9]{8}-[0-9]" maxlength="13" aria-describedby="id_panel_cuit_help" class="input-ien" required>
+              <p id="id_panel_cuit_help" class="text-xs leading-relaxed text-[#6B645C]">{{ form_perfil.cuit.help_text }}</p>
             </div>
             <div class="space-y-1.5">
               <label class="block text-sm">Industria</label>
@@ -141,8 +142,8 @@
           </div>
 
           <div class="mt-5 space-y-1.5">
-            <label class="block text-sm">Descripción de la empresa</label>
-            <textarea name="descripcion" rows="4" class="input-ien resize-none">{{ form_perfil.descripcion.value|default:'' }}</textarea>
+            <label class="block text-sm" for="id_panel_descripcion">Descripción de la empresa</label>
+            <textarea id="id_panel_descripcion" data-character-limit="2000" name="descripcion" rows="4" class="input-ien resize-none">{{ form_perfil.descripcion.value|default:'' }}</textarea>
           </div>
 
           <div class="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">

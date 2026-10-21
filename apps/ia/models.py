@@ -1,7 +1,50 @@
 import uuid
+from pathlib import Path
 
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 from django.db import models
 from usuarios.models import Postulante
+
+
+class PrivateCVStorage(FileSystemStorage):
+    """Almacén de CV fuera del árbol servido como MEDIA_URL."""
+
+    def __init__(self, location=None, base_url=None, **kwargs):
+        super().__init__(
+            location=location or Path(settings.BASE_DIR) / 'private_uploads' / 'cv',
+            base_url=base_url,
+            **kwargs,
+        )
+
+    def deconstruct(self):
+        return ('ia.models.PrivateCVStorage', (), {})
+
+    def url(self, name):
+        raise ValueError('Los CV se entregan únicamente mediante la descarga autorizada.')
+
+
+private_cv_storage = PrivateCVStorage()
+
+
+class CVVersion(models.Model):
+    """Snapshot inmutable de un CV aceptado del postulante."""
+
+    postulante = models.ForeignKey(Postulante, on_delete=models.CASCADE, related_name='versiones_cv')
+    numero = models.PositiveIntegerField()
+    archivo = models.FileField(storage=private_cv_storage, upload_to='')
+    nombre_original = models.CharField(max_length=255)
+    sha256 = models.CharField(max_length=64)
+    formato = models.CharField(max_length=12)
+    tamano = models.PositiveBigIntegerField()
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-numero']
+        constraints = [models.UniqueConstraint(fields=['postulante', 'numero'], name='ia_cv_version_numero_unico')]
+
+    def __str__(self):
+        return f'CV {self.numero} - {self.postulante}'
 
 
 class AnalisisCV(models.Model):
@@ -17,6 +60,8 @@ class AnalisisCV(models.Model):
         on_delete=models.CASCADE,
         related_name='analisis_cv',
     )
+    version_cv = models.ForeignKey(CVVersion, null=True, blank=True, on_delete=models.SET_NULL, related_name='analisis')
+    perfil_snapshot = models.JSONField(null=True, blank=True)
     estado = models.CharField(max_length=12, choices=Estado.choices, default=Estado.PENDIENTE)
     respuesta = models.JSONField(null=True, blank=True)
     error = models.TextField(blank=True)
@@ -25,13 +70,7 @@ class AnalisisCV(models.Model):
 
     class Meta:
         ordering = ['-creado_en']
-        constraints = [
-            models.UniqueConstraint(
-                fields=['postulante'],
-                condition=models.Q(estado='pendiente'),
-                name='ia_unico_analisis_pendiente_por_postulante',
-            ),
-        ]
+        constraints = []
 
     def __str__(self):
         return f'Análisis {self.pk} - {self.postulante}'
@@ -49,6 +88,7 @@ class PerfilCV(models.Model):
     """Perfil canónico editable; AnalisisCV conserva la respuesta histórica."""
 
     postulante = models.OneToOneField(Postulante, on_delete=models.CASCADE, related_name='perfil_ia')
+    cv_version = models.ForeignKey(CVVersion, null=True, blank=True, on_delete=models.SET_NULL, related_name='perfiles_publicados')
     contenido = models.JSONField(null=True, blank=True)
     version = models.PositiveIntegerField(default=0)
     source_hash = models.CharField(max_length=64, blank=True)
@@ -117,9 +157,10 @@ class TrabajoExtraccion(models.Model):
     source_hash = models.CharField(max_length=64)
     prompt_version = models.CharField(max_length=64, default='extraction.v1')
     remote_job_id = models.CharField(max_length=64, blank=True)
-    cv_snapshot = models.FileField(upload_to='ia/extraction_snapshots/', null=True, blank=True)
+    cv_snapshot = models.FileField(storage=private_cv_storage, upload_to='snapshots/', null=True, blank=True)
     profile_snapshot = models.JSONField(null=True, blank=True)
     profile_version_base = models.PositiveIntegerField(null=True, blank=True)
+    source_cv_version = models.ForeignKey(CVVersion, null=True, blank=True, on_delete=models.SET_NULL, related_name='trabajos_normalizacion')
     estado = models.CharField(max_length=24, choices=Estado.choices, default=Estado.PENDIENTE)
     intentos = models.PositiveIntegerField(default=0)
     error = models.TextField(blank=True)

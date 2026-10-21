@@ -104,7 +104,8 @@
       </div>
 
       <div class="space-y-6">
-        <div class="panel p-6 text-center" id="match-card" data-request-id="{% if match %}{{ match.request_id }}{% endif %}" data-status="{% if match %}{{ match.estado }}{% endif %}">
+        {% if not user.is_authenticated or user.postulante %}
+        <div class="panel p-6 text-center" id="match-card" data-config-hash="{{ match_config_hash }}" data-request-id="{% if match %}{{ match.request_id }}{% endif %}" data-status="{% if match %}{{ match.estado }}{% endif %}">
           <h3 class="font-mono text-xs uppercase tracking-widest text-[#6B645C]">Match inteligente</h3>
           {% if user.is_authenticated and user.postulante and not perfil_cv %}
             {% include 'ia/comparacion_historica.html' %}
@@ -132,18 +133,13 @@
           <p class="mt-3 text-xs text-[#6B645C]">El porcentaje compara tu perfil con los requisitos de la oferta. No representa una probabilidad de contratación.</p>
           <details class="mt-4 text-left text-xs text-[#6B645C]">
             <summary class="cursor-pointer font-semibold text-[#512DA8]">¿Cómo se calcula mi match?</summary>
-            <p class="mt-3 leading-relaxed">Comparamos tu perfil guardado con esta oferta. La IA evalúa cada área de 0 a 4 y combinamos los puntajes con estos pesos:</p>
-            <ul class="mt-2 space-y-1">
-              <li>Habilidades obligatorias: 45%</li>
-              <li>Experiencia: 25%</li>
-              <li>Formación e idiomas: 15%</li>
-              <li>Preferencias y requisitos deseables: 15%</li>
-            </ul>
-            <p class="mt-2 leading-relaxed">Un requisito excluyente sin respaldo limita el resultado a 40%. La cobertura indica cuántos requisitos tienen una habilidad con el mismo nombre en tu perfil; la confianza es una estimación de la IA. Los resultados de las cuentas demo son simulados.</p>
+            <p class="mt-3 leading-relaxed">La evaluación revisa los requisitos de la oferta, distingue los obligatorios de los deseables y muestra por separado cada dimensión. Los pesos vigentes se guardan con cada cálculo; un requisito obligatorio no deja de serlo aunque su dimensión tenga peso cero. La fecha de evaluación se usa para interpretar vigencia de credenciales.</p>
           </details>
           <div id="match-details" class="mt-4 text-left text-sm text-[#6B645C]" hidden>
             <p id="match-coverage"></p>
             <p id="match-confidence" class="mt-1"></p>
+            <p id="match-mandatory" class="mt-1 font-semibold"></p>
+            <ul id="match-breakdown" class="mt-3 grid gap-1 sm:grid-cols-2"></ul>
             <ul id="match-assessments" class="mt-3 space-y-2"></ul>
           </div>
           {% if user.is_authenticated and perfil_cv and perfil_cv.estado == 'ready' and perfil_oferta and perfil_oferta.estado == 'ready' %}
@@ -155,8 +151,8 @@
           {% endif %}
         </div>
 
-        {# TODO: todavia no existe el modelo de postulaciones. #}
         <button type="button" disabled class="btn-sun w-full cursor-not-allowed opacity-70">Postularme — Próximamente</button>
+        {% endif %}
 
         <div class="panel space-y-4 p-6">
           <h3 class="font-semibold text-[#26222E]">Información adicional</h3>
@@ -232,6 +228,8 @@
   let animationFrame;
   let displayedValue = 0;
   let lastTarget = null;
+  let activeRequestId = card.dataset.requestId || null;
+  let activeConfigHash = card.dataset.configHash || '';
   const circumference = 2 * Math.PI * 54;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   function paint(value) {
@@ -264,19 +262,31 @@
     if (socket) { socket.close(); socket = null; }
   }
   function render(data) {
+    if (data.request_id && activeRequestId && data.request_id !== activeRequestId) return;
+    if (data.scoring_config_hash && activeConfigHash && data.scoring_config_hash !== activeConfigHash) return;
     if (data.status === 'completed') {
       animatePercentage(data.match_percentage);
       message.textContent = 'Compatibilidad calculada según tu perfil y esta oferta.';
       button.disabled = false; button.textContent = 'Ver compatibilidad'; stopWatching();
       document.getElementById('match-details').hidden = false;
       document.getElementById('match-coverage').textContent = 'Requisitos con información: ' + Math.round(data.coverage_percentage) + '%';
-      document.getElementById('match-confidence').textContent = 'Confianza estimada de la evaluación: ' + Math.round(data.confidence_percentage) + '%';
+      document.getElementById('match-confidence').textContent = data.confidence_percentage == null ? 'La evaluación no incluye una estimación de confianza cuantificada.' : 'Confianza estimada de la evaluación: ' + Math.round(data.confidence_percentage) + '%';
+      const mandatoryLabels = {all_met: 'Se cumplen los requisitos obligatorios', not_met: 'Hay requisitos obligatorios que no se cumplen', unknown: 'No hay información suficiente para confirmar todos los requisitos obligatorios'};
+      document.getElementById('match-mandatory').textContent = mandatoryLabels[data.result?.mandatory_status] || '';
+      const dimensionLabels = {technical_skills: 'Competencias técnicas', soft_skills: 'Habilidades blandas', experience: 'Experiencia', education: 'Educación', languages: 'Idiomas', logistics: 'Logística y modalidad', desirables: 'Requisitos deseables'};
+      const breakdown = document.getElementById('match-breakdown');
+      breakdown.replaceChildren();
+      for (const [key, value] of Object.entries(data.result?.breakdown || {})) {
+        const row = document.createElement('li');
+        row.textContent = `${dimensionLabels[key] || key}: ${value.applicable ? Math.round(value.score * 100) + '%' : 'Sin requisitos aplicables'} · peso ${Number(value.configured_weight_bp) / 100}%`;
+        breakdown.appendChild(row);
+      }
       const list = document.getElementById('match-assessments');
       list.replaceChildren();
       const labels = {met: 'Coincide', partial: 'Coincide parcialmente', not_met: 'No alcanza el nivel requerido', unknown: 'Sin información suficiente'};
       for (const item of data.result?.assessments || []) {
         const row = document.createElement('li');
-        row.textContent = item.name + ': ' + (labels[item.status] || item.status);
+        row.textContent = `${item.mandatory ? 'Obligatorio' : 'Deseable'} · ${item.name}: ${labels[item.status] || item.status}`;
         list.appendChild(row);
       }
     }
@@ -307,6 +317,10 @@
     fetch(form.action, {method: 'POST', headers: {'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value, 'X-Requested-With': 'XMLHttpRequest'}})
       .then(response => response.json()).then(data => {
         if (!data.success) { card.classList.remove('is-calculating'); message.textContent = data.mensaje || 'No se pudo iniciar el cálculo.'; button.disabled = false; return; }
+        activeRequestId = data.request_id;
+        activeConfigHash = data.scoring_config_hash || '';
+        card.dataset.requestId = activeRequestId;
+        card.dataset.configHash = activeConfigHash;
         render(data);
         if (data.status !== 'completed' && data.status !== 'error') watch(data.request_id);
       }).catch(() => { card.classList.remove('is-calculating'); message.textContent = 'No se pudo iniciar el cálculo.'; button.disabled = false; });

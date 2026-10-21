@@ -59,16 +59,18 @@
           </div>
 
           <div class="space-y-2">
-            <label class="block text-sm font-medium">CUIT</label>
-            <input type="text" name="cuit" value="{{ form.cuit.value|default:'' }}" data-cuit-input
-                   placeholder="Ej. 30-12345678-9" maxlength="13" inputmode="numeric" pattern="[0-9]{11}|[0-9]{2}-[0-9]{8}-[0-9]"
+            <label class="block text-sm font-medium" for="id_empresa_cuit">{{ form.cuit.label }}</label>
+            <input id="id_empresa_cuit" type="text" name="cuit" value="{{ form.cuit.value|default:'' }}" data-cuit-input
+                   placeholder="XX-XXXXXXXX-X" maxlength="13" inputmode="numeric" pattern="[0-9]{11}|[0-9]{2}-[0-9]{8}-[0-9]"
+                   aria-describedby="id_empresa_cuit_help{% if form.cuit.errors %} id_empresa_cuit_error{% endif %}"{% if form.cuit.errors %} aria-invalid="true"{% endif %}
                    class="input-ien focus:outline-none focus:ring-2 focus:ring-ring" required>
-            {% if form.cuit.errors %}<p class="text-sm text-red-500">{{ form.cuit.errors.0 }}</p>{% endif %}
+            <p id="id_empresa_cuit_help" class="text-xs leading-relaxed text-[#6B645C]">{{ form.cuit.help_text }}</p>
+            {% if form.cuit.errors %}<p id="id_empresa_cuit_error" class="text-sm text-red-500">{{ form.cuit.errors.0 }}</p>{% endif %}
           </div>
 
           <div class="space-y-2">
-            <label class="block text-sm font-medium">Descripción</label>
-            <textarea name="descripcion" rows="4" placeholder="Contá a qué se dedica tu empresa"
+            <label class="block text-sm font-medium" for="id_empresa_descripcion">Descripción</label>
+            <textarea id="id_empresa_descripcion" data-character-limit="2000" name="descripcion" rows="4" placeholder="Contá a qué se dedica tu empresa"
                       class="input-ien focus:outline-none focus:ring-2 focus:ring-ring">{{ form.descripcion.value|default:'' }}</textarea>
             {% if form.descripcion.errors %}<p class="text-sm text-red-500">{{ form.descripcion.errors.0 }}</p>{% endif %}
           </div>

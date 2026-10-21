@@ -16,10 +16,17 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils import timezone
+from django.core.exceptions import ValidationError
+from django.core.files.storage import default_storage
+from django.db import transaction
+from hashlib import sha256
+from uuid import uuid4
 from django.contrib.auth import logout as auth_logout
 
 from .models import Postulante, Oferente
 from .models import Usuario
+from ia.models import CVVersion, EstadoPerfil, PerfilCV
+from .uploads import normalize_image_upload, scan_cv_upload, validate_cv_upload
 
 token_generator = PasswordResetTokenGenerator()
 
@@ -143,26 +150,13 @@ def puede_publicar_ofertas(oferente):
     return oferente.estado_obj.puede_publicar()
 
 
-def obtener_url_contacto(email_usuario):
-    """Genera URL de contacto según el dominio del email (Gmail, Outlook, etc.).
-
-    Args:
-        email_usuario (str): Email del usuario.
-
-    Returns:
-        str: URL del cliente de correo con destinatario prellenado.
-    """
-    dominio = email_usuario.split("@")[1].lower()
-    destino = "contacto@ien.edu.ar"
-    asunto = "Solicitud de validación de empresa"
-    if "gmail" in dominio:
-        return f"https://mail.google.com/mail/?view=cm&fs=1&to={destino}&su={asunto}"
-    elif "outlook" in dominio or "hotmail" in dominio or "live" in dominio:
-        return f"https://outlook.live.com/mail/0/deeplink/compose?to={destino}&subject={asunto}"
-    elif "yahoo" in dominio:
-        return f"https://compose.mail.yahoo.com/?to={destino}&subject={asunto}"
-    else:
-        return f"mailto:{destino}?subject={asunto}"
+def obtener_url_contacto(email_usuario=None):
+    """Devuelve el contacto institucional configurado, sin depender del correo del usuario."""
+    from urllib.parse import urlencode
+    email = getattr(settings, 'IEN_CONTACT_EMAIL', '').strip()
+    if not email:
+        return ''
+    return f"mailto:{email}?{urlencode({'subject': 'Solicitud de validación de empresa'})}"
 
 
 # --- Recuperación de contraseña ---
@@ -221,6 +215,7 @@ def validar_token_recuperacion(uidb64, token):
 
 # --- Gestión de CV ---
 
+@transaction.atomic
 def cargar_cv(postulante, archivo):
     """Carga o reemplaza el CV de un postulante.
 
@@ -228,21 +223,63 @@ def cargar_cv(postulante, archivo):
         postulante: Instancia del modelo Postulante.
         archivo: Archivo subido desde el formulario.
     """
-    if postulante.cv:
-        postulante.cv.delete(save=False)
-    postulante.cv = archivo
+    extension, _declared_type, tamano = validate_cv_upload(archivo)
+    scan_cv_upload(archivo)
+    postulante = Postulante.objects.select_for_update().get(pk=postulante.pk)
+    digest = sha256()
+    archivo.seek(0)
+    for chunk in archivo.chunks():
+        digest.update(chunk)
+    archivo.seek(0)
+    numero = (postulante.versiones_cv.order_by('-numero').values_list('numero', flat=True).first() or 0) + 1
+    version = CVVersion(
+        postulante=postulante,
+        numero=numero,
+        nombre_original=archivo.name[:255],
+        sha256=digest.hexdigest(),
+        formato=extension,
+        tamano=tamano,
+    )
+    version.archivo.save(f'{uuid4().hex}.{extension}', archivo, save=False)
+    version.save()
+    old_legacy_name = postulante.cv.name if postulante.cv else None
+    postulante.cv_version_actual = version
     postulante.cv_fecha_carga = timezone.now()
-    postulante.save()
+    postulante.cv = None
+    postulante.save(update_fields=['cv_version_actual', 'cv_fecha_carga', 'cv'])
+    profile = PerfilCV.objects.select_for_update().filter(postulante=postulante).first()
+    if profile:
+        profile.estado = EstadoPerfil.PENDIENTE
+        profile.save(update_fields=['estado', 'actualizado_en'])
+    if old_legacy_name:
+        transaction.on_commit(lambda: default_storage.delete(old_legacy_name))
+    return version
 
 
+@transaction.atomic
 def eliminar_cv(postulante):
     """Elimina el CV de un postulante y limpia la fecha de carga.
 
     Args:
         postulante: Instancia del modelo Postulante.
     """
+    from ia.models import AnalisisCV
+    postulante = Postulante.objects.select_for_update().get(pk=postulante.pk)
     if postulante.cv:
         postulante.cv.delete(save=False)
-        postulante.cv = None
-        postulante.cv_fecha_carga = None
-        postulante.save()
+    postulante.cv = None
+    postulante.cv_version_actual = None
+    postulante.cv_fecha_carga = None
+    postulante.save(update_fields=['cv', 'cv_version_actual', 'cv_fecha_carga'])
+    PerfilCV.objects.filter(postulante=postulante).update(estado=EstadoPerfil.PENDIENTE)
+
+
+def guardar_foto_postulante(postulante, uploaded):
+    normalized = normalize_image_upload(uploaded, max_bytes=2 * 1024 * 1024, max_side=1024)
+    postulante.foto.save(f'{uuid4().hex}.webp', normalized, save=True)
+
+
+def guardar_imagen_oferente(oferente, field_name, uploaded):
+    limits = {'logo': 2 * 1024 * 1024, 'banner': 5 * 1024 * 1024}
+    normalized = normalize_image_upload(uploaded, max_bytes=limits[field_name])
+    getattr(oferente, field_name).save(f'{uuid4().hex}.webp', normalized, save=True)

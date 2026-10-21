@@ -33,9 +33,21 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-local-development-onl
 if not DEBUG and SECRET_KEY.startswith('django-insecure-'):
     raise RuntimeError('SECRET_KEY debe configurarse fuera del código cuando DEBUG=False.')
 
-ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', '*').split(',') if host.strip()]
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', '*' if DEBUG else '').split(',') if host.strip()]
 if not DEBUG and not ALLOWED_HOSTS:
     raise RuntimeError('ALLOWED_HOSTS debe configurarse cuando DEBUG=False.')
+
+# Orígenes completos con esquema, separados por coma (por ejemplo, el dominio
+# HTTPS publicado por Cloudflare Tunnel). No modifica la protección CSRF.
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
+]
+# Activar únicamente detrás de un proxy confiable; el origen debe permanecer
+# en loopback o en una red privada que no acepte encabezados de clientes directos.
+if env_bool('TRUST_PROXY_HEADERS', not DEBUG):
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
@@ -68,6 +80,22 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# El límite se aplica durante la recepción multipart, antes de que los archivos
+# completos queden materializados por los upload handlers estándar.
+FILE_UPLOAD_HANDLERS = [
+    'usuarios.upload_handlers.BoundedUploadHandler',
+    'django.core.files.uploadhandler.MemoryFileUploadHandler',
+    'django.core.files.uploadhandler.TemporaryFileUploadHandler',
+]
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+DATA_UPLOAD_MAX_NUMBER_FILES = 5
+CV_SCAN_ENABLED = env_bool('CV_SCAN_ENABLED', False)
+CV_SCAN_COMMAND = os.environ.get('CV_SCAN_COMMAND', '')
+CV_SCAN_TIMEOUT_SECONDS = int(os.environ.get('CV_SCAN_TIMEOUT_SECONDS', '30'))
+CV_DOCKER_COMMAND = os.environ.get('CV_DOCKER_COMMAND', 'docker')
+CV_LEGACY_CONVERTER_IMAGE = os.environ.get('CV_LEGACY_CONVERTER_IMAGE', '')
+CV_LEGACY_CONVERSION_TIMEOUT_SECONDS = int(os.environ.get('CV_LEGACY_CONVERSION_TIMEOUT_SECONDS', '30'))
+
 ROOT_URLCONF = 'ientrabajo.urls'
 
 TEMPLATES = [
@@ -81,6 +109,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'ia.context_processors.cv_notifications',
+                'ientrabajo.context_processors.contacto_ien',
             ],
             # {% static_v %} disponible en todas las plantillas: agrega la version
             # del archivo a la URL para que el navegador no use JS/CSS viejo cacheado.
@@ -103,12 +132,43 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+DB_ENGINE = os.environ.get('DB_ENGINE', 'sqlite').strip().lower()
+
+if not DEBUG and DB_ENGINE != 'postgresql':
+    raise RuntimeError('En producción configurá DB_ENGINE=postgresql.')
+
+if DB_ENGINE == 'postgresql':
+    required_db_vars = ('DB_NAME', 'DB_USER', 'DB_PASSWORD', 'DB_HOST')
+    missing_db_vars = [name for name in required_db_vars if not os.environ.get(name)]
+    if missing_db_vars:
+        raise RuntimeError(f'Faltan variables de PostgreSQL: {", ".join(missing_db_vars)}')
+    db_sslmode = (os.environ.get('DB_SSLMODE') or ('require' if not DEBUG else 'prefer')).strip().lower()
+    if db_sslmode not in {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}:
+        raise RuntimeError('DB_SSLMODE no es un modo TLS válido de PostgreSQL.')
+    if not DEBUG and db_sslmode not in {'require', 'verify-ca', 'verify-full'}:
+        raise RuntimeError('En producción DB_SSLMODE debe exigir TLS: require, verify-ca o verify-full.')
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ['DB_NAME'],
+            'USER': os.environ['DB_USER'],
+            'PASSWORD': os.environ['DB_PASSWORD'],
+            'HOST': os.environ['DB_HOST'],
+            'PORT': os.environ.get('DB_PORT', '5432'),
+            'OPTIONS': {
+                'sslmode': db_sslmode,
+            },
+        }
     }
-}
+elif DB_ENGINE == 'sqlite':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
+    raise RuntimeError(f'DB_ENGINE desconocido: {DB_ENGINE}')
 
 
 # Password validation
@@ -167,11 +227,13 @@ PASSWORD_RESET_TIMEOUT = 86400  # 24 horas en segundos
 #IA_API_URL poner la direccion y puerto de la api (si corre en esta pc poner localhost)
 IA_API_URL = os.environ.get('IA_API_URL', 'http://192.168.100.82:8001/api/v1/cv-analyses')
 IA_API_TOKEN = os.environ.get('IA_API_TOKEN', '')
-# ACA VA CV_RESULT_CALLBACK_SECRET que esta en la /backend de la api
-IA_CALLBACK_TOKEN = os.environ.get('IA_CALLBACK_TOKEN', 'HgjB1ZeMMpRo3W9ehIsYqg71l0Ageo3OyRhtSOCLeDr0Mr_m6E3ia03bDjGVntdr')
+# Compatibilidad con configuraciones locales anteriores; el callback usa HMAC.
+IA_CALLBACK_TOKEN = os.environ.get('IA_CALLBACK_TOKEN', '')
 # Opcional: URL pública fija para callbacks (útil si Django corre detrás de proxy o túnel).
 IA_CALLBACK_URL = os.environ.get('IA_CALLBACK_URL', '')
-IA_CALLBACK_HMAC_SECRET = os.environ.get('IA_CALLBACK_HMAC_SECRET', IA_CALLBACK_TOKEN)
+IA_CALLBACK_HMAC_SECRET = os.environ.get('IA_CALLBACK_HMAC_SECRET') or IA_CALLBACK_TOKEN
+if not DEBUG and not IA_CALLBACK_HMAC_SECRET:
+    raise RuntimeError('IA_CALLBACK_HMAC_SECRET debe configurarse en producción.')
 IA_OFFER_API_URL = os.environ.get('IA_OFFER_API_URL', '')
 MATCH_API_URL = os.environ.get('MATCH_API_URL', 'ws://127.0.0.1:8001/api/v1/ws/v1/matches')
 MATCH_API_HTTP_URL = os.environ.get('MATCH_API_HTTP_URL', 'http://127.0.0.1:8001/api/v1')
@@ -188,4 +250,6 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '31536000'))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Correo público de contacto. Definirlo en el entorno cuando el IEN lo confirme.
+IEN_CONTACT_EMAIL = os.environ.get('IEN_CONTACT_EMAIL', '').strip()

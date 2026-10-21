@@ -28,6 +28,7 @@ from .profile_skills import split_profile_skills
 
 NIVELES_HABILIDAD = ('Teórico', 'Principiante', 'Intermedio', 'Avanzado')
 logger = logging.getLogger(__name__)
+ANALYSIS_IN_PROGRESS_MESSAGE = 'Puede tardar varios minutos según la disponibilidad del servicio.'
 
 
 @login_required
@@ -38,18 +39,15 @@ def solicitar_analisis(request):
     """Envía el PDF a FastAPI, que lo encola para extraerlo y analizarlo."""
     postulante = request.user.postulante
 
-    if not postulante.cv:
+    if not postulante.cv_version_actual_id:
         return JsonResponse({'success': False, 'mensaje': 'Primero debés cargar un CV.'}, status=400)
-    if not postulante.cv.name.lower().endswith('.pdf'):
-        return JsonResponse(
-            {'success': False, 'mensaje': 'Por el momento el análisis admite CV en formato PDF.'},
-            status=400,
-        )
 
     if not settings.IA_API_URL:
         return JsonResponse({'success': False, 'mensaje': 'El servicio de análisis no está configurado.'}, status=503)
     try:
         analisis, _, creado = request_cv_extraction(postulante)
+    except ValueError as exc:
+        return JsonResponse({'success': False, 'mensaje': str(exc)}, status=409)
     except OSError:
         return JsonResponse({'success': False, 'mensaje': 'No se pudo preparar el CV para analizar.'}, status=502)
 
@@ -57,6 +55,7 @@ def solicitar_analisis(request):
         'success': True,
         'mensaje': 'CV preparado para analizar.' if creado else 'Ya hay un análisis de CV en proceso.',
         'analisis_id': analisis.id,
+        'version_cv_id': analisis.version_cv_id,
     }, status=202)
 
 
@@ -71,16 +70,20 @@ def estado_analisis(request, analisis_id):
     )
     data = {
         'estado': analisis.estado,
+        'version_cv_id': analisis.version_cv_id,
+        'es_version_actual': analisis.version_cv_id == request.user.postulante.cv_version_actual_id,
         'mensaje': '',
         'resultado_url': None,
     }
-    if analisis.estado == AnalisisCV.Estado.COMPLETADO:
+    if not data['es_version_actual']:
+        data['mensaje'] = 'Este análisis corresponde a una versión anterior del CV.'
+    elif analisis.estado == AnalisisCV.Estado.COMPLETADO:
         data['mensaje'] = 'El análisis del CV está listo.'
         data['resultado_url'] = reverse('ia:ver_resultado', args=[analisis.id])
     elif analisis.estado == AnalisisCV.Estado.ERROR:
         data['mensaje'] = analisis.error or 'No se pudo analizar el CV.'
     else:
-        data['mensaje'] = 'Analizando CV…'
+        data['mensaje'] = ANALYSIS_IN_PROGRESS_MESSAGE
     return JsonResponse(data)
 
 
@@ -93,11 +96,16 @@ def ver_resultado(request, analisis_id):
         pk=analisis_id,
         postulante=request.user.postulante,
     )
-    perfil = PerfilCV.objects.filter(postulante=analisis.postulante).first()
-    habilidades_duras, habilidades_blandas = split_profile_skills(perfil.contenido if perfil else {})
+    perfil = None
+    contenido_historico = analisis.perfil_snapshot
+    if contenido_historico:
+        from types import SimpleNamespace
+        perfil = SimpleNamespace(contenido=contenido_historico)
+    habilidades_duras, habilidades_blandas = split_profile_skills(contenido_historico or {})
     return render(request, 'ia/resultado_analisis.html', {
         'analisis': analisis,
         'perfil': perfil,
+        'es_version_actual': analisis.version_cv_id == analisis.postulante.cv_version_actual_id,
         'habilidades_duras': habilidades_duras,
         'habilidades_blandas': habilidades_blandas,
     })
@@ -215,11 +223,13 @@ def llegue(request):
             analysis = job.analisis_cv
             notification = {
                 'analysis_id': analysis.pk,
+                'version_cv_id': analysis.version_cv_id,
+                'es_version_actual': analysis.version_cv_id == analysis.postulante.cv_version_actual_id,
                 'status': analysis.estado,
                 'mensaje': 'El análisis del CV está listo.' if analysis.estado == AnalisisCV.Estado.COMPLETADO
                            else (analysis.error or 'No se pudo analizar el CV.'),
                 'resultado_url': reverse('ia:ver_resultado', args=[analysis.pk])
-                                 if analysis.estado == AnalisisCV.Estado.COMPLETADO else None,
+                                 if analysis.estado == AnalisisCV.Estado.COMPLETADO and analysis.version_cv_id == analysis.postulante.cv_version_actual_id else None,
             }
             try:
                 async_to_sync(get_channel_layer().group_send)(

@@ -2,31 +2,41 @@
 
 import re
 
+from ientrabajo.form_fields import DescripcionField
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, SetPasswordForm as DjangoSetPasswordForm
 from .models import Usuario, Postulante, Oferente
 from .validators import normalizar_cuit, validar_cuit
+from .uploads import normalize_image_upload, validate_cv_upload
 
-CV_FORMATOS_PERMITIDOS = ['pdf', 'doc', 'docx']
+CV_FORMATOS_PERMITIDOS = ['pdf', 'docx', 'odt', 'txt']
 CV_TAMANO_MAXIMO_MB = 5
 
 
 class CuitField(forms.CharField):
-    """Acepta CUIT/CUIL de 11 dígitos, con o sin guiones."""
+    """Acepta el CUIT de la empresa con o sin guiones y explica el formato."""
 
     def __init__(self, **kwargs):
         kwargs.setdefault('max_length', 13)
-        kwargs.setdefault('label', 'CUIT/CUIL')
+        kwargs.setdefault('label', 'CUIT de la empresa')
+        kwargs.setdefault('help_text', 'Ingresá el CUIT tal como figura en tu constancia de inscripción. Son 11 números y podés escribirlo con o sin guiones.')
+        kwargs.setdefault('error_messages', {
+            'required': 'Ingresá el CUIT de tu empresa.',
+            'max_length': 'El CUIT debe tener 11 números, con o sin guiones.',
+        })
         kwargs.setdefault('widget', forms.TextInput(attrs={
             'inputmode': 'numeric',
             'autocomplete': 'off',
+            'placeholder': 'XX-XXXXXXXX-X',
         }))
         super().__init__(**kwargs)
 
     def validate(self, value):
         super().validate(value)
         if value and not re.fullmatch(r'(?:[0-9]{11}|[0-9]{2}-[0-9]{8}-[0-9])', value):
-            raise forms.ValidationError('Ingresá 11 números, con o sin guiones (ej. 30-12345678-9).')
+            if len(re.sub(r'\D', '', value)) != 11:
+                raise forms.ValidationError('El CUIT debe tener 11 números. Revisá que esté completo.')
+            raise forms.ValidationError('Escribí el CUIT con o sin guiones, con el formato XX-XXXXXXXX-X.')
 
 
 
@@ -59,8 +69,6 @@ class RegistroOferenteForm(RegistroBaseForm):
         validar_cuit(cuit)
         return normalizar_cuit(cuit)
 
-
-
 class LoginForm(forms.Form):
     """Recibe las credenciales utilizadas por el servicio de autenticación."""
     email = forms.EmailField(label='Email')
@@ -71,6 +79,7 @@ class LoginForm(forms.Form):
     
 class OferenteForm(forms.ModelForm):
     """Edita la información pública y de contacto de una empresa."""
+    descripcion = DescripcionField(required=False)
     cuit = CuitField()
 
     class Meta:
@@ -85,6 +94,18 @@ class OferenteForm(forms.ModelForm):
         cuit = self.cleaned_data['cuit']
         validar_cuit(cuit)
         return normalizar_cuit(cuit)
+
+    def clean_logo(self):
+        upload = self.cleaned_data.get('logo')
+        if upload and hasattr(upload, 'read'):
+            return normalize_image_upload(upload, max_bytes=2 * 1024 * 1024)
+        return upload
+
+    def clean_banner(self):
+        upload = self.cleaned_data.get('banner')
+        if upload and hasattr(upload, 'read'):
+            return normalize_image_upload(upload, max_bytes=5 * 1024 * 1024)
+        return upload
 
 class DatosPersonalesForm(forms.ModelForm):
     """Actualiza datos del usuario y del perfil de postulante."""
@@ -179,22 +200,16 @@ class CargaCVForm(forms.Form):
     cv = forms.FileField(label='Archivo CV')
 
     def clean_cv(self):
-        """Acepta PDF o documentos Word de hasta el tamaño configurado."""
+        """Acepta solo formatos con soporte de extracción habilitado."""
         archivo = self.cleaned_data.get('cv')
         if not archivo:
             raise forms.ValidationError('Debes seleccionar un archivo.')
 
-        extension = archivo.name.rsplit('.', 1)[-1].lower()
-        if extension not in CV_FORMATOS_PERMITIDOS:
-            raise forms.ValidationError(
-                f'Formato no permitido. Solo se aceptan: {", ".join(CV_FORMATOS_PERMITIDOS).upper()}'
-            )
-
-        tamano_bytes = archivo.size
-        tamano_maximo_bytes = CV_TAMANO_MAXIMO_MB * 1024 * 1024
-        if tamano_bytes > tamano_maximo_bytes:
-            raise forms.ValidationError(
-                f'El archivo supera el tamaño máximo de {CV_TAMANO_MAXIMO_MB} MB.'
-            )
+        try:
+            validate_cv_upload(archivo)
+        except Exception as exc:
+            if hasattr(exc, 'messages'):
+                raise forms.ValidationError(exc.messages)
+            raise
 
         return archivo

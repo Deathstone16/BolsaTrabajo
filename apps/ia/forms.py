@@ -5,9 +5,15 @@ class PerfilCVForm(forms.Form):
     version = forms.IntegerField(widget=forms.HiddenInput)
     headline = forms.CharField(max_length=180, required=False, label='Título profesional')
     summary = forms.CharField(max_length=2000, required=False, widget=forms.Textarea(attrs={'rows': 5}), label='Resumen profesional')
-    skills = forms.CharField(max_length=2000, required=False, label='Habilidades', help_text='Separalas con comas.')
+    skills = forms.CharField(max_length=2000, required=False, widget=forms.HiddenInput(), label='Habilidades', help_text='Agregá una habilidad por vez. Elegí una sugerencia o escribí su nombre y presioná Agregar.')
     languages = forms.CharField(max_length=1000, required=False, label='Idiomas', help_text='Separalos con comas.')
     locations = forms.CharField(max_length=1000, required=False, label='Ubicaciones preferidas', help_text='Separalas con comas.')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            if not field.widget.is_hidden:
+                field.widget.attrs.setdefault('class', 'input-ien')
 
     @classmethod
     def initial_from_profile(cls, profile):
@@ -26,8 +32,33 @@ class PerfilCVForm(forms.Form):
         result['headline'] = self.cleaned_data['headline'] or None
         result['summary'] = self.cleaned_data['summary'] or None
         old_skills = {item.get('name', '').casefold(): item for item in result.get('skills', [])}
-        result['skills'] = [old_skills.get(name.casefold(), {'name': name, 'level': 'unknown', 'evidence': []}) for name in self._csv('skills')]
-        result['languages'] = [{'name': name, 'level': 'unknown'} for name in self._csv('languages')]
+        new_names = self._csv('skills')
+        result['rejected_skills'] = list(result.get('rejected_skills', []))
+        rejected_by_name = {item.get('name', '').casefold(): item for item in result['rejected_skills']}
+        for name in new_names:
+            rejected_by_name.pop(name.casefold(), None)
+        for key, item in old_skills.items():
+            if key not in {name.casefold() for name in new_names}:
+                rejected_by_name[key] = {
+                    'name': item.get('name', ''),
+                    'concept_id': item.get('concept_id'),
+                    'reason': 'Rechazada explícitamente por el postulante.',
+                }
+        result['rejected_skills'] = list(rejected_by_name.values())
+        result['skills'] = [
+            old_skills.get(name.casefold(), {
+                'name': name,
+                'level': 'unknown',
+                'years_experience': None,
+                'evidence': [f'Declarada directamente por el postulante: {name}'],
+                'kind': 'unknown',
+                'origin': 'user_declared',
+                'concept_id': None,
+            })
+            for name in new_names
+        ]
+        existing_languages = {item.get('name', '').casefold(): item for item in result.get('languages', [])}
+        result['languages'] = [existing_languages.get(name.casefold(), {'name': name, 'level': 'unknown'}) for name in self._csv('languages')]
         preferences = dict(result.get('preferences') or {})
         preferences['locations'] = self._csv('locations')
         preferences.setdefault('work_modes', [])
@@ -35,4 +66,12 @@ class PerfilCVForm(forms.Form):
         return result
 
     def _csv(self, field):
-        return list(dict.fromkeys(item.strip() for item in self.cleaned_data[field].split(',') if item.strip()))
+        values = []
+        seen = set()
+        for raw in self.cleaned_data[field].split(','):
+            item = raw.strip()
+            key = item.casefold()
+            if item and key not in seen:
+                seen.add(key)
+                values.append(item)
+        return values

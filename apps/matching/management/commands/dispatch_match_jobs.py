@@ -38,10 +38,14 @@ class Command(BaseCommand):
 
     def _claim(self):
         with transaction.atomic():
+            lease_cutoff = timezone.now() - timedelta(seconds=getattr(settings, 'MATCH_OUTBOX_LEASE_SECONDS', 300))
             event = EventoSalida.objects.select_for_update().filter(
                 tipo=EventoSalida.Tipo.MATCH,
-                estado=EventoSalida.Estado.PENDIENTE,
-            ).filter(Q(proximo_intento_en__isnull=True) | Q(proximo_intento_en__lte=timezone.now())).order_by('creado_en').first()
+            ).filter(
+                Q(estado=EventoSalida.Estado.PENDIENTE, proximo_intento_en__isnull=True)
+                | Q(estado=EventoSalida.Estado.PENDIENTE, proximo_intento_en__lte=timezone.now())
+                | Q(estado=EventoSalida.Estado.ENVIANDO, actualizado_en__lte=lease_cutoff)
+            ).order_by('creado_en').first()
             if event:
                 event.estado = EventoSalida.Estado.ENVIANDO
                 event.intentos += 1
@@ -56,6 +60,9 @@ class Command(BaseCommand):
                 socket.send(json.dumps({'type': 'match.start', 'payload': match_request_payload(match)}))
                 while True:
                     message = json.loads(socket.recv(timeout=60))
+                    event.refresh_from_db(fields=['estado'])
+                    if event.estado == EventoSalida.Estado.ENVIANDO:
+                        event.save(update_fields=['actualizado_en'])
                     status = message.get('status')
                     if status in {'accepted', 'processing', 'rate_limited'}:
                         update_match_status(str(match.request_id), status)

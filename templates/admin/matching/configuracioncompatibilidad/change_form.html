@@ -1,0 +1,13 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+{% block submit_buttons_bottom %}
+  {{ block.super }}
+  {% if puede_publicar_configuracion %}
+    {% if not original or original.es_borrador %}
+    <div class="submit-row">
+      <input type="submit" value="Establecer configuración" name="_publicar_configuracion" class="default" />
+      <span>Guarda el borrador y lo establece como configuración vigente si los pesos suman exactamente 100%.</span>
+    </div>
+    {% endif %}
+  {% endif %}
+{% endblock %}

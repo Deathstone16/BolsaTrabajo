@@ -24,7 +24,7 @@
       
       {% for field in form %}
       <div class="space-y-1">
-          <label class="text-sm font-medium">{{ field.label }}</label>
+          <label class="text-sm font-medium" for="{{ field.id_for_label }}">{{ field.label }}</label>
           {% if field.name == 'imagen' %}
       <!-- 🔧 FIX 2: Renderizar widget completo nativo (sin 'hidden') + JS para nombre archivo -->
       <div class="flex items-center gap-3">
@@ -47,6 +47,7 @@
       {% endif %}
       {% else %}
       {{ field }}
+      {% if field.name == 'categoria' %}{% include 'cursos/_category_help.html' %}{% endif %}
       {% if field.errors %}
           <!-- 🔧 FIX 3: Errores de campo como lista individual -->
           <div class="text-destructive text-xs mt-1 space-y-1">

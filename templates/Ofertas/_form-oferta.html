@@ -67,6 +67,30 @@
       </select>
     </div>
   </div>
+  {% if form.warnings %}<div class="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"><p class="font-semibold">Revisá la clasificación antes de publicar</p>{% for warning in form.warnings %}<p class="mt-1">{{ warning }}</p>{% endfor %}</div>{% endif %}
+</div>
+
+<div class="space-y-4 border-t border-[rgba(110,85,55,0.16)] pt-8 mt-8" id="requirements-editor">
+  <h3 class="flex items-center gap-2 text-lg font-semibold text-[#26222E]">Requisitos y criterios</h3>
+  {% if form.instance.pk and form.instance.requiere_revision_requisitos %}
+    <p class="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">Esta oferta necesita una revisión. Los requisitos anteriores aparecen como deseables por defecto; mové al campo obligatorio únicamente lo que deba cumplirse.</p>
+  {% endif %}
+  <div class="space-y-2">
+    <label for="id_requisitos_obligatorios" class="block text-sm font-semibold">Requisitos obligatorios</label>
+    {{ form.requisitos_obligatorios }}
+    <p class="text-xs text-[#6B645C]">TODO requisito incluido aquí será obligatorio. Separá cada requisito con un salto de línea; hasta 100 caracteres por línea.</p>
+    <div id="categorias-obligatorias" class="space-y-2" aria-live="polite"></div>
+    {% if form.requisitos_obligatorios.errors %}<p class="text-sm text-[#d4183d]">{{ form.requisitos_obligatorios.errors.0 }}</p>{% endif %}
+  </div>
+  <div class="space-y-2">
+    <label for="id_requisitos_deseables" class="block text-sm font-semibold">Requisitos deseables</label>
+    {{ form.requisitos_deseables }}
+    <p class="text-xs text-[#6B645C]">Incluí conocimientos o experiencia que suman valor, pero cuya ausencia no implica incumplir un requisito obligatorio.</p>
+    {% if form.requisitos_deseables.errors %}<p class="text-sm text-[#d4183d]">{{ form.requisitos_deseables.errors.0 }}</p>{% endif %}
+  </div>
+  {{ form.categorias_requisitos }}
+  {% if form.categorias_requisitos.errors %}<p class="text-sm text-[#d4183d]">{{ form.categorias_requisitos.errors.0 }}</p>{% endif %}
+  <div class="rounded-xl bg-[#F8F3F0] p-4"><p class="font-semibold text-sm">Resumen revisable para la publicación</p><ul id="resumen-requisitos" class="mt-2 list-disc space-y-1 pl-5 text-sm text-[#6B645C]"></ul></div>
 </div>
 
 <div class="space-y-4 border-t border-[rgba(110,85,55,0.16)] pt-8 mt-8">
@@ -75,8 +99,8 @@
   </h3>
 
   <div class="space-y-2">
-    <label class="block text-sm">Descripción</label>
-    <textarea name="descripcion" rows="5" placeholder="Describe las responsabilidades y actividades del puesto..."
+    <label class="block text-sm" for="id_oferta_descripcion">Descripción</label>
+    <textarea id="id_oferta_descripcion" data-character-limit="2000" name="descripcion" rows="5" placeholder="Describe las responsabilidades y actividades del puesto..."
               class="input-ien resize-none" required>{{ form.descripcion.value|default:'' }}</textarea>
     {% if form.descripcion.errors %}<p class="text-sm text-[#d4183d]">{{ form.descripcion.errors.0 }}</p>{% endif %}
   </div>
@@ -90,9 +114,9 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <fieldset class="space-y-3 rounded-2xl border border-[#512DA8]/25 bg-[#512DA8]/5 p-4">
       <legend class="px-2 text-sm font-semibold text-[#512DA8]">Habilidades técnicas (duras)</legend>
-      <p class="text-xs text-[#6B645C]">Mínimo 1, máximo 10 habilidades</p>
+      <p class="text-xs text-[#6B645C]">Mínimo 1, máximo 10. Elegí una sugerencia con clic o Enter.</p>
       <div class="relative">
-        <input type="text" id="tags-input-duras" placeholder="Ej. Python, SQL, Docker..."
+        <input type="text" id="tags-input-duras" placeholder="Escribí una habilidad técnica"
                class="input-ien" autocomplete="off">
         <ul id="tags-dropdown-duras"
             class="absolute z-10 mt-1 hidden max-h-48 w-full overflow-y-auto rounded-2xl border border-[rgba(110,85,55,0.16)] bg-white shadow-lg"></ul>
@@ -104,9 +128,9 @@
 
     <fieldset class="space-y-3 rounded-2xl border border-emerald-600/25 bg-emerald-600/5 p-4">
       <legend class="px-2 text-sm font-semibold text-emerald-700">Habilidades blandas</legend>
-      <p class="text-xs text-[#6B645C]">Máximo 10 habilidades</p>
+      <p class="text-xs text-[#6B645C]">Máximo 10. Elegí una sugerencia con clic o Enter.</p>
       <div class="relative">
-        <input type="text" id="tags-input-blandas" placeholder="Ej. Comunicación, Liderazgo..."
+        <input type="text" id="tags-input-blandas" placeholder="Escribí una habilidad blanda"
                class="input-ien" autocomplete="off">
         <ul id="tags-dropdown-blandas"
             class="absolute z-10 mt-1 hidden max-h-48 w-full overflow-y-auto rounded-2xl border border-[rgba(110,85,55,0.16)] bg-white shadow-lg"></ul>
@@ -135,6 +159,8 @@
         <span class="text-sm text-[#6B645C]">años</span>
       </div>
       {% if form.experiencia_requerida.errors %}<p class="text-sm text-[#d4183d]">{{ form.experiencia_requerida.errors.0 }}</p>{% endif %}
+      <label class="block text-xs text-[#6B645C]">Clasificación</label>
+      {{ form.experiencia_clasificacion }}
     </div>
 
     <div class="space-y-2">
@@ -145,9 +171,12 @@
         {% endfor %}
       </select>
       {% if form.nivel_educativo.errors %}<p class="text-sm text-[#d4183d]">{{ form.nivel_educativo.errors.0 }}</p>{% endif %}
+      <label class="block text-xs text-[#6B645C]">Clasificación</label>
+      {{ form.educacion_clasificacion }}
     </div>
   </div>
 </div>
+<script src="{% static 'ofertas/requirements.js' %}" defer></script>
 
 <div class="space-y-4 border-t border-[rgba(110,85,55,0.16)] pt-8 mt-8">
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

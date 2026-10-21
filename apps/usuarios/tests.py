@@ -1,10 +1,11 @@
 from django.core.exceptions import ValidationError
-from django.test import SimpleTestCase
-from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
 from .forms import CuitField, RegistroOferenteForm
 from .validators import normalizar_cuit, validar_cuit
+from .uploads import CV_MAX_BYTES, normalize_image_upload, validate_cv_upload
 
 
 class CuitFieldTests(SimpleTestCase):
@@ -54,3 +55,81 @@ class CuitValidatorTests(TestCase):
         self.assertTrue(form.is_valid(), form.errors.as_json())
         self.assertEqual(form.cleaned_data['cuit'], '20-12345678-6')
         self.assertEqual(normalizar_cuit('20123456786'), '20-12345678-6')
+
+
+class CVAndImageUploadValidationTests(SimpleTestCase):
+    @override_settings(CV_LEGACY_CONVERTER_IMAGE='')
+    def test_txt_utf8_es_admitido_y_extension_falsa_se_rechaza(self):
+        upload = SimpleUploadedFile('cv.txt', 'Experiencia: Python'.encode())
+        self.assertEqual(validate_cv_upload(upload)[0], 'txt')
+        fake = SimpleUploadedFile('cv.txt', b'%PDF-1.7\n%%EOF')
+        with self.assertRaises(ValidationError):
+            validate_cv_upload(fake)
+
+    def test_rechaza_un_byte_sobre_limite_cv(self):
+        upload = SimpleUploadedFile('cv.txt', b'a' * (CV_MAX_BYTES + 1))
+        with self.assertRaisesMessage(ValidationError, '5 MiB'):
+            validate_cv_upload(upload)
+
+    def test_txt_sobre_limite_de_extraccion_no_se_acepta(self):
+        upload = SimpleUploadedFile('cv.txt', b'a' * 100_001)
+        with self.assertRaisesMessage(ValidationError, '100.000'):
+            validate_cv_upload(upload)
+
+    def test_docx_con_xml_roto_se_rechaza_antes_de_guardar(self):
+        from io import BytesIO
+        import zipfile
+        payload = BytesIO()
+        with zipfile.ZipFile(payload, 'w') as archive:
+            archive.writestr('[Content_Types].xml', '<Types/>')
+            archive.writestr('word/document.xml', '<w:document><broken>')
+        with self.assertRaises(ValidationError):
+            validate_cv_upload(SimpleUploadedFile('cv.docx', payload.getvalue()))
+
+    def test_docx_cuenta_separadores_de_parrafo_como_api_antes_de_guardar(self):
+        from io import BytesIO
+        import zipfile
+        payload = BytesIO()
+        document = (
+            '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'
+            '<w:p><w:r><w:t>' + ('a' * 50_000) + '</w:t></w:r></w:p>'
+            '<w:p><w:r><w:t>' + ('b' * 50_000) + '</w:t></w:r></w:p>'
+            '</w:body></w:document>'
+        )
+        with zipfile.ZipFile(payload, 'w') as archive:
+            archive.writestr('[Content_Types].xml', '<Types/>')
+            archive.writestr('word/document.xml', document)
+        with self.assertRaisesMessage(ValidationError, '100.000'):
+            validate_cv_upload(SimpleUploadedFile('cv.docx', payload.getvalue()))
+
+    def test_almacenamiento_privado_no_expone_url(self):
+        from ia.models import private_cv_storage
+        with self.assertRaises(ValueError):
+            private_cv_storage.url('cv/privado.pdf')
+
+    def test_imagen_4096_por_uno_se_normaliza_y_lado_4097_se_rechaza(self):
+        from io import BytesIO
+        from PIL import Image
+        accepted = BytesIO()
+        Image.new('RGB', (4096, 1), 'red').save(accepted, format='PNG')
+        normalized = normalize_image_upload(
+            SimpleUploadedFile('photo.png', accepted.getvalue()), max_bytes=2 * 1024 * 1024,
+        )
+        self.assertTrue(normalized.name.endswith('.webp'))
+        oversized = BytesIO()
+        Image.new('RGB', (4097, 1), 'red').save(oversized, format='PNG')
+        with self.assertRaises(ValidationError):
+            normalize_image_upload(
+                SimpleUploadedFile('photo.png', oversized.getvalue()), max_bytes=2 * 1024 * 1024,
+            )
+
+    def test_formulario_admin_de_oferente_rechaza_gif(self):
+        from io import BytesIO
+        from PIL import Image
+        from .admin import OferenteAdminForm
+        image = BytesIO()
+        Image.new('RGB', (2, 2), 'red').save(image, format='GIF')
+        form = OferenteAdminForm()
+        form.cleaned_data = {'logo': SimpleUploadedFile('logo.gif', image.getvalue())}
+        with self.assertRaises(ValidationError):
+            form.clean_logo()

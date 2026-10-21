@@ -10,6 +10,7 @@ def ultimo_analisis_completado(postulante):
         AnalisisCV.objects
         .filter(
             postulante=postulante,
+            version_cv_id=postulante.cv_version_actual_id,
             estado=AnalisisCV.Estado.COMPLETADO,
             respuesta__isnull=False,
         )

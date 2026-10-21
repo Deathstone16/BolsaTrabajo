@@ -32,6 +32,13 @@ class ModeracionOfertasTests(TestCase):
             titulo='Desarrollador', nombre_puesto='Desarrollador',
             ubicacion='Córdoba', descripcion='Descripción de prueba',
             habilidades_requeridas='Python', habilidades_duras='Python',
+            requisitos_obligatorios='Python',
+            requisitos_estructurados=[{
+                'id': 'fixture-python', 'category': 'technical_skills',
+                'source': 'requisitos_obligatorios', 'name': 'Python',
+                'mandatory': True, 'exclusionary': False,
+            }],
+            requiere_revision_requisitos=False,
             nivel_educativo='universitario',
             fecha_cierre=timezone.now() + timedelta(days=10),
         )
@@ -53,6 +60,15 @@ class ModeracionOfertasTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.oferta.refresh_from_db()
         self.assertEqual(self.oferta.estado, 'activa')
+
+    def test_no_publica_una_oferta_legacy_hasta_que_se_revisen_requisitos(self):
+        self.oferta.requiere_revision_requisitos = True
+        self.oferta.save(update_fields=['requiere_revision_requisitos'])
+        self.client.force_login(self.staff)
+        response = self.client.post(reverse('mod_aprobar_oferta', args=[self.oferta.id]))
+        self.assertEqual(response.status_code, 302)
+        self.oferta.refresh_from_db()
+        self.assertEqual(self.oferta.estado, 'pendiente')
 
     def test_rechazo_exige_motivo(self):
         self.client.force_login(self.staff)
