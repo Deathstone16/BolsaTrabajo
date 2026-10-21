@@ -24,7 +24,8 @@ hmac = values.get('IA_CALLBACK_HMAC_SECRET') or values.get('IA_CALLBACK_TOKEN') 
 api_values = dotenv_values(api / '.env')
 model = api_values.get('MATCH_GROQ_MODEL') or api_values.get('CV_MODEL') or 'llama-3.3-70b-versatile'
 update(django_env, {
-    'DEBUG': 'true', 'ALLOWED_HOSTS': '127.0.0.1,localhost',
+    'DEBUG': values.get('DEBUG') or 'true',
+    'ALLOWED_HOSTS': values.get('ALLOWED_HOSTS') or '127.0.0.1,localhost',
     'IA_API_URL': 'http://127.0.0.1:8001/api/v1/cv-analyses',
     'IA_OFFER_API_URL': 'http://127.0.0.1:8001/api/v1/offer-analyses',
     'IA_API_TOKEN': service, 'IA_CALLBACK_HMAC_SECRET': hmac,

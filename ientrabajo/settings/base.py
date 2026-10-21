@@ -37,6 +37,18 @@ ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', '*' if
 if not DEBUG and not ALLOWED_HOSTS:
     raise RuntimeError('ALLOWED_HOSTS debe configurarse cuando DEBUG=False.')
 
+# Orígenes completos con esquema, separados por coma (por ejemplo, el dominio
+# HTTPS publicado por Cloudflare Tunnel). No modifica la protección CSRF.
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
+]
+# Activar únicamente detrás de un proxy confiable; el origen debe permanecer
+# en loopback o en una red privada que no acepte encabezados de clientes directos.
+if env_bool('TRUST_PROXY_HEADERS', not DEBUG):
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
 INSTALLED_APPS = [
@@ -238,7 +250,6 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '31536000'))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Correo público de contacto. Definirlo en el entorno cuando el IEN lo confirme.
 IEN_CONTACT_EMAIL = os.environ.get('IEN_CONTACT_EMAIL', '').strip()
