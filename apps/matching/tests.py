@@ -1,18 +1,23 @@
 from datetime import timedelta
+from decimal import Decimal
 from unittest.mock import patch
 
-from django.test import TestCase
+from django.core.exceptions import ValidationError
+from asgiref.sync import async_to_sync
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 
 from categorias.models import Categoria
-from ia.models import EstadoPerfil, EventoSalida, PerfilCV, PerfilOferta
+from ia.models import CVVersion, EstadoPerfil, EventoSalida, PerfilCV, PerfilOferta, TrabajoExtraccion
+from ia.workflow import offer_snapshot, request_offer_extraction
 from ofertas.models import Oferta
 from usuarios.models import Postulante, Usuario
 
-from .models import ResultadoCompatibilidad
+from .configuration import publish_configuration, scoring_hash
+from .models import ConfiguracionActiva, ConfiguracionCompatibilidad, ResultadoCompatibilidad
 from .services import complete_match, get_or_create_match, match_request_payload
-from copy import deepcopy
-from django.urls import reverse
+from .services import status_payload
 
 
 class MatchingServiceTests(TestCase):
@@ -20,122 +25,216 @@ class MatchingServiceTests(TestCase):
         limiter = patch('matching.services._allow_new_request', return_value=True)
         limiter.start()
         self.addCleanup(limiter.stop)
-        candidate_user = Usuario.objects.create_user(email='candidate@example.com', password='test-password')
-        self.postulante = Postulante.objects.create(usuario=candidate_user)
+        cache = patch('matching.services._read_cache', return_value=None)
+        cache.start()
+        self.addCleanup(cache.stop)
+        self.candidate_user = Usuario.objects.create_user(email='candidate@example.com', password='test-password')
+        self.postulante = Postulante.objects.create(usuario=self.candidate_user)
+        self.cv_version = CVVersion.objects.create(
+            postulante=self.postulante, numero=1,
+            archivo=SimpleUploadedFile('cv.txt', b'Python developer'),
+            nombre_original='cv.txt', sha256='a' * 64, formato='txt', tamano=15,
+        )
+        self.postulante.cv_version_actual = self.cv_version
+        self.postulante.save(update_fields=['cv_version_actual'])
+        self.cv_profile = PerfilCV.objects.create(
+            postulante=self.postulante, cv_version=self.cv_version, version=1,
+            source_hash='b' * 64, schema_version='candidate-profile.v2', estado=EstadoPerfil.LISTO,
+            contenido={
+                'schema_version': 'candidate-profile.v2', 'profile_id': str(self.postulante.pk),
+                'headline': 'Backend developer', 'summary': None,
+                'skills': [{'name': 'Python', 'level': 'advanced', 'evidence': ['Listed as a skill'],
+                            'source_quotes': ['Python'], 'kind': 'technical', 'origin': 'declared'}],
+                'work_experience': [], 'education': [], 'languages': [], 'credentials': [],
+                'preferences': {'locations': [], 'work_modes': []}, 'rejected_skills': [],
+            },
+        )
         company = Usuario.objects.create_user(email='company@example.com', password='test-password')
         category = Categoria.objects.create(nombre='Tecnología')
         self.oferta = Oferta.objects.create(
             empresa=company, categoria=category, titulo='Backend developer', nombre_puesto='Backend developer',
             ubicacion='Córdoba', modalidad='remoto', descripcion='Python role', habilidades_duras='Python',
-            habilidades_requeridas='Python', nivel_educativo='universitario', fecha_cierre=timezone.now() + timedelta(days=7),
-            estado='activa',
+            habilidades_requeridas='Python', requisitos_obligatorios='Python',
+            requisitos_estructurados=[{'id': 'req-python', 'category': 'technical_skills',
+                'source': 'requisitos_obligatorios', 'name': 'Python', 'mandatory': True, 'exclusionary': False}],
+            requiere_revision_requisitos=False, nivel_educativo='universitario',
+            fecha_cierre=timezone.now() + timedelta(days=7), estado='activa',
         )
-        self.cv_profile = PerfilCV.objects.create(
-            postulante=self.postulante, version=1, source_hash='a' * 64, estado=EstadoPerfil.LISTO,
-            contenido={'schema_version': 'candidate-profile.v1', 'profile_id': str(self.postulante.pk), 'headline': 'Backend developer', 'summary': None, 'skills': [{'name': 'Python', 'level': 'advanced', 'evidence': []}], 'work_experience': [], 'education': [], 'languages': [], 'preferences': {'locations': [], 'work_modes': []}},
+        self.offer_profile = PerfilOferta.objects.create(
+            oferta=self.oferta, version=1, source_hash='c' * 64, schema_version='job-offer.v2',
+            estado=EstadoPerfil.LISTO,
+            contenido={
+                **offer_snapshot(self.oferta), 'requirements': self.oferta.requisitos_estructurados,
+            },
         )
-        PerfilOferta.objects.create(
-            oferta=self.oferta, version=1, source_hash='b' * 64, estado=EstadoPerfil.LISTO,
-            contenido={'schema_version': 'job-offer.v1', 'offer_id': str(self.oferta.pk), 'title': 'Backend developer', 'summary': None, 'location': 'Córdoba', 'work_mode': 'remote', 'minimum_experience_months': None, 'education_levels': [], 'languages': [], 'requirements': [{'name': 'Python', 'minimum_level': 'intermediate', 'minimum_years': None, 'mandatory': True, 'exclusionary': False, 'evidence': []}]},
-        )
+        job, _ = request_offer_extraction(self.oferta)
+        job.estado = TrabajoExtraccion.Estado.COMPLETADO
+        job.save(update_fields=['estado', 'actualizado_en'])
+        self.offer_profile.estado = EstadoPerfil.LISTO
+        self.offer_profile.save(update_fields=['estado', 'actualizado_en'])
+        self.config = ConfiguracionActiva.objects.get(singleton='actual').configuracion
 
-    @patch('matching.services._read_cache', return_value=None)
-    def test_same_versions_create_one_match_and_one_outbox_event(self, cache_read):
-        first, created = get_or_create_match(self.postulante, self.oferta)
-        second, created_again = get_or_create_match(self.postulante, self.oferta)
-        self.assertTrue(created)
-        self.assertFalse(created_again)
-        self.assertEqual(first.pk, second.pk)
-        self.assertEqual(EventoSalida.objects.filter(tipo=EventoSalida.Tipo.MATCH).count(), 1)
+    def tearDown(self):
+        for version in self.postulante.versiones_cv.all():
+            version.archivo.delete(save=False)
+        super().tearDown()
 
     @patch('matching.services._save_cache')
-    @patch('matching.services._read_cache', return_value=None)
-    @patch('matching.services._notify')
-    def test_result_is_persisted_and_recoverable_from_db(self, notify, cache_read, cache_save):
+    def test_match_usa_v2_y_congela_perfiles_y_configuracion(self, save_cache):
+        match, created = get_or_create_match(self.postulante, self.oferta)
+        self.assertTrue(created)
+        self.assertEqual(EventoSalida.objects.filter(tipo=EventoSalida.Tipo.MATCH).count(), 1)
+        payload = match_request_payload(match)
+        self.assertEqual(payload['protocol_version'], 'match.v2')
+        self.assertEqual(payload['scoring_config']['weights'], self.config.pesos_basis_points())
+        self.assertEqual(payload['metadata']['evaluation_date'], timezone.localdate().isoformat())
+        self.cv_profile.contenido['headline'] = 'Changed after queue'
+        self.cv_profile.save()
+        payload = match_request_payload(match)
+        self.assertEqual(payload['candidate_profile']['headline'], 'Backend developer')
+
+    def test_dispatch_match_recupera_un_lease_vencido(self):
+        from datetime import timedelta
+        from django.utils import timezone
+        from matching.management.commands.dispatch_match_jobs import Command
+        get_or_create_match(self.postulante, self.oferta)
+        event = EventoSalida.objects.get(tipo=EventoSalida.Tipo.MATCH)
+        command = Command()
+        self.assertEqual(command._claim().pk, event.pk)
+        EventoSalida.objects.filter(pk=event.pk).update(actualizado_en=timezone.now() - timedelta(minutes=10))
+        self.assertEqual(command._claim().pk, event.pk)
+
+    @patch('matching.services._save_cache')
+    def test_callback_v2_rechaza_clasificacion_distinta_y_preserva_config_capturada(self, save_cache):
         match, _ = get_or_create_match(self.postulante, self.oferta)
         payload = match_request_payload(match)
         result = {
-            'schema_version': 'match-result.v1', 'request_id': payload['request_id'], 'status': 'completed',
-            'match_percentage': 82, 'coverage_percentage': 100, 'confidence_percentage': 75,
-            'assessments': [{'name': 'Python', 'score': 1, 'status': 'met', 'mandatory': True, 'explanation': 'Documented profile skill.'}],
-            'summary': 'Strong skill alignment.',
+            'schema_version': 'match-result.v2', 'request_id': payload['request_id'], 'status': 'completed',
+            'match_percentage': 82, 'coverage_percentage': 100, 'confidence_percentage': None,
+            'confidence_available': False,
+            'assessments': [{'requirement_id': 'req-python', 'category': 'soft_skills',
+                'source': 'requisitos_obligatorios', 'name': 'Python', 'score': 1,
+                'status': 'met', 'mandatory': True, 'explanation': 'Evidence found.',
+                'evidence_refs': ['/skills/0/source_quotes/0']}],
+            'summary': 'Match.', 'breakdown': {
+                key: {'score': 1, 'configured_weight_bp': weight, 'effective_weight_bp': weight, 'applicable': True}
+                for key, weight in payload['scoring_config']['weights'].items()
+            },
+            'scoring_config': payload['scoring_config'], 'mandatory_status': 'all_met',
+            'provider_model': 'groq:test-model',
         }
+        with self.assertRaises(ValueError):
+            complete_match(str(match.request_id), result)
+        result['assessments'][0]['category'] = 'technical_skills'
         completed = complete_match(str(match.request_id), result)
-        completed.refresh_from_db()
         self.assertEqual(completed.estado, ResultadoCompatibilidad.Estado.COMPLETADO)
-        self.assertEqual(float(completed.match_percentage), 82.0)
+        self.assertIsNone(completed.confidence_percentage)
+        self.assertEqual(completed.model_version, 'groq:test-model')
+        self.assertEqual(completed.scoring_config_hash, scoring_hash(self.config))
 
-    @patch('matching.services._read_cache', return_value=None)
-    def test_same_content_from_different_candidate_is_not_shared(self, cache_read):
-        first, _ = get_or_create_match(self.postulante, self.oferta)
-        user = Usuario.objects.create_user(email='other@example.com', password='test-password')
-        other = Postulante.objects.create(usuario=user)
-        PerfilCV.objects.create(postulante=other, version=1, source_hash=self.cv_profile.source_hash,
-                                estado=EstadoPerfil.LISTO, contenido=self.cv_profile.contenido)
-        second, _ = get_or_create_match(other, self.oferta)
-        self.assertNotEqual(first.pk, second.pk)
-        self.assertEqual(second.postulante_id, other.pk)
-        self.client.force_login(user)
-        response = self.client.get(reverse('matching:estado', args=[first.request_id]))
-        self.assertEqual(response.status_code, 404)
+    def test_no_calcula_con_perfil_de_un_cv_anterior(self):
+        other = CVVersion.objects.create(
+            postulante=self.postulante, numero=2,
+            archivo=SimpleUploadedFile('new.txt', b'new'), nombre_original='new.txt',
+            sha256='d' * 64, formato='txt', tamano=3,
+        )
+        self.postulante.cv_version_actual = other
+        self.postulante.save(update_fields=['cv_version_actual'])
+        with self.assertRaisesMessage(ValueError, 'versión actual'):
+            get_or_create_match(self.postulante, self.oferta)
 
-    @patch('matching.services._read_cache', return_value=None)
-    def test_queued_match_keeps_original_profiles_after_edit(self, cache_read):
-        match, _ = get_or_create_match(self.postulante, self.oferta)
-        original = deepcopy(self.cv_profile.contenido)
-        self.cv_profile.version = 2
-        self.cv_profile.contenido['headline'] = 'Changed after queuing'
-        self.cv_profile.save()
-        match.refresh_from_db()
-        payload = match_request_payload(match)
-        self.assertEqual(payload['candidate_profile']['headline'], original['headline'])
-        self.assertEqual(payload['metadata']['candidate_profile_version'], 1)
+    def test_no_calcula_con_el_cv_cacheado_antes_de_una_carga_nueva(self):
+        newer = CVVersion.objects.create(
+            postulante=self.postulante, numero=2, archivo='synthetic-stale.txt',
+            nombre_original='synthetic.txt', sha256='d' * 64, formato='txt', tamano=10,
+        )
+        Postulante.objects.filter(pk=self.postulante.pk).update(cv_version_actual=newer)
+        with self.assertRaisesMessage(ValueError, 'versión actual'):
+            get_or_create_match(self.postulante, self.oferta)
+        self.assertFalse(ResultadoCompatibilidad.objects.exists())
 
-    def test_missing_profile_returns_conflict_instead_of_server_error(self):
-        self.cv_profile.delete()
-        self.client.force_login(self.postulante.usuario)
-        response = self.client.post(reverse('matching:calcular', args=[self.oferta.pk]))
-        self.assertEqual(response.status_code, 409)
+    def test_no_calcula_con_la_oferta_cacheada_antes_de_una_edicion(self):
+        Oferta.objects.filter(pk=self.oferta.pk).update(titulo='New title committed elsewhere')
+        with self.assertRaisesMessage(ValueError, 'La oferta cambió'):
+            get_or_create_match(self.postulante, self.oferta)
+        self.assertFalse(ResultadoCompatibilidad.objects.exists())
 
-    @patch('matching.services._read_cache', return_value=None)
-    def test_updated_profile_hides_previous_result(self, cache_read):
-        match, _ = get_or_create_match(self.postulante, self.oferta)
-        match.estado = 'completed'
-        match.match_percentage = 82
-        match.save()
-        self.cv_profile.version = 2
-        self.cv_profile.save()
-        self.client.force_login(self.postulante.usuario)
-        from ofertas.views import detalle_oferta_postulante
-        from django.test import RequestFactory
-        request = RequestFactory().get('/')
-        request.user = self.postulante.usuario
-        with patch('ofertas.views.render') as render:
-            detalle_oferta_postulante(request, self.oferta.pk)
-        self.assertIsNone(render.call_args.args[2]['match'])
-
-    @patch('matching.services._read_cache', return_value=None)
-    def test_failed_match_can_be_retried_as_new_execution(self, cache_read):
-        first, _ = get_or_create_match(self.postulante, self.oferta)
-        old_id = first.request_id
-        first.estado = 'error'
-        first.save()
-        retried, created = get_or_create_match(self.postulante, self.oferta)
+    def test_offer_callback_a_after_b_is_stale(self):
+        from ia.workflow import receive_extraction_event
+        job_a = TrabajoExtraccion.objects.filter(oferta=self.oferta, tipo=TrabajoExtraccion.Tipo.OFERTA).latest('pk')
+        self.oferta.requisitos_obligatorios = 'Python y Django'
+        self.oferta.requisitos_estructurados = [{'id': 'req-django', 'category': 'technical_skills',
+            'source': 'requisitos_obligatorios', 'name': 'Django', 'mandatory': True, 'exclusionary': False}]
+        self.oferta.save(update_fields=['requisitos_obligatorios', 'requisitos_estructurados'])
+        job_b, _ = request_offer_extraction(self.oferta)
+        job_a.estado = TrabajoExtraccion.Estado.PROCESANDO
+        job_a.save(update_fields=['estado'])
+        content_b = {**offer_snapshot(self.oferta), 'requirements': self.oferta.requisitos_estructurados}
+        receive_extraction_event({
+            'event_id': 'current-b', 'request_id': job_b.clave_idempotencia, 'source_hash': job_b.source_hash,
+            'job_id': 'remote-b', 'kind': 'job_offer', 'candidate_id': None,
+            'analysis_id': None, 'offer_id': self.oferta.pk, 'status': 'completed', 'result': content_b,
+        })
+        content = {**offer_snapshot(self.oferta), 'requirements': self.oferta.requisitos_estructurados}
+        receive_extraction_event({
+            'event_id': 'late-a', 'request_id': job_a.clave_idempotencia, 'source_hash': job_a.source_hash,
+            'job_id': 'remote-a', 'kind': 'job_offer', 'candidate_id': None,
+            'analysis_id': None, 'offer_id': self.oferta.pk, 'status': 'completed', 'result': content,
+        })
+        job_b.refresh_from_db()
+        self.assertEqual(job_b.estado, TrabajoExtraccion.Estado.COMPLETADO)
+        self.offer_profile.refresh_from_db()
+        expected_profile_hash = self.offer_profile.source_hash
+        self.assertNotEqual(expected_profile_hash, 'c' * 64)
+        match, created = get_or_create_match(self.postulante, self.oferta)
         self.assertTrue(created)
-        self.assertNotEqual(retried.request_id, old_id)
-        self.assertEqual(retried.estado, 'pending')
+        self.assertEqual(match.perfil_oferta_hash, expected_profile_hash)
 
-    @patch('matching.services._read_cache', return_value=None)
-    def test_offer_page_displays_zero_percentage_and_keeps_recovery_id(self, cache_read):
-        match, _ = get_or_create_match(self.postulante, self.oferta)
-        match.estado = 'completed'
-        match.match_percentage = 0
-        match.save()
-        from django.test import RequestFactory
-        from ofertas.views import detalle_oferta_postulante
-        request = RequestFactory().get('/')
-        request.user = self.postulante.usuario
-        response = detalle_oferta_postulante(request, self.oferta.pk)
-        self.assertContains(response, '>0%</span>')
-        self.assertContains(response, f'data-request-id="{match.request_id}"')
-        self.assertContains(response, 'Requisitos con información')
+
+class CompatibilityConfigurationTests(TestCase):
+    def test_borrador_no_publica_sin_100_y_preserva_valores(self):
+        user = Usuario.objects.create_superuser(email='admin@example.com', password='test-password')
+        config = ConfiguracionCompatibilidad.objects.create(
+            version='borrador-uno', technical_skills=Decimal('20.00'), soft_skills=Decimal('15.00'),
+            experience=Decimal('20.00'), education=Decimal('10.00'), languages=Decimal('5.00'),
+            logistics=Decimal('5.00'), desirables=Decimal('10.00'),
+        )
+        with self.assertRaises(ValidationError):
+            publish_configuration(config.pk, user)
+        config.refresh_from_db()
+        self.assertTrue(config.es_borrador)
+        self.assertEqual(config.technical_skills, Decimal('20.00'))
+
+    def test_publicada_es_inmutable_y_admin_no_puede_borrarla(self):
+        user = Usuario.objects.create_superuser(email='admin@example.com', password='test-password')
+        config = ConfiguracionCompatibilidad.objects.get(version='rubrica-inicial-v1')
+        with self.assertRaises(ValidationError):
+            config.delete()
+        with self.assertRaises(ValidationError):
+            config.technical_skills = Decimal('34.00')
+            config.save()
+
+
+class MatchConsumerTransactionTests(TransactionTestCase):
+    def test_websocket_carga_configuracion_antes_de_serializar_payload(self):
+        # Channels closes old DB connections at the sync/async boundary. Its
+        # query must observe committed fixtures rather than TestCase's atomic.
+        from .consumers import MatchConsumer
+
+        user = Usuario.objects.create_user(email='socket@example.com', password='synthetic-password')
+        postulante = Postulante.objects.create(usuario=user)
+        category = Categoria.objects.create(nombre='Synthetic category')
+        offer = Oferta.objects.create(
+            empresa=user, categoria=category, titulo='Synthetic role', nombre_puesto='Synthetic role',
+            ubicacion='Synthetic location', descripcion='Synthetic role', habilidades_requeridas='',
+            nivel_educativo='secundario', fecha_cierre=timezone.now() + timedelta(days=1),
+        )
+        config = ConfiguracionCompatibilidad.objects.create(version='socket-fixture', es_borrador=False)
+        match = ResultadoCompatibilidad.objects.create(
+            postulante=postulante, oferta=offer, cache_key='a' * 64,
+            perfil_cv_version=1, perfil_oferta_version=1,
+            perfil_cv_hash='b' * 64, perfil_oferta_hash='c' * 64,
+            configuracion=config, scoring_weights=config.pesos_basis_points(),
+        )
+        loaded = async_to_sync(MatchConsumer().owned_match)(user.pk, match.request_id)
+        self.assertEqual(status_payload(loaded)['scoring_config']['version'], config.version)

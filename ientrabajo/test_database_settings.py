@@ -93,6 +93,25 @@ class DatabaseSettingsTests(unittest.TestCase):
         self.assertNotEqual(no_hmac.returncode, 0)
         self.assertIn('IA_CALLBACK_HMAC_SECRET', no_hmac.stderr)
 
+    def test_production_rejects_modes_that_can_connect_without_tls(self):
+        for mode in ('disable', 'allow', 'prefer'):
+            with self.subTest(mode=mode):
+                result = self.run_settings(
+                    DEBUG='false', DB_ENGINE='postgresql', DB_NAME='ien',
+                    DB_USER='ien', DB_PASSWORD='test-password',
+                    DB_HOST='db.example.invalid', DB_SSLMODE=mode,
+                )
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn('DB_SSLMODE debe exigir TLS', result.stderr)
+
+    def test_postgresql_rejects_unknown_sslmode(self):
+        result = self.run_settings(
+            DB_ENGINE='postgresql', DB_NAME='ien', DB_USER='ien',
+            DB_PASSWORD='test-password', DB_HOST='localhost', DB_SSLMODE='typo',
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('DB_SSLMODE', result.stderr)
+
 
 if __name__ == '__main__':
     unittest.main()

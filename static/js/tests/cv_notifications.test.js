@@ -57,11 +57,24 @@ test('WebSocket muestra toast con enlace y badge al finalizar', () => {
   const socket = state.created[0];
   socket.readyState = 1;
   socket.onopen();
-  socket.onmessage({ data: JSON.stringify({ type: 'cv.analyzed', payload: { analysis_id: 31, status: 'completado' } }) });
+  socket.onmessage({ data: JSON.stringify({ type: 'cv.analyzed', payload: { analysis_id: 31, version_cv_id: 1, es_version_actual: true, status: 'completado' } }) });
   assert.equal(state.body.children.length, 1);
   assert.equal(state.body.children[0].children[0].href, '/perfil/#cv-analysis');
   assert.match(state.body.children[0].textContent, /Análisis listo/);
   assert.equal(state.badge.classList.hidden, false);
+  assert.equal(state.storage.get('ien-cv-analysis-ready'), '31');
+});
+
+test('polling conserva la identidad de versión al completar el análisis', async () => {
+  const state = setup();
+  state.context.fetch = async () => ({ ok: true, json: async () => ({
+    estado: 'completado', version_cv_id: 1, es_version_actual: true,
+    resultado_url: '/ia/analisis/31/', mensaje: 'CV listo',
+  }) });
+  state.created[0].onclose({ code: 1006 });
+  const poll = state.intervals.find(timer => timer.ms === 10000);
+  await poll.fn();
+  assert.equal(state.body.children.length, 1);
   assert.equal(state.storage.get('ien-cv-analysis-ready'), '31');
 });
 

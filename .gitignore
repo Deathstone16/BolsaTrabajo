@@ -502,3 +502,5 @@ db.sqlite3
 db.sqlite3.ia-match-*.bak
 media/cursos/demo-curso-*.png
 db.sqlite3-journal
+private_uploads/
+private_backups/

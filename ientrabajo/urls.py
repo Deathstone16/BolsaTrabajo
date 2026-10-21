@@ -19,11 +19,18 @@ from django.urls import include, path
 from django.views.generic.base import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import HttpResponseNotFound
+from django.urls import re_path
+
+
+def deny_private_media(request, path=''):
+    return HttpResponseNotFound()
 from . import views
 from usuarios.views import mi_perfil
 
 
 urlpatterns = [
+    re_path(r'^media/(?:postulantes/cv|ia/extraction_snapshots)/.*$', deny_private_media),
     path('admin/', admin.site.urls),
     path('',views.home,name='home'),
     path('usuarios/', include('usuarios.urls')),

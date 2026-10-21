@@ -37,6 +37,11 @@ class OfertaFormTests(TestCase):
             "habilidades_blandas": "Comunicación, Trabajo en equipo",
             "experiencia_requerida": "1-2",
             "nivel_educativo": "universitario",
+            "requisitos_obligatorios": "Python developer",
+            "requisitos_deseables": "Django",
+            "categorias_requisitos": '{"mandatory":["technical_skills"]}',
+            "experiencia_clasificacion": "obligatorio",
+            "educacion_clasificacion": "deseable",
             "fecha_cierre": (timezone.localdate() + timedelta(days=7)).isoformat(),
         }
 
@@ -109,6 +114,44 @@ class OfertaFormTests(TestCase):
         self.assertEqual(oferta.habilidades_duras, "SQL")
         self.assertEqual(oferta.habilidades_blandas, "Liderazgo")
         self.assertEqual(oferta.habilidades_requeridas, "SQL, Liderazgo")
+
+    def test_oferente_puede_revisar_una_oferta_activa_legacy_y_reenvia_a_moderacion(self):
+        oferta = Oferta.objects.create(
+            empresa=self.usuario, categoria=self.categoria, titulo='Oferta histórica',
+            nombre_puesto='Backend Developer', ubicacion='Córdoba', modalidad='remoto',
+            descripcion='Trabajo con Python.', habilidades_requeridas='Python',
+            habilidades_duras='Python', nivel_educativo='universitario',
+            fecha_cierre=timezone.localdate() + timedelta(days=7), estado='activa',
+            requiere_revision_requisitos=True,
+        )
+        self.client.force_login(self.usuario)
+        page = self.client.get(reverse('editar_oferta', args=[oferta.pk]))
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, 'necesita revisar la clasificación')
+        response = self.client.post(
+            reverse('editar_oferta', args=[oferta.pk]), self.data,
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertTrue(response.json()['success'], response.json())
+        oferta.refresh_from_db()
+        self.assertEqual(oferta.estado, 'pendiente')
+        self.assertFalse(oferta.requiere_revision_requisitos)
+
+    def test_otro_oferente_no_puede_revisar_oferta_legacy(self):
+        oferta = Oferta.objects.create(
+            empresa=self.usuario, categoria=self.categoria, titulo='Oferta histórica',
+            nombre_puesto='Backend Developer', ubicacion='Córdoba', modalidad='remoto',
+            descripcion='Trabajo con Python.', habilidades_requeridas='Python',
+            habilidades_duras='Python', nivel_educativo='universitario',
+            fecha_cierre=timezone.localdate() + timedelta(days=7), estado='activa',
+            requiere_revision_requisitos=True,
+        )
+        other = Usuario.objects.create_user(email='otra-empresa@example.com', password='test-password')
+        Oferente.objects.create(usuario=other, estado_validacion=Oferente.EstadoValidacion.APROBADO,
+                                nombre_empresa='Otra', cuit='20-12345678-6')
+        self.client.force_login(other)
+        response = self.client.get(reverse('editar_oferta', args=[oferta.pk]))
+        self.assertRedirects(response, reverse('dashboard_empresa'))
 
     def test_detalle_distingue_habilidades_blandas_y_muestra_vacio(self):
         oferta = Oferta.objects.create(

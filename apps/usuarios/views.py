@@ -20,6 +20,7 @@ from .forms import (
 from .decorators import postulante_required, oferente_required
 from .models import Oferente
 from . import services
+from .uploads import cv_enabled_formats
 from django.views.decorators.http import require_POST
 
 
@@ -200,16 +201,45 @@ def mi_perfil(request):
     """Muestra perfil, rol y herramientas propias del usuario autenticado."""
     postulante = request.user.postulante
     # El último análisis permite ofrecer el resultado al volver al perfil.
-    ultimo_analisis = postulante.analisis_cv.first()
+    ultimo_analisis = postulante.analisis_cv.filter(version_cv_id=postulante.cv_version_actual_id).first() if postulante.cv_version_actual_id else None
     perfil_cv = getattr(postulante, 'perfil_ia', None)
+    if perfil_cv and perfil_cv.cv_version_id != postulante.cv_version_actual_id:
+        perfil_cv = None
     _, habilidades_blandas = split_profile_skills(perfil_cv.contenido if perfil_cv else {})
 
     if request.method == 'POST':
+        _ = request.FILES
+        if getattr(request, '_upload_limit_exceeded', None):
+            mensaje = 'La solicitud supera el tamaño máximo permitido. El archivo no se guardó.'
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'mensaje': mensaje}, status=413)
+            messages.error(request, mensaje)
+            return redirect('mi_perfil')
+        if request.FILES.get('foto'):
+            try:
+                services.guardar_foto_postulante(postulante, request.FILES['foto'])
+            except Exception as exc:
+                mensaje = exc.messages[0] if hasattr(exc, 'messages') else 'No se pudo procesar la foto.'
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': False, 'mensaje': mensaje}, status=400)
+                messages.error(request, mensaje)
+                return redirect('mi_perfil')
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'mensaje': 'Foto de perfil actualizada.'})
+            messages.success(request, 'Foto de perfil actualizada.')
+            return redirect('mi_perfil')
         form = CargaCVForm(request.POST, request.FILES)
         if form.is_valid():
-            services.cargar_cv(postulante, form.cleaned_data['cv'])
+            try:
+                version = services.cargar_cv(postulante, form.cleaned_data['cv'])
+            except Exception as exc:
+                mensaje = exc.messages[0] if hasattr(exc, 'messages') else 'No se pudo guardar el CV.'
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'success': False, 'mensaje': mensaje}, status=400)
+                messages.error(request, mensaje)
+                return redirect('mi_perfil')
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': True, 'mensaje': 'CV cargado con éxito.'})
+                return JsonResponse({'success': True, 'mensaje': 'CV cargado con éxito. Analizá esta versión para volver a calcular compatibilidades.', 'version_cv_id': version.pk, 'version_cv_numero': version.numero, 'nombre_cv': version.nombre_original})
             messages.success(request, 'CV cargado con éxito.')
             return redirect('mi_perfil')
         else:
@@ -225,7 +255,23 @@ def mi_perfil(request):
         'ultimo_analisis': ultimo_analisis,
         'perfil_cv': perfil_cv,
         'habilidades_blandas': habilidades_blandas,
+        'version_cv_actual': postulante.cv_version_actual,
+        'cv_formatos': cv_enabled_formats(),
     })
+
+
+@login_required
+@postulante_required
+def descargar_cv(request, version_id):
+    """Entrega un snapshot privado únicamente a su propietario."""
+    from django.http import FileResponse
+    from ia.models import CVVersion
+    version = get_object_or_404(CVVersion, pk=version_id, postulante=request.user.postulante)
+    response = FileResponse(version.archivo.open('rb'), as_attachment=True, filename=version.nombre_original)
+    response['Cache-Control'] = 'private, no-store'
+    response['X-Content-Type-Options'] = 'nosniff'
+    response['Content-Type'] = 'application/octet-stream'
+    return response
 
 
 @login_required

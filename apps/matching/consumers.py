@@ -10,7 +10,7 @@ class MatchConsumer(AsyncJsonWebsocketConsumer):
     def owned_match(self, user_id, request_id):
         return ResultadoCompatibilidad.objects.filter(
             request_id=request_id, postulante__usuario_id=user_id,
-        ).first()
+        ).select_related('configuracion').first()
 
     async def connect(self):
         user = self.scope['user']

@@ -68,6 +68,22 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# El límite se aplica durante la recepción multipart, antes de que los archivos
+# completos queden materializados por los upload handlers estándar.
+FILE_UPLOAD_HANDLERS = [
+    'usuarios.upload_handlers.BoundedUploadHandler',
+    'django.core.files.uploadhandler.MemoryFileUploadHandler',
+    'django.core.files.uploadhandler.TemporaryFileUploadHandler',
+]
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+DATA_UPLOAD_MAX_NUMBER_FILES = 5
+CV_SCAN_ENABLED = env_bool('CV_SCAN_ENABLED', False)
+CV_SCAN_COMMAND = os.environ.get('CV_SCAN_COMMAND', '')
+CV_SCAN_TIMEOUT_SECONDS = int(os.environ.get('CV_SCAN_TIMEOUT_SECONDS', '30'))
+CV_DOCKER_COMMAND = os.environ.get('CV_DOCKER_COMMAND', 'docker')
+CV_LEGACY_CONVERTER_IMAGE = os.environ.get('CV_LEGACY_CONVERTER_IMAGE', '')
+CV_LEGACY_CONVERSION_TIMEOUT_SECONDS = int(os.environ.get('CV_LEGACY_CONVERSION_TIMEOUT_SECONDS', '30'))
+
 ROOT_URLCONF = 'ientrabajo.urls'
 
 TEMPLATES = [
@@ -114,6 +130,11 @@ if DB_ENGINE == 'postgresql':
     missing_db_vars = [name for name in required_db_vars if not os.environ.get(name)]
     if missing_db_vars:
         raise RuntimeError(f'Faltan variables de PostgreSQL: {", ".join(missing_db_vars)}')
+    db_sslmode = (os.environ.get('DB_SSLMODE') or ('require' if not DEBUG else 'prefer')).strip().lower()
+    if db_sslmode not in {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}:
+        raise RuntimeError('DB_SSLMODE no es un modo TLS válido de PostgreSQL.')
+    if not DEBUG and db_sslmode not in {'require', 'verify-ca', 'verify-full'}:
+        raise RuntimeError('En producción DB_SSLMODE debe exigir TLS: require, verify-ca o verify-full.')
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -123,7 +144,7 @@ if DB_ENGINE == 'postgresql':
             'HOST': os.environ['DB_HOST'],
             'PORT': os.environ.get('DB_PORT', '5432'),
             'OPTIONS': {
-                'sslmode': os.environ.get('DB_SSLMODE') or ('require' if not DEBUG else 'prefer'),
+                'sslmode': db_sslmode,
             },
         }
     }

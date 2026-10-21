@@ -11,6 +11,7 @@ urlpatterns = [
     path('oferente/<int:pk>/', views.perfil_oferente, name='perfil_oferente'),
     path('mi-perfil/', views.mi_perfil, name='mi_perfil'),
     path('eliminar-cv/', views.eliminar_cv, name='eliminar_cv'),
+    path('cv/<int:version_id>/descargar/', views.descargar_cv, name='descargar_cv'),
     
     # ── Recuperación de contraseña ────────────────────────────────────────────
     path('recuperar/',                              views.password_reset_request, name='recuperar-contrasena'),

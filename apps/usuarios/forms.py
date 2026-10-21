@@ -7,8 +7,9 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, SetPasswordForm as DjangoSetPasswordForm
 from .models import Usuario, Postulante, Oferente
 from .validators import normalizar_cuit, validar_cuit
+from .uploads import normalize_image_upload, validate_cv_upload
 
-CV_FORMATOS_PERMITIDOS = ['pdf', 'doc', 'docx']
+CV_FORMATOS_PERMITIDOS = ['pdf', 'docx', 'odt', 'txt']
 CV_TAMANO_MAXIMO_MB = 5
 
 
@@ -68,8 +69,6 @@ class RegistroOferenteForm(RegistroBaseForm):
         validar_cuit(cuit)
         return normalizar_cuit(cuit)
 
-
-
 class LoginForm(forms.Form):
     """Recibe las credenciales utilizadas por el servicio de autenticación."""
     email = forms.EmailField(label='Email')
@@ -95,6 +94,18 @@ class OferenteForm(forms.ModelForm):
         cuit = self.cleaned_data['cuit']
         validar_cuit(cuit)
         return normalizar_cuit(cuit)
+
+    def clean_logo(self):
+        upload = self.cleaned_data.get('logo')
+        if upload and hasattr(upload, 'read'):
+            return normalize_image_upload(upload, max_bytes=2 * 1024 * 1024)
+        return upload
+
+    def clean_banner(self):
+        upload = self.cleaned_data.get('banner')
+        if upload and hasattr(upload, 'read'):
+            return normalize_image_upload(upload, max_bytes=5 * 1024 * 1024)
+        return upload
 
 class DatosPersonalesForm(forms.ModelForm):
     """Actualiza datos del usuario y del perfil de postulante."""
@@ -189,22 +200,16 @@ class CargaCVForm(forms.Form):
     cv = forms.FileField(label='Archivo CV')
 
     def clean_cv(self):
-        """Acepta PDF o documentos Word de hasta el tamaño configurado."""
+        """Acepta solo formatos con soporte de extracción habilitado."""
         archivo = self.cleaned_data.get('cv')
         if not archivo:
             raise forms.ValidationError('Debes seleccionar un archivo.')
 
-        extension = archivo.name.rsplit('.', 1)[-1].lower()
-        if extension not in CV_FORMATOS_PERMITIDOS:
-            raise forms.ValidationError(
-                f'Formato no permitido. Solo se aceptan: {", ".join(CV_FORMATOS_PERMITIDOS).upper()}'
-            )
-
-        tamano_bytes = archivo.size
-        tamano_maximo_bytes = CV_TAMANO_MAXIMO_MB * 1024 * 1024
-        if tamano_bytes > tamano_maximo_bytes:
-            raise forms.ValidationError(
-                f'El archivo supera el tamaño máximo de {CV_TAMANO_MAXIMO_MB} MB.'
-            )
+        try:
+            validate_cv_upload(archivo)
+        except Exception as exc:
+            if hasattr(exc, 'messages'):
+                raise forms.ValidationError(exc.messages)
+            raise
 
         return archivo

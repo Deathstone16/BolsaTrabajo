@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const formEliminar = document.getElementById('form-eliminar-cv');
     const formAnalizar = document.getElementById('form-analizar-cv');
     const botonResultado = document.getElementById('boton-ver-resultado');
+    let versionCvActualId = Number(formAnalizar ? formAnalizar.dataset.versionCvId : 0);
     const AVISO_DEMORA_MS = 20000;
     let analisisActualId = null;
     let botonAnalisisActual = null;
@@ -25,10 +26,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!archivo) return;
 
         // Validar formato
-        const formatosPermitidos = ['pdf', 'doc', 'docx'];
+        const formatosPermitidos = (cvInput.getAttribute('accept') || '')
+            .split(',').map(value => value.trim().replace(/^\./, '').toLowerCase()).filter(Boolean);
         const extension = archivo.name.split('.').pop().toLowerCase();
         if (!formatosPermitidos.includes(extension)) {
-            mostrarFeedback('error', 'Formato no permitido. Solo se aceptan PDF, DOC y DOCX.');
+            mostrarFeedback('error', 'Formato no disponible. Revisá los formatos habilitados en esta página.');
             cvInput.value = '';
             return;
         }
@@ -158,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
         temporizadorDemora = setTimeout(function () {
             mostrarEstadoAnalisis(
                 'pendiente',
-                'Está tardando un poco más de lo habitual, pero seguimos analizando tu CV.'
+                'Puede tardar varios minutos según la disponibilidad del servicio.'
             );
         }, AVISO_DEMORA_MS);
     }
@@ -174,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
         analisisActualId = Number(analisisId);
         botonAnalisisActual = boton;
         textoBotonOriginal = textoOriginal;
-        if (window.CVNotifications) window.CVNotifications.watch(analisisId);
+        if (window.CVNotifications) window.CVNotifications.watch(analisisId, versionCvActualId);
     }
 
     function restaurarBotonAnalizar(boton, textoOriginal) {
@@ -225,6 +227,8 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                    if (botonResultado) deshabilitarBotonResultado();
+                    versionCvActualId = Number(data.version_cv_id) || 0;
                 if (window.IenUI) window.IenUI.avisoTrasRecarga('exito', data.mensaje || 'CV cargado con éxito.');
                 location.reload();
             } else {
@@ -255,6 +259,8 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                    if (botonResultado) deshabilitarBotonResultado();
+                    versionCvActualId = Number(data.version_cv_id) || 0;
                 if (window.IenUI) window.IenUI.avisoTrasRecarga('exito', data.mensaje || 'CV reemplazado con éxito.');
                 location.reload();
             } else {
@@ -294,8 +300,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (estado === 'pendiente') {
             icono.className = 'grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#512DA8]/10 text-[#512DA8]';
             icono.innerHTML = SPINNER;
-            titulo.textContent = 'Analizando tu CV con IA…';
-            texto.textContent = mensaje || 'Puede tardar un par de minutos. Podés seguir usando la plataforma: te avisamos acá cuando termine.';
+            titulo.textContent = 'Analizando tu CV por paquetes…';
+            texto.textContent = mensaje || 'Puede tardar varios minutos según la disponibilidad del servicio.';
         } else if (estado === 'completado') {
             icono.className = 'grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#27AE60]/15 text-[#27AE60]';
             icono.innerHTML = ICONO_OK;

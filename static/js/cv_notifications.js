@@ -8,6 +8,7 @@
   const statusTemplate = config.dataset.statusUrl;
   const profileUrl = config.dataset.profileUrl;
   let analysisId = Number(config.dataset.analysisId) || null;
+  let currentVersionId = Number(config.dataset.currentVersionId) || null;
   let socket = null;
   let pollTimer = null;
   let retryTimer = null;
@@ -42,6 +43,7 @@
   function complete(payload) {
     const id = Number(payload.analysis_id);
     if (!id || id === lastNotifiedId) return;
+    if ((currentVersionId && Number(payload.version_cv_id) !== currentVersionId) || payload.es_version_actual === false) return;
     // No aceptar un evento de otro análisis si conocemos el que está en curso.
     if (analysisId && id !== analysisId) return;
     lastNotifiedId = id;
@@ -67,8 +69,9 @@
       });
       if (!response.ok) return;
       const data = await response.json();
+      if (data.es_version_actual === false) { analysisId = null; stopPolling(); return; }
       if (data.estado === 'completado' || data.estado === 'error') {
-        complete({ analysis_id: id, status: data.estado, resultado_url: data.resultado_url, mensaje: data.mensaje });
+        complete({ analysis_id: id, version_cv_id: data.version_cv_id, es_version_actual: data.es_version_actual, status: data.estado, resultado_url: data.resultado_url, mensaje: data.mensaje });
       }
     } catch (_) { /* el siguiente intento puede recuperar la conexión */ }
   }
@@ -112,8 +115,9 @@
   }
 
   window.CVNotifications = {
-    watch: function (id) {
+    watch: function (id, versionId) {
       analysisId = Number(id) || null;
+      currentVersionId = Number(versionId) || currentVersionId;
       if (analysisId) checkStatus();
       if (!window.WebSocket || !socket || socket.readyState !== WebSocket.OPEN) startPolling();
     },

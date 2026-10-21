@@ -25,6 +25,8 @@ class EstadoOferta(ABC):
 class Pendiente(EstadoOferta):
     """Estado de oferta pendiente de aprobación. Puede aprobarse o rechazarse."""
     def aprobar(self, oferta):
+        if oferta.requiere_revision_requisitos:
+            raise ValueError('La oferta necesita revisar sus requisitos antes de publicarse.')
         from .services import activar_y_programar_analisis
         activar_y_programar_analisis(oferta)
     def rechazar(self, oferta):
