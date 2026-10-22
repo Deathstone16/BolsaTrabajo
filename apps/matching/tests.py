@@ -7,6 +7,7 @@ from asgiref.sync import async_to_sync
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
+from django.urls import reverse
 
 from categorias.models import Categoria
 from ia.models import CVVersion, EstadoPerfil, EventoSalida, PerfilCV, PerfilOferta, TrabajoExtraccion
@@ -78,6 +79,40 @@ class MatchingServiceTests(TestCase):
         for version in self.postulante.versiones_cv.all():
             version.archivo.delete(save=False)
         super().tearDown()
+
+    def test_detalle_organiza_resultado_y_escapa_explicaciones(self):
+        match, _ = get_or_create_match(self.postulante, self.oferta)
+        match.estado = 'completed'
+        match.match_percentage = 82
+        match.coverage_percentage = 100
+        match.resultado = {
+            'mandatory_status': 'all_met', 'summary': 'Resumen de compatibilidad.',
+            'assessments': [{'name': 'Python', 'status': 'met', 'mandatory': True,
+                             'explanation': '<script>alert(1)</script>'}],
+            'breakdown': {'technical_skills': {'score': 1, 'applicable': True, 'configured_weight_bp': 3500}},
+        }
+        match.save()
+        self.client.force_login(self.candidate_user)
+        response = self.client.get(reverse('matching:detalle', args=[match.request_id]))
+        self.assertContains(response, '82%')
+        self.assertContains(response, 'Compatibilidad por área')
+        self.assertContains(response, 'Requisitos obligatorios')
+        self.assertContains(response, 'Coincide')
+        self.assertContains(response, '&lt;script&gt;alert(1)&lt;/script&gt;')
+        self.assertNotContains(response, '<script>alert(1)</script>')
+
+    def test_detalle_es_privado_y_no_inicia_otra_solicitud(self):
+        match, _ = get_or_create_match(self.postulante, self.oferta)
+        url = reverse('matching:detalle', args=[match.request_id])
+        self.assertEqual(self.client.get(url).status_code, 302)
+        other = Usuario.objects.create_user(email='other-match@example.com', password='test-password')
+        Postulante.objects.create(usuario=other)
+        self.client.force_login(other)
+        self.assertEqual(self.client.get(url).status_code, 404)
+        self.client.force_login(self.candidate_user)
+        count = EventoSalida.objects.count()
+        self.assertContains(self.client.get(url), 'El resultado todavía no está listo')
+        self.assertEqual(EventoSalida.objects.count(), count)
 
     @patch('matching.services._save_cache')
     def test_match_usa_v2_y_congela_perfiles_y_configuracion(self, save_cache):

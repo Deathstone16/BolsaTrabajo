@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_GET, require_POST
 
 from usuarios.decorators import postulante_required
@@ -28,3 +28,38 @@ def calcular_compatibilidad(request, oferta_id):
 def estado_compatibilidad(request, request_id):
     match = get_object_or_404(ResultadoCompatibilidad, request_id=request_id, postulante=request.user.postulante)
     return JsonResponse(status_payload(match))
+
+
+@login_required
+@postulante_required
+@require_GET
+def detalle_compatibilidad(request, request_id):
+    match = get_object_or_404(
+        ResultadoCompatibilidad.objects.select_related('oferta'),
+        request_id=request_id, postulante=request.user.postulante,
+    )
+    result = match.resultado if match.estado == 'completed' else {}
+    dimensions = {
+        'technical_skills': 'Competencias técnicas', 'soft_skills': 'Habilidades blandas',
+        'experience': 'Experiencia', 'education': 'Educación', 'languages': 'Idiomas',
+        'logistics': 'Logística y modalidad', 'desirables': 'Requisitos deseables',
+    }
+    statuses = {'met': 'Coincide', 'partial': 'Coincide parcialmente',
+                'not_met': 'No alcanza el nivel requerido', 'unknown': 'Sin información suficiente'}
+    groups = []
+    for mandatory, title in ((True, 'Requisitos obligatorios'), (False, 'Requisitos deseables')):
+        items = [{**item, 'status_label': statuses.get(item['status'], 'Sin información suficiente')}
+                 for item in result.get('assessments', []) if item['mandatory'] == mandatory]
+        groups.append({'title': title, 'items': items})
+    breakdown = [{**value, 'label': dimensions.get(key, key),
+                  'percentage': round(value['score'] * 100),
+                  'weight': value['configured_weight_bp'] / 100}
+                 for key, value in result.get('breakdown', {}).items()]
+    mandatory_labels = {'all_met': 'Se cumplen los requisitos obligatorios',
+                        'not_met': 'Hay requisitos obligatorios que no se cumplen',
+                        'unknown': 'Falta información para confirmar los requisitos obligatorios'}
+    return render(request, 'matching/detalle.html', {
+        'vista_activa': 'buscar', 'match': match, 'result': result,
+        'groups': groups, 'breakdown': breakdown,
+        'mandatory_label': mandatory_labels.get(result.get('mandatory_status'), 'Sin requisitos obligatorios'),
+    })

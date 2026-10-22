@@ -8,8 +8,10 @@ from __future__ import annotations
 
 import ctypes
 import os
+import sys
 
 _JOB_HANDLE = None
+_MEMORY_MONITOR = None
 
 
 def configure_process_limits(memory_bytes: int = 512 * 1024 * 1024) -> None:
@@ -19,6 +21,9 @@ def configure_process_limits(memory_bytes: int = 512 * 1024 * 1024) -> None:
     if os.name == "nt":
         _JOB_HANDLE = _configure_windows_job(memory_bytes)
         return
+    if sys.platform == "darwin":
+        _configure_darwin_monitor(memory_bytes)
+        return
     import resource
 
     for limit_name in ("RLIMIT_AS", "RLIMIT_DATA"):
@@ -26,6 +31,73 @@ def configure_process_limits(memory_bytes: int = 512 * 1024 * 1024) -> None:
         if limit is None:
             continue
         resource.setrlimit(limit, (memory_bytes, memory_bytes))
+
+
+def _configure_darwin_monitor(memory_bytes: int) -> None:
+    """Watch RSS in a separate process: Darwin rejects RLIMIT_AS/DATA.
+
+    Sampling can briefly overshoot the budget; this is not a kernel allocation
+    cap. The independent process also works while a parser holds Python's GIL.
+    Existing parent-side parser timeouts and input/output bounds still apply.
+    """
+    import select
+    import subprocess
+
+    global _MEMORY_MONITOR
+    if _MEMORY_MONITOR is not None:
+        raise RuntimeError("Parser memory supervision is already configured.")
+    monitor = subprocess.Popen(
+        [sys.executable, '-c',
+         'from ien_contracts.process_limits import _darwin_watch_parent; '
+         'import sys; _darwin_watch_parent(int(sys.argv[1]), int(sys.argv[2]))',
+         str(os.getpid()), str(memory_bytes)],
+        stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL, close_fds=True,
+    )
+    try:
+        readable, _, _ = select.select([monitor.stdout], [], [], 5)
+        if not readable or monitor.stdout.read(1) != b'1':
+            raise RuntimeError("Could not start parser memory supervision.")
+    except BaseException:
+        monitor.kill()
+        monitor.wait()
+        raise
+    finally:
+        monitor.stdout.close()
+    _MEMORY_MONITOR = monitor
+
+
+def _darwin_watch_parent(parent_pid: int, memory_bytes: int) -> None:
+    """Stop only our own parent if RSS exceeds the budget or monitoring fails."""
+    import signal
+    import time
+
+    # rusage_info_v0, from the macOS SDK's sys/resource.h; sizes are bytes.
+    class RUsageInfo(ctypes.Structure):
+        _fields_ = [('uuid', ctypes.c_uint8 * 16)] + [
+            (name, ctypes.c_uint64) for name in (
+                'user_time', 'system_time', 'pkg_idle_wkups',
+                'interrupt_wkups', 'pageins', 'wired_size', 'resident_size',
+                'phys_footprint', 'proc_start_abstime', 'proc_exit_abstime',
+            )
+        ]
+
+    library = ctypes.CDLL('/usr/lib/libproc.dylib', use_errno=True)
+    query = library.proc_pid_rusage
+    query.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_void_p]
+    query.restype = ctypes.c_int
+    info = RUsageInfo()
+    if os.getppid() != parent_pid or query(parent_pid, 0, ctypes.byref(info)) != 0:
+        return  # No handshake: the parser will refuse to start.
+    sys.stdout.buffer.write(b'1')
+    sys.stdout.buffer.flush()
+    while os.getppid() == parent_pid:
+        if query(parent_pid, 0, ctypes.byref(info)) != 0 or info.resident_size > memory_bytes:
+            # Recheck parenthood before signalling: never target a reused PID.
+            if os.getppid() == parent_pid:
+                os.kill(parent_pid, signal.SIGKILL)
+            return
+        time.sleep(0.05)
 
 
 def _configure_windows_job(memory_bytes: int):
