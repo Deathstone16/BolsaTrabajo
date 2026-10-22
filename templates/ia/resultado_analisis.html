@@ -32,7 +32,7 @@
             <p class="mt-4 whitespace-pre-line leading-relaxed text-[#6B645C]">{% if perfil %}{{ perfil.contenido.summary }}{% else %}{{ analisis.respuesta.result.resumen_ejecutivo }}{% endif %}</p>
           </div>
 
-          <div class="panel mt-6 p-8">
+          <div class="panel mt-6 p-8" data-profile-skills>
             <div class="flex items-center gap-3">
               <div class="grid h-11 w-11 place-items-center rounded-2xl bg-[#FFDE59]/35">
                 <span data-icon="sparkles" class="h-5 w-5 text-[#43218F]"></span>
@@ -75,6 +75,12 @@
               </div>
             </section>
           </div>
+
+          {% if perfil %}
+            {% include "ia/_education_courses.html" with education=perfil.contenido.education credentials=perfil.contenido.credentials only %}
+          {% else %}
+            {% include "ia/_education_courses.html" with education=analisis.respuesta.result.education credentials=analisis.respuesta.result.credentials only %}
+          {% endif %}
 
           {% if analisis.respuesta.result.habilidades_analizadas %}
             <div class="panel mt-6 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
