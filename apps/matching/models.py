@@ -80,6 +80,7 @@ class ResultadoCompatibilidad(models.Model):
         RATE_LIMITED = 'rate_limited', 'Rate limited'
         COMPLETADO = 'completed', 'Completed'
         ERROR = 'error', 'Error'
+        CANCELADO = 'cancelled', 'Cancelado'
 
     postulante = models.ForeignKey('usuarios.Postulante', on_delete=models.CASCADE, related_name='resultados_match')
     oferta = models.ForeignKey('ofertas.Oferta', on_delete=models.CASCADE, related_name='resultados_match')
