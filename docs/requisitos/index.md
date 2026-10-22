@@ -1,0 +1,30 @@
+# Requisitos y criterios de aceptación
+
+Componente 02 de la guía. Responsable sugerido: referente funcional y responsable del módulo. Actualizar cuando cambien funcionalidades, reglas, prioridades o criterios de aceptación.
+
+Revisión: 22/10/2026. Backlog derivado de código existente; no equivale a pruebas ejecutadas. P0 indica seguridad/integridad crítica; P1, funcionalidad central; P2, complemento. Los RF son identificadores locales y aún no tienen issues vinculados.
+
+| ID / prioridad | Historia y reglas | Criterios verificables | Evidencia / tarea de mantenimiento |
+| --- | --- | --- | --- |
+| RF-01 / P1 | Como persona quiero registrarme y entrar con email. Email único; contraseña gestionada por Django. | Un email duplicado no crea otra cuenta; credenciales válidas abren sesión; credenciales inválidas no autentican. | `usuarios/models.py`, `forms.py`, `views.py`; mantener autenticación. |
+| RF-02 / P0 | Como moderador quiero aprobar o rechazar empresas. Estado inicial pendiente. | Una empresa pendiente no accede a publicar; un miembro staff aprueba/rechaza; otro rol no modera; al reenviar revisión se limpia el rechazo. | `usuarios/estado_oferente.py`, `decorators.py`, `moderacion/views.py`. |
+| RF-03 / P1 | Como empresa aprobada quiero crear y administrar mis ofertas. | La creación queda pendiente; editar exige propiedad y estado permitido; aprobar lleva a activa; finalizar impide tratarla como activa; rechazo conserva motivo. | `ofertas/views.py`, `forms.py`, `state.py`. |
+| RF-04 / P1 | Como visitante/postulante quiero consultar ofertas y cursos. | La búsqueda respeta los filtros definidos en la vista; el catálogo de cursos muestra activos; el acceso directo respeta la política de visibilidad de la vista. | `ofertas/services.py`, `cursos/views.py`; verificar listado y detalle. |
+| RF-05 / P1 | Como postulante quiero marcar ofertas favoritas. | Dos altas de la misma pareja no duplican filas; desmarcar elimina la relación; otra cuenta no modifica mis favoritas. | `ofertas/models.py`, `services.py`, `views.py`. |
+| RF-06 / P0 | Como postulante quiero cargar y descargar un CV privado. | Se rechazan archivos mayores a 5 MiB o de contenido inválido; se aceptan PDF, DOCX, ODT y TXT válidos; DOC/RTF dependen del conversor aislado; cada carga aceptada tiene número, hash y archivo privado; otra cuenta/anónimo no descarga; rutas públicas heredadas devuelven 404. | `usuarios/uploads.py`, `services.py`, `views.py`, `ia/models.py`; validar formatos habilitados. |
+| RF-07 / P0 | Como postulante quiero analizar mi CV sin esperar en la petición web. | Sin versión actual responde 400; solicitud válida responde 202 y crea/reutiliza el trabajo; el despachador entrega el snapshot; callback válido actualiza el análisis; firma inválida responde 401; evento duplicado no vuelve a aplicar cambios. | `ia/views.py`, `workflow.py`, comandos; verificar con dobles del proveedor. |
+| RF-08 / P0 | Como postulante quiero editar mi perfil sin usar información obsoleta en el match. | Se conservan versiones; la normalización debe finalizar antes del cálculo cuando corresponda; un resultado de CV anterior no se presenta como vigente; el conflicto devuelve 409. | `ia/workflow.py`, `forms.py`, `matching/services.py`; revisar nombres de formularios al modificar. |
+| RF-09 / P1 | Como postulante quiero ver compatibilidad y sus fundamentos. | Solo se calcula sobre oferta activa y perfiles aptos; la respuesta es 202 al encolar o 200 al reutilizar completado; resultado guarda hashes, versiones, pesos y snapshots; el detalle muestra requisitos y brechas; otra cuenta recibe 404 al consultar el UUID ajeno. | `matching/views.py`, `services.py`, `ien_contracts/models.py`. |
+| RF-10 / P1 | Como postulante quiero cancelar un cálculo pendiente. | Cancelar mi trabajo devuelve estado cancelled; un callback tardío no lo convierte en completado; se registra el evento de cancelación remota; cancelar el UUID de otra persona no lo modifica. | `matching/views.py`, `services.py`, `dispatch_match_jobs.py`. |
+| RF-11 / P1 | Como administrador quiero publicar ponderaciones reproducibles. | Cada peso está entre 0 y 100; publicación exige suma exacta 100; una configuración publicada no se edita con las operaciones del modelo; los resultados conservan la configuración usada. | `matching/models.py`, `admin.py`, `configuration.py`; validar la ruta efectiva de publicación. |
+| RF-12 / P2 | Como postulante quiero cursos relacionados con mis brechas. | Solo se recomiendan cursos aptos según el algoritmo local; se usan habilidades declaradas del curso y brechas del resultado; no se realiza otra llamada LLM. | `matching/course_recommendations.py`, `cursos/models.py`. |
+| RF-13 / P0 | Como usuario quiero recibir solo mis eventos. | WebSocket anónimo rechaza con 4401; match ajeno rechaza con 4404; CV firmado exige token y sesión correspondientes; si no hay canal en vivo puede consultarse estado HTTP. | `ia/consumers.py`, `matching/consumers.py`, `asgi.py`. |
+| RF-14 / P1 | Como moderador quiero mantener categorías, habilidades y cursos. | No se borra categoría referenciada; no se repite habilidad por nombre/categoría; un usuario sin permisos no administra catálogos. | `categorias/models.py`, `cursos/models.py`, `moderacion/views.py`. |
+
+## Restricciones y excepciones
+
+El servicio IA puede fallar o limitar solicitudes. Un timeout no demuestra que el trabajo no fue aceptado: se mantienen claves de idempotencia, eventos y estados de entrega. Redis es necesario para canales y caché; la persistencia de negocio está en la base relacional. La compatibilidad es una ayuda informativa y no registra una decisión de contratación.
+
+## Pendientes funcionales para validar con el referente
+
+Confirmar visibilidad esperada del detalle de ofertas/cursos inactivos, política de cuentas con ambos perfiles, tratamiento de CUIT repetido (hoy no es único en BD), reglas de conservación/borrado y objetivos de tiempo de respuesta. Crear issues reales para estos puntos y asociarles los RF; no se crearon tareas en servicios externos.

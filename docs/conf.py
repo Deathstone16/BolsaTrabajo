@@ -13,20 +13,27 @@ sys.path.insert(0, str(APPS_ROOT))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ientrabajo.settings.base")
 
 import django
+from pygments.lexers.special import TextLexer
+from sphinx.highlighting import lexers
 
 django.setup()
+
+# Keep editable diagram/environment sources readable without an extra renderer.
+lexers["mermaid"] = TextLexer()
+lexers["dotenv"] = TextLexer()
 
 project = "IEN Trabajo"
 author = "Equipo IEN Trabajo"
 language = "es"
 
 extensions = [
+    "myst_parser",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
 ]
 
-templates_path = ["_templates"]
+templates_path = []
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 html_theme = "sphinx_rtd_theme"

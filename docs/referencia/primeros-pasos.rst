@@ -1,6 +1,9 @@
 Primeros pasos
 ==============
 
+Nota de vigencia: esta página conserva el inicio breve original. El procedimiento completo y mantenido está en ``README.md`` y ``docs/inicio/proyecto.md``.
+
+
 Requisitos
 ----------
 

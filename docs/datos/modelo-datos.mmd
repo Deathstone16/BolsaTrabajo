@@ -1,0 +1,131 @@
+erDiagram
+    Usuario {
+        int id PK
+    }
+    Postulante {
+        int id PK
+        int usuario_id FK
+        int cv_version_actual_id FK
+    }
+    Oferente {
+        int id PK
+        int usuario_id FK
+    }
+    Curso {
+        int id PK
+        int categoria_id FK
+    }
+    Oferta {
+        int id PK
+        int empresa_id FK
+        int categoria_id FK
+    }
+    OfertaFavorita {
+        int id PK
+        int postulante_id FK
+        int oferta_id FK
+    }
+    Categoria {
+        int id PK
+    }
+    Habilidad {
+        int id PK
+        int categoria_id FK
+    }
+    CVVersion {
+        int id PK
+        int postulante_id FK
+    }
+    AnalisisCV {
+        int id PK
+        int postulante_id FK
+        int version_cv_id FK
+    }
+    PerfilCV {
+        int id PK
+        int postulante_id FK
+        int cv_version_id FK
+        int analisis_fuente_id FK
+    }
+    VersionPerfilCV {
+        int id PK
+        int perfil_id FK
+    }
+    PerfilOferta {
+        int id PK
+        int oferta_id FK
+    }
+    VersionPerfilOferta {
+        int id PK
+        int perfil_id FK
+    }
+    TrabajoExtraccion {
+        int id PK
+        int analisis_cv_id FK
+        int oferta_id FK
+        int source_cv_version_id FK
+    }
+    EventoSalida {
+        int id PK
+    }
+    EventoRecepcion {
+        int id PK
+    }
+    ComparacionOfertaCV {
+        int id PK
+        int postulante_id FK
+        int oferta_id FK
+        int analisis_id FK
+    }
+    ConfiguracionCompatibilidad {
+        int id PK
+        int creada_por_id FK
+        int publicada_por_id FK
+    }
+    ConfiguracionActiva {
+        int id PK
+        int configuracion_id FK
+    }
+    ResultadoCompatibilidad {
+        int id PK
+        int postulante_id FK
+        int oferta_id FK
+        int configuracion_id FK
+    }
+    Usuario ||--o| Postulante : usuario
+    CVVersion |o--o{ Postulante : cv_version_actual
+    Usuario ||--o| Oferente : usuario
+    Categoria ||--o{ Curso : categoria
+    Usuario ||--o{ Oferta : empresa
+    Categoria ||--o{ Oferta : categoria
+    Postulante ||--o{ OfertaFavorita : postulante
+    Oferta ||--o{ OfertaFavorita : oferta
+    Categoria ||--o{ Habilidad : categoria
+    Postulante ||--o{ CVVersion : postulante
+    Postulante ||--o{ AnalisisCV : postulante
+    CVVersion |o--o{ AnalisisCV : version_cv
+    Postulante ||--o| PerfilCV : postulante
+    CVVersion |o--o{ PerfilCV : cv_version
+    AnalisisCV |o--o{ PerfilCV : analisis_fuente
+    PerfilCV ||--o{ VersionPerfilCV : perfil
+    Oferta ||--o| PerfilOferta : oferta
+    PerfilOferta ||--o{ VersionPerfilOferta : perfil
+    AnalisisCV |o--o| TrabajoExtraccion : analisis_cv
+    Oferta |o--o{ TrabajoExtraccion : oferta
+    CVVersion |o--o{ TrabajoExtraccion : source_cv_version
+    Postulante ||--o{ ComparacionOfertaCV : postulante
+    Oferta ||--o{ ComparacionOfertaCV : oferta
+    AnalisisCV ||--o{ ComparacionOfertaCV : analisis
+    Usuario |o--o{ ConfiguracionCompatibilidad : creada_por
+    Usuario |o--o{ ConfiguracionCompatibilidad : publicada_por
+    ConfiguracionCompatibilidad ||--o{ ConfiguracionActiva : configuracion
+    Postulante ||--o{ ResultadoCompatibilidad : postulante
+    Oferta ||--o{ ResultadoCompatibilidad : oferta
+    ConfiguracionCompatibilidad |o--o{ ResultadoCompatibilidad : configuracion
+    CursoHabilidad {
+        int id PK
+        int curso_id FK
+        int habilidad_id FK
+    }
+    Curso ||--o{ CursoHabilidad : curso
+    Habilidad ||--o{ CursoHabilidad : habilidad

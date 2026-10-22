@@ -1,6 +1,9 @@
 # Cola de CV y presupuesto de Gemini
 
-Configuración local activa: proveedor `gemini-3.5-flash-lite`; extracción `cv-extraction.v2-packets-soft.v6`. La cola y su primera medición se incorporaron en v4. La revisión v6 de cobertura y sus límites están documentados en `COBERTURA_HABILIDADES_V6.md`.
+> Alcance: snapshot de una configuración local del servicio externo de IA, conservado como referencia. No verifica sus cuotas o modelos actuales. Ver [operación general](despliegue.md) y [evaluación de cobertura](../pruebas/evaluaciones/cobertura-habilidades-v6.md).
+
+
+Configuración local activa: proveedor `gemini-3.5-flash-lite`; extracción `cv-extraction.v2-packets-soft.v6`. La cola y su primera medición se incorporaron en v4. La revisión v6 de cobertura y sus límites están documentados en [revisión de cobertura v6](../pruebas/evaluaciones/cobertura-habilidades-v6.md).
 
 ## Cuotas verificadas y margen local
 
