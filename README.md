@@ -213,6 +213,13 @@ consulta el estado cada 10 segundos. El enlace del aviso lleva a
 | FastAPI | 8001 | API de análisis de CV |
 | Redis | 6379 | Cola entre FastAPI y Celery |
 
+## Recomendaciones de cursos
+
+Las recomendaciones de cursos aparecen en el detalle de cada match completado.
+Priorizan cursos específicos y permiten declarar las habilidades que desarrolla
+cada curso desde su formulario. No consumen llamadas adicionales de IA.
+Configuración y criterios: [recomendaciones de cursos](docs/RECOMENDACIONES_CURSOS.md).
+
 ## Problemas frecuentes
 
 - **“El servicio de análisis no está configurado”**: falta `IA_API_URL` en el

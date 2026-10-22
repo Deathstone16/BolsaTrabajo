@@ -1,11 +1,13 @@
 from datetime import timedelta
 from decimal import Decimal
+from html.parser import HTMLParser
 from unittest.mock import patch
 
 from django.core.exceptions import ValidationError
 from asgiref.sync import async_to_sync
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, TransactionTestCase
+from django.urls import reverse
 from django.utils import timezone
 
 from categorias.models import Categoria
@@ -18,6 +20,22 @@ from .configuration import publish_configuration, scoring_hash
 from .models import ConfiguracionActiva, ConfiguracionCompatibilidad, ResultadoCompatibilidad
 from .services import complete_match, get_or_create_match, match_request_payload
 from .services import status_payload
+
+
+def html_attributes_by_id(response):
+    class Elements(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.elements = {}
+
+        def handle_starttag(self, tag, attrs):
+            values = dict(attrs)
+            if values.get('id'):
+                self.elements[values['id']] = values
+
+    parser = Elements()
+    parser.feed(response.content.decode())
+    return parser.elements
 
 
 class MatchingServiceTests(TestCase):
@@ -78,6 +96,127 @@ class MatchingServiceTests(TestCase):
         for version in self.postulante.versiones_cv.all():
             version.archivo.delete(save=False)
         super().tearDown()
+
+    def test_detalle_organiza_resultado_y_escapa_explicaciones(self):
+        match, _ = get_or_create_match(self.postulante, self.oferta)
+        match.estado = 'completed'
+        match.match_percentage = 82
+        match.coverage_percentage = 100
+        match.resultado = {
+            'mandatory_status': 'all_met', 'summary': 'Resumen de compatibilidad.',
+            'assessments': [{'name': 'Python', 'status': 'met', 'mandatory': True,
+                             'explanation': '<script>alert(1)</script>'}],
+            'breakdown': {'technical_skills': {'score': 1, 'applicable': True, 'configured_weight_bp': 3500}},
+        }
+        match.save()
+        self.client.force_login(self.candidate_user)
+        response = self.client.get(reverse('matching:detalle', args=[match.request_id]))
+        self.assertContains(response, '82%')
+        self.assertContains(response, 'Compatibilidad por área')
+        self.assertContains(response, 'Requisitos obligatorios')
+        self.assertContains(response, 'Coincide')
+        self.assertContains(response, '&lt;script&gt;alert(1)&lt;/script&gt;')
+        self.assertNotContains(response, '<script>alert(1)</script>')
+
+    def test_detalle_es_privado_y_no_inicia_otra_solicitud(self):
+        match, _ = get_or_create_match(self.postulante, self.oferta)
+        url = reverse('matching:detalle', args=[match.request_id])
+        self.assertEqual(self.client.get(url).status_code, 302)
+        other = Usuario.objects.create_user(email='other-match@example.com', password='test-password')
+        Postulante.objects.create(usuario=other)
+        self.client.force_login(other)
+        self.assertEqual(self.client.get(url).status_code, 404)
+        self.client.force_login(self.candidate_user)
+        count = EventoSalida.objects.count()
+        self.assertContains(self.client.get(url), 'El resultado todavía no está listo')
+        self.assertEqual(EventoSalida.objects.count(), count)
+
+    @patch('matching.services._save_cache')
+    def test_oferta_recupera_match_completado_y_link_sin_otro_calculo(self, _cache):
+        match, _ = get_or_create_match(self.postulante, self.oferta)
+        match.estado = 'completed'
+        match.match_percentage = 82
+        match.resultado = {'mandatory_status': 'all_met', 'assessments': [], 'breakdown': {}}
+        match.save()
+        self.client.force_login(self.candidate_user)
+        count = EventoSalida.objects.count()
+        response = self.client.get(reverse('detalle_oferta', args=[self.oferta.pk]))
+        elements = html_attributes_by_id(response)
+        self.assertEqual(elements['match-card']['data-request-id'], str(match.request_id))
+        self.assertEqual(elements['match-card']['data-status'], 'completed')
+        self.assertNotIn('is-calculating', elements['match-card']['class'])
+        self.assertEqual(float(elements['match-progress']['data-value']), 82)
+        self.assertContains(response, '>82%</span>')
+        self.assertNotIn('hidden', elements['match-details-action'])
+        self.assertEqual(elements['match-details-link']['href'], reverse('matching:detalle', args=[match.request_id]))
+        self.assertIn('hidden', elements['match-form'])
+        self.assertEqual(EventoSalida.objects.count(), count)
+
+    @patch('matching.services._save_cache')
+    def test_cero_es_un_resultado_valido_y_no_un_estado_de_carga(self, _cache):
+        match, _ = get_or_create_match(self.postulante, self.oferta)
+        match.estado = 'completed'
+        match.match_percentage = 0
+        match.save()
+        self.client.force_login(self.candidate_user)
+        response = self.client.get(reverse('detalle_oferta', args=[self.oferta.pk]))
+        elements = html_attributes_by_id(response)
+        self.assertEqual(float(elements['match-progress']['data-value']), 0)
+        self.assertNotIn('is-calculating', elements['match-card']['class'])
+        self.assertContains(response, '>0%</span>')
+        self.assertNotIn('hidden', elements['match-details-action'])
+
+    @patch('matching.services._save_cache')
+    def test_match_pendiente_se_recupera_con_espera_sin_porcentaje_ficticio(self, _cache):
+        match, _ = get_or_create_match(self.postulante, self.oferta)
+        self.client.force_login(self.candidate_user)
+        count = EventoSalida.objects.count()
+        response = self.client.get(reverse('detalle_oferta', args=[self.oferta.pk]))
+        elements = html_attributes_by_id(response)
+        self.assertEqual(elements['match-card']['data-request-id'], str(match.request_id))
+        self.assertEqual(elements['match-card']['data-status'], match.estado)
+        self.assertIn('is-calculating', elements['match-card']['class'])
+        self.assertEqual(elements['match-progress']['data-value'], '')
+        self.assertContains(response, '>Calculando</span>')
+        self.assertNotContains(response, '>0%</span>')
+        self.assertIn('disabled', elements['match-button'])
+        self.assertEqual(EventoSalida.objects.count(), count)
+
+    def test_sin_match_se_muestra_sin_calcular_y_no_un_cero(self):
+        self.client.force_login(self.candidate_user)
+        response = self.client.get(reverse('detalle_oferta', args=[self.oferta.pk]))
+        self.assertContains(response, '>Sin calcular</span>')
+        self.assertNotContains(response, '>0%</span>')
+        self.assertFalse(ResultadoCompatibilidad.objects.exists())
+
+    def test_oferta_legacy_explica_revision_y_no_ofrece_un_calculo_bloqueado(self):
+        self.oferta.requiere_revision_requisitos = True
+        self.oferta.save(update_fields=['requiere_revision_requisitos'])
+        self.offer_profile.schema_version = 'job-offer.v1'
+        self.offer_profile.save(update_fields=['schema_version'])
+        self.client.force_login(self.candidate_user)
+        response = self.client.get(reverse('detalle_oferta', args=[self.oferta.pk]))
+        self.assertContains(response, 'id="match-requisitos-pendientes"')
+        self.assertContains(response, 'La empresa debe actualizar los requisitos')
+        self.assertNotContains(response, 'id="match-form"')
+        with self.assertRaisesMessage(ValueError, 'revisar sus requisitos'):
+            get_or_create_match(self.postulante, self.oferta)
+        self.assertFalse(ResultadoCompatibilidad.objects.exists())
+
+    def test_revision_pendiente_bloquea_incluso_un_perfil_v2_antiguo(self):
+        self.oferta.requiere_revision_requisitos = True
+        self.oferta.save(update_fields=['requiere_revision_requisitos'])
+        with self.assertRaisesMessage(ValueError, 'revisar sus requisitos'):
+            get_or_create_match(self.postulante, self.oferta)
+        self.assertFalse(ResultadoCompatibilidad.objects.exists())
+
+    def test_perfil_v1_revisado_no_muestra_el_boton_hasta_actualizar_el_analisis(self):
+        self.offer_profile.schema_version = 'job-offer.v1'
+        self.offer_profile.save(update_fields=['schema_version'])
+        self.client.force_login(self.candidate_user)
+        response = self.client.get(reverse('detalle_oferta', args=[self.oferta.pk]))
+        self.assertContains(response, 'Esta oferta está siendo analizada.')
+        self.assertNotContains(response, 'id="match-form"')
 
     @patch('matching.services._save_cache')
     def test_match_usa_v2_y_congela_perfiles_y_configuracion(self, save_cache):

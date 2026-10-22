@@ -1,0 +1,160 @@
+{% extends 'nueva_ui/base.html' %}
+
+{% block title %}Detalles del match · {{ match.oferta.titulo }} · IEN Empleo{% endblock %}
+
+{% block extra_head %}
+<style>
+  .match-page { max-width: 1080px; margin: 0 auto; padding: 40px 24px 64px; }
+  .match-page h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 700; line-height: 1.2; letter-spacing: -.03em; }
+  .match-page h2 { font-size: 21px; font-weight: 600; }
+  .match-eyebrow { font: 11px 'JetBrains Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #6B645C; }
+  .match-back { display: inline-flex; gap: 8px; color: #512DA8; font-size: 14px; margin-bottom: 28px; }
+  .match-intro { margin: 12px 0 28px; color: #6B645C; line-height: 1.7; overflow-wrap: anywhere; }
+  .match-overview { display: grid; grid-template-columns: 1fr 1.6fr; gap: 24px; }
+  .match-score { background: #512DA8; border-radius: 28px; color: white; padding: 32px; }
+  .match-score .match-eyebrow { color: #E4DDF3; }
+  .match-number { font-size: clamp(54px, 8vw, 80px); font-weight: 700; line-height: 1.2; margin: 16px 0; font-variant-numeric: tabular-nums; }
+  .match-score p:last-child { font-size: 13px; color: #E4DDF3; line-height: 1.7; }
+  .match-summary { padding: 28px; }
+  .match-summary p { margin-top: 12px; color: #6B645C; line-height: 1.7; }
+  .match-coverage { border-top: 1px solid #E8DFD5; padding-top: 18px; margin-top: 20px; }
+  .match-coverage strong { color: #512DA8; font-size: 24px; }
+  .match-section { margin-top: 36px; }
+  .match-section > p { color: #6B645C; font-size: 14px; line-height: 1.7; margin: 8px 0 20px; }
+  .match-dimensions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .match-dimension { padding: 22px; }
+  .match-dimension h3 { font-size: 14px; font-weight: 600; }
+  .match-dimension strong { display: block; font-size: 28px; color: #512DA8; margin: 14px 0 10px; }
+  .match-track { height: 6px; background: #EEE7F6; border-radius: 99px; overflow: hidden; margin-bottom: 14px; }
+  .match-track span { display: block; height: 100%; background: #512DA8; border-radius: inherit; }
+  .match-weight, .match-empty { color: #6B645C; font-size: 12px; line-height: 1.7; }
+  .match-unused { margin-top: 20px; padding: 20px 24px; }
+  .match-unused summary { cursor: pointer; color: #512DA8; font-size: 14px; font-weight: 500; }
+  .match-unused ul { margin-top: 14px; display: grid; gap: 10px; color: #6B645C; font-size: 13px; }
+  .match-requirements { display: grid; gap: 14px; margin-top: 18px; }
+  .match-requirement { padding: 24px; }
+  .match-requirement header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  .match-requirement h3 { font-weight: 600; overflow-wrap: anywhere; }
+  .match-requirement p { margin-top: 14px; font-size: 14px; color: #6B645C; line-height: 1.8; overflow-wrap: anywhere; }
+  .match-badge { display: inline-block; flex-shrink: 0; font-size: 11px; padding: 6px 12px; border-radius: 99px; background: #F0EBF8; color: #512DA8; }
+  .match-badge.met { background: #E8F4EC; color: #246342; }
+  .match-badge.partial { background: #FFF2CC; color: #765500; }
+  .match-badge.not_met { background: #FBE9E9; color: #9C3535; }
+  .match-badge.unknown { background: #F0ECE7; color: #6B645C; }
+  .match-footnote { margin-top: 32px; padding: 24px; color: #6B645C; font-size: 12px; line-height: 1.8; }
+  .match-courses { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  .course-recommendation { padding: 24px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .course-recommendation h3 { font-size: 18px; font-weight: 600; overflow-wrap: anywhere; }
+  .course-recommendation p, .course-recommendation li { color: #6B645C; font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
+  .course-recommendation ul { display: grid; gap: 8px; }
+  .course-recommendation .btn-ien { margin-top: auto; }
+  .course-recommendation .match-badge { align-self: flex-start; }
+  @media (max-width: 640px) { .match-courses { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { .match-overview { grid-template-columns: 1fr; } .match-dimensions { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 480px) { .match-page { padding: 28px 16px 48px; } .match-dimensions { grid-template-columns: 1fr; } .match-requirement header { flex-direction: column; gap: 10px; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="match-page">
+  <a class="match-back" href="{% url 'detalle_oferta' match.oferta_id %}"><span aria-hidden="true">←</span> Volver a la oferta</a>
+  <p class="match-eyebrow">Tu perfil y esta oportunidad</p>
+  <h1 class="mt-3">Detalles del match</h1>
+  <p class="match-intro">{{ match.oferta.titulo }}{% if match.evaluation_date %} · Evaluación del {{ match.evaluation_date|date:'d/m/Y' }}{% endif %}</p>
+
+  {% if match.estado == 'completed' %}
+  <div class="match-overview">
+    <div class="match-score">
+      <p class="match-eyebrow">Compatibilidad con la oferta</p>
+      <div class="match-number">{{ match.match_percentage|floatformat:0 }}%</div>
+      <p>Este porcentaje compara tu perfil con los requisitos de la oferta. No representa una probabilidad de contratación.</p>
+    </div>
+    <div class="panel match-summary">
+      <h2>{{ mandatory_label }}</h2>
+      {% if result.summary %}<p>{{ result.summary }}</p>{% endif %}
+      <div class="match-coverage">
+        <strong>{{ match.coverage_percentage|floatformat:0 }}%</strong>
+        <p>de los requisitos tienen información en tu perfil para evaluarlos. Cuando falta información, el detalle lo indica.</p>
+      </div>
+    </div>
+  </div>
+
+  <section class="match-section" aria-labelledby="match-dimensions-title">
+    <h2 id="match-dimensions-title">Compatibilidad por área</h2>
+    <p>El resultado de cada área y su peso en la configuración de esta evaluación.</p>
+    <div class="match-dimensions">
+      {% for dimension in breakdown %}{% if dimension.applicable %}
+      <article class="panel match-dimension">
+        <h3>{{ dimension.label }}</h3>
+        <strong>{{ dimension.percentage }}%</strong>
+        <div class="match-track" aria-hidden="true"><span style="width: {{ dimension.percentage }}%"></span></div>
+        <p class="match-weight">Peso configurado: {{ dimension.weight|floatformat:'-2' }}%</p>
+      </article>
+      {% endif %}{% endfor %}
+    </div>
+    <details class="panel match-unused">
+      <summary>Áreas sin requisitos aplicables</summary>
+      <ul>{% for dimension in breakdown %}{% if not dimension.applicable %}<li>{{ dimension.label }} · Sin requisitos aplicables · Peso configurado: {{ dimension.weight|floatformat:'-2' }}%</li>{% endif %}{% endfor %}</ul>
+    </details>
+  </section>
+
+  {% for group in groups %}
+  <section class="match-section" aria-labelledby="match-group-{{ forloop.counter }}">
+    <h2 id="match-group-{{ forloop.counter }}">{{ group.title }}</h2>
+    <div class="match-requirements">
+      {% for item in group.items %}
+      <article class="panel match-requirement">
+        <header><h3>{{ item.name }}</h3><span class="match-badge {{ item.status }}">{{ item.status_label }}</span></header>
+        {% if item.explanation %}<p>{{ item.explanation }}</p>{% endif %}
+      </article>
+      {% empty %}<p class="match-empty">Esta oferta no incluye {{ group.title|lower }}.</p>{% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+
+  {% if course_recommendations.has_gaps %}
+  <section id="course-recommendations" class="match-section" aria-labelledby="course-recommendations-title">
+    <h2 id="course-recommendations-title">Cursos para reforzar tu perfil</h2>
+    <p>Opciones del catálogo para los requisitos que podés reforzar en esta evaluación. Para cada requisito se priorizan los cursos más específicos.</p>
+    {% if course_recommendations.courses %}
+    <div class="match-courses">
+      {% for recommendation in course_recommendations.courses %}
+      <article class="panel course-recommendation" data-course-id="{{ recommendation.course.pk }}">
+        <span class="match-badge">{% if recommendation.match_type == 'related' %}Opción general del área{% else %}Relacionado con el requisito{% endif %}</span>
+        <h3>{{ recommendation.course.nombre }}</h3>
+        <p>{{ recommendation.reason }}</p>
+        <ul>
+          {% for gap in recommendation.gaps %}
+          <li><strong>{{ gap.name }}</strong> · {% if gap.status == 'unknown' %}Sin información suficiente en el CV{% elif gap.status == 'partial' %}Coincidencia parcial{% else %}Requisito por reforzar{% endif %}</li>
+          {% endfor %}
+        </ul>
+        <p>{{ recommendation.course.categoria.nombre }} · {{ recommendation.course.get_tipo_display }}{% if recommendation.course.duracion %} · {{ recommendation.course.duracion }}{% endif %}</p>
+        <a href="{% url 'cursos:detalle' recommendation.course.pk %}" class="btn-ien">Ver curso: {{ recommendation.course.nombre }} <span aria-hidden="true">→</span></a>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="panel match-summary">
+      {% if course_recommendations.no_catalog %}<p>Todavía no hay cursos activos en el catálogo.</p>{% else %}<p>No encontramos cursos del catálogo relacionados con estos requisitos.</p>{% endif %}
+      <a href="{% url 'cursos:listado' %}" class="btn-ghost mt-4">Explorar cursos</a>
+    </div>
+    {% endif %}
+    {% for gap in course_recommendations.gaps %}
+      {% if not gap.courses %}<p class="match-empty">{{ gap.name }}: sin un curso relacionado disponible por el momento.</p>{% endif %}
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  <aside class="panel match-footnote">
+    <strong>Cómo interpretar este resultado</strong><br>
+    La evaluación usa las versiones de tu perfil y de la oferta guardadas al solicitar el match. Un requisito obligatorio se evalúa como tal independientemente de su peso.
+    {% if match.confidence_percentage != None %}<br>Confianza estimada de la evaluación: {{ match.confidence_percentage|floatformat:0 }}%.{% else %}<br>Esta evaluación no incluye una estimación de confianza cuantificada.{% endif %}
+  </aside>
+  {% else %}
+  <div class="panel match-summary" role="status">
+    {% if match.estado == 'error' %}<h2>No se pudo completar el match</h2><p>{{ match.error }}</p>{% else %}<h2>El resultado todavía no está listo</h2><p>Volvé a la oferta para consultar el estado del cálculo.</p>{% endif %}
+    <a class="btn-ien mt-5" href="{% url 'detalle_oferta' match.oferta_id %}">Volver a la oferta</a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

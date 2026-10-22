@@ -3,6 +3,21 @@
 {% block title %}{{ oferta.titulo }} · IEN Empleo{% endblock %}
 {% block description %}{{ oferta.descripcion|truncatechars:150 }}{% endblock %}
 
+{% block extra_head %}
+<style>
+  #match-percentage { font-variant-numeric: tabular-nums; }
+  #match-card.is-calculating #match-progress {
+    stroke-dasharray: 20 80;
+    transform-origin: 60px 60px;
+    animation: match-spin 1.6s linear infinite;
+  }
+  @keyframes match-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    #match-card.is-calculating #match-progress { animation: none; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="bg-[#F8F3F0] pb-16">
 
@@ -105,45 +120,41 @@
 
       <div class="space-y-6">
         {% if not user.is_authenticated or user.postulante %}
-        <div class="panel p-6 text-center" id="match-card" data-config-hash="{{ match_config_hash }}" data-request-id="{% if match %}{{ match.request_id }}{% endif %}" data-status="{% if match %}{{ match.estado }}{% endif %}">
+        <div class="panel p-6 text-center{% if match and match.estado != 'completed' and match.estado != 'error' %} is-calculating{% endif %}" id="match-card" data-config-hash="{{ match_config_hash }}" data-request-id="{% if match %}{{ match.request_id }}{% endif %}" data-status="{% if match %}{{ match.estado }}{% endif %}">
           <h3 class="font-mono text-xs uppercase tracking-widest text-[#6B645C]">Match inteligente</h3>
+          {% if oferta.requiere_revision_requisitos %}
+            <p id="match-requisitos-pendientes" class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950" role="status">La empresa debe actualizar los requisitos de esta oferta. La compatibilidad estará disponible después de esa revisión.</p>
+          {% endif %}
           {% if user.is_authenticated and user.postulante and not perfil_cv %}
             {% include 'ia/comparacion_historica.html' %}
           {% else %}
           <div class="relative mx-auto mt-6 h-36 w-36">
             <svg class="h-36 w-36 -rotate-90" viewBox="0 0 120 120" aria-hidden="true">
               <circle cx="60" cy="60" r="54" stroke="#F0E9E1" stroke-width="12" fill="none"></circle>
-              <circle id="match-progress" data-value="{% if match and match.match_percentage %}{{ match.match_percentage|floatformat:'2u' }}{% else %}0{% endif %}" cx="60" cy="60" r="54" stroke="#512DA8" stroke-width="12" fill="none"
-                      stroke-dasharray="339.29" stroke-dashoffset="339.29" stroke-linecap="round"></circle>
+              <circle id="match-progress" data-value="{% if match and match.estado == 'completed' and match.match_percentage != None %}{{ match.match_percentage|floatformat:'2u' }}{% endif %}" cx="60" cy="60" r="54" pathLength="100" stroke="#512DA8" stroke-width="12" fill="none"
+                      stroke-dasharray="{% if match and match.estado == 'completed' and match.match_percentage != None %}{{ match.match_percentage|floatformat:'2u' }}{% else %}0{% endif %} 100" stroke-linecap="round"></circle>
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center">
-              <span id="match-percentage" class="text-3xl font-bold text-[#26222E]">{% if match and match.estado == 'completed' %}{{ match.match_percentage|floatformat:0 }}%{% else %}—{% endif %}</span>
+              <span id="match-percentage" class="{% if match and match.estado == 'completed' %}text-3xl{% else %}text-sm{% endif %} font-bold text-[#26222E]">{% if match and match.estado == 'completed' and match.match_percentage != None %}{{ match.match_percentage|floatformat:0 }}%{% elif match and match.estado == 'error' %}Sin resultado{% elif match %}Calculando{% else %}Sin calcular{% endif %}</span>
               <span class="font-mono text-[10px] uppercase tracking-widest text-[#6B645C]">match</span>
             </div>
           </div>
           <p id="match-message" class="mt-5 text-sm text-[#6B645C]" role="status" aria-live="polite">
             {% if not user.is_authenticated %}Iniciá sesión para calcular tu compatibilidad.
+            {% elif oferta.requiere_revision_requisitos %}Requisitos pendientes de actualización por la empresa.
             {% elif not perfil_cv or perfil_cv.estado != 'ready' %}Primero completá el análisis de tu perfil.
-            {% elif not perfil_oferta or perfil_oferta.estado != 'ready' %}Esta oferta está siendo analizada.
+            {% elif not perfil_oferta or perfil_oferta.estado != 'ready' or perfil_oferta.schema_version != 'job-offer.v2' %}Esta oferta está siendo analizada.
             {% elif match and match.estado == 'completed' %}Compatibilidad calculada según tu perfil y esta oferta.
             {% elif match.estado == 'error' %}No se pudo calcular la compatibilidad. Podés reintentar.
             {% elif match %}Calculando compatibilidad…
             {% else %}Compará tu perfil guardado con esta oferta.{% endif %}
           </p>
-          <p class="mt-3 text-xs text-[#6B645C]">El porcentaje compara tu perfil con los requisitos de la oferta. No representa una probabilidad de contratación.</p>
-          <details class="mt-4 text-left text-xs text-[#6B645C]">
-            <summary class="cursor-pointer font-semibold text-[#512DA8]">¿Cómo se calcula mi match?</summary>
-            <p class="mt-3 leading-relaxed">La evaluación revisa los requisitos de la oferta, distingue los obligatorios de los deseables y muestra por separado cada dimensión. Los pesos vigentes se guardan con cada cálculo; un requisito obligatorio no deja de serlo aunque su dimensión tenga peso cero. La fecha de evaluación se usa para interpretar vigencia de credenciales.</p>
-          </details>
-          <div id="match-details" class="mt-4 text-left text-sm text-[#6B645C]" hidden>
-            <p id="match-coverage"></p>
-            <p id="match-confidence" class="mt-1"></p>
-            <p id="match-mandatory" class="mt-1 font-semibold"></p>
-            <ul id="match-breakdown" class="mt-3 grid gap-1 sm:grid-cols-2"></ul>
-            <ul id="match-assessments" class="mt-3 space-y-2"></ul>
+          <p class="mt-3 text-xs text-[#6B645C]">El porcentaje compara tu perfil con los requisitos obligatorios y deseables de la oferta. No representa una probabilidad de contratación.</p>
+          <div id="match-details-action" class="mt-5"{% if not match or match.estado != 'completed' %} hidden{% endif %}>
+            <a id="match-details-link" class="btn-ien w-full" href="{% if match %}{% url 'matching:detalle' match.request_id %}{% else %}#{% endif %}">Ver detalles del match <span aria-hidden="true">→</span></a>
           </div>
-          {% if user.is_authenticated and perfil_cv and perfil_cv.estado == 'ready' and perfil_oferta and perfil_oferta.estado == 'ready' %}
-            <form id="match-form" method="post" action="{% url 'matching:calcular' oferta.pk %}" class="mt-5">
+          {% if user.is_authenticated and not oferta.requiere_revision_requisitos and perfil_cv and perfil_cv.estado == 'ready' and perfil_cv.schema_version == 'candidate-profile.v2' and perfil_oferta and perfil_oferta.estado == 'ready' and perfil_oferta.schema_version == 'job-offer.v2' %}
+            <form id="match-form" method="post" action="{% url 'matching:calcular' oferta.pk %}" class="mt-5"{% if match and match.estado == 'completed' %} hidden{% endif %}>
               {% csrf_token %}
               <button id="match-button" class="btn-ien w-full" type="submit" {% if match and match.estado != 'error' and match.estado != 'completed' %}disabled{% endif %}>{% if match and match.estado == 'completed' %}Ver compatibilidad{% else %}Calcular compatibilidad{% endif %}</button>
             </form>
@@ -200,135 +211,108 @@
     </div>
   </div>
 </section>
-<style>
-  #match-percentage { font-variant-numeric: tabular-nums; }
-  #match-card.is-calculating #match-progress {
-    stroke-dasharray: 65 274.29;
-    transform-origin: 60px 60px;
-    animation: match-spin 1.6s linear infinite;
-  }
-  #match-card.match-arrived #match-percentage { animation: match-settle .45s ease-out; }
-  @keyframes match-spin { to { transform: rotate(360deg); } }
-  @keyframes match-settle { 50% { transform: scale(1.08); } }
-  @media (prefers-reduced-motion: reduce) {
-    #match-card.is-calculating #match-progress, #match-card.match-arrived #match-percentage { animation: none; }
-  }
-</style>
 <script>
 (() => {
-  const form = document.getElementById('match-form');
-  if (!form) return;
-  const button = document.getElementById('match-button');
-  const message = document.getElementById('match-message');
+  const card = document.getElementById('match-card');
   const percentage = document.getElementById('match-percentage');
   const progress = document.getElementById('match-progress');
-  const card = document.getElementById('match-card');
+  if (!card || !percentage || !progress) return;
+  const form = document.getElementById('match-form');
+  const button = document.getElementById('match-button');
+  const message = document.getElementById('match-message');
+  const detailsAction = document.getElementById('match-details-action');
+  const detailsLink = document.getElementById('match-details-link');
   let pollTimer;
   let socket;
-  let animationFrame;
-  let displayedValue = 0;
-  let lastTarget = null;
   let activeRequestId = card.dataset.requestId || null;
   let activeConfigHash = card.dataset.configHash || '';
-  const circumference = 2 * Math.PI * 54;
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  function paint(value) {
-    displayedValue = value;
-    percentage.textContent = Math.round(value) + '%';
-    progress.style.strokeDashoffset = String(circumference * (1 - value / 100));
-  }
-  function animatePercentage(rawTarget) {
-    const target = Math.min(100, Math.max(0, Number(rawTarget)));
-    if (!Number.isFinite(target) || target === lastTarget) return;
-    lastTarget = target;
-    cancelAnimationFrame(animationFrame);
-    card.classList.remove('is-calculating', 'match-arrived');
-    if (reducedMotion.matches) { paint(target); return; }
-    const from = displayedValue;
-    const duration = 1400;
-    let started;
-    function tick(timestamp) {
-      if (started === undefined) started = timestamp;
-      const elapsed = Math.min(1, (timestamp - started) / duration);
-      const eased = 1 - Math.pow(1 - elapsed, 3);
-      paint(from + (target - from) * eased);
-      if (elapsed < 1) animationFrame = requestAnimationFrame(tick);
-      else { paint(target); card.classList.add('match-arrived'); }
-    }
-    animationFrame = requestAnimationFrame(tick);
-  }
+
   function stopWatching() {
     clearInterval(pollTimer);
     if (socket) { socket.close(); socket = null; }
   }
+  function setLabel(text, numeric = false) {
+    percentage.textContent = text;
+    percentage.classList.toggle('text-3xl', numeric);
+    percentage.classList.toggle('text-sm', !numeric);
+  }
+  function showCalculating(status) {
+    card.classList.add('is-calculating');
+    card.dataset.status = status;
+    progress.style.strokeDasharray = '';
+    setLabel('Calculando');
+    message.textContent = status === 'rate_limited' ? 'Esperando disponibilidad para calcular tu compatibilidad…' : 'Calculando compatibilidad…';
+    detailsAction.hidden = true;
+    if (button) button.disabled = true;
+  }
+  function showError(error) {
+    card.classList.remove('is-calculating');
+    card.dataset.status = 'error';
+    setLabel('Sin resultado');
+    progress.style.strokeDasharray = '0 100';
+    message.textContent = error || 'No se pudo calcular la compatibilidad. Podés reintentar.';
+    detailsAction.hidden = true;
+    if (form) form.hidden = false;
+    if (button) { button.disabled = false; button.textContent = 'Reintentar'; }
+    stopWatching();
+  }
   function render(data) {
     if (data.request_id && activeRequestId && data.request_id !== activeRequestId) return;
     if (data.scoring_config_hash && activeConfigHash && data.scoring_config_hash !== activeConfigHash) return;
+    if (card.dataset.status === 'completed' && data.status !== 'completed') return;
     if (data.status === 'completed') {
-      animatePercentage(data.match_percentage);
+      const value = data.match_percentage;
+      if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 100) return;
+      card.classList.remove('is-calculating');
+      card.dataset.status = 'completed';
+      progress.dataset.value = String(value);
+      progress.style.strokeDasharray = `${value} 100`;
+      setLabel(Math.round(value) + '%', true);
       message.textContent = 'Compatibilidad calculada según tu perfil y esta oferta.';
-      button.disabled = false; button.textContent = 'Ver compatibilidad'; stopWatching();
-      document.getElementById('match-details').hidden = false;
-      document.getElementById('match-coverage').textContent = 'Requisitos con información: ' + Math.round(data.coverage_percentage) + '%';
-      document.getElementById('match-confidence').textContent = data.confidence_percentage == null ? 'La evaluación no incluye una estimación de confianza cuantificada.' : 'Confianza estimada de la evaluación: ' + Math.round(data.confidence_percentage) + '%';
-      const mandatoryLabels = {all_met: 'Se cumplen los requisitos obligatorios', not_met: 'Hay requisitos obligatorios que no se cumplen', unknown: 'No hay información suficiente para confirmar todos los requisitos obligatorios'};
-      document.getElementById('match-mandatory').textContent = mandatoryLabels[data.result?.mandatory_status] || '';
-      const dimensionLabels = {technical_skills: 'Competencias técnicas', soft_skills: 'Habilidades blandas', experience: 'Experiencia', education: 'Educación', languages: 'Idiomas', logistics: 'Logística y modalidad', desirables: 'Requisitos deseables'};
-      const breakdown = document.getElementById('match-breakdown');
-      breakdown.replaceChildren();
-      for (const [key, value] of Object.entries(data.result?.breakdown || {})) {
-        const row = document.createElement('li');
-        row.textContent = `${dimensionLabels[key] || key}: ${value.applicable ? Math.round(value.score * 100) + '%' : 'Sin requisitos aplicables'} · peso ${Number(value.configured_weight_bp) / 100}%`;
-        breakdown.appendChild(row);
-      }
-      const list = document.getElementById('match-assessments');
-      list.replaceChildren();
-      const labels = {met: 'Coincide', partial: 'Coincide parcialmente', not_met: 'No alcanza el nivel requerido', unknown: 'Sin información suficiente'};
-      for (const item of data.result?.assessments || []) {
-        const row = document.createElement('li');
-        row.textContent = `${item.mandatory ? 'Obligatorio' : 'Deseable'} · ${item.name}: ${labels[item.status] || item.status}`;
-        list.appendChild(row);
-      }
+      if (form) form.hidden = true;
+      detailsLink.href = `{% url 'matching:detalle' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', data.request_id);
+      detailsAction.hidden = false;
+      stopWatching();
+    } else if (data.status === 'error') {
+      showError(data.error);
+    } else {
+      showCalculating(data.status);
     }
-    else if (data.status === 'error') { card.classList.remove('is-calculating'); message.textContent = data.error || 'No se pudo calcular la compatibilidad.'; button.disabled = false; button.textContent = 'Reintentar'; stopWatching(); }
-    else { card.classList.add('is-calculating'); percentage.textContent = '…'; message.textContent = data.status === 'rate_limited' ? 'Esperando disponibilidad para calcular tu compatibilidad…' : 'Calculando compatibilidad…'; button.disabled = true; }
   }
   function watch(requestId) {
     stopWatching();
     const stateUrl = `{% url 'matching:estado' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', requestId);
-    const poll = () => fetch(stateUrl).then(r => r.ok ? r.json() : null).then(data => data && render(data)).catch(() => { message.textContent = 'Reconectando con tu resultado…'; });
+    const poll = () => fetch(stateUrl).then(r => r.ok ? r.json() : null).then(data => data && render(data)).catch(() => {
+      if (card.dataset.status !== 'completed' && card.dataset.status !== 'error') message.textContent = 'Reconectando con tu resultado…';
+    });
     pollTimer = setInterval(poll, 3000);
     const scheme = location.protocol === 'https:' ? 'wss' : 'ws';
     try {
       socket = new WebSocket(`${scheme}://${location.host}/ws/matches/${requestId}/`);
-      socket.onmessage = event => render(JSON.parse(event.data));
-      socket.onclose = () => {};
+      socket.onmessage = event => { try { render(JSON.parse(event.data)); } catch (_) {} };
     } catch (_) {}
     poll();
   }
-  form.addEventListener('submit', event => {
+  if (form) form.addEventListener('submit', event => {
     event.preventDefault();
-    button.disabled = true;
-    cancelAnimationFrame(animationFrame);
-    lastTarget = null;
-    paint(0);
-    card.classList.remove('match-arrived');
-    card.classList.add('is-calculating');
+    showCalculating('pending');
     fetch(form.action, {method: 'POST', headers: {'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value, 'X-Requested-With': 'XMLHttpRequest'}})
       .then(response => response.json()).then(data => {
-        if (!data.success) { card.classList.remove('is-calculating'); message.textContent = data.mensaje || 'No se pudo iniciar el cálculo.'; button.disabled = false; return; }
+        if (!data.success) { showError(data.mensaje); return; }
         activeRequestId = data.request_id;
         activeConfigHash = data.scoring_config_hash || '';
         card.dataset.requestId = activeRequestId;
         card.dataset.configHash = activeConfigHash;
         render(data);
         if (data.status !== 'completed' && data.status !== 'error') watch(data.request_id);
-      }).catch(() => { card.classList.remove('is-calculating'); message.textContent = 'No se pudo iniciar el cálculo.'; button.disabled = false; });
+      }).catch(() => showError('No se pudo iniciar el cálculo.'));
   });
-  const initial = Number(progress.dataset.value || 0);
-  if (card.dataset.status === 'completed') { paint(0); animatePercentage(initial); }
-  if (card.dataset.requestId && card.dataset.status !== 'error') watch(card.dataset.requestId);
-  window.addEventListener('pagehide', () => { stopWatching(); cancelAnimationFrame(animationFrame); });
+  // Completed results are already painted by Django. Resume only unfinished jobs.
+  if (activeRequestId && card.dataset.status !== 'completed' && card.dataset.status !== 'error') watch(activeRequestId);
+  window.addEventListener('pageshow', event => {
+    if (event.persisted && activeRequestId && card.dataset.status !== 'completed' && card.dataset.status !== 'error') watch(activeRequestId);
+  });
+  window.addEventListener('pagehide', stopWatching);
 })();
 </script>
 {% endblock %}

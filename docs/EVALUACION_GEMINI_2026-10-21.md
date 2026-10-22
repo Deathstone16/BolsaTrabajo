@@ -1,0 +1,108 @@
+# Evaluación de Gemini para extracción de CV
+
+Fecha: 21 de octubre de 2026. Investigación documental, pruebas reales con datos sintéticos e integración local de Gemini Flash-Lite.
+
+Actualización: posteriormente se verificó la cuota real mediante una captura de AI Studio (15 RPM, 250.000 TPM, 500 RPD) y se implementó la optimización v4. La configuración vigente y las pruebas de cola están en [COLA_Y_CUOTAS_GEMINI.md](COLA_Y_CUOTAS_GEMINI.md). Las mediciones v3 y las propuestas de este documento describen las etapas previas.
+
+## Conclusión
+
+Se configuró `gemini-3.5-flash-lite` para extracción y compatibilidad, por petición expresa del usuario. La clave fue aceptada y quedó únicamente en el `.env` privado del backend. El modelo se selecciona en cada petición. Los límites de cuota efectivos del proyecto todavía deben consultarse en AI Studio: el catálogo de modelos y una generación exitosa no los revelan.
+
+El mayor ahorro potencial está en reducir las peticiones por CV y la repetición del prompt, además de comparar proveedores. Cambiar únicamente la clave no implementa esta mejora.
+
+## Evidencia local
+
+La configuración anterior era `LLM_PROVIDER=groq`, `CV_MODEL=qwen/qwen3.8-27b` y `MATCH_GROQ_MODEL=qwen/qwen3.8-27b`. Al inicio no había clave Gemini configurada. La tabla siguiente documenta ese punto de partida; los valores activos nuevos se detallan al final.
+
+| Parámetro | Valor |
+|---|---:|
+| Fragmento efectivo de CV | 500 caracteres |
+| Prompt de extracción repetido por fragmento | 6.594 caracteres |
+| Prompt de consolidación | 1.585 caracteres |
+| Máximo configurado de salida por extracción | 950 tokens |
+| Pausa Groq configurada | 12 segundos |
+| Límite local configurado | 20 solicitudes/minuto |
+
+Sin subdivisiones ni reintentos, el número de peticiones es `ceil(caracteres_CV / 500) + 1`: una por fragmento y otra para consolidar. Los límites locales no prueban las cuotas concedidas por Groq.
+
+| CV sintético | Fragmentos | Peticiones | Pausas entre peticiones, si se ejecutan consecutivamente |
+|---|---:|---:|---:|
+| 131 caracteres | 1 | 2 | Aproximadamente 12 s |
+| 2.200 caracteres | 5 | 6 | Aproximadamente 60 s |
+
+Estas pausas son una referencia de configuración, no un tiempo garantizado de la tarea. Hay que sumar generación, cola, consolidación y posibles reintentos; solicitudes concurrentes también consumen cuota. Los logs contienen tareas de 10,719 s, 25,235 s y 457,579 s, sin correspondencia segura entre duración y documento. No constituyen un benchmark comparable.
+
+Para el CV de 2.200 caracteres se repiten 32.970 caracteres de instrucciones en las cinco extracciones, antes de incluir CV, estructura del mensaje y consolidación. El estimador conservador interno calcula 26.183 tokens reservados para ese ejemplo, incluyendo presupuestos de salida y una consolidación sintética mínima. **No es consumo real ni conteo del tokenizer de Gemini.** Los hechos extraídos hacen crecer la consolidación.
+
+No reutilizar ese estimador como cuota de entrada Gemini: Google define TPM sobre tokens de entrada. Medir con el contador del modelo y registrar entrada, salida, razonamiento y total que devuelva la API, separados de la reserva local.
+
+## Modelos y límites actuales
+
+- Para proyectos nuevos Google recomienda `gemini-3.5-flash-lite` o `gemini-3.8-flash`. `gemini-2.5-flash` y `gemini-2.5-pro` tienen acceso limitado a usuarios que ya los utilizaron; no asumir que la cuenta gratuita nueva los habilita. [Calendario oficial](https://ai.google.dev/gemini-api/docs/deprecations).
+- Para extracción estructurada probar primero Flash-Lite y usar Flash como comparación de calidad. Reservar Pro para una necesidad demostrada; no es la primera opción para bajar latencia.
+- `text-embedding-004` fue retirado el 14 de enero de 2026. Además, un modelo de embeddings no produce el perfil JSON del CV. [Estado oficial](https://ai.google.dev/gemini-api/docs/deprecations).
+- La cuota depende de proyecto, modelo y nivel: RPM, TPM de entrada y RPD. Otra clave del mismo proyecto comparte límites. Superar cualquiera puede producir 429. RPD se restablece a medianoche del Pacífico. Consultar límites activos en AI Studio; Google no garantiza la capacidad publicada. [Cuotas oficiales](https://ai.google.dev/gemini-api/docs/rate-limits).
+- Flash-Lite 3.5 tiene entrada y salida sin cargo en Free Tier, sujetas a cuota. La tarifa Standard de pago publicada es USD 0,30/millón de tokens de entrada y USD 2,50/millón de salida, incluido razonamiento. No confundir tarifas Batch/Flex con Standard. [Precios oficiales](https://ai.google.dev/gemini-api/docs/pricing).
+- Free Tier indica que el contenido puede usarse para mejorar productos. Como los CV contienen datos personales, el benchmark inicial será sintético. [Condiciones por nivel](https://ai.google.dev/gemini-api/docs/pricing).
+
+Con `R` peticiones por CV y `I` tokens de entrada por CV, los techos teóricos son `RPM/R` CV/minuto, `TPM/I` CV/minuto y `RPD/R` CV/día. Tomar el mínimo y descontar matching, ofertas, reintentos y demás tráfico. No representan capacidad garantizada.
+
+## Cambios necesarios para una prueba justa
+
+1. Agregar un adaptador Gemini opcional, con modelo explícito y clave privada, conservando Groq como proveedor activo durante la comparación. No alcanza con sustituir el valor de la clave Groq.
+2. Mantener esquemas actuales de extracción y matching, normalizar errores y validar JSON con los contratos existentes. Gemini admite JSON Schema, pero ello no garantiza que los hechos sean correctos. [Salida estructurada](https://ai.google.dev/gemini-api/docs/structured-output).
+3. Configurar cuotas propias por proyecto/modelo, respetar esperas 429, limitar concurrencia y reintentos, y medir el tiempo de cola aparte de generación.
+4. Configurar razonamiento según el modelo: 2.5 Flash permite `thinking_budget=0`; Pro 2.5 no permite desactivarlo. Los modelos nuevos usan otras opciones. No trasladar automáticamente el presupuesto de 950 tokens: el razonamiento y un JSON completo pueden requerir más salida. [Razonamiento](https://ai.google.dev/gemini-api/docs/generate-content/thinking).
+5. No mezclar proveedores o versiones de prompt dentro de un trabajo en curso. Registrar proveedor, modelo, versión, intentos y consumo sin texto del CV ni claves.
+
+## Benchmark propuesto
+
+- Corpus sintético de perfiles administrativos, atención al cliente, ventas, oficios, salud y tecnología; versiones corta, mediana y extensa. Incluir evidencia de habilidades blandas sin depender de un perfil técnico ni forzar cantidades sin sustento.
+- Primera comparación: mismos documentos, prompts, tamaños de fragmento y validación. Medir tres repeticiones por caso, de forma secuencial y dentro de las cuotas. Mostrar mediana y máximo observado; aumentar muestra antes de publicar percentiles fiables.
+- Segunda comparación: fragmentos mayores o documento completo, presupuesto de salida suficiente y consolidación solo cuando se necesita. Separar esta optimización del efecto de cambiar proveedor.
+- Medir tiempo hasta perfil disponible en Django, cola, API, llamadas, entrada/salida/razonamiento, 429, reintentos, truncamientos y porcentaje de JSON válido.
+- Revisar precisión y cobertura de experiencia, educación y habilidades; falsos positivos, duplicados y calidad de las blandas. Elegir por tiempo y calidad conjuntamente.
+- Finalizar con E2E real de carga del CV, callback, perfil, compatibilidad y limpieza de datos sintéticos.
+
+## Resultado de la integración y la prueba real
+
+Configuración activa: `LLM_PROVIDER=gemini`, `GEMINI_MODEL=gemini-3.5-flash-lite`, pensamiento `minimal`, fragmentos de hasta 4.000 caracteres y hasta 8.192 tokens de salida por extracción. El máximo de salida es un techo, no consumo reservado facturado. El limitador local admite como máximo cuatro solicitudes por minuto y aplica 15 segundos entre peticiones, compartido por extracción y matching. Es una configuración conservadora local, no la cuota concedida por Google.
+
+Se agregaron un adaptador HTTP con errores seguros, espera 429 según RetryInfo, métricas de tokens y validación estricta; el namespace de compatibilidad se actualizó para no devolver resultados Groq de la caché. El script de arranque conserva el proveedor seleccionado. La versión de extracción cambió a `cv-extraction.v2-packets-soft.v3` en ambos repositorios.
+
+La primera muestra de cuatro llamadas con el prompt anterior consumió 17.381 tokens y respondió en 2,5–4,9 segundos por documento, pero tres salidas eran inválidas. Por ello no se consideró una integración funcional. Se ajustaron los límites del prompt y se agregaron referencias a citas literales que arma el servidor: el modelo elige IDs y el servidor los sustituye por texto original antes de validar. Los IDs inexistentes siguen siendo rechazados. Un fragmento inválido admite un único reintento; no se relaja la validación.
+
+Prueba posterior mediante el pipeline real, con extracción y consolidación, cuatro documentos sintéticos de 947–1.081 caracteres y profesiones diferentes:
+
+| Sector | Técnicas | Blandas | Perfil válido | Tiempo con pausas locales |
+|---|---:|---:|---|---:|
+| Administración | 3 | 7 | Sí | 25,642 s |
+| Comercio | 4 | 5 | Sí | 42,289 s |
+| Mantenimiento industrial | 4 | 5 | Sí | 41,898 s |
+| Tecnología | 8 | 9 | Sí | 43,461 s |
+
+Total: **ocho peticiones**, **19.953 tokens de entrada**, **5.535 de salida**, **25.488 tokens totales**, **153,290 segundos** incluyendo las pausas y el limitador local. Dos peticiones por CV; no hubo reintentos de validación ni errores 429 en esta ronda. Las cantidades de habilidades reflejan esta muestra, no objetivos forzados de extracción.
+
+Esto demuestra que esos cuatro documentos se procesaron correctamente con la cuenta y modelo probados. No garantiza capacidad ilimitada ni el mismo consumo para CVs largos. Un CV que necesita varios fragmentos agrega peticiones, instrucciones repetidas y consolidación mayor. Quedan pendientes las cifras RPM/TPM/RPD efectivas de AI Studio y una comparación controlada con Groq usando exactamente los mismos documentos y condiciones.
+
+Los perfiles y métricas sintéticos se conservaron en el directorio local de revisión; no se guardaron claves en informes ni código.
+
+## Investigación posterior: cómo reducir la latencia
+
+Esta sección describe propuestas; no se modificaron los servicios ni su configuración durante la investigación.
+
+La principal oportunidad identificada es omitir la llamada de consolidación cuando existe exactamente una hoja completada y no hay posibles duplicados. `cv_packets.py` llama siempre al modelo para proponer el plan, incluso con un solo fragmento. El ensamblador `cv_consolidation.py` puede recibir un plan determinista de referencias individuales y conservar hechos, evidencias, citas, niveles, origen y preferencias bajo las validaciones actuales. Hay que mantener el checkpoint completo y el modelo de la hoja. Una raíz puede haberse subdividido: la condición debe mirar las hojas finales, no la cantidad de raíces.
+
+No es una sustitución sin diferencias: actualmente el modelo también puede redactar título/resumen y proponer agrupaciones. El ensamblador no deduplica por sí solo. Un camino rápido debe detectar posibles duplicados por nombre/concepto y conservar la consolidación cuando haya ambigüedad; el título/resumen debe obtenerse en la extracción o quedar explícitamente opcional. La prueba offline sobre perfiles sintéticos ya consolidados confirma la reconstrucción del esquema, pero no prueba equivalencia con los fragmentos originales ni sustituye un E2E del cambio.
+
+En los cuatro CV medidos, consolidar consumió 5.573 de 25.488 tokens. Evitar esas cuatro llamadas llevaría el consumo calculado a 19.915 tokens si las extracciones permanecen iguales: **21,87 % menos tokens y 50 % menos peticiones**. Es ahorro calculado sobre la muestra existente, no un nuevo benchmark optimizado. También se evitaría una espera local de 15 segundos y una petición por CV, siempre que no haya otras esperas de cola/cuota. No se publica un tiempo final optimizado aún.
+
+Segunda prioridad: reemplazar la pausa fija después de cada respuesta por planificación según las cuotas reales de AI Studio, manteniendo coordinación Redis y RetryInfo para 429. El código actual reserva un intervalo al iniciar y vuelve a fijar el próximo turno después de la respuesta; se toma el máximo de ambas fechas, no se suman dos pausas de 15 segundos. La cuota RPM local de cuatro también puede producir espera aunque se reduzca la pausa. No basta con poner la pausa en cero: deben coordinarse RPM, TPM de entrada y RPD del proyecto. [Cuotas oficiales](https://ai.google.dev/gemini-api/docs/rate-limits).
+
+Tercera prioridad: acortar el prompt y el esquema enviado sin eliminar hechos, citas ni reglas de inferencia, y controlar calidad con el corpus multisectorial. Reutilizar conexiones HTTP es una mejora secundaria frente a las esperas actuales. El modelo ya usa Flash-Lite y pensamiento mínimo; bajar arbitrariamente el máximo de salida puede truncar JSON y aumentar reintentos. [Control de razonamiento y límites de salida](https://ai.google.dev/gemini-api/docs/generate-content/thinking).
+
+Para varias personas simultáneas, el worker `--pool=solo` también serializa trabajo. Separar entrega de callbacks de las tareas largas y añadir concurrencia acotada puede reducir espera de cola; no aumenta la cuota del proveedor. Primero deben separarse las métricas de cola, extracción de texto, espera local, petición, consolidación y callback.
+
+Streaming permite mostrar avances antes, pero el perfil final necesita JSON completo y validado; no garantiza que el resultado termine antes. [Streaming oficial](https://ai.google.dev/gemini-api/docs/generate-content/text-generation#streaming-responses). El caché de contexto puede reducir coste y tiempo hasta el primer token cuando hay aciertos, pero no sustituye eliminar llamadas innecesarias; deben verificarse soporte y condiciones del modelo/nivel. [Caché oficial](https://ai.google.dev/gemini-api/docs/caching). Batch puede tardar hasta 24 horas y Flex tiene objetivo de minutos; para una interacción web no son las primeras opciones. [Modalidades de inferencia](https://ai.google.dev/gemini-api/docs/optimization).
+
+Orden recomendado: instrumentar etapas; implementar el camino rápido de una hoja con fallback; comparar los mismos CV contra el comportamiento actual y verificar cobertura/calidad; ajustar cuotas locales con los valores reales de AI Studio; finalizar con E2E y prueba de concurrencia. No mezclar Groq y Gemini como primera optimización: añade coordinación sin quitar la consolidación ni asegurar menor latencia.
