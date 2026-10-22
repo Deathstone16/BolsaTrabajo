@@ -439,6 +439,11 @@ def status(path: Path) -> dict:
         "offer_title": pending.titulo if pending else None,
         "requirements": pending.requisitos_estructurados if pending else [],
         "soft_count": soft_count,
+        "soft_names": [item['name'] for item in skills if item.get('kind') == 'soft'],
+        "skill_names": [item['name'] for item in skills],
+        "education": content.get('education', []),
+        "profile_headline": content.get('headline'),
+        "profile_summary": content.get('summary'),
     }
 
 

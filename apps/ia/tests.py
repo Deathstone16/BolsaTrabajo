@@ -97,7 +97,7 @@ class AnalisisCVViewsTests(TestCase):
         self.assertEqual(response.status_code, 202)
         analysis = AnalisisCV.objects.get(postulante=self.postulante)
         job = TrabajoExtraccion.objects.get(analisis_cv=analysis)
-        self.assertEqual(job.prompt_version, 'cv-extraction.v2-packets-soft.v6')
+        self.assertEqual(job.prompt_version, 'cv-extraction.v2-packets-soft.v7')
         self.assertEqual(job.estado, TrabajoExtraccion.Estado.PENDIENTE)
         self.assertTrue(job.cv_snapshot.name)
         self.assertTrue(EventoSalida.objects.filter(payload__job_id=job.id).exists())
@@ -116,7 +116,7 @@ class AnalisisCVViewsTests(TestCase):
         self.assertTrue(created)
         self.assertNotEqual(new_analysis.pk, old_analysis.pk)
         self.assertNotEqual(new_job.pk, old_job.pk)
-        self.assertEqual(new_job.prompt_version, 'cv-extraction.v2-packets-soft.v6')
+        self.assertEqual(new_job.prompt_version, 'cv-extraction.v2-packets-soft.v7')
         self.assertEqual(AnalisisCV.objects.filter(version_cv=self.postulante.cv_version_actual).count(), 2)
 
         new_analysis.estado = AnalisisCV.Estado.COMPLETADO

@@ -44,7 +44,7 @@
         {# Los mensajes los renderiza nueva_ui/base.html, no hace falta repetirlos aca. #}
 
         {% if perfil_cv and perfil_cv.estado == 'ready' %}
-          <div class="panel mt-8 p-6">
+          <div class="panel mt-8 p-6" data-profile-skills>
             <div class="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p class="text-sm font-semibold text-[#26222E]">Perfil para compatibilidad</p>
@@ -62,6 +62,7 @@
               <a class="btn-ghost !py-2 text-sm" href="{% url 'ia:editar_perfil_cv' %}">Editar información</a>
             </div>
           </div>
+          {% include "ia/_education_courses.html" with education=perfil_cv.contenido.education credentials=perfil_cv.contenido.credentials only %}
         {% elif perfil_cv and perfil_cv.estado == 'processing' %}
           <div class="panel mt-8 p-6" role="status">
             <p class="text-sm font-semibold text-[#26222E]">Actualizando tu perfil para compatibilidad</p>

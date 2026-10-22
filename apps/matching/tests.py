@@ -132,7 +132,7 @@ class MatchingServiceTests(TestCase):
         self.assertEqual(EventoSalida.objects.count(), count)
 
     @patch('matching.services._save_cache')
-    def test_oferta_espera_click_aunque_haya_un_match_completado(self, _cache):
+    def test_oferta_recupera_match_completado_y_link_sin_otro_calculo(self, _cache):
         match, _ = get_or_create_match(self.postulante, self.oferta)
         match.estado = 'completed'
         match.match_percentage = 82
@@ -142,16 +142,14 @@ class MatchingServiceTests(TestCase):
         count = EventoSalida.objects.count()
         response = self.client.get(reverse('detalle_oferta', args=[self.oferta.pk]))
         elements = html_attributes_by_id(response)
-        self.assertEqual(elements['match-card']['data-request-id'], '')
-        self.assertEqual(elements['match-card']['data-status'], '')
+        self.assertEqual(elements['match-card']['data-request-id'], str(match.request_id))
+        self.assertEqual(elements['match-card']['data-status'], 'completed')
         self.assertNotIn('is-calculating', elements['match-card']['class'])
-        self.assertEqual(elements['match-progress']['data-value'], '')
-        self.assertContains(response, '>Sin calcular</span>')
-        self.assertNotContains(response, '>82%</span>')
-        self.assertIn('hidden', elements['match-details-action'])
-        self.assertEqual(elements['match-details-link']['href'], '#')
-        self.assertNotIn('hidden', elements['match-form'])
-        self.assertNotIn('disabled', elements['match-button'])
+        self.assertEqual(float(elements['match-progress']['data-value']), 82)
+        self.assertContains(response, '>82%</span>')
+        self.assertNotIn('hidden', elements['match-details-action'])
+        self.assertEqual(elements['match-details-link']['href'], reverse('matching:detalle', args=[match.request_id]))
+        self.assertIn('hidden', elements['match-form'])
         self.assertEqual(EventoSalida.objects.count(), count)
 
     @patch('matching.services._save_cache')
@@ -162,25 +160,26 @@ class MatchingServiceTests(TestCase):
         match.save()
         self.client.force_login(self.candidate_user)
         response = self.client.get(reverse('detalle_oferta', args=[self.oferta.pk]))
-        self.assertContains(response, '>Sin calcular</span>')
-        state = self.client.get(reverse('matching:estado', args=[match.request_id])).json()
-        self.assertEqual(state['status'], 'completed')
-        self.assertEqual(state['match_percentage'], 0)
+        elements = html_attributes_by_id(response)
+        self.assertEqual(float(elements['match-progress']['data-value']), 0)
+        self.assertNotIn('is-calculating', elements['match-card']['class'])
+        self.assertContains(response, '>0%</span>')
+        self.assertNotIn('hidden', elements['match-details-action'])
 
     @patch('matching.services._save_cache')
-    def test_match_pendiente_no_se_retoma_automaticamente_al_entrar(self, _cache):
+    def test_match_pendiente_se_recupera_con_espera_sin_porcentaje_ficticio(self, _cache):
         match, _ = get_or_create_match(self.postulante, self.oferta)
         self.client.force_login(self.candidate_user)
         count = EventoSalida.objects.count()
         response = self.client.get(reverse('detalle_oferta', args=[self.oferta.pk]))
         elements = html_attributes_by_id(response)
-        self.assertEqual(elements['match-card']['data-request-id'], '')
-        self.assertEqual(elements['match-card']['data-status'], '')
-        self.assertNotIn('is-calculating', elements['match-card']['class'])
+        self.assertEqual(elements['match-card']['data-request-id'], str(match.request_id))
+        self.assertEqual(elements['match-card']['data-status'], match.estado)
+        self.assertIn('is-calculating', elements['match-card']['class'])
         self.assertEqual(elements['match-progress']['data-value'], '')
-        self.assertContains(response, '>Sin calcular</span>')
+        self.assertContains(response, '>Calculando</span>')
         self.assertNotContains(response, '>0%</span>')
-        self.assertNotIn('disabled', elements['match-button'])
+        self.assertIn('disabled', elements['match-button'])
         self.assertEqual(EventoSalida.objects.count(), count)
 
     def test_sin_match_se_muestra_sin_calcular_y_no_un_cero(self):
