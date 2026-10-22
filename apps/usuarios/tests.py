@@ -58,6 +58,50 @@ class CuitValidatorTests(TestCase):
 
 
 class CVAndImageUploadValidationTests(SimpleTestCase):
+    @staticmethod
+    def _docx_with_external_relationship(relationship_type, target, *, macro=False):
+        from io import BytesIO
+        import zipfile
+        from xml.sax.saxutils import quoteattr
+
+        payload = BytesIO()
+        with zipfile.ZipFile(payload, 'w') as archive:
+            archive.writestr('[Content_Types].xml', '<Types/>')
+            archive.writestr('word/document.xml',
+                '<w:document xmlns:w="w"><w:body><w:p><w:r>'
+                '<w:t>Experiencia en ventas y administración.</w:t>'
+                '</w:r></w:p></w:body></w:document>')
+            archive.writestr('word/settings.xml',
+                '<w:settings xmlns:w="w" xmlns:r="r"><w:attachedTemplate r:id="rId1"/></w:settings>')
+            archive.writestr('word/_rels/settings.xml.rels',
+                '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+                f'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/{relationship_type}" '
+                f'TargetMode="External" Target={quoteattr(target)}/></Relationships>')
+            if macro:
+                archive.writestr('word/vbaProject.bin', b'macro')
+        return SimpleUploadedFile('cv.docx', payload.getvalue())
+
+    def test_docx_con_plantilla_remota_local_o_de_red_se_acepta_sin_modificarlo(self):
+        for target in ('https://example.invalid/cv.dotx', 'file:///C:/plantillas/cv.dotm', r'\\servidor\plantillas\cv.dotx'):
+            with self.subTest(target=target):
+                upload = self._docx_with_external_relationship('attachedTemplate', target)
+                original = upload.read()
+                self.assertEqual(validate_cv_upload(upload)[0], 'docx')
+                self.assertEqual(upload.tell(), 0)
+                self.assertEqual(upload.read(), original)
+
+    def test_docx_otros_recursos_externos_siguen_rechazados(self):
+        for relationship_type in ('image', 'oleObject', 'aFChunk'):
+            with self.subTest(relationship_type=relationship_type):
+                upload = self._docx_with_external_relationship(relationship_type, 'https://example.invalid/resource')
+                with self.assertRaisesMessage(ValidationError, 'recursos externos'):
+                    validate_cv_upload(upload)
+
+    def test_docx_plantilla_admitida_no_habilita_macros(self):
+        upload = self._docx_with_external_relationship('attachedTemplate', 'https://example.invalid/cv.dotx', macro=True)
+        with self.assertRaisesMessage(ValidationError, 'macros'):
+            validate_cv_upload(upload)
+
     @override_settings(CV_LEGACY_CONVERTER_IMAGE='')
     def test_txt_utf8_es_admitido_y_extension_falsa_se_rechaza(self):
         upload = SimpleUploadedFile('cv.txt', 'Experiencia: Python'.encode())

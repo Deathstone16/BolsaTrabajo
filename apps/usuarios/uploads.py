@@ -79,9 +79,11 @@ def _validate_office_zip(data, extension):
                     raise ValidationError('El documento está dañado o tiene una estructura inválida.')
                 for node in xml.iter():
                     if node.attrib.get('TargetMode', '').casefold() == 'external':
-                        # Hipervínculos son texto inerte: Word no los resuelve al abrir ni al analizar.
-                        if not node.attrib.get('Type', '').casefold().endswith('/hyperlink'):
-                            raise ValidationError('El documento contiene plantillas o referencias externas activas.')
+                        # El extractor solo lee XML dentro del archivo: no abre enlaces
+                        # ni resuelve la plantilla de Word (aunque apunte a una ruta local).
+                        relationship_type = node.attrib.get('Type', '').casefold()
+                        if not relationship_type.endswith(('/hyperlink', '/attachedtemplate')):
+                            raise ValidationError('El documento contiene objetos o recursos externos activos no admitidos.')
             if extension == 'odt':
                 if 'mimetype' not in names or archive.read('mimetype') != b'application/vnd.oasis.opendocument.text' or 'content.xml' not in names:
                     raise ValidationError('El archivo no tiene una estructura ODT válida.')

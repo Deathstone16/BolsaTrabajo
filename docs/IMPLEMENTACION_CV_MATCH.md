@@ -6,6 +6,8 @@ Este documento resume el comportamiento implementado en Django y la API para la 
 
 Los CV admitidos son PDF, DOCX, ODT y TXT. DOC y RTF dependen de que el conversor aislado esté habilitado en el despliegue. Las cargas tienen un límite de 5 MiB y se validan por contenido, estructura y límites de extracción; los archivos rechazados no sustituyen la versión vigente. El escaneo falla de forma cerrada si no puede completarse.
 
+Los DOCX pueden conservar hipervínculos y plantillas de Word vinculadas, incluso si la plantilla apunta a Internet, a un archivo local o a una carpeta de red. La validación y el análisis leen únicamente el texto XML incluido en el DOCX: no descargan ni abren esas referencias. Se mantienen los rechazos de macros, objetos activos, otros recursos externos, XML inválido y archivos que exceden los límites. Esta excepción corresponde a DOCX; no cambia el tratamiento de recursos externos en ODT ni el conversor aislado de DOC/RTF.
+
 Fotos de perfil, logos y banners se validan y normalizan según límites de tamaño y dimensiones. Se eliminan metadatos de las imágenes procesadas.
 
 Los archivos de CV se almacenan fuera de los medios públicos. Cada carga crea un `CVVersion` inmutable con hash, formato, tamaño y nombre original. `Postulante.cv_version_actual` apunta a la versión vigente. La descarga requiere autenticación y verifica que la versión pertenezca al postulante; no se genera una URL pública. El comando `migrar_cv_privados` traslada los archivos heredados conservando sus referencias y evita sobrescribir versiones existentes.

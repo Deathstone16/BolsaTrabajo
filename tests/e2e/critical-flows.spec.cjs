@@ -168,6 +168,38 @@ test('carga de CV, validación de formato y privacidad entre cuentas', async ({ 
   await snapshot(page, testInfo, 'cv-privado-y-rechazo-de-formato');
 });
 
+test('Word con plantilla externa se carga y conserva su descarga privada', async ({ page }, testInfo) => {
+  const document = execFileSync(python, ['-c', `
+import io, sys, zipfile
+from xml.sax.saxutils import escape
+buffer = io.BytesIO()
+with zipfile.ZipFile(buffer, 'w') as archive:
+    archive.writestr('[Content_Types].xml', '<Types/>')
+    archive.writestr('word/document.xml', '<w:document xmlns:w="w"><w:body><w:p><w:r><w:t>' + escape(sys.argv[1]) + '</w:t></w:r></w:p></w:body></w:document>')
+    archive.writestr('word/settings.xml', '<w:settings xmlns:w="w" xmlns:r="r"><w:attachedTemplate r:id="rId1"/></w:settings>')
+    archive.writestr('word/_rels/settings.xml.rels', '<Relationships><Relationship Id="rId1" Type="r/attachedTemplate" TargetMode="External" Target="https://example.invalid/cv-template.dotx"/></Relationships>')
+sys.stdout.buffer.write(buffer.getvalue())
+`, cvText], { cwd: root, timeout: 30_000 });
+  await login(page, 'candidate');
+  await page.goto('/usuarios/mi-perfil/');
+  const previousVersion = status().cv_version_id;
+  const uploadResponse = page.waitForResponse(response => response.url().endsWith('/usuarios/mi-perfil/') && response.request().method() === 'POST');
+  await page.locator('#cv-input').setInputFiles({
+    name: 'cv-e2e-con-plantilla.docx',
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    buffer: document,
+  });
+  expect((await uploadResponse).status()).toBe(200);
+  await expect.poll(() => status().cv_version_id).not.toBe(previousVersion);
+  const version = status().cv_version_id;
+  await expect(page.locator('#form-analizar-cv')).toHaveAttribute('data-version-cv-id', String(version));
+  const downloaded = await page.request.get(`/usuarios/cv/${version}/descargar/`);
+  expect(downloaded.status()).toBe(200);
+  expect(await downloaded.body()).toEqual(document);
+  expect(status().new_analysis_count).toBe(0);
+  await snapshot(page, testInfo, 'word-con-plantilla-admitido');
+});
+
 test('E2E real: analizar CV, mostrar habilidades, calcular match y bloquear el CV obsoleto', async ({ page }, testInfo) => {
   test.skip(process.env.E2E_REAL_IA !== '1', 'Requiere npm run test:e2e:live: consume cuota del proveedor.');
   test.setTimeout(1_300_000);
