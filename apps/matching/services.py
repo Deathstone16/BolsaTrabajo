@@ -112,6 +112,8 @@ def get_or_create_match(postulante, oferta) -> tuple[ResultadoCompatibilidad, bo
     if (not postulante.cv_version_actual_id or candidate.cv_version_id != postulante.cv_version_actual_id
             or candidate.schema_version != 'candidate-profile.v2'):
         raise ValueError('El perfil todavía no corresponde a la versión actual del CV.')
+    if oferta.requiere_revision_requisitos:
+        raise ValueError('La oferta necesita revisar sus requisitos antes de calcular compatibilidad.')
     if offer is None or offer.estado != EstadoPerfil.LISTO or not offer.contenido:
         raise ValueError('La oferta todavía está siendo analizada.')
     if offer.schema_version != 'job-offer.v2':

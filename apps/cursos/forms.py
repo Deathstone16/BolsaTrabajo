@@ -11,7 +11,7 @@ class CursoForm(forms.ModelForm):
     descripcion = DescripcionField()
     class Meta:
         model = Curso
-        fields = ['nombre', 'categoria', 'imagen', 'descripcion', 'duracion', 'horario', 'tipo', 'url_externa']
+        fields = ['nombre', 'categoria', 'imagen', 'descripcion', 'duracion', 'horario', 'tipo', 'habilidades', 'url_externa']
         labels = {
             'nombre': 'Nombre',
             'categoria': 'Categoria',
@@ -20,7 +20,11 @@ class CursoForm(forms.ModelForm):
             'duracion': 'Duracion',
             'horario': 'Horario',
             'tipo': 'Tipo',
+            'habilidades': 'Habilidades que desarrolla',
             'url_externa': 'URL externa',
+        }
+        help_texts = {
+            'habilidades': 'Seleccioná competencias que el curso desarrolla. Esto ayuda a recomendar opciones generales sin asumir contenidos no declarados.',
         }
         widgets = {
             'nombre': forms.TextInput(attrs={'class': INPUT_CLASS, 'placeholder': 'Ej. Python desde cero'}),
@@ -30,6 +34,7 @@ class CursoForm(forms.ModelForm):
             'duracion': forms.TextInput(attrs={'class': INPUT_CLASS, 'placeholder': 'Ej. 6 meses'}),
             'horario': forms.TextInput(attrs={'class': INPUT_CLASS, 'placeholder': 'Ej. Lunes y Miercoles 18:00 - 21:00'}),
             'tipo': forms.Select(attrs={'class': INPUT_CLASS}),
+            'habilidades': forms.SelectMultiple(attrs={'class': INPUT_CLASS, 'size': 8}),
             'url_externa': forms.URLInput(attrs={'class': INPUT_CLASS, 'placeholder': 'https://ien.edu.ar/cursos/...'}),
         }
 

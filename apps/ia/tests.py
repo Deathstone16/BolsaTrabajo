@@ -97,7 +97,7 @@ class AnalisisCVViewsTests(TestCase):
         self.assertEqual(response.status_code, 202)
         analysis = AnalisisCV.objects.get(postulante=self.postulante)
         job = TrabajoExtraccion.objects.get(analisis_cv=analysis)
-        self.assertEqual(job.prompt_version, 'cv-extraction.v2-packets-soft.v2')
+        self.assertEqual(job.prompt_version, 'cv-extraction.v2-packets-soft.v6')
         self.assertEqual(job.estado, TrabajoExtraccion.Estado.PENDIENTE)
         self.assertTrue(job.cv_snapshot.name)
         self.assertTrue(EventoSalida.objects.filter(payload__job_id=job.id).exists())
@@ -116,7 +116,7 @@ class AnalisisCVViewsTests(TestCase):
         self.assertTrue(created)
         self.assertNotEqual(new_analysis.pk, old_analysis.pk)
         self.assertNotEqual(new_job.pk, old_job.pk)
-        self.assertEqual(new_job.prompt_version, 'cv-extraction.v2-packets-soft.v2')
+        self.assertEqual(new_job.prompt_version, 'cv-extraction.v2-packets-soft.v6')
         self.assertEqual(AnalisisCV.objects.filter(version_cv=self.postulante.cv_version_actual).count(), 2)
 
         new_analysis.estado = AnalisisCV.Estado.COMPLETADO
@@ -449,8 +449,39 @@ class AnalisisCVViewsTests(TestCase):
         self.assertNotContains(profile_page, 'Inferida')
         self.assertNotContains(detail, 'Inferida a partir de las tareas descritas')
         self.assertNotContains(detail, 'Declarada en el CV')
-        self.assertContains(detail, 'Adapté la solución a las necesidades del cliente')
+        self.assertNotContains(detail, 'Ver evidencia del CV')
+        self.assertNotContains(detail, 'Adapté la solución a las necesidades del cliente')
+        self.assertContains(detail, 'Adaptó la solución a las necesidades del cliente')
 
+
+    def test_resultado_de_oficios_oculta_nivel_desconocido_y_traduce_niveles(self):
+        result = self._result()
+        result['skills'] = [
+            {'name': name, 'level': level, 'kind': 'technical', 'origin': 'declared'}
+            for name, level in (
+                ('Manipulación de alimentos', 'unknown'),
+                ('Control de inventario', 'beginner'),
+                ('Operación de maquinaria', 'intermediate'),
+                ('Seguridad e higiene', 'advanced'),
+                ('Mantenimiento industrial', 'expert'),
+            )
+        ]
+        analysis = AnalisisCV.objects.create(
+            postulante=self.postulante, estado=AnalisisCV.Estado.COMPLETADO,
+            version_cv=self.postulante.cv_version_actual, perfil_snapshot=result,
+        )
+
+        detail = self.client.get(reverse('ia:ver_resultado', args=[analysis.pk]))
+
+        self.assertEqual(detail.status_code, 200)
+        for name in (skill['name'] for skill in result['skills']):
+            self.assertContains(detail, name)
+        for label in ('Principiante', 'Intermedio', 'Avanzado', 'Experto'):
+            self.assertContains(detail, f'>{label}</span>', html=False)
+        self.assertNotContains(detail, 'unknown')
+        self.assertNotContains(detail, 'chip shrink-0"></span>')
+        analysis.refresh_from_db()
+        self.assertEqual(analysis.perfil_snapshot['skills'][0]['level'], 'unknown')
 
     def test_postulante_guarda_todas_las_habilidades_sin_perder_sugerencia_ia(self):
         analisis = AnalisisCV.objects.create(

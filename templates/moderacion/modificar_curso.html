@@ -31,6 +31,7 @@
   {% else %}
     {{ field }}
       {% if field.name == 'categoria' %}{% include 'cursos/_category_help.html' %}{% endif %}
+      {% if field.name == 'habilidades' and field.help_text %}<p class="text-xs text-muted-foreground">{{ field.help_text }}</p>{% endif %}
     {% if field.errors %}
       <p class="text-destructive text-xs">{{ field.errors }}</p>
     {% endif %}

@@ -3,6 +3,21 @@
 {% block title %}{{ oferta.titulo }} · IEN Empleo{% endblock %}
 {% block description %}{{ oferta.descripcion|truncatechars:150 }}{% endblock %}
 
+{% block extra_head %}
+<style>
+  #match-percentage { font-variant-numeric: tabular-nums; }
+  #match-card.is-calculating #match-progress {
+    stroke-dasharray: 20 80;
+    transform-origin: 60px 60px;
+    animation: match-spin 1.6s linear infinite;
+  }
+  @keyframes match-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    #match-card.is-calculating #match-progress { animation: none; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="bg-[#F8F3F0] pb-16">
 
@@ -105,38 +120,40 @@
 
       <div class="space-y-6">
         {% if not user.is_authenticated or user.postulante %}
-        <div class="panel p-6 text-center" id="match-card" data-config-hash="" data-request-id="" data-status="">
+        <div class="panel p-6 text-center" id="match-card" data-config-hash="{{ match_config_hash }}" data-request-id="" data-status="">
           <h3 class="font-mono text-xs uppercase tracking-widest text-[#6B645C]">Match inteligente</h3>
+          {% if oferta.requiere_revision_requisitos %}
+            <p id="match-requisitos-pendientes" class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950" role="status">La empresa debe actualizar los requisitos de esta oferta. La compatibilidad estará disponible después de esa revisión.</p>
+          {% endif %}
           {% if user.is_authenticated and user.postulante and not perfil_cv %}
             {% include 'ia/comparacion_historica.html' %}
           {% else %}
           <div class="relative mx-auto mt-6 h-36 w-36">
             <svg class="h-36 w-36 -rotate-90" viewBox="0 0 120 120" aria-hidden="true">
               <circle cx="60" cy="60" r="54" stroke="#F0E9E1" stroke-width="12" fill="none"></circle>
-              <circle id="match-progress" data-value="0" cx="60" cy="60" r="54" stroke="#512DA8" stroke-width="12" fill="none"
-                      stroke-dasharray="339.29" stroke-dashoffset="339.29" stroke-linecap="round"></circle>
+              <circle id="match-progress" data-value="" cx="60" cy="60" r="54" pathLength="100" stroke="#512DA8" stroke-width="12" fill="none"
+                      stroke-dasharray="0 100" stroke-linecap="round"></circle>
             </svg>
             <div class="absolute inset-0 flex flex-col items-center justify-center">
-              <span id="match-percentage" class="text-3xl font-bold text-[#26222E]">—</span>
+              <span id="match-percentage" class="text-sm font-bold text-[#26222E]">Sin calcular</span>
               <span class="font-mono text-[10px] uppercase tracking-widest text-[#6B645C]">match</span>
             </div>
           </div>
           <p id="match-message" class="mt-5 text-sm text-[#6B645C]" role="status" aria-live="polite">
             {% if not user.is_authenticated %}Iniciá sesión para calcular tu compatibilidad.
-            {% elif oferta.requiere_revision_requisitos %}La empresa debe revisar cuáles requisitos son obligatorios y cuáles deseables antes de habilitar la compatibilidad.
+            {% elif oferta.requiere_revision_requisitos %}Requisitos pendientes de actualización por la empresa.
             {% elif not perfil_cv or perfil_cv.estado != 'ready' %}Primero completá el análisis de tu perfil.
-            {% elif not perfil_oferta or perfil_oferta.estado != 'ready' %}Esta oferta está siendo analizada.
-            {% elif perfil_oferta.schema_version != 'job-offer.v2' %}Esta oferta necesita actualizar su análisis para habilitar la compatibilidad.
+            {% elif not perfil_oferta or perfil_oferta.estado != 'ready' or perfil_oferta.schema_version != 'job-offer.v2' %}Esta oferta está siendo analizada.
             {% else %}Compará tu perfil guardado con esta oferta.{% endif %}
           </p>
-          <p class="mt-3 text-xs text-[#6B645C]">El porcentaje compara tu perfil con los requisitos de la oferta. No representa una probabilidad de contratación.</p>
+          <p class="mt-3 text-xs text-[#6B645C]">El porcentaje compara tu perfil con los requisitos obligatorios y deseables de la oferta. No representa una probabilidad de contratación.</p>
           <div id="match-details-action" class="mt-5" hidden>
             <a id="match-details-link" class="btn-ien w-full" href="#">Ver detalles del match <span aria-hidden="true">→</span></a>
           </div>
-          {% if user.is_authenticated and perfil_cv and perfil_cv.estado == 'ready' and perfil_oferta and perfil_oferta.estado == 'ready' and perfil_oferta.schema_version == 'job-offer.v2' and not oferta.requiere_revision_requisitos %}
+          {% if user.is_authenticated and not oferta.requiere_revision_requisitos and perfil_cv and perfil_cv.estado == 'ready' and perfil_cv.schema_version == 'candidate-profile.v2' and perfil_oferta and perfil_oferta.estado == 'ready' and perfil_oferta.schema_version == 'job-offer.v2' %}
             <form id="match-form" method="post" action="{% url 'matching:calcular' oferta.pk %}" class="mt-5">
               {% csrf_token %}
-              <button id="match-button" class="btn-ien w-full" type="submit" >Calcular compatibilidad</button>
+              <button id="match-button" class="btn-ien w-full" type="submit">Calcular compatibilidad</button>
             </form>
           {% endif %}
           {% endif %}
@@ -191,115 +208,107 @@
     </div>
   </div>
 </section>
-<style>
-  #match-percentage { font-variant-numeric: tabular-nums; }
-  #match-card.is-calculating #match-progress {
-    stroke-dasharray: 65 274.29;
-    transform-origin: 60px 60px;
-    animation: match-spin 1.6s linear infinite;
-  }
-  #match-card.match-arrived #match-percentage { animation: match-settle .45s ease-out; }
-  @keyframes match-spin { to { transform: rotate(360deg); } }
-  @keyframes match-settle { 50% { transform: scale(1.08); } }
-  @media (prefers-reduced-motion: reduce) {
-    #match-card.is-calculating #match-progress, #match-card.match-arrived #match-percentage { animation: none; }
-  }
-</style>
 <script>
 (() => {
-  const form = document.getElementById('match-form');
-  if (!form) return;
-  const button = document.getElementById('match-button');
-  const message = document.getElementById('match-message');
+  const card = document.getElementById('match-card');
   const percentage = document.getElementById('match-percentage');
   const progress = document.getElementById('match-progress');
-  const card = document.getElementById('match-card');
+  if (!card || !percentage || !progress) return;
+  const form = document.getElementById('match-form');
+  const button = document.getElementById('match-button');
+  const message = document.getElementById('match-message');
+  const detailsAction = document.getElementById('match-details-action');
+  const detailsLink = document.getElementById('match-details-link');
   let pollTimer;
   let socket;
-  let animationFrame;
-  let displayedValue = 0;
-  let lastTarget = null;
   let activeRequestId = card.dataset.requestId || null;
   let activeConfigHash = card.dataset.configHash || '';
-  const circumference = 2 * Math.PI * 54;
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  function paint(value) {
-    displayedValue = value;
-    percentage.textContent = Math.round(value) + '%';
-    progress.style.strokeDashoffset = String(circumference * (1 - value / 100));
-  }
-  function animatePercentage(rawTarget) {
-    const target = Math.min(100, Math.max(0, Number(rawTarget)));
-    if (!Number.isFinite(target) || target === lastTarget) return;
-    lastTarget = target;
-    cancelAnimationFrame(animationFrame);
-    card.classList.remove('is-calculating', 'match-arrived');
-    if (reducedMotion.matches) { paint(target); return; }
-    const from = displayedValue;
-    const duration = 1400;
-    let started;
-    function tick(timestamp) {
-      if (started === undefined) started = timestamp;
-      const elapsed = Math.min(1, (timestamp - started) / duration);
-      const eased = 1 - Math.pow(1 - elapsed, 3);
-      paint(from + (target - from) * eased);
-      if (elapsed < 1) animationFrame = requestAnimationFrame(tick);
-      else { paint(target); card.classList.add('match-arrived'); }
-    }
-    animationFrame = requestAnimationFrame(tick);
-  }
+
   function stopWatching() {
     clearInterval(pollTimer);
     if (socket) { socket.close(); socket = null; }
   }
+  function setLabel(text, numeric = false) {
+    percentage.textContent = text;
+    percentage.classList.toggle('text-3xl', numeric);
+    percentage.classList.toggle('text-sm', !numeric);
+  }
+  function showCalculating(status) {
+    card.classList.add('is-calculating');
+    card.dataset.status = status;
+    progress.style.strokeDasharray = '';
+    setLabel('Calculando');
+    message.textContent = status === 'rate_limited' ? 'Esperando disponibilidad para calcular tu compatibilidad…' : 'Calculando compatibilidad…';
+    detailsAction.hidden = true;
+    if (button) button.disabled = true;
+  }
+  function showError(error) {
+    card.classList.remove('is-calculating');
+    card.dataset.status = 'error';
+    setLabel('Sin resultado');
+    progress.style.strokeDasharray = '0 100';
+    message.textContent = error || 'No se pudo calcular la compatibilidad. Podés reintentar.';
+    detailsAction.hidden = true;
+    if (form) form.hidden = false;
+    if (button) { button.disabled = false; button.textContent = 'Reintentar'; }
+    stopWatching();
+  }
   function render(data) {
     if (data.request_id && activeRequestId && data.request_id !== activeRequestId) return;
     if (data.scoring_config_hash && activeConfigHash && data.scoring_config_hash !== activeConfigHash) return;
+    if (card.dataset.status === 'completed' && data.status !== 'completed') return;
     if (data.status === 'completed') {
-      animatePercentage(data.match_percentage);
+      const value = data.match_percentage;
+      if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 100) return;
+      card.classList.remove('is-calculating');
+      card.dataset.status = 'completed';
+      progress.dataset.value = String(value);
+      progress.style.strokeDasharray = `${value} 100`;
+      setLabel(Math.round(value) + '%', true);
       message.textContent = 'Compatibilidad calculada según tu perfil y esta oferta.';
-      button.disabled = false;
-      form.hidden = true;
+      if (form) form.hidden = true;
+      detailsLink.href = `{% url 'matching:detalle' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', data.request_id);
+      detailsAction.hidden = false;
       stopWatching();
-      document.getElementById('match-details-link').href = `{% url 'matching:detalle' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', data.request_id);
-      document.getElementById('match-details-action').hidden = false;
+    } else if (data.status === 'error') {
+      showError(data.error);
+    } else {
+      showCalculating(data.status);
     }
-    else if (data.status === 'error') { card.classList.remove('is-calculating'); message.textContent = data.error || 'No se pudo calcular la compatibilidad.'; button.disabled = false; button.textContent = 'Reintentar'; stopWatching(); }
-    else { card.classList.add('is-calculating'); percentage.textContent = '…'; message.textContent = data.status === 'rate_limited' ? 'Esperando disponibilidad para calcular tu compatibilidad…' : 'Calculando compatibilidad…'; button.disabled = true; }
   }
   function watch(requestId) {
     stopWatching();
     const stateUrl = `{% url 'matching:estado' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', requestId);
-    const poll = () => fetch(stateUrl).then(r => r.ok ? r.json() : null).then(data => data && render(data)).catch(() => { message.textContent = 'Reconectando con tu resultado…'; });
+    const poll = () => fetch(stateUrl).then(r => r.ok ? r.json() : null).then(data => data && render(data)).catch(() => {
+      if (card.dataset.status !== 'completed' && card.dataset.status !== 'error') message.textContent = 'Reconectando con tu resultado…';
+    });
     pollTimer = setInterval(poll, 3000);
     const scheme = location.protocol === 'https:' ? 'wss' : 'ws';
     try {
       socket = new WebSocket(`${scheme}://${location.host}/ws/matches/${requestId}/`);
-      socket.onmessage = event => render(JSON.parse(event.data));
-      socket.onclose = () => {};
+      socket.onmessage = event => { try { render(JSON.parse(event.data)); } catch (_) {} };
     } catch (_) {}
     poll();
   }
-  form.addEventListener('submit', event => {
+  if (form) form.addEventListener('submit', event => {
     event.preventDefault();
-    button.disabled = true;
-    cancelAnimationFrame(animationFrame);
-    lastTarget = null;
-    paint(0);
-    card.classList.remove('match-arrived');
-    card.classList.add('is-calculating');
+    showCalculating('pending');
     fetch(form.action, {method: 'POST', headers: {'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value, 'X-Requested-With': 'XMLHttpRequest'}})
       .then(response => response.json()).then(data => {
-        if (!data.success) { card.classList.remove('is-calculating'); message.textContent = data.mensaje || 'No se pudo iniciar el cálculo.'; button.disabled = false; return; }
+        if (!data.success) { showError(data.mensaje); return; }
         activeRequestId = data.request_id;
         activeConfigHash = data.scoring_config_hash || '';
         card.dataset.requestId = activeRequestId;
         card.dataset.configHash = activeConfigHash;
         render(data);
         if (data.status !== 'completed' && data.status !== 'error') watch(data.request_id);
-      }).catch(() => { card.classList.remove('is-calculating'); message.textContent = 'No se pudo iniciar el cálculo.'; button.disabled = false; });
+      }).catch(() => showError('No se pudo iniciar el cálculo.'));
   });
-  window.addEventListener('pagehide', () => { stopWatching(); cancelAnimationFrame(animationFrame); });
+  // Only resume a request explicitly started in this page, including a bfcache return.
+  window.addEventListener('pageshow', event => {
+    if (event.persisted && activeRequestId && card.dataset.status !== 'completed' && card.dataset.status !== 'error') watch(activeRequestId);
+  });
+  window.addEventListener('pagehide', stopWatching);
 })();
 </script>
 {% endblock %}

@@ -42,6 +42,14 @@
   .match-badge.not_met { background: #FBE9E9; color: #9C3535; }
   .match-badge.unknown { background: #F0ECE7; color: #6B645C; }
   .match-footnote { margin-top: 32px; padding: 24px; color: #6B645C; font-size: 12px; line-height: 1.8; }
+  .match-courses { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  .course-recommendation { padding: 24px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .course-recommendation h3 { font-size: 18px; font-weight: 600; overflow-wrap: anywhere; }
+  .course-recommendation p, .course-recommendation li { color: #6B645C; font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
+  .course-recommendation ul { display: grid; gap: 8px; }
+  .course-recommendation .btn-ien { margin-top: auto; }
+  .course-recommendation .match-badge { align-self: flex-start; }
+  @media (max-width: 640px) { .match-courses { grid-template-columns: 1fr; } }
   @media (max-width: 760px) { .match-overview { grid-template-columns: 1fr; } .match-dimensions { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 480px) { .match-page { padding: 28px 16px 48px; } .match-dimensions { grid-template-columns: 1fr; } .match-requirement header { flex-direction: column; gap: 10px; } }
 </style>
@@ -103,6 +111,39 @@
     </div>
   </section>
   {% endfor %}
+
+  {% if course_recommendations.has_gaps %}
+  <section id="course-recommendations" class="match-section" aria-labelledby="course-recommendations-title">
+    <h2 id="course-recommendations-title">Cursos para reforzar tu perfil</h2>
+    <p>Opciones del catálogo para los requisitos que podés reforzar en esta evaluación. Para cada requisito se priorizan los cursos más específicos.</p>
+    {% if course_recommendations.courses %}
+    <div class="match-courses">
+      {% for recommendation in course_recommendations.courses %}
+      <article class="panel course-recommendation" data-course-id="{{ recommendation.course.pk }}">
+        <span class="match-badge">{% if recommendation.match_type == 'related' %}Opción general del área{% else %}Relacionado con el requisito{% endif %}</span>
+        <h3>{{ recommendation.course.nombre }}</h3>
+        <p>{{ recommendation.reason }}</p>
+        <ul>
+          {% for gap in recommendation.gaps %}
+          <li><strong>{{ gap.name }}</strong> · {% if gap.status == 'unknown' %}Sin información suficiente en el CV{% elif gap.status == 'partial' %}Coincidencia parcial{% else %}Requisito por reforzar{% endif %}</li>
+          {% endfor %}
+        </ul>
+        <p>{{ recommendation.course.categoria.nombre }} · {{ recommendation.course.get_tipo_display }}{% if recommendation.course.duracion %} · {{ recommendation.course.duracion }}{% endif %}</p>
+        <a href="{% url 'cursos:detalle' recommendation.course.pk %}" class="btn-ien">Ver curso: {{ recommendation.course.nombre }} <span aria-hidden="true">→</span></a>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="panel match-summary">
+      {% if course_recommendations.no_catalog %}<p>Todavía no hay cursos activos en el catálogo.</p>{% else %}<p>No encontramos cursos del catálogo relacionados con estos requisitos.</p>{% endif %}
+      <a href="{% url 'cursos:listado' %}" class="btn-ghost mt-4">Explorar cursos</a>
+    </div>
+    {% endif %}
+    {% for gap in course_recommendations.gaps %}
+      {% if not gap.courses %}<p class="match-empty">{{ gap.name }}: sin un curso relacionado disponible por el momento.</p>{% endif %}
+    {% endfor %}
+  </section>
+  {% endif %}
 
   <aside class="panel match-footnote">
     <strong>Cómo interpretar este resultado</strong><br>

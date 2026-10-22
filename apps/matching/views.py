@@ -8,6 +8,7 @@ from ofertas.models import Oferta
 
 from .models import ResultadoCompatibilidad
 from .services import get_or_create_match, status_payload
+from .course_recommendations import recommend_courses_for_match
 
 
 @login_required
@@ -35,10 +36,10 @@ def estado_compatibilidad(request, request_id):
 @require_GET
 def detalle_compatibilidad(request, request_id):
     match = get_object_or_404(
-        ResultadoCompatibilidad.objects.select_related('oferta'),
+        ResultadoCompatibilidad.objects.select_related('oferta__categoria'),
         request_id=request_id, postulante=request.user.postulante,
     )
-    result = match.resultado if match.estado == 'completed' else {}
+    result = (match.resultado or {}) if match.estado == 'completed' else {}
     dimensions = {
         'technical_skills': 'Competencias técnicas', 'soft_skills': 'Habilidades blandas',
         'experience': 'Experiencia', 'education': 'Educación', 'languages': 'Idiomas',
@@ -61,5 +62,6 @@ def detalle_compatibilidad(request, request_id):
     return render(request, 'matching/detalle.html', {
         'vista_activa': 'buscar', 'match': match, 'result': result,
         'groups': groups, 'breakdown': breakdown,
+        'course_recommendations': recommend_courses_for_match(match),
         'mandatory_label': mandatory_labels.get(result.get('mandatory_status'), 'Sin requisitos obligatorios'),
     })

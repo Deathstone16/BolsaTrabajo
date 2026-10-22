@@ -34,6 +34,12 @@ class Curso(models.Model):
     tipo = models.CharField(max_length=20,choices=TIPO_CHOICES,default=PRESENCIAL)
     url_externa=models.URLField(blank=True,null=True)
     activo = models.BooleanField(default=True)
+    habilidades = models.ManyToManyField(
+        'categorias.Habilidad',
+        blank=True,
+        related_name='cursos',
+        help_text='Competencias que el curso declara desarrollar.',
+    )
 
     def __str__(self):
         return self.nombre

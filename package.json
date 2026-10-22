@@ -1,0 +1,13 @@
+{
+  "name": "ien-trabajo-tests",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test:js": "node --test static/js/tests/*.test.js",
+    "test:e2e": "node scripts/run_e2e.cjs",
+    "test:e2e:live": "node scripts/run_e2e.cjs --live-ai"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}
