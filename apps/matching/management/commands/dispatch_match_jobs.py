@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from datetime import timedelta
 
 from django.conf import settings
@@ -15,6 +16,9 @@ from websockets.sync.client import connect
 from ia.models import EventoSalida
 from matching.models import ResultadoCompatibilidad
 from matching.services import complete_match, match_request_payload, update_match_status
+
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -63,7 +67,12 @@ class Command(BaseCommand):
                     event.refresh_from_db(fields=['estado'])
                     if event.estado == EventoSalida.Estado.ENVIANDO:
                         event.save(update_fields=['actualizado_en'])
-                    status = message.get('status')
+                    # The initial acknowledgment may report the *job's* current
+                    # status as completed, but it never carries the result.
+                    # Route by event type so the following match.completed
+                    # message is the one we publish.
+                    event_type = message.get('type', '')
+                    status = event_type.removeprefix('match.') if event_type.startswith('match.') else message.get('status')
                     if status in {'accepted', 'processing', 'rate_limited'}:
                         update_match_status(str(match.request_id), status)
                         continue
@@ -80,6 +89,7 @@ class Command(BaseCommand):
                         event.save(update_fields=['estado', 'error', 'actualizado_en'])
                         return
         except Exception:
+            logger.exception('Falló la entrega del match %s.', match.request_id)
             event.estado = EventoSalida.Estado.PENDIENTE
             event.error = 'No se pudo entregar el match al microservicio.'
             event.proximo_intento_en = timezone.now() + timedelta(seconds=min(300, 2 ** min(event.intentos, 8)))

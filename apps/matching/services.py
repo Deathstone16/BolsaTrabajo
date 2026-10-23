@@ -137,12 +137,12 @@ def get_or_create_match(postulante, oferta) -> tuple[ResultadoCompatibilidad, bo
         'offer_version': offer.version,
         'candidate': candidate.source_hash,
         'offer': offer.source_hash,
-        'rubric': 'match-rubric.v2',
+        'rubric': 'match-rubric.v3-points',
         'scoring_config_version': config.version,
         'scoring_config_hash': config_digest,
         'evaluation_date': evaluation_date.isoformat(),
         'schema': 'match-result.v2',
-        'prompt': 'match-groq.v2',
+        'prompt': 'match-groq.v3-evidence',
         'provider_model_config': settings.MATCH_MODEL_VERSION,
         'model': 'provider-managed',
     })
@@ -163,7 +163,8 @@ def get_or_create_match(postulante, oferta) -> tuple[ResultadoCompatibilidad, bo
             'configuracion': config,
             'scoring_config_hash': config_digest,
             'scoring_weights': config_data['weights'],
-            'rubric_version': 'match-rubric.v2',
+            'rubric_version': 'match-rubric.v3-points',
+            'matcher_prompt_version': 'match-groq.v3-evidence',
             'evaluation_date': evaluation_date,
         },
     )
@@ -250,6 +251,18 @@ def complete_match(request_id: str, result: dict) -> ResultadoCompatibilidad:
             raise ValueError('La clasificación del requisito no coincide con la oferta guardada.')
     if seen != set(requirements):
         raise ValueError('El resultado no evaluó todos los requisitos guardados de la oferta.')
+    if match.rubric_version == 'match-rubric.v3-points':
+        rows = validated['assessments']
+        if any(item.get('points_awarded') is None or item.get('points_possible') is None for item in rows):
+            raise ValueError('El resultado no incluye los puntos de cada requisito.')
+        earned = sum((Decimal(str(item['points_awarded'])) for item in rows), Decimal('0'))
+        possible = sum((Decimal(str(item['points_possible'])) for item in rows), Decimal('0'))
+        if abs(possible - Decimal('100')) > Decimal('0.02') or abs(earned - Decimal(str(validated['match_percentage']))) > Decimal('0.02'):
+            raise ValueError('La suma de puntos no coincide con el porcentaje del match.')
+        for item in rows:
+            expected_points = Decimal(str(item['points_possible'])) * Decimal(str(item['score']))
+            if abs(Decimal(str(item['points_awarded'])) - expected_points) > Decimal('0.02'):
+                raise ValueError('Los puntos de un requisito no coinciden con su evaluación.')
     mandatory = [item for item in validated['assessments'] if item['mandatory']]
     if mandatory:
         expected_status = (
