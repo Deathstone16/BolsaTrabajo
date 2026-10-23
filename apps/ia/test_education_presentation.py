@@ -1,11 +1,12 @@
 from html.parser import HTMLParser
 
 from django.contrib.auth import get_user_model
+from django.template import Context, Template
 from django.test import TestCase
 from django.urls import reverse
 
 from ia.models import AnalisisCV, CVVersion, EstadoPerfil, PerfilCV
-from ia.templatetags.education_presentation import education_title
+from ia.templatetags.education_presentation import education_status, education_title
 from usuarios.models import Postulante
 
 
@@ -41,6 +42,20 @@ class SectionTextParser(HTMLParser):
 
 
 class EducationPresentationTests(TestCase):
+    def test_legacy_entities_render_as_text_without_enabling_html(self):
+        output = Template('{% load education_presentation %}{{ value|human_text }}').render(
+            Context({'value': 'Comunicaci&oacute;n &lt;script&gt;alert(1)&lt;/script&gt;'}))
+        self.assertIn('Comunicación', output)
+        self.assertIn('&lt;script&gt;', output)
+        self.assertNotIn('<script>', output)
+
+    def test_cursado_licenciatura_does_not_claim_a_degree(self):
+        study = {'level': 'bachelor', 'field': 'Lic. en Comunicación social',
+                 'completed': None, 'completion_status': 'unknown',
+                 'source_quotes': ['Lic. en Comunicación social', 'cursado 2016-2018 UNNE']}
+        self.assertEqual(education_title(study), 'Licenciatura en Comunicación social')
+        self.assertEqual(education_status(study), 'Cursado; título no informado')
+
     def setUp(self):
         user_model = get_user_model()
         self.user = user_model.objects.create_user(

@@ -26,7 +26,7 @@ from .models import (
     VersionPerfilOferta,
 )
 
-CV_PROMPT_VERSION = 'cv-extraction.v2-packets-soft.v8'
+CV_PROMPT_VERSION = 'cv-extraction.v2-packets-soft.v11-courses'
 OFFER_PROMPT_VERSION = 'offer-extraction.v2'
 PROFILE_NORMALIZATION_PROMPT_VERSION = 'profile-normalization.v2'
 

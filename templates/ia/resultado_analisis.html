@@ -1,4 +1,5 @@
 {% extends 'nueva_ui/base.html' %}
+{% load education_presentation %}
 
 {% block title %}Resultado del análisis de CV · IEN Empleo{% endblock %}
 
@@ -29,7 +30,7 @@
               </div>
               <h2 class="text-xl font-bold text-[#26222E]">Resumen profesional</h2>
             </div>
-            <p class="mt-4 whitespace-pre-line leading-relaxed text-[#6B645C]">{% if perfil %}{{ perfil.contenido.summary }}{% else %}{{ analisis.respuesta.result.resumen_ejecutivo }}{% endif %}</p>
+            <p class="mt-4 whitespace-pre-line leading-relaxed text-[#6B645C]">{% if perfil %}{{ perfil.contenido.summary|human_text }}{% else %}{{ analisis.respuesta.result.resumen_ejecutivo|human_text }}{% endif %}</p>
           </div>
 
           <div class="panel mt-6 p-8" data-profile-skills>
@@ -45,8 +46,8 @@
               {% if perfil %}
                 {% for habilidad in habilidades_duras %}
                   <article class="rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#F8F3F0] p-5">
-                    <div class="flex items-start justify-between gap-3"><h4 class="font-semibold text-[#26222E]">{{ habilidad.name }}</h4>{% include 'ia/_nivel_habilidad.html' with nivel=habilidad.level only %}</div>
-                    {% if habilidad.evidence %}<p class="mt-3 text-sm leading-relaxed text-[#6B645C]">{{ habilidad.evidence|join:", " }}</p>{% endif %}
+                    <div class="flex items-start justify-between gap-3"><h4 class="font-semibold text-[#26222E]">{{ habilidad.name|human_text }}</h4>{% include 'ia/_nivel_habilidad.html' with nivel=habilidad.level only %}</div>
+                    {% if habilidad.evidence %}<p class="mt-3 text-sm leading-relaxed text-[#6B645C]">{% for evidence in habilidad.evidence %}{{ evidence|human_text }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}
                   </article>
                 {% empty %}<p class="text-[#6B645C]">No se detectaron habilidades técnicas.</p>{% endfor %}
               {% else %}
@@ -68,8 +69,8 @@
               <div class="mt-3 grid gap-4 md:grid-cols-2">
                 {% for habilidad in habilidades_blandas %}
                   <article class="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
-                    <h4 class="font-semibold text-emerald-900">{{ habilidad.name }}</h4>
-                    {% if habilidad.evidence %}<p class="mt-3 text-sm leading-relaxed text-emerald-900/80">{{ habilidad.evidence|join:", " }}</p>{% endif %}
+                    <h4 class="font-semibold text-emerald-900">{{ habilidad.name|human_text }}</h4>
+                    {% if habilidad.evidence %}<p class="mt-3 text-sm leading-relaxed text-emerald-900/80">{% for evidence in habilidad.evidence %}{{ evidence|human_text }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}
                   </article>
                 {% empty %}<p class="text-sm text-[#6B645C]">No se detectaron habilidades blandas respaldadas por el CV.</p>{% endfor %}
               </div>

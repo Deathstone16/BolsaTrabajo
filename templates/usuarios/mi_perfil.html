@@ -1,4 +1,5 @@
 {% extends 'nueva_ui/base.html' %}
+{% load education_presentation %}
 {% load static %}
 
 {% block title %}Mi perfil profesional · IEN Empleo{% endblock %}
@@ -49,12 +50,12 @@
               <div>
                 <p class="text-sm font-semibold text-[#26222E]">Perfil para compatibilidad</p>
                 <p class="mt-1 text-sm text-[#6B645C]">Versión {{ perfil_cv.version }} · actualizado {{ perfil_cv.actualizado_en|date:"d/m/Y H:i" }}</p>
-                {% if perfil_cv.contenido.summary %}<p class="mt-3 max-w-2xl text-sm text-[#6B645C]">{{ perfil_cv.contenido.summary }}</p>{% endif %}
+                {% if perfil_cv.contenido.summary %}<p class="mt-3 max-w-2xl text-sm text-[#6B645C]">{{ perfil_cv.contenido.summary|human_text }}</p>{% endif %}
                 <div class="mt-5" id="habilidades-blandas-perfil">
                   <p class="text-sm font-semibold text-emerald-700">Habilidades blandas detectadas</p>
                   <div class="mt-2 flex flex-wrap gap-2">
                     {% for habilidad in habilidades_blandas %}
-                      <span class="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">{{ habilidad.name }}</span>
+                      <span class="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">{{ habilidad.name|human_text }}</span>
                     {% empty %}<p class="text-sm text-[#6B645C]">Todavía no se detectaron habilidades blandas respaldadas por el CV.</p>{% endfor %}
                   </div>
                 </div>
