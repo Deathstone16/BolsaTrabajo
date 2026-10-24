@@ -1,0 +1,18 @@
+[Unit]
+Description=IEN Django CV extraction outbox dispatcher
+After=network-online.target postgresql.service redis-server.service ien-django.service ien-api.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ienapp
+Group=ienapp
+WorkingDirectory=/srv/ien/BolsaTrabajo
+ExecStart=/srv/ien/BolsaTrabajo/.venv/bin/python -u manage.py run_integration_dispatcher --kind extraction
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

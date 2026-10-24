@@ -1,0 +1,18 @@
+[Unit]
+Description=IEN CV and match Celery worker
+After=network-online.target redis-server.service ien-api.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ienapp
+Group=ienapp
+WorkingDirectory=/srv/ien/ia_api/backend
+ExecStart=/srv/ien/ia_api/backend/.venv/bin/celery -A app.core.celery_app.celery_app worker --loglevel=INFO --concurrency=1 --prefetch-multiplier=1
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,18 @@
+[Unit]
+Description=IEN CV FastAPI
+After=network-online.target redis-server.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ienapp
+Group=ienapp
+WorkingDirectory=/srv/ien/ia_api/backend
+ExecStart=/srv/ien/ia_api/backend/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8001
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

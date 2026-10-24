@@ -326,8 +326,9 @@ def scan_cv_upload(upload):
     if not getattr(settings, 'CV_SCAN_ENABLED', False):
         return
     command = getattr(settings, 'CV_SCAN_COMMAND', '')
+    backend = getattr(settings, 'CV_SCAN_BACKEND', 'defender').strip().lower()
     timeout = getattr(settings, 'CV_SCAN_TIMEOUT_SECONDS', 30)
-    if not command:
+    if not command or backend not in {'defender', 'clamav'}:
         raise ValidationError('El escáner de archivos no está configurado; el CV no se guardó.')
     root = Path(settings.BASE_DIR) / 'private_uploads' / 'quarantine'
     root.mkdir(parents=True, exist_ok=True)
@@ -338,8 +339,12 @@ def scan_cv_upload(upload):
             upload.seek(0)
             for chunk in upload.chunks():
                 handle.write(chunk)
+        arguments = (
+            [command, '--no-summary', str(temp_path)] if backend == 'clamav'
+            else [command, '-Scan', '-ScanType', '3', '-File', str(temp_path), '-DisableRemediation']
+        )
         completed = subprocess.run(
-            [command, '-Scan', '-ScanType', '3', '-File', str(temp_path), '-DisableRemediation'],
+            arguments,
             capture_output=True,
             timeout=timeout,
             check=False,

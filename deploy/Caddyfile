@@ -1,0 +1,29 @@
+# Cloudflare Tunnel apunta a http://127.0.0.1:8080. No publicar este puerto.
+:8080 {
+    bind 127.0.0.1
+
+    handle_path /static/* {
+        root * /srv/ien/BolsaTrabajo/staticfiles
+        file_server
+    }
+    handle_path /media/cursos/* {
+        root * /srv/ien/BolsaTrabajo/media/cursos
+        file_server
+    }
+    handle_path /media/empresas/* {
+        root * /srv/ien/BolsaTrabajo/media/empresas
+        file_server
+    }
+    handle_path /media/postulantes/fotos/* {
+        root * /srv/ien/BolsaTrabajo/media/postulantes/fotos
+        file_server
+    }
+    handle /media/* {
+        respond 404
+    }
+    handle {
+        reverse_proxy 127.0.0.1:8000 {
+            header_up X-Forwarded-Proto https
+        }
+    }
+}

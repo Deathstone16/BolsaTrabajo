@@ -104,6 +104,14 @@ class DatabaseSettingsTests(unittest.TestCase):
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn('DB_SSLMODE debe exigir TLS', result.stderr)
 
+    def test_production_accepts_local_postgresql_socket(self):
+        result = self.run_settings(
+            DEBUG='false', DB_ENGINE='postgresql', DB_NAME='ien',
+            DB_USER='ien', DB_PASSWORD='test-password', DB_HOST='/var/run/postgresql',
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)['sslmode'], 'disable')
+
     def test_postgresql_rejects_unknown_sslmode(self):
         result = self.run_settings(
             DB_ENGINE='postgresql', DB_NAME='ien', DB_USER='ien',
