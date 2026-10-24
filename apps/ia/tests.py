@@ -102,12 +102,12 @@ class AnalisisCVViewsTests(TestCase):
         self.assertTrue(job.cv_snapshot.name)
         self.assertTrue(EventoSalida.objects.filter(payload__job_id=job.id).exists())
 
-    def test_cv_completado_con_prompt_previo_no_se_reutiliza_en_v2_packets(self):
+    def test_cv_completado_con_prompt_previo_no_se_reutiliza_en_educacion(self):
         old_analysis, old_job, _ = request_cv_extraction(self.postulante)
         old_analysis.estado = AnalisisCV.Estado.COMPLETADO
         old_analysis.save(update_fields=['estado'])
-        old_job.prompt_version = 'cv-extraction.v2-blocks-refs'
-        old_job.clave_idempotencia = f'candidate-cv:{self.postulante.cv_version_actual_id}:{self.postulante.cv_version_actual.sha256}:cv-extraction.v2-blocks-refs'
+        old_job.prompt_version = 'cv-extraction.v2-packets-soft.v11-courses'
+        old_job.clave_idempotencia = f'candidate-cv:{self.postulante.cv_version_actual_id}:{self.postulante.cv_version_actual.sha256}:cv-extraction.v2-packets-soft.v11-courses'
         old_job.estado = TrabajoExtraccion.Estado.COMPLETADO
         old_job.save(update_fields=['prompt_version', 'clave_idempotencia', 'estado'])
 
