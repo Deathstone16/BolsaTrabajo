@@ -90,6 +90,8 @@ def education_title(item):
     field = str(item.get("field") or "").strip()
     if _course_study(item) and field:
         return field
+    if level == 'other' and field:
+        return field
     if level == 'bachelor' and field.casefold().startswith('lic. en '):
         return 'Licenciatura en ' + field[8:]
     title = "Grado universitario" if level == "bachelor" else education_level(level)

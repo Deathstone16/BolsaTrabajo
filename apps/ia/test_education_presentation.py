@@ -42,6 +42,9 @@ class SectionTextParser(HTMLParser):
 
 
 class EducationPresentationTests(TestCase):
+    def test_professional_training_uses_its_own_name(self):
+        self.assertEqual(education_title({'level': 'other', 'field': 'Piloto comercial'}), 'Piloto comercial')
+
     def test_legacy_entities_render_as_text_without_enabling_html(self):
         output = Template('{% load education_presentation %}{{ value|human_text }}').render(
             Context({'value': 'Comunicaci&oacute;n &lt;script&gt;alert(1)&lt;/script&gt;'}))
