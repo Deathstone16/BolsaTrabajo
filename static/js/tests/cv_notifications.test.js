@@ -14,7 +14,7 @@ function setup() {
   const storage = new Map();
   const config = { dataset: {
     token: 'signed-token', analysisId: '31',
-    statusUrl: '/ia/analisis/0/estado/', profileUrl: '/perfil/#cv-analysis',
+    statusUrl: '/ia/analisis/0/estado/', profileUrl: '/ia/perfil-profesional/',
   } };
   const badge = { classList: {
     hidden: true,
@@ -59,7 +59,8 @@ test('WebSocket muestra toast con enlace y badge al finalizar', () => {
   socket.onopen();
   socket.onmessage({ data: JSON.stringify({ type: 'cv.analyzed', payload: { analysis_id: 31, version_cv_id: 1, es_version_actual: true, status: 'completado' } }) });
   assert.equal(state.body.children.length, 1);
-  assert.equal(state.body.children[0].children[0].href, '/perfil/#cv-analysis');
+  assert.equal(state.body.children[0].children[0].href, '/ia/perfil-profesional/');
+  assert.equal(state.body.children[0].children[0].textContent, 'Ver mi perfil profesional');
   assert.match(state.body.children[0].textContent, /Análisis listo/);
   assert.equal(state.badge.classList.hidden, false);
   assert.equal(state.storage.get('ien-cv-analysis-ready'), '31');
