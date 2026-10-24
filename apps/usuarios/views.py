@@ -206,6 +206,8 @@ def mi_perfil(request):
     if perfil_cv and perfil_cv.cv_version_id != postulante.cv_version_actual_id:
         perfil_cv = None
     _, habilidades_blandas = split_profile_skills(perfil_cv.contenido if perfil_cv else {})
+    from ia.profile_summary import visible_profile_summary
+    resumen_profesional = visible_profile_summary(perfil_cv.contenido) if perfil_cv else None
 
     if request.method == 'POST':
         _ = request.FILES
@@ -254,6 +256,7 @@ def mi_perfil(request):
         'form': form,
         'ultimo_analisis': ultimo_analisis,
         'perfil_cv': perfil_cv,
+        'resumen_profesional': resumen_profesional,
         'habilidades_blandas': habilidades_blandas,
         'version_cv_actual': postulante.cv_version_actual,
         'cv_formatos': cv_enabled_formats(),

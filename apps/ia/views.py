@@ -102,12 +102,17 @@ def ver_resultado(request, analisis_id):
         from types import SimpleNamespace
         perfil = SimpleNamespace(contenido=contenido_historico)
     habilidades_duras, habilidades_blandas = split_profile_skills(contenido_historico or {})
+    from .profile_summary import visible_profile_summary
+    legacy_result = (analisis.respuesta or {}).get('result') or {}
     return render(request, 'ia/resultado_analisis.html', {
         'analisis': analisis,
         'perfil': perfil,
         'es_version_actual': analisis.version_cv_id == analisis.postulante.cv_version_actual_id,
         'habilidades_duras': habilidades_duras,
         'habilidades_blandas': habilidades_blandas,
+        'resumen_profesional': visible_profile_summary(
+            contenido_historico, legacy_result.get('resumen_ejecutivo'),
+        ),
     })
 
 

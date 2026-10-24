@@ -30,7 +30,7 @@
               </div>
               <h2 class="text-xl font-bold text-[#26222E]">Resumen profesional</h2>
             </div>
-            <p class="mt-4 whitespace-pre-line leading-relaxed text-[#6B645C]">{% if perfil %}{{ perfil.contenido.summary|human_text }}{% else %}{{ analisis.respuesta.result.resumen_ejecutivo|human_text }}{% endif %}</p>
+            <p class="mt-4 whitespace-pre-line leading-relaxed text-[#6B645C]">{{ resumen_profesional|human_text }}</p>
           </div>
 
           <div class="panel mt-6 p-8" data-profile-skills>
@@ -78,9 +78,15 @@
           </div>
 
           {% if perfil %}
-            {% include "ia/_education_courses.html" with education=perfil.contenido.education credentials=perfil.contenido.credentials only %}
+            {% include "ia/_projects.html" with projects=perfil.contenido.projects only %}
           {% else %}
-            {% include "ia/_education_courses.html" with education=analisis.respuesta.result.education credentials=analisis.respuesta.result.credentials only %}
+            {% include "ia/_projects.html" with projects=analisis.respuesta.result.projects only %}
+          {% endif %}
+
+          {% if perfil %}
+            {% include "ia/_education.html" with education=perfil.contenido.education only %}
+          {% else %}
+            {% include "ia/_education.html" with education=analisis.respuesta.result.education only %}
           {% endif %}
 
           {% if analisis.respuesta.result.habilidades_analizadas %}
