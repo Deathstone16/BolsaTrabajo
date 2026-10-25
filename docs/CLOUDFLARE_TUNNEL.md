@@ -27,7 +27,7 @@ conectado y que la ruta apunte al servidor correcto.
 
 Configurar en el `.env` privado, reemplazando el ejemplo por el hostname elegido:
 
-```dotenv
+```ini
 ALLOWED_HOSTS=localhost,127.0.0.1,bolsa.example.com
 CSRF_TRUSTED_ORIGINS=https://bolsa.example.com
 TRUST_PROXY_HEADERS=true

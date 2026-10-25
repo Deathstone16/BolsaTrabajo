@@ -90,7 +90,7 @@ antes de este despliegue. No pegar tokens del túnel, LLM ni contraseñas en Git
 
 Valores indispensables de Django:
 
-```dotenv
+```ini
 DEBUG=false
 SECRET_KEY=<nuevo-secreto-django>
 ALLOWED_HOSTS=bolsa.neadev.com
@@ -120,7 +120,7 @@ CV_SCAN_COMMAND=/usr/bin/clamscan
 
 Valores indispensables de FastAPI (con los mismos secretos compartidos):
 
-```dotenv
+```ini
 MODE=production
 LLM_PROVIDER=gemini
 MATCH_PROVIDER=groq
