@@ -72,7 +72,11 @@
         <article class="ien-step">
           <span class="ien-step-number">02</span>
           <h3>Cargá o actualizá tu CV</h3>
+          {% if render_ui_demo %}
+          <p>En esta demo podés probar la carga con un CV ficticio. El análisis de habilidades no está disponible.</p>
+          {% else %}
           <p>Desde Mi perfil podés cargar tu currículum y solicitar un análisis de tus habilidades.</p>
+          {% endif %}
           <a href="{% url 'mi_perfil' %}" class="btn-ghost">Ir a Mi perfil <span data-icon="arrow-right" class="h-4 w-4"></span></a>
         </article>
         <article class="ien-step">
