@@ -8,7 +8,7 @@ if (!stateFile) throw new Error('Ejecutar con npm run test:e2e para preparar y l
 const state = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
 const root = path.resolve(__dirname, '../..');
 const python = process.env.E2E_PYTHON || path.join(root, '.venv', 'Scripts', 'python.exe');
-const cvText = 'CV sintético de pruebas. Usé Python y Django durante tres años. Expliqué procedimientos a clientes y coordiné entregas con colegas.';
+const cvText = 'CV sintético de pruebas. Usé Python y Django durante tres años. Expliqué procedimientos a clientes y coordiné entregas con colegas.\n\nLicenciatura en Informática, Universidad Sintética: título obtenido en 2024.\nDoctorado en Informática, Universidad Sintética: en curso.\nCurso de Excel: en curso.';
 function status() {
   const text = execFileSync(python, ['scripts/e2e_fixture.py', 'status', '--state', stateFile], {
     cwd: root, env: { ...process.env, PYTHONUTF8: '1' }, encoding: 'utf8', timeout: 30_000,
@@ -227,11 +227,25 @@ test('E2E real: analizar CV, mostrar habilidades, calcular match y bloquear el C
   await expect(page.locator('#habilidades-blandas-perfil')).not.toContainText('Inferida');
   expect(status().soft_count).toBeGreaterThan(0);
   expect(status().cv_profile_schema).toBe('candidate-profile.v2');
+  const extracted = status();
+  const allowedSoftSkills = ['Pensamiento crítico', 'Alfabetización en IA', 'Inteligencia emocional', 'Learnability',
+    'Comunicación', 'Colaboración', 'Adaptabilidad al cambio', 'Creatividad', 'Responsabilidad', 'Proactividad'];
+  expect(extracted.soft_names.every(name => allowedSoftSkills.includes(name))).toBe(true);
+  expect(extracted.soft_names.length).toBe(new Set(extracted.soft_names).size);
+  expect(extracted.education).toEqual(expect.arrayContaining([
+    expect.objectContaining({ level: 'doctorate', completed: false, completion_status: 'in_progress' }),
+    expect.objectContaining({ level: 'bachelor', completed: true, completion_status: 'completed' }),
+  ]));
+  expect(extracted.skill_names.some(name => /doctor|licenciad|curso de|curso:|^excel$/i.test(name))).toBe(false);
+  expect(extracted.profile_headline || '').not.toMatch(/doctor(?:a)? en inform[aá]tica/i);
+  expect(extracted.profile_summary || '').not.toMatch(/(?:es |como |^)(?:doctor|doctora) en inform[aá]tica/i);
+  await expect(page.locator('[data-profile-education]')).toContainText('En curso');
   await snapshot(page, testInfo, 'perfil-analizado-real');
   await page.goto('/usuarios/mi-perfil/');
   await page.locator('#boton-ver-resultado').click();
   await expect(page.locator('#habilidades-blandas-cv')).toBeVisible();
   await expect(page.locator('#habilidades-blandas-cv')).not.toContainText('Inferida a partir');
+  await expect(page.locator('[data-profile-education]')).toContainText('En curso');
   await expect.poll(() => status().offer_profile_state, { timeout: 400_000, intervals: [2000, 4000, 8000] }).toBe('ready');
   expect(status().offer_profile_schema).toBe('job-offer.v2');
   console.log('E2E IA real: oferta lista, calculando compatibilidad desde el navegador.');
