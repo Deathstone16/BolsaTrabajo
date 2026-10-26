@@ -17,6 +17,12 @@
 </head>
 <body class="bg-[#F8F3F0] text-[#26222E] antialiased">
 
+  {% if render_ui_demo %}
+  <div class="bg-[#512DA8] px-4 py-2 text-center text-sm font-semibold text-white" role="note">
+    Demo de la interfaz · Usá solo datos ficticios · El análisis de CV no está disponible
+  </div>
+  {% endif %}
+
   {% comment %}
     Las pantallas de login y registro del diseno ocupan el alto completo y no
     llevan nav ni footer: sobreescriben estos bloques con contenido vacio.
