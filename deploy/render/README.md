@@ -42,9 +42,15 @@ demo. Un aviso visible en todas las páginas identifica el entorno de prueba.
 Las imágenes de cursos y empresas que están versionadas en Git se sirven en la
 demo. Los archivos subidos por visitantes quedan en el disco efímero.
 
+La demo está publicada en https://bolsatrabajo-ien-demo.onrender.com con
+Render Free y PostgreSQL de Neon Free. El servicio usa la rama
+`codex/deploy-render`, tiene despliegues automáticos desactivados y comprueba
+`/health`. Las variables `DATABASE_URL` y `SECRET_KEY` se guardaron únicamente
+en Render; no forman parte del repositorio.
+
 ## Requisitos pendientes para publicar la aplicación completa
 
-- Conectar PostgreSQL de Neon y comprobar altas, consultas y persistencia.
+- Poblar y validar el flujo funcional completo con datos de prueba.
 - Configurar almacenamiento persistente de imágenes, CV y snapshots privados.
   La versión actual usa el filesystem local; Render Free lo pierde al
   reiniciar. El Dockerfile no resuelve todavía ese almacenamiento.
@@ -67,6 +73,6 @@ que el análisis de CV esté disponible ni que los archivos sean persistentes.
 
 Referencias: https://render.com/docs/free y https://render.com/docs/docker.
 
-No se crearon servicios de Render ni se publicaron credenciales desde esta
-preparación. El proyecto Neon `BolsaTrabajo` fue creado por el usuario en su
-cuenta con plan gratuito; aún no se conectó a la aplicación.
+El proyecto Neon `BolsaTrabajo` fue creado por el usuario con plan gratuito y
+conectado a este servicio. Las credenciales no deben copiarse a Git ni a
+capturas o registros públicos.
