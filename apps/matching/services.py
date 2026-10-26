@@ -177,7 +177,7 @@ def get_or_create_match(postulante, oferta) -> tuple[ResultadoCompatibilidad, bo
     if match.estado == ResultadoCompatibilidad.Estado.COMPLETADO:
         _save_cache(cache_key, match.resultado)
         return match, False
-    if match.estado == ResultadoCompatibilidad.Estado.ERROR:
+    if match.estado in {ResultadoCompatibilidad.Estado.ERROR, ResultadoCompatibilidad.Estado.CANCELADO}:
         match.request_id = uuid4()
         match.estado = ResultadoCompatibilidad.Estado.PENDIENTE
         match.error = ''
@@ -220,12 +220,31 @@ def match_request_payload(match: ResultadoCompatibilidad) -> dict:
 
 
 @transaction.atomic
+def cancel_match(request_id, postulante):
+    match = ResultadoCompatibilidad.objects.select_for_update().get(request_id=request_id, postulante=postulante)
+    if match.estado in {'completed', 'error', 'cancelled'}:
+        return match
+    match.estado = ResultadoCompatibilidad.Estado.CANCELADO
+    match.error = ''
+    match.save(update_fields=['estado', 'error', 'actualizado_en'])
+    EventoSalida.objects.filter(tipo=EventoSalida.Tipo.MATCH, payload__match_id=match.pk).update(
+        estado=EventoSalida.Estado.ERROR, error='Cancelado por el usuario.',
+    )
+    EventoSalida.objects.get_or_create(
+        clave_idempotencia=f'cancel-match:{request_id}',
+        defaults={'tipo': EventoSalida.Tipo.CANCELAR_MATCH, 'payload': {'request_id': str(request_id)}},
+    )
+    transaction.on_commit(lambda: _notify(match))
+    return match
+
+
+@transaction.atomic
 def complete_match(request_id: str, result: dict) -> ResultadoCompatibilidad:
     validated = MatchResult.model_validate(result).model_dump(mode='json')
     if validated['request_id'] != str(request_id):
         raise ValueError('El resultado no corresponde a esta solicitud.')
     match = ResultadoCompatibilidad.objects.select_for_update().get(request_id=request_id)
-    if match.estado in {ResultadoCompatibilidad.Estado.COMPLETADO, ResultadoCompatibilidad.Estado.ERROR}:
+    if match.estado in {ResultadoCompatibilidad.Estado.COMPLETADO, ResultadoCompatibilidad.Estado.ERROR, ResultadoCompatibilidad.Estado.CANCELADO}:
         return match
     if validated.get('schema_version') != 'match-result.v2':
         raise ValueError('Se esperaba un resultado match-result.v2.')
@@ -279,7 +298,7 @@ def complete_match(request_id: str, result: dict) -> ResultadoCompatibilidad:
 @transaction.atomic
 def update_match_status(request_id: str, status: str, error: str = '') -> ResultadoCompatibilidad:
     match = ResultadoCompatibilidad.objects.select_for_update().get(request_id=request_id)
-    if match.estado in {ResultadoCompatibilidad.Estado.COMPLETADO, ResultadoCompatibilidad.Estado.ERROR}:
+    if match.estado in {ResultadoCompatibilidad.Estado.COMPLETADO, ResultadoCompatibilidad.Estado.ERROR, ResultadoCompatibilidad.Estado.CANCELADO}:
         return match
     state = {
         'accepted': ResultadoCompatibilidad.Estado.PENDIENTE,

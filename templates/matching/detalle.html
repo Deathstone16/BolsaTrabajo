@@ -152,7 +152,7 @@
   </aside>
   {% else %}
   <div class="panel match-summary" role="status">
-    {% if match.estado == 'error' %}<h2>No se pudo completar el match</h2><p>{{ match.error }}</p>{% else %}<h2>El resultado todavía no está listo</h2><p>Volvé a la oferta para consultar el estado del cálculo.</p>{% endif %}
+    {% if match.estado == 'cancelled' %}<h2>Cancelaste este match</h2><p>Podés volver a calcular tu compatibilidad desde la oferta.</p>{% elif match.estado == 'error' %}<h2>No se pudo completar el match</h2><p>{{ match.error }}</p>{% else %}<h2>El resultado todavía no está listo</h2><p>Volvé a la oferta para consultar el estado del cálculo.</p>{% endif %}
     <a class="btn-ien mt-5" href="{% url 'detalle_oferta' match.oferta_id %}">Volver a la oferta</a>
   </div>
   {% endif %}

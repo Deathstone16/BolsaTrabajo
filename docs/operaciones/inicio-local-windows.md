@@ -1,5 +1,8 @@
 # Rama ia-match: comparación CV–oferta con Groq
 
+> Nota de vigencia (22/10/2026): esta nota conserva el arranque de la rama ia-match. Los porcentajes, la confianza y el proveedor que describe son históricos. Para el protocolo actual y las siete dimensiones consultá [contratos](../api/contratos.md) y [despliegue](despliegue.md); no usar esos valores históricos como configuración vigente.
+
+
 Las ramas anteriores se conservan. Django parte de `ia-aplicada`; la API integra
 esa rama con `feature/habilidades-blandas-y-notificacion-cv` de Benja. La comparación vive dentro de la misma API de CV, en `api/ia_api/backend`. No se inicia un servicio de compatibilidad separado.
 

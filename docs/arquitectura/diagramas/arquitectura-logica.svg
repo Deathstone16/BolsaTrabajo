@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1320" viewBox="0 0 1200 1320" role="img" aria-labelledby="title desc">
+<title id="title">Arquitectura lógica simplificada de Bolsa de Trabajo IEN</title>
+<desc id="desc">Usuarios se conectan a Django SSR y Channels. Django usa PostgreSQL y se integra con FastAPI mediante despachadores. FastAPI coordina Celery y Redis; los workers consultan al proveedor LLM. PostgreSQL no se conecta directamente al proveedor.</desc>
+<rect width="1200" height="1320" fill="white"/>
+<text x="72" y="82.24" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="700" fill="#16324f">Arquitectura lógica simplificada</text>
+<text x="72" y="118.64" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#526477">Bolsa de Trabajo IEN · Interfaz, persistencia y procesamiento con IA</text>
+<rect x="72" y="160" width="1056" height="104" rx="18" fill="#fbfcfe" stroke="#a6c6e6" stroke-width="2"/>
+<text x="600.0" y="206.68" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#16324f">Usuarios / Navegador</text>
+<text x="600.0" y="242.8" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#526477">Interfaz web</text>
+<rect x="72" y="350" width="1056" height="144" rx="18" fill="#edf4fc" stroke="#a6c6e6" stroke-width="2"/>
+<text x="600.0" y="396.68" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#16324f">Django SSR + Channels</text>
+<text x="600.0" y="432.8" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#526477">Lógica de negocio, vistas, autenticación y comunicación en tiempo real</text>
+<text x="600.0" y="461.8" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#526477">Despachadores Django para extracción y compatibilidad</text>
+<rect x="72" y="594" width="360" height="144" rx="18" fill="#fbfcfe" stroke="#a6c6e6" stroke-width="2"/>
+<text x="252.0" y="640.68" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#16324f">PostgreSQL</text>
+<text x="252.0" y="676.8" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#526477">Persistencia del sistema</text>
+<text x="252.0" y="705.8" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#526477">SQLite disponible en desarrollo</text>
+<rect x="610" y="594" width="518" height="144" rx="18" fill="#fbfcfe" stroke="#a6c6e6" stroke-width="2"/>
+<text x="869.0" y="640.68" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#16324f">FastAPI</text>
+<text x="869.0" y="676.8" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#526477">Servicio de integración con LLM</text>
+<text x="869.0" y="705.8" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#526477">Solicitudes, resultados y callbacks</text>
+<rect x="610" y="838" width="518" height="144" rx="18" fill="#fbfcfe" stroke="#a6c6e6" stroke-width="2"/>
+<text x="869.0" y="884.68" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#16324f">Celery + Redis</text>
+<text x="869.0" y="920.8" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#526477">Cola de tareas y workers</text>
+<text x="869.0" y="949.8" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#526477">Procesamiento asíncrono</text>
+<rect x="610" y="1082" width="518" height="144" rx="18" fill="#fbfcfe" stroke="#a6c6e6" stroke-width="2"/>
+<text x="869.0" y="1128.68" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#16324f">Proveedor / Modelo LLM</text>
+<text x="869.0" y="1164.8" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#526477">Procesamiento mediante IA</text>
+<path d="M 600 278 L 600 336" fill="none" stroke="#6c8195" stroke-width="2"/>
+<polygon points="600,278 593,289 607,289" fill="#6c8195"/>
+<polygon points="600,336 593,325 607,325" fill="#6c8195"/>
+<text x="620" y="316.12" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#526477">HTTPS / WebSocket</text>
+<path d="M 252 508 L 252 580" fill="none" stroke="#6c8195" stroke-width="2"/>
+<polygon points="252,508 245,519 259,519" fill="#6c8195"/>
+<polygon points="252,580 245,569 259,569" fill="#6c8195"/>
+<text x="272" y="550.12" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#526477">Lectura / escritura</text>
+<path d="M 869 508 L 869 580" fill="none" stroke="#6c8195" stroke-width="2"/>
+<polygon points="869,508 862,519 876,519" fill="#6c8195"/>
+<polygon points="869,580 862,569 876,569" fill="#6c8195"/>
+<text x="888" y="550.12" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#526477">HTTP / WebSocket</text>
+<path d="M 869 752 L 869 824" fill="none" stroke="#6c8195" stroke-width="2"/>
+<polygon points="869,752 862,763 876,763" fill="#6c8195"/>
+<polygon points="869,824 862,813 876,813" fill="#6c8195"/>
+<text x="888" y="794.12" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#526477">Cola / resultados</text>
+<path d="M 869 996 L 869 1068" fill="none" stroke="#6c8195" stroke-width="2"/>
+<polygon points="869,996 862,1007 876,1007" fill="#6c8195"/>
+<polygon points="869,1068 862,1057 876,1057" fill="#6c8195"/>
+<text x="888" y="1038.12" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#526477">Consulta / respuesta</text>
+<text x="72" y="865.32" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="700" fill="#16324f">Cómo leer el esquema</text>
+<text x="72" y="907.12" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#526477">Django controla el acceso a los datos.</text>
+<text x="72" y="937.12" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#526477">FastAPI integra el procesamiento de IA.</text>
+<text x="72" y="967.12" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#526477">Celery ejecuta trabajos en segundo plano.</text>
+<text x="72" y="997.12" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#526477">Redis también se usa para Channels</text>
+<text x="72" y="1027.12" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#526477">y caché, según la configuración.</text>
+<text x="72" y="1057.12" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#526477"></text>
+<text x="72" y="1087.12" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#526477">El detalle de transportes y límites</text>
+<text x="72" y="1117.12" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#526477">está en arquitectura/general.md.</text>
+<text x="72" y="1289.12" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#526477">Vista simplificada. Los servicios de IA se mantienen en el repositorio externo.</text>
+</svg>
