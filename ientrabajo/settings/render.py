@@ -2,9 +2,23 @@
 
 import os
 from hashlib import sha256
+from urllib.parse import unquote, urlsplit
 
 os.environ.setdefault('DEBUG', 'false')
 os.environ.setdefault('DB_ENGINE', 'postgresql')
+database_url = os.environ.get('DATABASE_URL', '').strip()
+if database_url:
+    parsed_db = urlsplit(database_url)
+    if parsed_db.scheme not in {'postgres', 'postgresql'} or not all((
+        parsed_db.hostname, parsed_db.username, parsed_db.password, parsed_db.path.lstrip('/'),
+    )):
+        raise RuntimeError('DATABASE_URL debe ser una URL PostgreSQL completa.')
+    os.environ['DB_NAME'] = unquote(parsed_db.path.lstrip('/'))
+    os.environ['DB_USER'] = unquote(parsed_db.username)
+    os.environ['DB_PASSWORD'] = unquote(parsed_db.password)
+    os.environ['DB_HOST'] = parsed_db.hostname
+    os.environ['DB_PORT'] = str(parsed_db.port or 5432)
+    os.environ['DB_SSLMODE'] = 'require'
 if os.environ.get('SECRET_KEY', '').strip():
     # La demo no usa callbacks; satisface la validación de base con un valor
     # privado derivado del secreto de Django, sin otra variable manual.
@@ -29,6 +43,7 @@ CV_SCAN_ENABLED = False
 IA_API_URL = ''
 IA_OFFER_API_URL = ''
 RENDER_UI_DEMO = True
+EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 CHANNEL_LAYERS = {'default': {'BACKEND': 'channels.layers.InMemoryChannelLayer'}}
 
 MIDDLEWARE = list(MIDDLEWARE)  # noqa: F405

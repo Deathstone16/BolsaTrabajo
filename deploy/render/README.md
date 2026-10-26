@@ -19,18 +19,16 @@ DEBUG=false
 SECRET_KEY=generar-un-secreto-exclusivo-de-produccion
 ALLOWED_HOSTS=nombre-del-servicio.onrender.com
 CSRF_TRUSTED_ORIGINS=https://nombre-del-servicio.onrender.com
-DB_ENGINE=postgresql
-DB_HOST=host-de-neon
-DB_PORT=5432
-DB_NAME=nombre-de-la-base
-DB_USER=usuario
-DB_PASSWORD=configurar-en-render
-DB_SSLMODE=require
+DATABASE_URL=postgresql://usuario:clave@host-de-neon/neondb?sslmode=require
 ```
 
 Render proporciona `PORT` y `RENDER_EXTERNAL_HOSTNAME`; este último configura
 el dominio y el origen CSRF cuando no se definen explícitamente. Para un
 dominio propio, configurar ambas listas en Render.
+La cadena `DATABASE_URL` solo va en las variables secretas de Render, nunca en
+Git. El módulo la separa en las variables `DB_*` requeridas por la configuración
+existente y obliga a usar TLS. También usa un backend de correo nulo para que
+la demo no intente conectarse al SMTP de Gmail ni envíe mensajes.
 
 El arranque comprueba Django, aplica migraciones, reúne estáticos y ejecuta
 Daphne en `0.0.0.0:$PORT`. WhiteNoise sirve los estáticos con `DEBUG=false`.
