@@ -1,0 +1,12 @@
+flowchart TB
+    U["Usuarios / Navegador<br/>Interfaz web"]
+    D["Django SSR + Channels<br/>Lógica de negocio, autenticación y tiempo real<br/>Despachadores de extracción y compatibilidad"]
+    P[("PostgreSQL<br/>Persistencia del sistema")]
+    F["FastAPI<br/>Integración con LLM y coordinación de trabajos"]
+    C["Celery + Redis<br/>Cola de tareas y workers asíncronos"]
+    L["Proveedor / Modelo LLM<br/>Procesamiento mediante IA"]
+    U <-->|HTTPS / WebSocket| D
+    D <-->|Lectura / escritura| P
+    D <-->|HTTP / WebSocket| F
+    F <-->|Cola / resultados| C
+    C <-->|Consulta / respuesta| L

@@ -25,6 +25,16 @@
     {% include "nueva_ui/partials/_nav.html" %}
   {% endblock %}
 
+  {% if cv_notification_token %}
+  <div id="cv-analysis-global" class="mx-auto max-w-7xl px-4 pt-4" {% if not cv_pending_analysis_id %}hidden{% endif %}>
+    <div class="panel flex flex-wrap items-center justify-between gap-3 px-5 py-3" role="status" aria-live="polite">
+      <p class="text-sm text-[#512DA8]"><span aria-hidden="true">◌</span> Estamos analizando tu CV en segundo plano.</p>
+      <a class="text-sm font-semibold text-[#512DA8]" href="{% url 'mi_perfil' %}#cv-analysis">Ver progreso →</a>
+      <p class="w-full text-xs text-[#6B645C]">Podés seguir navegando. Te avisaremos cuando esté listo.</p>
+    </div>
+  </div>
+  {% endif %}
+
   <main>
     {% comment %}
       Los mensajes de Django salen como avisos flotantes (IenUI.aviso en
@@ -50,6 +60,7 @@
   <script src="{% static_v 'js/character-limit.js' %}"></script>
   {% if cv_notification_token %}
     <script id="cv-notifications-config"
+            data-user-id="{{ user.pk }}"
             data-token="{{ cv_notification_token }}"
             data-analysis-id="{{ cv_pending_analysis_id }}"
             data-status-url="{{ cv_analysis_status_url }}"

@@ -1,5 +1,8 @@
 # Integración de PostgreSQL, CV y compatibilidad
 
+> Alcance: registro de integración y verificaciones de su momento. Para preparar un nuevo entorno usá el `README.md` (raíz del repositorio) y el [runbook actual](despliegue.md); los resultados citados aquí no acreditan el estado de otro ambiente.
+
+
 Estado: integrada y validada el 21 de octubre de 2026.
 
 ## Alcance

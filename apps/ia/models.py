@@ -174,6 +174,7 @@ class EventoSalida(models.Model):
         EXTRAER_OFERTA = 'extract_offer', 'Extract offer'
         NORMALIZAR_PERFIL = 'normalize_profile', 'Normalize profile'
         MATCH = 'match', 'Match'
+        CANCELAR_MATCH = 'cancel_match', 'Cancel match'
 
     class Estado(models.TextChoices):
         PENDIENTE = 'pending', 'Pending'

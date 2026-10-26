@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import requests
 from datetime import timedelta
 
 from django.conf import settings
@@ -44,7 +45,7 @@ class Command(BaseCommand):
         with transaction.atomic():
             lease_cutoff = timezone.now() - timedelta(seconds=getattr(settings, 'MATCH_OUTBOX_LEASE_SECONDS', 300))
             event = EventoSalida.objects.select_for_update().filter(
-                tipo=EventoSalida.Tipo.MATCH,
+                tipo__in=[EventoSalida.Tipo.MATCH, EventoSalida.Tipo.CANCELAR_MATCH],
             ).filter(
                 Q(estado=EventoSalida.Estado.PENDIENTE, proximo_intento_en__isnull=True)
                 | Q(estado=EventoSalida.Estado.PENDIENTE, proximo_intento_en__lte=timezone.now())
@@ -57,14 +58,36 @@ class Command(BaseCommand):
             return event
 
     def _send(self, event):
+        if event.tipo == EventoSalida.Tipo.CANCELAR_MATCH:
+            try:
+                response = requests.post(
+                    f"{settings.MATCH_API_HTTP_URL.rstrip('/')}/matches/{event.payload['request_id']}/cancel",
+                    headers={'Authorization': f'Bearer {settings.MATCH_API_TOKEN}'}, timeout=5,
+                )
+                response.raise_for_status()
+                event.estado = EventoSalida.Estado.ENVIADO
+                event.error = ''
+            except requests.RequestException:
+                event.estado = EventoSalida.Estado.PENDIENTE
+                event.error = 'No se pudo entregar la cancelación al microservicio.'
+                event.proximo_intento_en = timezone.now() + timedelta(seconds=min(60, 2 ** min(event.intentos, 6)))
+            event.save(update_fields=['estado', 'error', 'proximo_intento_en', 'actualizado_en'])
+            return
         match = ResultadoCompatibilidad.objects.select_related('postulante__perfil_ia', 'oferta__perfil_ia').get(pk=event.payload['match_id'])
+        if match.estado == 'cancelled':
+            return
         try:
             headers = {'Authorization': f'Bearer {settings.MATCH_API_TOKEN}'}
             with connect(settings.MATCH_API_URL, additional_headers=headers, open_timeout=10, close_timeout=5) as socket:
                 socket.send(json.dumps({'type': 'match.start', 'payload': match_request_payload(match)}))
                 while True:
-                    message = json.loads(socket.recv(timeout=60))
                     event.refresh_from_db(fields=['estado'])
+                    if event.estado != EventoSalida.Estado.ENVIANDO:
+                        return
+                    try:
+                        message = json.loads(socket.recv(timeout=2))
+                    except TimeoutError:
+                        continue
                     if event.estado == EventoSalida.Estado.ENVIANDO:
                         event.save(update_fields=['actualizado_en'])
                     # The initial acknowledgment may report the *job's* current
@@ -90,6 +113,9 @@ class Command(BaseCommand):
                         return
         except Exception:
             logger.exception('Falló la entrega del match %s.', match.request_id)
+            event.refresh_from_db(fields=['estado'])
+            if event.estado != EventoSalida.Estado.ENVIANDO:
+                return
             event.estado = EventoSalida.Estado.PENDIENTE
             event.error = 'No se pudo entregar el match al microservicio.'
             event.proximo_intento_en = timezone.now() + timedelta(seconds=min(300, 2 ** min(event.intentos, 8)))

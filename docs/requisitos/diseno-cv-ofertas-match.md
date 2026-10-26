@@ -1,6 +1,6 @@
 # Requisitos de diseño para CV, ofertas y compatibilidad
 
-Este documento conserva los requisitos técnicos que guían los flujos de CV y matching. El comportamiento implementado y su verificación se describen en [Implementación de CV y compatibilidad](IMPLEMENTACION_CV_MATCH.md).
+Este documento conserva los requisitos técnicos que guían los flujos de CV y matching. El comportamiento implementado y su verificación se describen en [Implementación de CV y compatibilidad](../arquitectura/implementacion-cv-match.md).
 
 ## 1. Archivos y privacidad
 

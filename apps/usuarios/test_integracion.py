@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from categorias.models import Categoria
 from cursos.models import Curso
-from ia.models import CVVersion, PerfilCV, PerfilOferta
+from ia.models import AnalisisCV, CVVersion, PerfilCV, PerfilOferta
 from matching.configuration import scoring_hash
 from matching.models import ConfiguracionActiva, ConfiguracionCompatibilidad
 from ofertas.models import Oferta
@@ -84,7 +84,28 @@ class FlujosIntegracionRamasTests(TestCase):
         self.assertContains(response, 'id="form-cv-upload"')
         self.assertContains(response, 'id="cv-upload-area"')
         self.assertContains(response, 'js/cv_upload.js')
-        self.assertContains(response, 'id="perfil-siguiente-paso"')
+        self.assertContains(response, 'id="perfil-siguiente-paso"', count=1)
+        self.assertContains(response, 'Empezá por cargar tu CV')
+
+    def test_analisis_pendiente_tiene_indicador_global_solo_para_su_propietario(self):
+        usuario, postulante = self.crear_postulante()
+        version = CVVersion.objects.create(
+            postulante=postulante, numero=1, archivo='cv-sintetico.pdf',
+            nombre_original='cv.pdf', sha256='a' * 64, formato='pdf', tamano=10,
+        )
+        postulante.cv_version_actual = version
+        postulante.save(update_fields=['cv_version_actual'])
+        analysis = AnalisisCV.objects.create(postulante=postulante, version_cv=version)
+        self.client.force_login(usuario)
+        for url in (reverse('home'), reverse('buscar_empleo'), reverse('mi_perfil')):
+            response = self.client.get(url)
+            self.assertEqual(response.context['cv_pending_analysis_id'], analysis.pk)
+            self.assertContains(response, 'id="cv-analysis-global"')
+            self.assertContains(response, 'Podés seguir navegando. Te avisaremos cuando esté listo.')
+            self.assertContains(response, f'data-user-id="{usuario.pk}"')
+        other, _ = self.crear_postulante('otro-progreso@example.com')
+        self.client.force_login(other)
+        self.assertEqual(self.client.get(reverse('home')).context['cv_pending_analysis_id'], '')
 
     def test_perfil_con_cv_muestra_una_sola_tarjeta_sin_pedir_cargarlo_otra_vez(self):
         usuario, postulante = self.crear_postulante()

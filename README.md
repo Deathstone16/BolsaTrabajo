@@ -6,6 +6,16 @@ microservicio FastAPI ubicado en el repositorio `ia_api/backend`.
 Para desplegar los dos servicios en una VPS, seguir
 [docs/DESPLIEGUE_VPS.md](docs/DESPLIEGUE_VPS.md).
 
+## Documentación del proyecto
+
+La [guía de documentación](docs/README.md) reúne los siete
+componentes: requisitos y aceptación, arquitectura y ADR, contratos HTTP y
+WebSocket, modelo de datos, operación y pruebas. El
+[modelo de datos](docs/datos/modelo-datos.md) incluye el diccionario de las 21
+entidades propias y un [diagrama ER editable](docs/datos/modelo-datos.mmd).
+La [revisión de limpieza](docs/mantenimiento/analisis-limpieza.md) distingue
+residuos locales, documentos históricos y candidatos a simplificar en el código.
+
 ## Requisitos
 
 - Python 3.12 (recomendado)
@@ -172,7 +182,8 @@ para obtener un JWT. El token que se coloca en `IA_API_TOKEN` es
 
 ### 3. Iniciar los servicios
 
-Se necesitan cuatro terminales:
+Para la web y el servicio externo se necesitan estas cuatro terminales;
+los dos despachadores Django se inician además, como se indica debajo:
 
 ```bash
 # Terminal 1, desde ia_api/backend
@@ -187,6 +198,21 @@ make run-api
 # Terminal 4, desde BolsaTrabajo
 .venv/bin/python manage.py runserver 0.0.0.0:8000
 ```
+
+En otras dos terminales, desde `BolsaTrabajo`, iniciá los procesos que entregan
+los trabajos guardados en la outbox. Sin ellos, los nuevos trabajos pueden
+quedar pendientes aunque FastAPI y Celery estén activos:
+
+```bash
+# Terminal 5
+.venv/bin/python manage.py run_integration_dispatcher --kind extraction --interval 2
+
+# Terminal 6
+.venv/bin/python manage.py run_integration_dispatcher --kind match --interval 2
+```
+
+El [procedimiento operativo](docs/operaciones/despliegue.md) describe también
+la ejecución acotada, el arranque ASGI y la propuesta de despliegue y recuperación.
 
 Abre `http://127.0.0.1:8000/`.
 
@@ -221,7 +247,7 @@ consulta el estado cada 10 segundos. El enlace del aviso lleva a
 Las recomendaciones de cursos aparecen en el detalle de cada match completado.
 Priorizan cursos específicos y permiten declarar las habilidades que desarrolla
 cada curso desde su formulario. No consumen llamadas adicionales de IA.
-Configuración y criterios: [recomendaciones de cursos](docs/RECOMENDACIONES_CURSOS.md).
+Configuración y criterios: [recomendaciones de cursos](docs/funcionalidades/recomendaciones-cursos.md).
 
 ## Problemas frecuentes
 

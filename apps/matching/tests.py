@@ -20,7 +20,7 @@ from usuarios.models import Postulante, Usuario
 from .configuration import publish_configuration, scoring_hash
 from .models import ConfiguracionActiva, ConfiguracionCompatibilidad, ResultadoCompatibilidad
 from .services import complete_match, get_or_create_match, match_request_payload
-from .services import status_payload
+from .services import status_payload, cancel_match, update_match_status
 
 
 def html_attributes_by_id(response):
@@ -97,6 +97,39 @@ class MatchingServiceTests(TestCase):
         for version in self.postulante.versiones_cv.all():
             version.archivo.delete(save=False)
         super().tearDown()
+
+    def test_cancelacion_es_privada_idempotente_y_permite_reintentar(self):
+        match, _ = get_or_create_match(self.postulante, self.oferta)
+        previous_id = match.request_id
+        url = reverse('matching:cancelar', args=[previous_id])
+        self.assertEqual(self.client.post(url).status_code, 302)
+        other = Usuario.objects.create_user(email='cancel-other@example.com', password='test-password')
+        Postulante.objects.create(usuario=other)
+        self.client.force_login(other)
+        self.assertEqual(self.client.post(url).status_code, 404)
+        self.client.force_login(self.candidate_user)
+        self.assertEqual(self.client.get(url).status_code, 405)
+        self.assertEqual(self.client.post(url).json()['status'], 'cancelled')
+        self.assertEqual(self.client.post(url).json()['status'], 'cancelled')
+        self.assertEqual(EventoSalida.objects.filter(tipo='cancel_match').count(), 1)
+        self.assertEqual(EventoSalida.objects.get(tipo='match').estado, 'error')
+        updated = update_match_status(str(previous_id), 'processing')
+        self.assertEqual(updated.estado, 'cancelled')
+        retried, created = get_or_create_match(self.postulante, self.oferta)
+        self.assertTrue(created)
+        self.assertNotEqual(retried.request_id, previous_id)
+        self.assertEqual(retried.estado, 'pending')
+
+    def test_cancelado_ignora_resultado_tardio_y_completado_no_se_cancela(self):
+        match, _ = get_or_create_match(self.postulante, self.oferta)
+        cancel_match(match.request_id, self.postulante)
+        with patch('matching.services.MatchResult') as contract:
+            contract.model_validate.return_value.model_dump.return_value = {'request_id': str(match.request_id)}
+            self.assertEqual(complete_match(str(match.request_id), {}).estado, 'cancelled')
+        match.estado = 'completed'
+        match.match_percentage = 75
+        match.save()
+        self.assertEqual(cancel_match(match.request_id, self.postulante).estado, 'completed')
 
     def test_detalle_organiza_resultado_y_escapa_explicaciones(self):
         match, _ = get_or_create_match(self.postulante, self.oferta)
@@ -252,14 +285,15 @@ class MatchingServiceTests(TestCase):
     def test_dispatch_match_espera_resultado_tras_aceptar_job_ya_completado(self, connect, complete):
         from matching.management.commands.dispatch_match_jobs import Command
         match, _ = get_or_create_match(self.postulante, self.oferta)
-        event = EventoSalida.objects.get(tipo=EventoSalida.Tipo.MATCH)
+        command = Command()
+        event = command._claim()
         socket = connect.return_value.__enter__.return_value
         socket.recv.side_effect = [
             json.dumps({'type': 'match.accepted', 'status': 'completed', 'request_id': str(match.request_id)}),
             json.dumps({'type': 'match.completed', 'status': 'completed', 'result': {'request_id': str(match.request_id)}}),
         ]
 
-        Command()._send(event)
+        command._send(event)
 
         event.refresh_from_db()
         self.assertEqual(event.estado, EventoSalida.Estado.ENVIADO)

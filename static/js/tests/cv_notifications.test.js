@@ -13,7 +13,7 @@ function setup() {
   const created = [];
   const storage = new Map();
   const config = { dataset: {
-    token: 'signed-token', analysisId: '31',
+    token: 'signed-token', analysisId: '31', userId: '7', currentVersionId: '1',
     statusUrl: '/ia/analisis/0/estado/', profileUrl: '/ia/perfil-profesional/',
   } };
   const badge = { classList: {
@@ -28,7 +28,7 @@ function setup() {
     querySelectorAll() { return []; },
     addEventListener(name, fn) { listeners[name] = fn; },
     dispatchEvent(event) { if (listeners[event.type]) listeners[event.type](event); },
-    createElement() { return { children: [], appendChild(item) { this.children.push(item); }, setAttribute() {}, remove() {} }; },
+    createElement() { return { children: [], appendChild(item) { this.children.push(item); }, setAttribute() {}, addEventListener() {}, remove() {} }; },
   };
   class FakeSocket {
     static OPEN = 1;
@@ -37,7 +37,7 @@ function setup() {
   }
   const context = {
     document, WebSocket: FakeSocket,
-    window: { WebSocket: FakeSocket },
+    window: { WebSocket: FakeSocket, addEventListener(name, fn) { listeners[name] = fn; } },
     location: { protocol: 'http:', host: 'localhost:8000' },
     localStorage: { setItem: (k, v) => storage.set(k, v), getItem: k => storage.get(k), removeItem: k => storage.delete(k) },
     CustomEvent: function (type, options) { this.type = type; this.detail = options.detail; },
@@ -61,9 +61,9 @@ test('WebSocket muestra toast con enlace y badge al finalizar', () => {
   assert.equal(state.body.children.length, 1);
   assert.equal(state.body.children[0].children[0].href, '/ia/perfil-profesional/');
   assert.equal(state.body.children[0].children[0].textContent, 'Ver mi perfil profesional');
-  assert.match(state.body.children[0].textContent, /Análisis listo/);
+  assert.match(state.body.children[0].textContent, /Tu CV ya está analizado/);
   assert.equal(state.badge.classList.hidden, false);
-  assert.equal(state.storage.get('ien-cv-analysis-ready'), '31');
+  assert.equal(state.storage.get('ien-cv-analysis-ready-7'), '31');
 });
 
 test('polling conserva la identidad de versión al completar el análisis', async () => {
@@ -76,7 +76,7 @@ test('polling conserva la identidad de versión al completar el análisis', asyn
   const poll = state.intervals.find(timer => timer.ms === 10000);
   await poll.fn();
   assert.equal(state.body.children.length, 1);
-  assert.equal(state.storage.get('ien-cv-analysis-ready'), '31');
+  assert.equal(state.storage.get('ien-cv-analysis-ready-7'), '31');
 });
 
 test('desconexión activa polling de 10 s y reconexión exponencial', () => {

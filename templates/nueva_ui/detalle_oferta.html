@@ -6,6 +6,7 @@
 {% block extra_head %}
 <style>
   #match-percentage { font-variant-numeric: tabular-nums; }
+  #match-cancel-button[hidden] { display: none; }
   #match-card.is-calculating #match-progress {
     stroke-dasharray: 20 80;
     transform-origin: 60px 60px;
@@ -159,6 +160,7 @@
               <button id="match-button" class="btn-ien w-full" type="submit" {% if match and match.estado != 'error' and match.estado != 'completed' %}disabled{% endif %}>{% if match and match.estado == 'completed' %}Ver compatibilidad{% else %}Calcular compatibilidad{% endif %}</button>
             </form>
           {% endif %}
+          <button id="match-cancel-button" type="button" class="btn-ghost mt-3 w-full" data-request-id="{% if match %}{{ match.request_id }}{% endif %}" {% if not match or match.estado == 'completed' or match.estado == 'error' or match.estado == 'cancelled' %}hidden{% endif %}>Cancelar match</button>
           {% endif %}
         </div>
 
@@ -218,6 +220,7 @@
   if (!card || !percentage || !progress) return;
   const form = document.getElementById('match-form');
   const button = document.getElementById('match-button');
+  const cancelButton = document.getElementById('match-cancel-button');
   const message = document.getElementById('match-message');
   const detailsAction = document.getElementById('match-details-action');
   const detailsLink = document.getElementById('match-details-link');
@@ -243,6 +246,7 @@
     message.textContent = status === 'rate_limited' ? 'Esperando disponibilidad para calcular tu compatibilidad…' : 'Calculando compatibilidad…';
     detailsAction.hidden = true;
     if (button) button.disabled = true;
+    if (cancelButton && activeRequestId) { cancelButton.hidden = false; cancelButton.dataset.requestId = activeRequestId; }
   }
   function showError(error) {
     card.classList.remove('is-calculating');
@@ -253,12 +257,28 @@
     detailsAction.hidden = true;
     if (form) form.hidden = false;
     if (button) { button.disabled = false; button.textContent = 'Reintentar'; }
+    if (cancelButton) cancelButton.hidden = true;
     stopWatching();
   }
   function render(data) {
     if (data.request_id && activeRequestId && data.request_id !== activeRequestId) return;
     if (data.scoring_config_hash && activeConfigHash && data.scoring_config_hash !== activeConfigHash) return;
     if (card.dataset.status === 'completed' && data.status !== 'completed') return;
+    if (card.dataset.status === 'cancelled' && data.status !== 'cancelled') return;
+    if (data.status === 'cancelled') {
+      stopWatching();
+      card.classList.remove('is-calculating');
+      card.dataset.status = 'cancelled';
+      progress.style.strokeDasharray = '0 100';
+      setLabel('Cancelado');
+      message.textContent = 'Cancelaste el match. Podés volver a calcularlo cuando quieras.';
+      detailsAction.hidden = true;
+      if (form) form.hidden = false;
+      if (button) { button.disabled = false; button.textContent = 'Calcular compatibilidad'; }
+      if (cancelButton) cancelButton.hidden = true;
+      activeRequestId = null;
+      return;
+    }
     if (data.status === 'completed') {
       const value = data.match_percentage;
       if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 100) return;
@@ -269,6 +289,7 @@
       setLabel(Math.round(value) + '%', true);
       message.textContent = 'Compatibilidad calculada según tu perfil y esta oferta.';
       if (form) form.hidden = true;
+      if (cancelButton) cancelButton.hidden = true;
       detailsLink.href = `{% url 'matching:detalle' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', data.request_id);
       detailsAction.hidden = false;
       stopWatching();
@@ -306,8 +327,20 @@
         if (data.status !== 'completed' && data.status !== 'error') watch(data.request_id);
       }).catch(() => showError('No se pudo iniciar el cálculo.'));
   });
-  // Completed results are already painted by Django. Resume only unfinished jobs.
-  if (activeRequestId && card.dataset.status !== 'completed' && card.dataset.status !== 'error') watch(activeRequestId);
+  if (cancelButton) cancelButton.addEventListener('click', async () => {
+    const requestId = activeRequestId || cancelButton.dataset.requestId;
+    if (!requestId || !form) return;
+    cancelButton.disabled = true;
+    const url = `{% url 'matching:cancelar' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', requestId);
+    try {
+      const response = await fetch(url, {method: 'POST', headers: {'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value}});
+      if (!response.ok) throw new Error('cancel');
+      render(await response.json());
+    } catch (_) {
+      message.textContent = 'No se pudo cancelar. Volvé a intentarlo.';
+    } finally { cancelButton.disabled = false; }
+  });
+  // Only resume a request explicitly started in this page, including a bfcache return.
   window.addEventListener('pageshow', event => {
     if (event.persisted && activeRequestId && card.dataset.status !== 'completed' && card.dataset.status !== 'error') watch(activeRequestId);
   });

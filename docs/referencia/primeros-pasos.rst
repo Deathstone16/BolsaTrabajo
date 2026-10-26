@@ -1,6 +1,9 @@
 Primeros pasos
 ==============
 
+Nota de vigencia: esta página conserva el inicio breve original. El procedimiento completo y mantenido está en ``README.md`` y ``docs/inicio/proyecto.md``.
+
+
 Requisitos
 ----------
 
@@ -13,7 +16,7 @@ Requisitos
 * El servicio FastAPI del repositorio ``ia_api/backend`` para extracción de CV,
   normalización de perfiles y análisis de ofertas. Consultá sus variables en su
   ``.env.example`` y la configuración de despliegue en
-  :doc:`DESPLIEGUE_VPS <DESPLIEGUE_VPS>`.
+  :doc:`DESPLIEGUE_VPS </DESPLIEGUE_VPS>`.
 
 Preparación local
 -----------------

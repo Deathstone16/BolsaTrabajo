@@ -2,7 +2,7 @@
 
 ## Resultado
 
-Se ejecutó la [estrategia de testing](ESTRATEGIA_TESTING.md). La verificación final
+Se ejecutó la [estrategia de testing](../plan-integracion.md). La verificación final
 aprobó 240 pruebas entre API, Django, configuración, JavaScript y navegador.
 
 | Capa | Resultado | Alcance |
@@ -91,7 +91,7 @@ Resultado de esa ronda: **5 pruebas aprobadas**, sin omisiones ni reintentos, en
 
 ## Activación de Gemini Flash-Lite
 
-Se activó `gemini-3.5-flash-lite` en extracción y compatibilidad. El flujo de cuatro CV sintéticos, con extracción y consolidación reales, produjo cuatro perfiles válidos en ocho llamadas, con 19.953 tokens de entrada y 5.535 de salida (25.488 totales), sin errores 429. Se conserva el detalle en `docs/EVALUACION_GEMINI_2026-10-21.md`.
+Se activó `gemini-3.5-flash-lite` en extracción y compatibilidad. El flujo de cuatro CV sintéticos, con extracción y consolidación reales, produjo cuatro perfiles válidos en ocho llamadas, con 19.953 tokens de entrada y 5.535 de salida (25.488 totales), sin errores 429. Se conserva el detalle en `docs/pruebas/evaluaciones/gemini-2026-10-21.md`.
 
 Validación posterior: **145 pruebas API aprobadas**, **53 pruebas Django de IA y matching aprobadas**, comprobaciones de web y OpenAPI con HTTP 200 y **cinco E2E aprobados** en 2,2 minutos. El E2E exige que `model_version` sea `gemini-3.5-flash-lite` y que el namespace de caché sea `gemini:gemini-3.5-flash-lite`; incluye callback, perfiles, match, idempotencia, privacidad, CV obsoleto y vista móvil. La ejecución `2026-10-21T22-01-54-530Z-760501cb` terminó sin omisiones ni reintentos y limpió cuatro usuarios, tres ofertas, tres archivos, tres eventos de salida y siete sesiones, sin fallos de archivos.
 
@@ -101,7 +101,7 @@ El script de configuración ya conserva el proveedor Gemini al reiniciar. El ver
 
 La captura de AI Studio confirmó 15 RPM, 250.000 TPM de entrada y 500 RPD. La configuración usa el 80 %: 12 RPM, 200.000 TPM estimados y 400 solicitudes en ventana móvil de 24 horas. Se eliminó la pausa fija y se agregaron reserva Redis atómica de cuotas, un lease global para serializar CVs, prioridad efectiva para callbacks y consolidación local de una hoja sin ambigüedad. El tamaño de fragmento llega a 20.000 caracteres, con preflight de entrada y división al truncarse la salida.
 
-Validación: **162 pruebas API**, **53 Django**, cinco E2E aprobados en **1,4 minutos** y prueba de cuatro solicitudes CV simultáneas completadas en **62,312 segundos**, con máximo observado de un CV procesándose. Los cuatro perfiles y callbacks fueron correctos; se limpiaron los cuatro conjuntos de fixtures. El plan de cola, los límites y sus restricciones se detallan en `docs/COLA_Y_CUOTAS_GEMINI.md`.
+Validación: **162 pruebas API**, **53 Django**, cinco E2E aprobados en **1,4 minutos** y prueba de cuatro solicitudes CV simultáneas completadas en **62,312 segundos**, con máximo observado de un CV procesándose. Los cuatro perfiles y callbacks fueron correctos; se limpiaron los cuatro conjuntos de fixtures. El plan de cola, los límites y sus restricciones se detallan en `docs/operaciones/cola-cuotas-ia.md`.
 
 ## Repetir las verificaciones
 

@@ -7,7 +7,7 @@ from usuarios.decorators import postulante_required
 from ofertas.models import Oferta
 
 from .models import ResultadoCompatibilidad
-from .services import get_or_create_match, status_payload
+from .services import get_or_create_match, status_payload, cancel_match
 from .course_recommendations import recommend_courses_for_match
 
 
@@ -29,6 +29,15 @@ def calcular_compatibilidad(request, oferta_id):
 def estado_compatibilidad(request, request_id):
     match = get_object_or_404(ResultadoCompatibilidad, request_id=request_id, postulante=request.user.postulante)
     return JsonResponse(status_payload(match))
+
+
+@login_required
+@postulante_required
+@require_POST
+def cancelar_compatibilidad(request, request_id):
+    get_object_or_404(ResultadoCompatibilidad, request_id=request_id, postulante=request.user.postulante)
+    match = cancel_match(request_id, request.user.postulante)
+    return JsonResponse({'success': True, **status_payload(match)})
 
 
 @login_required

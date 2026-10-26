@@ -1,45 +1,66 @@
 IEN Trabajo
 ===========
 
-Documentación técnica de la aplicación Django para administrar usuarios,
-empresas, ofertas laborales, cursos y moderación.
+Documentación de Bolsa de Trabajo IEN organizada según los siete componentes
+mínimos de la guía. Los planes, evaluaciones y reportes históricos se conservan
+separados de los procedimientos actuales.
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Guía y siete componentes
+
+   README
+   inicio/proyecto
+   requisitos/index
+   arquitectura/general
+   api/contratos
+   datos/modelo-datos
+   operaciones/despliegue
+   pruebas/estrategia
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Guías complementarias
+
+   requisitos/diseno-cv-ofertas-match
+   arquitectura/implementacion-cv-match
+   arquitectura/adr/001-persistencia-y-cv
+   arquitectura/adr/002-integracion-asincrona
+   operaciones/inicio-local-windows
+   operaciones/postgresql
+   operaciones/cloudflare-tunnel
+   operaciones/cola-cuotas-ia
+   funcionalidades/recomendaciones-cursos
+   pruebas/plan-integracion
+   pruebas/datos-demo
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Evaluaciones e historial
+
+   pruebas/evaluaciones/gemini-2026-10-21
+   pruebas/evaluaciones/cobertura-habilidades-v6
+   pruebas/reportes/resultados-2026-10-21
+   historial/integracion-match-2026-10-22
+   historial/revision-documental-2026-10-22
 
 Esta documentación combina una introducción al proyecto, referencias generadas
 desde los módulos Django y guías operativas en Markdown. Para poner en marcha
-el entorno local, consultar :doc:`getting_started`; para preparar una
+el entorno local, consultar :doc:`referencia/primeros-pasos`; para preparar una
 instalación en servidor, seguir la guía de despliegue.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contenido
+   :caption: Referencia y mantenimiento
 
-   getting_started
-   architecture
-   apps/index
+   referencia/primeros-pasos
+   referencia/arquitectura-mvt
+   referencia/documentacion-integrada
+   referencia/apps/index
+   mantenimiento/analisis-limpieza
+   mantenimiento/reorganizacion-documentacion
    DESPLIEGUE_VPS
-   ESTRATEGIA_TESTING
-   CLOUDFLARE_TUNNEL
-   COLA_Y_CUOTAS_GEMINI
-   RECOMENDACIONES_CURSOS
-
-Antecedentes
-------------
-
-Los documentos siguientes registran decisiones y evaluaciones anteriores; las
-guías de despliegue y arquitectura de arriba describen la versión actual.
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Historial técnico
-
-   INTEGRACION_POSTGRESQL
-   IMPLEMENTACION_CV_MATCH
-   PLAN_CV_OFERTAS_MATCH
-   INTEGRACION_BENJA_MATCH_2026-10-22
    INFERENCIA_CV_V7
-   COBERTURA_HABILIDADES_V6
-   EVALUACION_GEMINI_2026-10-21
-   RESULTADOS_TESTING_2026-10-21
 
 Índices
 -------

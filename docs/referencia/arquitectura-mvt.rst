@@ -86,7 +86,7 @@ Seguridad y operación
   publica el origen sin exponer directamente los puertos de aplicación.
 * Redis, PostgreSQL, la API y los workers no deben quedar expuestos a Internet.
   Para el despliegue, migración de datos, proxy y túnel, consultá
-  :doc:`DESPLIEGUE_VPS <DESPLIEGUE_VPS>`.
+  :doc:`DESPLIEGUE_VPS </DESPLIEGUE_VPS>`.
 
 Dependencias
 ------------
