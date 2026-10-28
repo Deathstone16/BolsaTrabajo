@@ -59,7 +59,7 @@
     const link = document.createElement('a');
     link.href = resultUrl || profileUrl;
     link.className = 'font-semibold text-[#512DA8] underline';
-    link.textContent = 'Ver análisis';
+    link.textContent = 'Ver mi perfil profesional';
     box.appendChild(link);
     const dismiss = document.createElement('button');
     dismiss.type = 'button';
@@ -166,7 +166,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     try { if (localStorage.getItem(badgeKey)) showBadge(); } catch (_) { /* storage disabled */ }
-    const anchor = document.getElementById('cv-analysis');
+    const anchor = document.getElementById('cv-analysis') || document.getElementById('cv-profile-view');
     if (anchor) clearBadge();
     document.querySelectorAll('a[href$="#cv-analysis"]').forEach(function (link) {
       link.addEventListener('click', clearBadge);

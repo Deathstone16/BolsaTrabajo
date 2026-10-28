@@ -3,6 +3,9 @@
 Aplicación web de la bolsa de trabajo. Para el análisis de CV usa el
 microservicio FastAPI ubicado en el repositorio `ia_api/backend`.
 
+Para desplegar los dos servicios en una VPS, seguir
+[docs/DESPLIEGUE_VPS.md](docs/DESPLIEGUE_VPS.md).
+
 ## Documentación del proyecto
 
 La [guía de documentación](docs/README.md) reúne los siete

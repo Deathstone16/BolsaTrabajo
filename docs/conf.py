@@ -42,7 +42,9 @@ html_static_path = ["_static"]
 autodoc_default_options = {
     "members": True,
     "undoc-members": True,
-    "show-inheritance": True,
     "member-order": "bysource",
 }
-autodoc_typehints = "description"
+# El inventario de Django no se importa aquí: evitar vínculos rotos a clases
+# base y anotaciones de dependencias externas en el HTML generado.
+autodoc_typehints = "none"
+nitpick_ignore = [("py:class", "optional")]

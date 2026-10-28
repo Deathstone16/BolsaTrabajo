@@ -14,6 +14,7 @@ from django.http import HttpResponseBadRequest, HttpResponseNotAllowed, JsonResp
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
 
@@ -102,12 +103,39 @@ def ver_resultado(request, analisis_id):
         from types import SimpleNamespace
         perfil = SimpleNamespace(contenido=contenido_historico)
     habilidades_duras, habilidades_blandas = split_profile_skills(contenido_historico or {})
+    from .profile_summary import visible_profile_summary
+    legacy_result = (analisis.respuesta or {}).get('result') or {}
     return render(request, 'ia/resultado_analisis.html', {
         'analisis': analisis,
         'perfil': perfil,
         'es_version_actual': analisis.version_cv_id == analisis.postulante.cv_version_actual_id,
         'habilidades_duras': habilidades_duras,
         'habilidades_blandas': habilidades_blandas,
+        'resumen_profesional': visible_profile_summary(
+            contenido_historico, legacy_result.get('resumen_ejecutivo'),
+        ),
+    })
+
+
+@login_required
+@postulante_required
+@never_cache
+def perfil_profesional(request):
+    """Muestra el perfil canónico vigente que alimenta la compatibilidad."""
+    postulante = request.user.postulante
+    perfil = PerfilCV.objects.filter(postulante=postulante).first()
+    if perfil and (not postulante.cv_version_actual_id or perfil.cv_version_id != postulante.cv_version_actual_id):
+        perfil = None
+    contenido = perfil.contenido if perfil and perfil.estado == 'ready' and perfil.contenido else None
+    habilidades_duras, habilidades_blandas = split_profile_skills(contenido or {})
+    from .profile_summary import visible_profile_summary
+    return render(request, 'ia/perfil_profesional.html', {
+        'postulante': postulante,
+        'perfil': perfil,
+        'contenido': contenido,
+        'habilidades_duras': habilidades_duras,
+        'habilidades_blandas': habilidades_blandas,
+        'resumen_profesional': visible_profile_summary(contenido) if contenido else None,
     })
 
 
@@ -130,7 +158,7 @@ def editar_perfil_cv(request):
                 content = form.apply_to(profile.contenido)
                 request_profile_normalization(request.user.postulante, content, profile.version)
                 messages.info(request, 'Guardamos tu edición. La estamos normalizando para usarla en compatibilidad.')
-                return redirect('mi_perfil')
+                return redirect('ia:perfil_profesional')
     else:
         form = PerfilCVForm(initial=PerfilCVForm.initial_from_profile(profile))
     return render(request, 'ia/editar_perfil_cv.html', {'form': form, 'perfil': profile})

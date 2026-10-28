@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const formUpload = document.getElementById('form-cv-upload');
     const formEliminar = document.getElementById('form-eliminar-cv');
     const formAnalizar = document.getElementById('form-analizar-cv');
-    const botonResultado = document.getElementById('boton-ver-resultado');
+    const botonPerfil = document.getElementById('boton-ver-perfil');
     let versionCvActualId = Number(formAnalizar ? formAnalizar.dataset.versionCvId : 0);
     const AVISO_DEMORA_MS = 20000;
     let analisisActualId = null;
@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.success) {
                     marcarBotonAnalisisPendiente(boton);
-                    deshabilitarBotonResultado();
+                    ocultarBotonPerfil();
                     mostrarEstadoAnalisis('pendiente');
                     iniciarTemporizadorDemora();
                     consultarEstadoAnalisis(data.analisis_id, boton, textoOriginal);
@@ -144,9 +144,9 @@ document.addEventListener('DOMContentLoaded', function() {
             cancelarTemporizadorDemora();
             restaurarBotonAnalizar(botonAnalisisActual || botonInicial, textoBotonOriginal || textoInicial);
             if (payload.status === 'completado') {
-                const resultadoUrl = payload.resultado_url || formAnalizar.dataset.estadoUrl.replace('/0/', '/' + payload.analysis_id + '/').replace('/estado/', '/');
-                mostrarEstadoAnalisis('completado', payload.mensaje, resultadoUrl);
-                habilitarBotonResultado(resultadoUrl);
+                const perfilUrl = formAnalizar.dataset.perfilUrl;
+                mostrarEstadoAnalisis('completado', payload.mensaje, perfilUrl);
+                mostrarBotonPerfil();
             } else {
                 mostrarEstadoAnalisis('error', payload.mensaje || 'No se pudo analizar el CV.');
             }
@@ -194,20 +194,12 @@ document.addEventListener('DOMContentLoaded', function() {
         boton.innerHTML = 'Análisis en proceso';
     }
 
-    function deshabilitarBotonResultado() {
-        if (!botonResultado) return;
-        botonResultado.href = '#';
-        botonResultado.setAttribute('aria-disabled', 'true');
-        botonResultado.classList.remove('text-primary', 'border-primary', 'hover:bg-primary/5');
-        botonResultado.classList.add('text-muted-foreground', 'border-border', 'opacity-50', 'pointer-events-none');
+    function ocultarBotonPerfil() {
+        if (botonPerfil) botonPerfil.style.display = 'none';
     }
 
-    function habilitarBotonResultado(resultadoUrl) {
-        if (!botonResultado) return;
-        botonResultado.href = resultadoUrl;
-        botonResultado.setAttribute('aria-disabled', 'false');
-        botonResultado.classList.remove('text-muted-foreground', 'border-border', 'opacity-50', 'pointer-events-none');
-        botonResultado.classList.add('text-primary', 'border-primary', 'hover:bg-primary/5');
+    function mostrarBotonPerfil() {
+        if (botonPerfil) botonPerfil.style.display = '';
     }
 
     function enviarCV(archivo) {
@@ -227,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                    if (botonResultado) deshabilitarBotonResultado();
+                    ocultarBotonPerfil();
                     versionCvActualId = Number(data.version_cv_id) || 0;
                 if (window.IenUI) window.IenUI.avisoTrasRecarga('exito', data.mensaje || 'CV cargado con éxito.');
                 location.reload();
@@ -259,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                    if (botonResultado) deshabilitarBotonResultado();
+                    ocultarBotonPerfil();
                     versionCvActualId = Number(data.version_cv_id) || 0;
                 if (window.IenUI) window.IenUI.avisoTrasRecarga('exito', data.mensaje || 'CV reemplazado con éxito.');
                 location.reload();
@@ -305,8 +297,8 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (estado === 'completado') {
             icono.className = 'grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#27AE60]/15 text-[#27AE60]';
             icono.innerHTML = ICONO_OK;
-            titulo.textContent = '¡Tu análisis está listo!';
-            texto.textContent = mensaje || 'Ya podés ver las habilidades que detectamos en tu CV.';
+            titulo.textContent = '¡Tu perfil está listo!';
+            texto.textContent = mensaje || 'Ya podés ver el perfil profesional que se usa en el match.';
             if (resultadoUrl) { link.href = resultadoUrl; link.style.display = ''; }
         } else {
             icono.className = 'grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#d4183d]/10 text-[#d4183d]';

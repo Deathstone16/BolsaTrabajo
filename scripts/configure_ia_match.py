@@ -13,7 +13,7 @@ PROVIDER_KEYS = {
 
 
 def resolve_provider_model(api_values):
-    """Return the validated active provider and its model without changing config."""
+    """Return the CV extraction provider and model without changing config."""
     provider = (api_values.get('LLM_PROVIDER') or 'groq').strip().lower()
     if provider not in PROVIDER_KEYS:
         raise ValueError(f'LLM_PROVIDER no soportado: {provider!r}')
@@ -31,6 +31,16 @@ def resolve_provider_model(api_values):
     return provider, model
 
 
+def resolve_match_provider_model(api_values):
+    """Keep match routing independent from the CV extraction provider."""
+    provider = (api_values.get('MATCH_PROVIDER') or 'groq').strip().lower()
+    if provider not in {'groq', 'gemini'}:
+        raise ValueError(f'MATCH_PROVIDER no soportado: {provider!r}')
+    if provider == 'gemini':
+        return provider, api_values.get('GEMINI_MODEL') or 'gemini-3.5-flash-lite'
+    return provider, api_values.get('MATCH_GROQ_MODEL') or api_values.get('CV_MODEL') or 'qwen/qwen3.8-27b'
+
+
 def api_env_updates(provider, model, service, hmac):
     """Build API env updates while preserving provider and unrelated model settings."""
     updates = {
@@ -39,8 +49,6 @@ def api_env_updates(provider, model, service, hmac):
         'CV_RESULT_CALLBACK_URL': 'http://127.0.0.1:8000/ia/llegue/',
         'CHANNEL_REDIS_URL': 'redis://127.0.0.1:6379/3',
     }
-    if provider == 'groq':
-        updates['MATCH_GROQ_MODEL'] = model
     return updates
 
 
@@ -64,6 +72,7 @@ def main():
     hmac = values.get('IA_CALLBACK_HMAC_SECRET') or values.get('IA_CALLBACK_TOKEN') or secrets.token_urlsafe(48)
     api_values = dotenv_values(api / '.env')
     provider, model = resolve_provider_model(api_values)
+    match_provider, match_model = resolve_match_provider_model(api_values)
     provider_key_configured = bool(api_values.get(PROVIDER_KEYS[provider]))
 
     update(django_env, {
@@ -75,11 +84,11 @@ def main():
         'MATCH_API_TOKEN': service, 'CHANNEL_REDIS_URL': 'redis://127.0.0.1:6379/3',
         'MATCH_API_URL': 'ws://127.0.0.1:8001/api/v1/ws/v1/matches',
         'MATCH_API_HTTP_URL': 'http://127.0.0.1:8001/api/v1',
-        'MATCH_MODEL_VERSION': f'{provider}:{model}',
+        'MATCH_MODEL_VERSION': f'{match_provider}:{match_model}:strict-low' if match_provider == 'groq' else f'{match_provider}:{match_model}',
     })
     updates = api_env_updates(provider, model, service, hmac)
     update(api / '.env', updates)
-    print(f'API única en 8001 configurada. Provider={provider}; clave configurada={provider_key_configured}')
+    print(f'API única en 8001 configurada. CV={provider}; match={match_provider}; clave CV configurada={provider_key_configured}')
 
 
 if __name__ == '__main__':

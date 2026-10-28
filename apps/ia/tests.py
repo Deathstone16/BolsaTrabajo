@@ -23,7 +23,7 @@ from django.urls import reverse
 from usuarios.models import Postulante, Usuario
 
 from .models import AnalisisCV, ComparacionOfertaCV, EventoSalida, PerfilCV, TrabajoExtraccion, private_cv_storage
-from .workflow import publish_candidate_profile, request_cv_extraction, request_profile_normalization
+from .workflow import CV_PROMPT_VERSION, publish_candidate_profile, request_cv_extraction, request_profile_normalization
 from .consumers import CVAnalysisConsumer, TOKEN_SALT
 from .profile_skills import split_profile_skills
 
@@ -97,17 +97,17 @@ class AnalisisCVViewsTests(TestCase):
         self.assertEqual(response.status_code, 202)
         analysis = AnalisisCV.objects.get(postulante=self.postulante)
         job = TrabajoExtraccion.objects.get(analisis_cv=analysis)
-        self.assertEqual(job.prompt_version, 'cv-extraction.v2-packets-soft.v8')
+        self.assertEqual(job.prompt_version, CV_PROMPT_VERSION)
         self.assertEqual(job.estado, TrabajoExtraccion.Estado.PENDIENTE)
         self.assertTrue(job.cv_snapshot.name)
         self.assertTrue(EventoSalida.objects.filter(payload__job_id=job.id).exists())
 
-    def test_cv_completado_con_prompt_previo_no_se_reutiliza_en_v2_packets(self):
+    def test_cv_completado_con_prompt_previo_no_se_reutiliza_en_educacion(self):
         old_analysis, old_job, _ = request_cv_extraction(self.postulante)
         old_analysis.estado = AnalisisCV.Estado.COMPLETADO
         old_analysis.save(update_fields=['estado'])
-        old_job.prompt_version = 'cv-extraction.v2-blocks-refs'
-        old_job.clave_idempotencia = f'candidate-cv:{self.postulante.cv_version_actual_id}:{self.postulante.cv_version_actual.sha256}:cv-extraction.v2-blocks-refs'
+        old_job.prompt_version = 'cv-extraction.v2-packets-soft.v11-courses'
+        old_job.clave_idempotencia = f'candidate-cv:{self.postulante.cv_version_actual_id}:{self.postulante.cv_version_actual.sha256}:cv-extraction.v2-packets-soft.v11-courses'
         old_job.estado = TrabajoExtraccion.Estado.COMPLETADO
         old_job.save(update_fields=['prompt_version', 'clave_idempotencia', 'estado'])
 
@@ -116,7 +116,7 @@ class AnalisisCVViewsTests(TestCase):
         self.assertTrue(created)
         self.assertNotEqual(new_analysis.pk, old_analysis.pk)
         self.assertNotEqual(new_job.pk, old_job.pk)
-        self.assertEqual(new_job.prompt_version, 'cv-extraction.v2-packets-soft.v8')
+        self.assertEqual(new_job.prompt_version, CV_PROMPT_VERSION)
         self.assertEqual(AnalisisCV.objects.filter(version_cv=self.postulante.cv_version_actual).count(), 2)
 
         new_analysis.estado = AnalisisCV.Estado.COMPLETADO
@@ -365,6 +365,76 @@ class AnalisisCVViewsTests(TestCase):
         Postulante.objects.create(usuario=other_user)
         self.client.force_login(other_user)
         self.assertEqual(self.client.get(reverse('ia:ver_resultado', args=[analysis.pk])).status_code, 404)
+
+    def test_perfil_profesional_muestra_la_version_editada_que_usa_el_match(self):
+        original = self._result()
+        analysis = AnalisisCV.objects.create(
+            postulante=self.postulante,
+            version_cv=self.postulante.cv_version_actual,
+            estado=AnalisisCV.Estado.COMPLETADO,
+            perfil_snapshot=original,
+        )
+        publish_candidate_profile(self.postulante, original, 'a' * 64, 'extraction', analysis)
+        edited = self._result()
+        edited['summary'] = 'Perfil final actualizado por la postulante.'
+        edited['skills'].append({
+            'name': 'PostgreSQL', 'level': 'intermediate', 'kind': 'technical',
+            'origin': 'user_declared', 'evidence': ['Declarada directamente por la postulante'],
+        })
+        edited['work_experience'] = [{
+            'job_title': 'Analista de datos', 'organization': 'Empresa de prueba',
+            'duration_months': 12, 'highlights': ['Preparó informes'],
+        }]
+        edited['languages'] = [{'name': 'Inglés', 'level': 'professional'}]
+        edited['preferences'] = {'locations': ['Resistencia'], 'work_modes': ['remote']}
+        publish_candidate_profile(self.postulante, edited, 'b' * 64, 'user_edit')
+
+        profile_url = reverse('ia:perfil_profesional')
+        page = self.client.get(profile_url)
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, 'Perfil final actualizado por la postulante.')
+        for expected in ('PostgreSQL', 'Analista de datos', 'Preparó informes', 'Inglés', 'Resistencia', 'Remoto'):
+            self.assertContains(page, expected)
+        self.assertContains(page, 'Versión 2')
+        self.assertContains(page, 'Editar información')
+        self.assertContains(self.client.get(reverse('mi_perfil')), f'href="{profile_url}"')
+        self.assertNotContains(self.client.get(reverse('ia:ver_resultado', args=[analysis.pk])), 'PostgreSQL')
+
+    def test_perfil_profesional_no_muestra_un_cv_anterior_ni_datos_ajenos(self):
+        profile = publish_candidate_profile(self.postulante, self._result(), 'a' * 64, 'extraction')
+        profile.estado = 'processing'
+        profile.save(update_fields=['estado'])
+        processing = self.client.get(reverse('ia:perfil_profesional'))
+        self.assertContains(processing, 'Estamos actualizando tu perfil')
+        self.assertNotContains(processing, 'Python developer.')
+
+        profile.estado = 'ready'
+        profile.cv_version = None
+        profile.save(update_fields=['estado', 'cv_version'])
+        stale = self.client.get(reverse('ia:perfil_profesional'))
+        self.assertContains(stale, 'Todavía no hay un perfil listo')
+        self.assertNotContains(stale, 'Python developer.')
+
+        other_user = Usuario.objects.create_user(email='otro-perfil@example.com', password='clave-segura')
+        Postulante.objects.create(usuario=other_user)
+        self.client.force_login(other_user)
+        other = self.client.get(reverse('ia:perfil_profesional'))
+        self.assertEqual(other.status_code, 200)
+        self.assertNotContains(other, 'Python developer.')
+
+    def test_guardar_edicion_lleva_al_perfil_profesional_en_proceso(self):
+        profile = publish_candidate_profile(self.postulante, self._result(), 'a' * 64, 'extraction')
+        response = self.client.post(reverse('ia:editar_perfil_cv'), {
+            'version': profile.version,
+            'headline': 'Backend developer',
+            'summary': 'Resumen editado por la postulante.',
+            'skills': 'Python',
+            'languages': '',
+            'locations': '',
+        })
+        self.assertRedirects(response, reverse('ia:perfil_profesional'), fetch_redirect_response=False)
+        profile.refresh_from_db()
+        self.assertEqual(profile.estado, 'processing')
 
     def test_edicion_se_normaliza_antes_de_reemplazar_el_perfil_canonico(self):
         profile = publish_candidate_profile(

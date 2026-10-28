@@ -1,8 +1,20 @@
 """Presentation helpers for education statuses and levels."""
 
+from html import unescape
+
 from django import template
 
 register = template.Library()
+
+
+@register.filter
+def human_text(value):
+    """Show legacy model text as Unicode; Django still escapes the result."""
+    if value is None:
+        return ""
+    text = str(value)
+    decoded = unescape(text)
+    return unescape(decoded) if decoded != text else decoded
 
 
 @register.filter
@@ -17,6 +29,9 @@ def education_status(item):
     }
     if status in labels:
         return labels[status]
+    if (str(item.get('level') or '').casefold() == 'bachelor'
+            and any('cursad' in str(quote).casefold() for quote in item.get('source_quotes') or [])):
+        return 'Cursado; título no informado'
     # Legacy profiles only have completed. False means not completed, but does
     # not establish whether the person is still studying or discontinued.
     if item.get("completed") is True:
@@ -75,6 +90,10 @@ def education_title(item):
     field = str(item.get("field") or "").strip()
     if _course_study(item) and field:
         return field
+    if level == 'other' and field:
+        return field
+    if level == 'bachelor' and field.casefold().startswith('lic. en '):
+        return 'Licenciatura en ' + field[8:]
     title = "Grado universitario" if level == "bachelor" else education_level(level)
     normalized_field = field.casefold()
     # Some source records already carry the full program name in `field`.

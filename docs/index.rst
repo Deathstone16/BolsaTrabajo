@@ -44,6 +44,11 @@ separados de los procedimientos actuales.
    historial/integracion-match-2026-10-22
    historial/revision-documental-2026-10-22
 
+Esta documentación combina una introducción al proyecto, referencias generadas
+desde los módulos Django y guías operativas en Markdown. Para poner en marcha
+el entorno local, consultar :doc:`referencia/primeros-pasos`; para preparar una
+instalación en servidor, seguir la guía de despliegue.
+
 .. toctree::
    :maxdepth: 2
    :caption: Referencia y mantenimiento
@@ -54,6 +59,8 @@ separados de los procedimientos actuales.
    referencia/apps/index
    mantenimiento/analisis-limpieza
    mantenimiento/reorganizacion-documentacion
+   DESPLIEGUE_VPS
+   INFERENCIA_CV_V7
 
 Índices
 -------

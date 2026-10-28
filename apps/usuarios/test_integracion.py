@@ -84,8 +84,8 @@ class FlujosIntegracionRamasTests(TestCase):
         self.assertContains(response, 'id="form-cv-upload"')
         self.assertContains(response, 'id="cv-upload-area"')
         self.assertContains(response, 'js/cv_upload.js')
-        self.assertNotContains(response, 'id="perfil-siguiente-paso"')
-        self.assertNotContains(response, 'Empezá por cargar tu CV')
+        self.assertContains(response, 'id="perfil-siguiente-paso"', count=1)
+        self.assertContains(response, 'Empezá por cargar tu CV')
 
     def test_analisis_pendiente_tiene_indicador_global_solo_para_su_propietario(self):
         usuario, postulante = self.crear_postulante()
@@ -106,6 +106,25 @@ class FlujosIntegracionRamasTests(TestCase):
         other, _ = self.crear_postulante('otro-progreso@example.com')
         self.client.force_login(other)
         self.assertEqual(self.client.get(reverse('home')).context['cv_pending_analysis_id'], '')
+
+    def test_perfil_con_cv_muestra_una_sola_tarjeta_sin_pedir_cargarlo_otra_vez(self):
+        usuario, postulante = self.crear_postulante()
+        version = CVVersion.objects.create(
+            postulante=postulante, numero=1, archivo='fixture-cv.pdf',
+            nombre_original='CV de prueba.pdf', sha256='a' * 64,
+            formato='pdf', tamano=123,
+        )
+        postulante.cv_version_actual = version
+        postulante.save(update_fields=['cv_version_actual'])
+        self.client.force_login(usuario)
+
+        response = self.client.get(reverse('mi_perfil'))
+
+        self.assertContains(response, 'id="perfil-siguiente-paso"', count=1)
+        self.assertContains(response, 'CV de prueba.pdf')
+        self.assertContains(response, 'id="form-analizar-cv"')
+        self.assertContains(response, 'id="form-cv-upload"')
+        self.assertNotContains(response, 'Empezá por cargar tu CV')
 
     def test_descarga_cv_no_filtra_archivos_a_anonimos_ni_a_otro_postulante(self):
         _, propietario = self.crear_postulante()

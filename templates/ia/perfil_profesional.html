@@ -1,0 +1,141 @@
+{% extends 'nueva_ui/base.html' %}
+{% load education_presentation %}
+
+{% block title %}Mi perfil profesional · IEN Empleo{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-[#F8F3F0] py-12">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid gap-8 lg:grid-cols-[16rem_1fr]">
+      {% include 'usuarios/_sidebar_postulante.html' with seccion='perfil' %}
+      <main class="min-w-0" id="cv-profile-view">
+        <p class="kicker">Tu perfil vigente</p>
+        <h1 class="mt-3 text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">Mi perfil profesional</h1>
+        {% include 'nueva_ui/partials/_breadcrumbs.html' with current='Perfil profesional' parent_url='mi_perfil' parent_label='Mi perfil' only %}
+
+        {% if contenido %}
+          <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
+            <p class="text-sm text-[#6B645C]">Esta es la versión guardada que se usa para calcular tu compatibilidad con las ofertas.</p>
+            <a href="{% url 'ia:editar_perfil_cv' %}" class="btn-ghost !py-2 text-sm">Editar información</a>
+          </div>
+          <p class="mt-2 font-mono text-xs text-[#6B645C]">Versión {{ perfil.version }} · actualizada {{ perfil.actualizado_en|date:'d/m/Y H:i' }}</p>
+
+          <section class="panel mt-6 p-6 sm:p-8" aria-labelledby="resumen-perfil-titulo">
+            <h2 id="resumen-perfil-titulo" class="text-xl font-bold text-[#26222E]">Resumen profesional</h2>
+            {% if contenido.headline %}<p class="mt-4 font-semibold text-[#512DA8]">{{ contenido.headline|human_text }}</p>{% endif %}
+            <p class="mt-3 whitespace-pre-line leading-relaxed text-[#6B645C]">{{ resumen_profesional|human_text }}</p>
+          </section>
+
+          <section class="panel mt-6 p-6 sm:p-8" data-profile-skills aria-labelledby="habilidades-perfil-titulo">
+            <h2 id="habilidades-perfil-titulo" class="text-xl font-bold text-[#26222E]">Habilidades</h2>
+            <h3 class="mt-6 text-sm font-semibold text-[#512DA8]">Habilidades técnicas</h3>
+            <div class="mt-3 grid gap-4 md:grid-cols-2">
+              {% for habilidad in habilidades_duras %}
+                <article class="rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#F8F3F0] p-5">
+                  <div class="flex items-start justify-between gap-3">
+                    <h4 class="font-semibold text-[#26222E]">{{ habilidad.name|human_text }}</h4>
+                    {% include 'ia/_nivel_habilidad.html' with nivel=habilidad.level only %}
+                  </div>
+                  {% if habilidad.evidence %}<p class="mt-3 text-sm leading-relaxed text-[#6B645C]">{% for evidencia in habilidad.evidence %}{{ evidencia|human_text }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+                </article>
+              {% empty %}<p class="text-sm text-[#6B645C]">Todavía no hay habilidades técnicas registradas.</p>{% endfor %}
+            </div>
+
+            <h3 class="mt-8 text-sm font-semibold text-emerald-700">Habilidades blandas</h3>
+            <div class="mt-3 grid gap-4 md:grid-cols-2">
+              {% for habilidad in habilidades_blandas %}
+                <article class="rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+                  <h4 class="font-semibold text-emerald-900">{{ habilidad.name|human_text }}</h4>
+                  {% if habilidad.evidence %}<p class="mt-3 text-sm leading-relaxed text-emerald-900/80">{% for evidencia in habilidad.evidence %}{{ evidencia|human_text }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+                </article>
+              {% empty %}<p class="text-sm text-[#6B645C]">Todavía no hay habilidades blandas registradas.</p>{% endfor %}
+            </div>
+          </section>
+
+          {% if contenido.work_experience %}
+            <section class="panel mt-6 p-6" aria-labelledby="experiencia-perfil-titulo">
+              <h2 id="experiencia-perfil-titulo" class="text-xl font-bold text-[#26222E]">Experiencia laboral</h2>
+              <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                {% for experiencia in contenido.work_experience %}
+                  <article class="rounded-2xl border border-[rgba(110,85,55,0.16)] bg-[#F8F3F0] p-4">
+                    <h3 class="font-semibold text-[#26222E]">{{ experiencia.job_title|human_text }}</h3>
+                    {% if experiencia.organization %}<p class="mt-1 text-sm text-[#6B645C]">{{ experiencia.organization|human_text }}</p>{% endif %}
+                    {% if experiencia.duration_months != None %}<p class="mt-1 text-xs text-[#6B645C]">{{ experiencia.duration_months }} meses de experiencia</p>{% endif %}
+                    {% if experiencia.highlights %}<ul class="mt-3 list-disc space-y-1 pl-5 text-sm text-[#6B645C]">{% for tarea in experiencia.highlights %}<li>{{ tarea|human_text }}</li>{% endfor %}</ul>{% endif %}
+                  </article>
+                {% endfor %}
+              </div>
+            </section>
+          {% endif %}
+
+          {% include 'ia/_projects.html' with projects=contenido.projects only %}
+          {% include 'ia/_education.html' with education=contenido.education only %}
+
+          {% if contenido.languages %}
+            <section class="panel mt-6 p-6" aria-labelledby="idiomas-perfil-titulo">
+              <h2 id="idiomas-perfil-titulo" class="text-xl font-bold text-[#26222E]">Idiomas</h2>
+              <div class="mt-4 flex flex-wrap gap-2">
+                {% for idioma in contenido.languages %}
+                  <span class="chip">{{ idioma.name|human_text }}{% if idioma.level == 'basic' %} · Básico{% elif idioma.level == 'conversational' %} · Conversacional{% elif idioma.level == 'professional' %} · Profesional{% elif idioma.level == 'native' %} · Nativo{% endif %}</span>
+                {% endfor %}
+              </div>
+            </section>
+          {% endif %}
+
+          {% if contenido.credentials %}
+            <section class="panel mt-6 p-6" aria-labelledby="credenciales-perfil-titulo">
+              <h2 id="credenciales-perfil-titulo" class="text-xl font-bold text-[#26222E]">Certificaciones registradas</h2>
+              <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                {% for credencial in contenido.credentials %}
+                  <article class="rounded-2xl border border-[rgba(110,85,55,0.16)] bg-[#F8F3F0] p-4">
+                    <h3 class="font-semibold text-[#26222E]">{{ credencial.name|human_text }}</h3>
+                    {% if credencial.issuer %}<p class="mt-1 text-sm text-[#6B645C]">{{ credencial.issuer|human_text }}</p>{% endif %}
+                    {% if credencial.expires_at %}<p class="mt-1 text-xs text-[#6B645C]">Vence: {{ credencial.expires_at }}</p>{% endif %}
+                  </article>
+                {% endfor %}
+              </div>
+            </section>
+          {% endif %}
+
+          {% if contenido.preferences.locations or contenido.preferences.work_modes %}
+            <section class="panel mt-6 p-6" aria-labelledby="preferencias-perfil-titulo">
+              <h2 id="preferencias-perfil-titulo" class="text-xl font-bold text-[#26222E]">Preferencias laborales</h2>
+              {% if contenido.preferences.locations %}<h3 class="mt-4 text-sm font-semibold text-[#26222E]">Ubicaciones</h3><div class="mt-2 flex flex-wrap gap-2">{% for ubicacion in contenido.preferences.locations %}<span class="chip">{{ ubicacion|human_text }}</span>{% endfor %}</div>{% endif %}
+              {% if contenido.preferences.work_modes %}<h3 class="mt-4 text-sm font-semibold text-[#26222E]">Modalidad</h3><div class="mt-2 flex flex-wrap gap-2">{% for modalidad in contenido.preferences.work_modes %}<span class="chip">{% if modalidad == 'remote' %}Remoto{% elif modalidad == 'hybrid' %}Híbrido{% elif modalidad == 'onsite' %}Presencial{% else %}Sin especificar{% endif %}</span>{% endfor %}</div>{% endif %}
+            </section>
+          {% endif %}
+
+          {% if contenido.rejected_skills %}
+            <details class="panel mt-6 p-6">
+              <summary class="cursor-pointer font-semibold text-[#26222E]">Habilidades que quitaste del perfil</summary>
+              <p class="mt-2 text-sm text-[#6B645C]">No aparecen entre tus habilidades activas.</p>
+              <div class="mt-3 flex flex-wrap gap-2">{% for habilidad in contenido.rejected_skills %}<span class="chip">{{ habilidad.name|human_text }}</span>{% endfor %}</div>
+            </details>
+          {% endif %}
+        {% elif perfil and perfil.estado == 'processing' %}
+          <div class="panel mt-8 p-6" role="status">
+            <h2 class="text-lg font-semibold text-[#26222E]">Estamos actualizando tu perfil</h2>
+            <p class="mt-2 text-sm text-[#6B645C]">Tu edición se está normalizando. Cuando termine, verás acá la versión final que se usa en el match.</p>
+          </div>
+        {% elif perfil and perfil.estado == 'error' %}
+          <div class="panel mt-8 p-6" role="alert">
+            <h2 class="text-lg font-semibold text-[#26222E]">No pudimos actualizar tu perfil</h2>
+            <p class="mt-2 text-sm text-[#6B645C]">Revisá tu información y volvé a guardarla.</p>
+            <a href="{% url 'ia:editar_perfil_cv' %}" class="btn-ghost mt-4 !py-2 text-sm">Editar información</a>
+          </div>
+        {% else %}
+          <div class="panel mt-8 p-6">
+            <h2 class="text-lg font-semibold text-[#26222E]">Todavía no hay un perfil listo</h2>
+            <p class="mt-2 text-sm text-[#6B645C]">Analizá la versión actual de tu CV para generar el perfil que se usa en el match.</p>
+            <a href="{% url 'mi_perfil' %}#cv-analysis" class="btn-ien mt-4">Ir a mi CV</a>
+          </div>
+        {% endif %}
+      </main>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  {% if perfil and perfil.estado == 'processing' %}<script>setTimeout(() => window.location.reload(), 8000);</script>{% endif %}
+{% endblock %}

@@ -1,0 +1,18 @@
+{% load education_presentation %}
+{% if projects %}
+<section class="panel mt-6 p-6" data-profile-projects aria-labelledby="profile-projects-title">
+  <h2 id="profile-projects-title" class="text-xl font-bold text-[#26222E]">Proyectos</h2>
+  <div class="mt-4 grid gap-3 sm:grid-cols-2">
+    {% for project in projects %}
+      <article class="rounded-2xl border border-[rgba(110,85,55,0.16)] bg-[#F8F3F0] p-4">
+        <h3 class="font-semibold text-[#26222E]">{{ project.name|human_text }}</h3>
+        {% if project.highlights %}
+          <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-[#6B645C]">
+            {% for highlight in project.highlights %}<li>{{ highlight|human_text }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}

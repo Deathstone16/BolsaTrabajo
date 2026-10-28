@@ -67,6 +67,7 @@
     <div class="match-score">
       <p class="match-eyebrow">Compatibilidad con la oferta</p>
       <div class="match-number">{{ match.match_percentage|floatformat:0 }}%</div>
+      <p>{{ match.match_percentage|floatformat:2 }} de 100 puntos obtenidos.</p>
       <p>Este porcentaje compara tu perfil con los requisitos de la oferta. No representa una probabilidad de contratación.</p>
     </div>
     <div class="panel match-summary">
@@ -105,6 +106,7 @@
       {% for item in group.items %}
       <article class="panel match-requirement">
         <header><h3>{{ item.name }}</h3><span class="match-badge {{ item.status }}">{{ item.status_label }}</span></header>
+        {% if item.points_possible != None %}<p><strong>{{ item.points_awarded|floatformat:2 }} / {{ item.points_possible|floatformat:2 }} puntos</strong></p>{% endif %}
         {% if item.explanation %}<p>{{ item.explanation }}</p>{% endif %}
       </article>
       {% empty %}<p class="match-empty">Esta oferta no incluye {{ group.title|lower }}.</p>{% endfor %}

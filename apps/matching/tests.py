@@ -1,3 +1,4 @@
+import json
 from datetime import timedelta
 from decimal import Decimal
 from html.parser import HTMLParser
@@ -138,13 +139,16 @@ class MatchingServiceTests(TestCase):
         match.resultado = {
             'mandatory_status': 'all_met', 'summary': 'Resumen de compatibilidad.',
             'assessments': [{'name': 'Python', 'status': 'met', 'mandatory': True,
-                             'explanation': '<script>alert(1)</script>'}],
+                             'explanation': '<script>alert(1)</script>',
+                             'points_awarded': 82, 'points_possible': 100}],
             'breakdown': {'technical_skills': {'score': 1, 'applicable': True, 'configured_weight_bp': 3500}},
         }
         match.save()
         self.client.force_login(self.candidate_user)
         response = self.client.get(reverse('matching:detalle', args=[match.request_id]))
         self.assertContains(response, '82%')
+        self.assertContains(response, '82,00 de 100 puntos obtenidos')
+        self.assertContains(response, '82,00 / 100,00 puntos')
         self.assertContains(response, 'Compatibilidad por área')
         self.assertContains(response, 'Requisitos obligatorios')
         self.assertContains(response, 'Coincide')
@@ -276,18 +280,38 @@ class MatchingServiceTests(TestCase):
         EventoSalida.objects.filter(pk=event.pk).update(actualizado_en=timezone.now() - timedelta(minutes=10))
         self.assertEqual(command._claim().pk, event.pk)
 
+    @patch('matching.management.commands.dispatch_match_jobs.complete_match')
+    @patch('matching.management.commands.dispatch_match_jobs.connect')
+    def test_dispatch_match_espera_resultado_tras_aceptar_job_ya_completado(self, connect, complete):
+        from matching.management.commands.dispatch_match_jobs import Command
+        match, _ = get_or_create_match(self.postulante, self.oferta)
+        command = Command()
+        event = command._claim()
+        socket = connect.return_value.__enter__.return_value
+        socket.recv.side_effect = [
+            json.dumps({'type': 'match.accepted', 'status': 'completed', 'request_id': str(match.request_id)}),
+            json.dumps({'type': 'match.completed', 'status': 'completed', 'result': {'request_id': str(match.request_id)}}),
+        ]
+
+        command._send(event)
+
+        event.refresh_from_db()
+        self.assertEqual(event.estado, EventoSalida.Estado.ENVIADO)
+        complete.assert_called_once_with(str(match.request_id), {'request_id': str(match.request_id)})
+
     @patch('matching.services._save_cache')
     def test_callback_v2_rechaza_clasificacion_distinta_y_preserva_config_capturada(self, save_cache):
         match, _ = get_or_create_match(self.postulante, self.oferta)
         payload = match_request_payload(match)
         result = {
             'schema_version': 'match-result.v2', 'request_id': payload['request_id'], 'status': 'completed',
-            'match_percentage': 82, 'coverage_percentage': 100, 'confidence_percentage': None,
+            'match_percentage': 100, 'coverage_percentage': 100, 'confidence_percentage': None,
             'confidence_available': False,
             'assessments': [{'requirement_id': 'req-python', 'category': 'soft_skills',
                 'source': 'requisitos_obligatorios', 'name': 'Python', 'score': 1,
                 'status': 'met', 'mandatory': True, 'explanation': 'Evidence found.',
-                'evidence_refs': ['/skills/0/source_quotes/0']}],
+                'evidence_refs': ['/skills/0/source_quotes/0'],
+                'points_awarded': 100, 'points_possible': 100}],
             'summary': 'Match.', 'breakdown': {
                 key: {'score': 1, 'configured_weight_bp': weight, 'effective_weight_bp': weight, 'applicable': True}
                 for key, weight in payload['scoring_config']['weights'].items()
@@ -298,6 +322,10 @@ class MatchingServiceTests(TestCase):
         with self.assertRaises(ValueError):
             complete_match(str(match.request_id), result)
         result['assessments'][0]['category'] = 'technical_skills'
+        result['match_percentage'] = 82
+        with self.assertRaisesMessage(ValueError, 'suma de puntos'):
+            complete_match(str(match.request_id), result)
+        result['match_percentage'] = 100
         completed = complete_match(str(match.request_id), result)
         self.assertEqual(completed.estado, ResultadoCompatibilidad.Estado.COMPLETADO)
         self.assertIsNone(completed.confidence_percentage)

@@ -73,6 +73,21 @@ test('oferta legacy avisa que los requisitos deben revisarse y oculta el formula
   await snapshot(page, testInfo, 'oferta-legacy-requiere-revision');
 });
 
+test('el perfil vigente se abre desde Mi CV y muestra la versión usada para match', async ({ page }, testInfo) => {
+  await login(page, 'other');
+  await page.goto('/usuarios/mi-perfil/');
+  const profileLink = page.locator('#boton-ver-perfil');
+  await expect(profileLink).toBeVisible();
+  await expect(profileLink).toHaveText('Ver mi perfil profesional');
+  await profileLink.click();
+  await expect(page).toHaveURL(/\/ia\/perfil-profesional\/$/);
+  await expect(page.getByRole('heading', { name: 'Mi perfil profesional' })).toBeVisible();
+  await expect(page.getByText('Esta es la versión guardada que se usa para calcular tu compatibilidad con las ofertas.')).toBeVisible();
+  await expect(page.locator('[data-profile-skills]')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Mi CV y análisis' })).toBeVisible();
+  await snapshot(page, testInfo, 'perfil-profesional-vigente');
+});
+
 test('match completado se renderiza desde el servidor, conserva 0% y abre el detalle sin calcular otra vez', async ({ browser }, testInfo) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   try {
@@ -221,7 +236,7 @@ test('E2E real: analizar CV, mostrar habilidades, calcular match y bloquear el C
     return (await response.json()).estado;
   }, { timeout: 700_000, intervals: [2000, 4000, 8000] }).toBe('completado');
   console.log('E2E IA real: extracción de CV y callback completados.');
-  await expect(page.locator('#boton-ver-resultado')).not.toHaveAttribute('aria-disabled', 'true', { timeout: 30_000 });
+  await expect(page.locator('#boton-ver-perfil')).toBeVisible({ timeout: 30_000 });
   await page.reload();
   await expect(page.locator('#habilidades-blandas-perfil')).toBeVisible();
   await expect(page.locator('#habilidades-blandas-perfil')).not.toContainText('Inferida');
@@ -242,9 +257,10 @@ test('E2E real: analizar CV, mostrar habilidades, calcular match y bloquear el C
   await expect(page.locator('[data-profile-education]')).toContainText('En curso');
   await snapshot(page, testInfo, 'perfil-analizado-real');
   await page.goto('/usuarios/mi-perfil/');
-  await page.locator('#boton-ver-resultado').click();
-  await expect(page.locator('#habilidades-blandas-cv')).toBeVisible();
-  await expect(page.locator('#habilidades-blandas-cv')).not.toContainText('Inferida a partir');
+  await page.locator('#boton-ver-perfil').click();
+  await expect(page).toHaveURL(/\/ia\/perfil-profesional\/$/);
+  await expect(page.locator('[data-profile-skills]')).toBeVisible();
+  await expect(page.locator('[data-profile-skills]')).not.toContainText('Inferida a partir');
   await expect(page.locator('[data-profile-education]')).toContainText('En curso');
   await expect.poll(() => status().offer_profile_state, { timeout: 400_000, intervals: [2000, 4000, 8000] }).toBe('ready');
   expect(status().offer_profile_schema).toBe('job-offer.v2');

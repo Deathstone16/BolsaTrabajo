@@ -1,7 +1,8 @@
 {% extends 'nueva_ui/base.html' %}
+{% load education_presentation %}
 {% load static %}
 
-{% block title %}Mi perfil profesional · IEN Empleo{% endblock %}
+{% block title %}Mi CV y análisis · IEN Empleo{% endblock %}
 
 {% block content %}
 {% comment %}
@@ -16,12 +17,12 @@
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="grid gap-8 lg:grid-cols-[16rem_1fr]">
 
-      {% include "usuarios/_sidebar_postulante.html" with seccion="perfil" %}
+      {% include "usuarios/_sidebar_postulante.html" with seccion="cv" %}
 
       <div class="min-w-0">
         <p class="kicker">Tu perfil</p>
-        <h1 class="mt-3 text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">Mi perfil profesional</h1>
-        {% include "nueva_ui/partials/_breadcrumbs.html" with current="Mi perfil" %}
+        <h1 class="mt-3 text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">Mi CV y análisis</h1>
+        {% include "nueva_ui/partials/_breadcrumbs.html" with current="Mi CV" %}
         <p class="mt-3 max-w-2xl font-semibold leading-relaxed text-[#26222E]">
           Cargá o actualizá tu CV y analizá tus habilidades para compararlas con los requisitos de las ofertas.
         </p>
@@ -32,7 +33,16 @@
           </p>
         </div>
 
-
+        {% if not version_cv_actual %}
+          <section id="perfil-siguiente-paso" class="panel ien-profile-next mt-6 p-6" aria-labelledby="siguiente-paso-titulo">
+            <h2 id="siguiente-paso-titulo" class="text-lg font-semibold text-[#26222E]">Empezá por cargar tu CV</h2>
+            <p class="mt-2 text-sm leading-relaxed text-[#6B645C]">Después podrás analizar tus habilidades y compararlas con las ofertas de empleo.</p>
+            <div class="mt-5 flex flex-wrap gap-3">
+              <a href="#form-cv-upload" class="btn-ien">Cargar CV <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+              <a href="{% url 'buscar_empleo' %}" class="btn-ghost">Ver empleos</a>
+            </div>
+          </section>
+        {% endif %}
 
         {# Los mensajes los renderiza nueva_ui/base.html, no hace falta repetirlos aca. #}
 
@@ -42,12 +52,12 @@
               <div>
                 <p class="text-sm font-semibold text-[#26222E]">Perfil para compatibilidad</p>
                 <p class="mt-1 text-sm text-[#6B645C]">Versión {{ perfil_cv.version }} · actualizado {{ perfil_cv.actualizado_en|date:"d/m/Y H:i" }}</p>
-                {% if perfil_cv.contenido.summary %}<p class="mt-3 max-w-2xl text-sm text-[#6B645C]">{{ perfil_cv.contenido.summary }}</p>{% endif %}
+                {% if resumen_profesional %}<p class="mt-3 max-w-2xl text-sm text-[#6B645C]">{{ resumen_profesional|human_text }}</p>{% endif %}
                 <div class="mt-5" id="habilidades-blandas-perfil">
                   <p class="text-sm font-semibold text-emerald-700">Habilidades blandas detectadas</p>
                   <div class="mt-2 flex flex-wrap gap-2">
                     {% for habilidad in habilidades_blandas %}
-                      <span class="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">{{ habilidad.name }}</span>
+                      <span class="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">{{ habilidad.name|human_text }}</span>
                     {% empty %}<p class="text-sm text-[#6B645C]">Todavía no se detectaron habilidades blandas respaldadas por el CV.</p>{% endfor %}
                   </div>
                 </div>
@@ -55,7 +65,8 @@
               <a class="btn-ghost !py-2 text-sm" href="{% url 'ia:editar_perfil_cv' %}">Editar información</a>
             </div>
           </div>
-          {% include "ia/_education_courses.html" with education=perfil_cv.contenido.education credentials=perfil_cv.contenido.credentials only %}
+          {% include "ia/_projects.html" with projects=perfil_cv.contenido.projects only %}
+          {% include "ia/_education.html" with education=perfil_cv.contenido.education only %}
         {% elif perfil_cv and perfil_cv.estado == 'processing' %}
           <div class="panel mt-8 p-6" role="status">
             <p class="text-sm font-semibold text-[#26222E]">Actualizando tu perfil para compatibilidad</p>
@@ -76,7 +87,7 @@
         </div>
 
         {% if version_cv_actual %}
-          <div class="panel mt-8 p-6">
+          <section id="perfil-siguiente-paso" class="panel mt-8 p-6" aria-label="Tu CV cargado">
             <div class="flex flex-wrap items-center justify-between gap-4">
               <div class="flex items-center gap-4">
                 <div class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#512DA8]/10">
@@ -115,21 +126,21 @@
                       data-estado-url="{% url 'ia:estado_analisis' 0 %}"
                       data-ultimo-analisis-id="{% if ultimo_analisis %}{{ ultimo_analisis.id }}{% endif %}"
                       data-ultimo-analisis-estado="{% if ultimo_analisis %}{{ ultimo_analisis.estado }}{% endif %}"
+                      data-perfil-url="{% url 'ia:perfil_profesional' %}"
                       data-version-cv-id="{{ version_cv_actual.pk }}">
                   {% csrf_token %}
                   <button type="submit" aria-describedby="cv-analysis-description" class="btn-ien !py-2 text-sm">
                     <span data-icon="sparkles" class="h-4 w-4"></span> Analizar CV
                   </button>
                 </form>
-                <a id="boton-ver-resultado"
-                   href="{% if ultimo_analisis and ultimo_analisis.estado == 'completado' %}{% url 'ia:ver_resultado' ultimo_analisis.id %}{% else %}#{% endif %}"
-                   aria-disabled="{% if not ultimo_analisis or ultimo_analisis.estado != 'completado' %}true{% else %}false{% endif %}"
-                   class="inline-flex items-center gap-2 rounded-full border-[1.5px] px-5 py-2 text-sm font-semibold transition-colors {% if ultimo_analisis and ultimo_analisis.estado == 'completado' %}text-primary border-primary hover:bg-primary/5{% else %}text-muted-foreground border-border opacity-50 pointer-events-none{% endif %}">
-                  Ver resultado
+                <a id="boton-ver-perfil"
+                   href="{% url 'ia:perfil_profesional' %}"
+                   class="btn-ghost !py-2 text-sm"{% if not perfil_cv %} style="display:none"{% endif %}>
+                  Ver mi perfil profesional
                 </a>
               </div>
             </div>
-          </div>
+          </section>
 
           {% comment %}
             Estado del analisis de CV. Lo actualiza cv_upload.js (mostrarEstadoAnalisis)
@@ -148,7 +159,7 @@
                 <p data-analisis-titulo class="font-semibold text-[#26222E]">Analizando tu CV por paquetes…</p>
                 <p data-analisis-mensaje class="mt-1 text-sm text-[#6B645C]">Puede tardar varios minutos según la disponibilidad del servicio.</p>
                 {# style inline: .btn-ien fuerza inline-flex y le gana a .hidden #}
-                <a data-analisis-link href="#" class="btn-ien mt-4 !py-2 text-sm" style="display:none">Ver resultado <span data-icon="arrow-right" class="h-4 w-4"></span></a>
+                <a data-analisis-link href="{% url 'ia:perfil_profesional' %}" class="btn-ien mt-4 !py-2 text-sm" style="display:none">Ver mi perfil profesional <span data-icon="arrow-right" class="h-4 w-4"></span></a>
               </div>
             </div>
             <div data-analisis-barra class="barra-indeterminada" aria-hidden="true"><span></span></div>
