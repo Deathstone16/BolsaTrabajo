@@ -71,29 +71,6 @@ def notificar_oferta_rechazada(oferta, offerente, motivo_rechazo=None):
     )
 
 
-def notificar_perfil_aprobado(oferente):
-    """
-    Envía email de notificación cuando el perfil de la empresa es aprobado.
-
-    Args:
-        oferente: Instancia del modelo Oferente (usuario empresa).
-    """
-    context = {
-        "oferente": oferente,
-        "site_name": "BolsaTrabajo IEN",
-        "year": 2026,
-    }
-
-    send_mail(
-        subject="✅ Tu perfil de empresa ha sido aprobado - BolsaTrabajo IEN",
-        message=render_to_string("emails/perfil_aprobado.txt", context),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[oferente.email],
-        html_message=render_to_string("emails/perfil_aprobado.html", context),
-        fail_silently=False,
-    )
-
-
 def notificar_perfil_rechazado(oferente, motivo_rechazo=None):
     """
     Envía email de notificación cuando el perfil de la empresa es rechazado.
@@ -113,7 +90,7 @@ def notificar_perfil_rechazado(oferente, motivo_rechazo=None):
         subject="❌ Tu perfil de empresa ha sido rechazado - BolsaTrabajo IEN",
         message=render_to_string("emails/perfil_rechazado.txt", context),
         from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[oferente.email],
+        recipient_list=[oferente.usuario.email],
         html_message=render_to_string("emails/perfil_rechazado.html", context),
         fail_silently=False,
     )

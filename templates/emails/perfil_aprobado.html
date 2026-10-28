@@ -3,78 +3,78 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perfil Aprobado</title>
+  <title>Empresa aprobada · IEN Empleo</title>
 </head>
-<body style="margin:0;padding:0;background-color:#f4f6f8;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f8;padding:40px 20px;">
+<body style="margin:0;padding:0;background-color:#F8F3F0;color:#26222E;font-family:Poppins,'Segoe UI',Arial,sans-serif;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">
+    Tu empresa fue aprobada y ya podés gestionar ofertas en IEN Empleo.
+  </div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#F8F3F0" style="background-color:#F8F3F0;">
     <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-
-          <!-- Header -->
+      <td align="center" style="padding:40px 16px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FEFCF9" style="width:100%;max-width:560px;background-color:#FEFCF9;border:1px solid #E8DED4;border-radius:20px;">
           <tr>
-            <td style="background:linear-gradient(135deg,#10b981,#059669);padding:32px 40px;text-align:center;">
-              <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:600;letter-spacing:-0.3px;">
-                ✅ Perfil Aprobado
-              </h1>
+            <td style="padding:32px 32px 12px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" valign="middle" width="46" height="46" bgcolor="#512DA8" style="width:46px;height:46px;background-color:#512DA8;border-radius:12px;color:#FFFFFF;font-size:15px;font-weight:700;letter-spacing:0.02em;">
+                    IEN<span style="color:#FFDE59;font-size:10px;vertical-align:top;">&bull;</span>
+                  </td>
+                  <td valign="middle" style="padding-left:12px;">
+                    <div style="color:#26222E;font-size:19px;font-weight:700;line-height:1.2;">IEN Empleo</div>
+                    <div style="padding-top:4px;color:#512DA8;font-family:'Courier New',monospace;font-size:9px;font-weight:700;letter-spacing:0.12em;line-height:1.3;text-transform:uppercase;">Bolsa de trabajo &middot; Chaco</div>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
-
-          <!-- Body -->
           <tr>
-            <td style="padding:40px;">
-              <h2 style="margin:0 0 16px;color:#1e293b;font-size:20px;font-weight:600;">
+            <td style="padding:18px 32px 36px;">
+              <p style="margin:0 0 10px;color:#512DA8;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;">
+                Perfil de empresa
+              </p>
+              <h1 style="margin:0 0 24px;color:#26222E;font-size:26px;font-weight:700;line-height:1.25;">
+                Tu empresa fue aprobada
+              </h1>
+              <p style="margin:0 0 14px;color:#26222E;font-size:16px;line-height:1.6;">
                 Hola {{ oferente.nombre_empresa }},
-              </h2>
-
-              <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.6;">
-                ¡Excelentes noticias! Tu perfil de empresa ha sido <span style="color: #10b981;">aprobado</span> y ya estás autorizado para publicar ofertas en BolsaTrabajo IEN.
               </p>
-
-              <p style="margin:0 0 28px;color:#475569;font-size:15px;line-height:1.6;">
-                Ahora podés comenzar a publicar ofertas laborales y recibir postulantes. Accede a tu panel para gestionar tu empresa.
+              <p style="margin:0 0 24px;color:#6B645C;font-size:14px;line-height:1.7;">
+                El equipo de IEN aprobó tu perfil de empresa. Ya podés ingresar al panel,
+                completar la información de tu empresa y publicar ofertas laborales.
               </p>
-
-              <!-- CTA Button -->
-              <table width="100%" cellpadding="0" cellspacing="0">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td align="center" style="padding:0 0 28px;">
-                    <a href="https://tusitio.com/empresa/dashboard/"
-                       style="display:inline-block;background-color:#10b981;color:#ffffff;font-size:16px;font-weight:600;text-decoration:none;padding:14px 36px;border-radius:8px;letter-spacing:0.2px;">
-                        Ir a Panel
+                  <td align="center" bgcolor="#512DA8" style="background-color:#512DA8;border-radius:999px;">
+                    <a href="{{ dashboard_url }}" style="display:block;padding:15px 24px;color:#FFFFFF;font-size:15px;font-weight:700;line-height:1.4;text-align:center;text-decoration:none;">
+                      Ir al panel de empresa
                     </a>
                   </td>
                 </tr>
               </table>
-
-              <!-- Fallback link -->
-              <p style="margin:0 0 28px;color:#94a3b8;font-size:13px;line-height:1.5;text-align:center;">
-                Si el botón no funciona, copiá y pegá este enlace en tu navegador:<br>
-                <a href="https://tusitio.com/empresa/dashboard/" style="color:#10b981;text-decoration:underline;word-break:break-all;">{{ protocol }}://{{ domain }}/empresa/dashboard/</a>
+              <p style="margin:22px 0 8px;color:#6B645C;font-size:12px;line-height:1.6;">
+                Si el botón no funciona, copiá este enlace en tu navegador:
               </p>
-
-              <hr style="border:none;border-top:1px solid #e2e8f0;margin:0 0 24px;">
-
-              <p style="margin:0 0 12px;color:#64748b;font-size:13px;line-height:1.5;">
-                🎯 Ya podés comenzar a publicar ofertas y captar talento para tu empresa.
+              <p style="margin:0;font-size:12px;line-height:1.6;overflow-wrap:anywhere;word-break:break-all;">
+                <a href="{{ dashboard_url }}" style="color:#512DA8;text-decoration:underline;overflow-wrap:anywhere;word-break:break-all;">{{ dashboard_url }}</a>
               </p>
-
-              <p style="margin:0;color:#64748b;font-size:13px;line-height:1.5;">
-                Si tenés alguna duda, escribí a soporte@ien.edu.ar.
-              </p>
+              {% if contact_email %}
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#F1EAE2" style="margin-top:24px;background-color:#F1EAE2;border-radius:12px;">
+                <tr>
+                  <td style="padding:15px 18px;color:#6B645C;font-size:13px;line-height:1.6;">
+                    ¿Tenés alguna consulta? Escribinos a
+                    <a href="mailto:{{ contact_email }}" style="color:#512DA8;text-decoration:underline;">{{ contact_email }}</a>.
+                  </td>
+                </tr>
+              </table>
+              {% endif %}
             </td>
           </tr>
-
-          <!-- Footer -->
           <tr>
-            <td style="background-color:#f8fafc;padding:24px 40px;text-align:center;border-top:1px solid #e2e8f0;">
-              <p style="margin:0;color:#94a3b8;font-size:12px;line-height:1.5;">
-                —<br>
-                BolsaTrabajo IEN 2026
-              </p>
+            <td align="center" bgcolor="#F1EAE2" style="padding:18px 24px;background-color:#F1EAE2;border-radius:0 0 20px 20px;color:#6B645C;font-size:12px;line-height:1.5;">
+              IEN Empleo · Bolsa de Trabajo
             </td>
           </tr>
-
         </table>
       </td>
     </tr>

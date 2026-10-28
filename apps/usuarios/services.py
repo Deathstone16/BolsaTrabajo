@@ -113,7 +113,29 @@ def aprobar_empresa(oferente):
     Args:
         oferente: Instancia del modelo Oferente.
     """
-    oferente.aprobar()
+    empresa = Oferente.objects.select_for_update().get(pk=oferente.pk)
+    if empresa.estado_validacion == Oferente.EstadoValidacion.APROBADO:
+        return False
+    empresa.aprobar()
+    oferente.estado_validacion = empresa.estado_validacion
+    return True
+
+
+def enviar_email_aprobacion(oferente, dashboard_url):
+    """Notifica al oferente después de confirmar la aprobación en la base."""
+    contexto = {
+        'oferente': oferente,
+        'dashboard_url': dashboard_url,
+        'contact_email': getattr(settings, 'IEN_CONTACT_EMAIL', ''),
+    }
+    send_mail(
+        subject='Tu empresa fue aprobada - IEN Empleo',
+        message=render_to_string('emails/perfil_aprobado.txt', contexto),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[oferente.usuario.email],
+        html_message=render_to_string('emails/perfil_aprobado.html', contexto),
+        fail_silently=False,
+    )
 
 
 @transaction.atomic

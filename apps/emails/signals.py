@@ -1,9 +1,4 @@
-"""
-Señales para notificaciones por email cuando cambia el estado del perfil de oferente.
-
-Dispara emails automáticamente cuando el estado_validacion de una oferta cambia
-de 'pendiente' a 'aprobado' o 'rechazado'.
-"""
+"""Conserva el aviso de rechazo; la aprobación se envía desde sus vistas."""
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -32,13 +27,8 @@ def notificar_cambio_estado_perfil(sender, instance, created, **kwargs):
         instance._previous_estado_validacion = valor_actual
         return
 
-    # Detectar cambio de pendiente a aprobado
-    if valor_anterior == 'pendiente' and valor_actual == 'aprobado':
-        from .services import notificar_perfil_aprobado
-        notificar_perfil_aprobado(instance)
-
-    # Detectar cambio de pendiente a rechazado
-    elif valor_anterior == 'pendiente' and valor_actual == 'rechazado':
+    # La aprobación se notifica desde moderación o admin, después de guardar.
+    if valor_anterior == 'pendiente' and valor_actual == 'rechazado':
         from .services import notificar_perfil_rechazado
         motivo = getattr(instance, 'motivo_rechazo', 'No especificado')
         notificar_perfil_rechazado(instance, motivo)

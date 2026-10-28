@@ -19,7 +19,6 @@
       </div>
     {% endif %}
     <h1 class="mt-6 text-2xl font-bold tracking-tight text-[#26222E]">{{ titulo }}</h1>
-        {% include "nueva_ui/partials/_breadcrumbs.html" with current=titulo only %}
     <p class="mt-2 text-sm leading-relaxed text-[#6B645C]">{{ mensaje }}</p>
     {% if detalle_mensaje %}<p class="mt-4 text-sm leading-relaxed text-[#6B645C]">{{ detalle_mensaje }}</p>{% endif %}
     <div class="mt-8 flex flex-col gap-3">

@@ -1,8 +1,11 @@
 """Vistas exclusivas del personal para moderar contenido de la plataforma."""
 
+import logging
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse
+from django.urls import reverse
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 
@@ -19,6 +22,9 @@ from ofertas.forms import HabilidadForm
 from ofertas import services as ofertas_services
 from .forms import RechazarEmpresaForm
 from . import services
+
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -183,7 +189,17 @@ def aprobar_empresa(request, pk):
     """Aprueba por POST el perfil de una empresa."""
     if request.method == 'POST':
         empresa = services.obtener_empresa(pk)
-        usuarios_service.aprobar_empresa(empresa)
+        if usuarios_service.aprobar_empresa(empresa):
+            dashboard_url = request.build_absolute_uri(reverse('dashboard_empresa'))
+            try:
+                usuarios_service.enviar_email_aprobacion(empresa, dashboard_url)
+            except Exception:
+                logger.exception('No se pudo enviar el aviso de aprobación para la empresa %s.', empresa.pk)
+                messages.warning(request, 'Empresa aprobada, pero no se pudo enviar el correo de aviso.')
+            else:
+                messages.success(request, 'Empresa aprobada y notificada por correo.')
+        else:
+            messages.info(request, 'La empresa ya estaba aprobada; no se envió otro correo.')
     return redirect('mod_listar_empresas')
 
 
