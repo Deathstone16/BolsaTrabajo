@@ -1,0 +1,51 @@
+# Ejecutar únicamente en la computadora durante la demo, no en Render Free.
+name: ien-ia-demo
+services:
+  redis:
+    image: redis:7.4-alpine
+    command: ['redis-server', '--appendonly', 'yes', '--appendfsync', 'everysec']
+    volumes:
+      - ia-redis:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: deploy/ia/Dockerfile
+    env_file: .env.ia-demo
+    environment:
+      MODE: production
+      CV_SCAN_ENABLED: 'true'
+      CV_SCAN_BACKEND: clamav
+      CV_SCAN_COMMAND: /usr/local/bin/scan-cv
+      CV_SCAN_TIMEOUT_SECONDS: '120'
+      CV_ARTIFACT_DIR: /data/cv
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      JOB_STORE_REDIS_URL: redis://redis:6379/2
+      CHANNEL_REDIS_URL: redis://redis:6379/3
+      MATCH_REDIS_URL: redis://redis:6379/4
+    ports:
+      - '127.0.0.1:8001:8001'
+    volumes:
+      - ia-data:/data
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    command: ['tunnel', '--no-autoupdate', '--url', 'http://api:8001']
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  ia-data:
+  ia-redis:

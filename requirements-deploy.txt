@@ -1,0 +1,4 @@
+-r requirements.txt
+# Solo se instalan en la imagen de despliegue.
+whitenoise>=6.12,<7
+django-storages[s3]>=1.14.6,<2
