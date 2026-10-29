@@ -269,6 +269,15 @@ class MatchingServiceTests(TestCase):
         payload = match_request_payload(match)
         self.assertEqual(payload['candidate_profile']['headline'], 'Backend developer')
 
+    def test_estado_cancelado_de_la_api_no_se_pierde_en_el_dispatcher(self):
+        match, _ = get_or_create_match(self.postulante, self.oferta)
+        update_match_status(str(match.request_id), 'cancelled')
+        match.refresh_from_db()
+        self.assertEqual(match.estado, 'cancelled')
+        update_match_status(str(match.request_id), 'processing')
+        match.refresh_from_db()
+        self.assertEqual(match.estado, 'cancelled')
+
     def test_dispatch_match_recupera_un_lease_vencido(self):
         from datetime import timedelta
         from django.utils import timezone

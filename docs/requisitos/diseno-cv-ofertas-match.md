@@ -52,4 +52,4 @@ La explicación deja claro que un porcentaje de compatibilidad no representa una
 
 ## 8. Operación y cambios de esquema
 
-Las migraciones deben ser aditivas y preservar relaciones históricas. Antes de activar escritores nuevos, desplegar lectores compatibles y aplicar el esquema. Los cambios reversibles se desactivan mediante configuración; no se eliminan perfiles, archivos ni resultados históricos para revertir una versión. Las dependencias del conversor, escáner y base de datos deben fijarse y verificarse en cada entorno de despliegue.
+Las migraciones deben ser aditivas y preservar relaciones históricas. Antes de activar escritores nuevos, desplegar lectores compatibles y aplicar el esquema. Los cambios reversibles se desactivan mediante configuración; no se eliminan perfiles, archivos ni resultados históricos para revertir una versión. Las dependencias del conversor y la base de datos deben fijarse y verificarse en cada entorno de despliegue.

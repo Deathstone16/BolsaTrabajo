@@ -8,6 +8,8 @@ de CV y la compatibilidad usan el microservicio FastAPI del repositorio
 
 Para desplegar los dos servicios en una VPS, seguir
 [docs/DESPLIEGUE_VPS.md](docs/DESPLIEGUE_VPS.md).
+La instalación de producción usa `requirements.lock` (Python 3.11) y comprueba
+los dos entornos con `deploy/check_config.py` antes de iniciar los servicios.
 
 ## Documentación del proyecto
 

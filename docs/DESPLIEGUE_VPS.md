@@ -11,7 +11,7 @@ de dirigir tráfico al nuevo servidor.
 ## 1. Preparación y datos existentes
 
 Usar Ubuntu 24.04 LTS, una cuenta SSH administrativa y espacio para la base,
-archivos subidos, logs y copias. Elegir el mismo commit compatible de **ambos**
+archivos subidos, logs y copias. Elegir una pareja de commits compatible de **ambos**
 repositorios; no desplegar `develop` de uno con una rama distinta del otro sin
 verificar el contrato de extracción y callback. Preparar una ventana de
 mantenimiento: el túnel hoy puede apuntar al equipo Windows y los usuarios
@@ -21,7 +21,7 @@ En la VPS, con una cuenta con `sudo`:
 
 ```bash
 sudo apt update
-sudo apt install -y git curl ca-certificates postgresql postgresql-client redis-server caddy clamav clamav-freshclam libgomp1 acl
+sudo apt install -y git curl ca-certificates postgresql postgresql-client redis-server caddy libgomp1 acl
 sudo useradd --system --create-home --home-dir /home/ienapp --shell /bin/bash ienapp
 sudo install -d -o ienapp -g ienapp -m 0750 /srv/ien
 sudo systemctl enable --now postgresql redis-server
@@ -44,13 +44,13 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 git clone https://github.com/Deathstone16/BolsaTrabajo.git /srv/ien/BolsaTrabajo
 git clone https://github.com/IENbolsa2026/ia_api.git /srv/ien/ia_api
 cd /srv/ien/BolsaTrabajo
-git checkout feature/rag-contexto-cv
+git checkout develop
 /home/ienapp/.local/bin/uv venv --python 3.11 .venv
-/home/ienapp/.local/bin/uv pip install --python .venv/bin/python -r requirements.txt
+/home/ienapp/.local/bin/uv pip sync --python .venv/bin/python --require-hashes requirements.lock
 cd /srv/ien/ia_api/backend
-git checkout feature/rag-contexto-cv
+git checkout main
 /home/ienapp/.local/bin/uv venv --python 3.11 .venv
-/home/ienapp/.local/bin/uv pip install --python .venv/bin/python -r requirements.txt
+/home/ienapp/.local/bin/uv pip sync --python .venv/bin/python --require-hashes requirements.lock
 exit
 ```
 
@@ -85,15 +85,14 @@ Redis usadas son 0 (cola), 1 (resultados), 2 (trabajos), 3 (Channels), 4
 Crear `/srv/ien/BolsaTrabajo/.env` y `/srv/ien/ia_api/backend/.env` a partir de
 sus `.env.example`, propiedad `ienapp`, permisos `0600`. Generar secretos
 independientes con `python -c 'import secrets; print(secrets.token_urlsafe(48))'`.
-La clave de Gemini que se compartió anteriormente en el chat debe **rotarse**
-antes de este despliegue. No pegar tokens del túnel, LLM ni contraseñas en Git.
+No pegar tokens del túnel, LLM ni contraseñas en Git.
 
 Valores indispensables de Django:
 
 ```ini
 DEBUG=false
 SECRET_KEY=<nuevo-secreto-django>
-ALLOWED_HOSTS=bolsa.neadev.com
+ALLOWED_HOSTS=bolsa.neadev.com,127.0.0.1
 CSRF_TRUSTED_ORIGINS=https://bolsa.neadev.com
 TRUST_PROXY_HEADERS=true
 SECURE_SSL_REDIRECT=true
@@ -113,9 +112,6 @@ MATCH_API_HTTP_URL=http://127.0.0.1:8001/api/v1
 MATCH_API_TOKEN=<token-servicio>
 CHANNEL_REDIS_URL=redis://127.0.0.1:6379/3
 MATCH_CACHE_REDIS_URL=redis://127.0.0.1:6379/6
-CV_SCAN_ENABLED=true
-CV_SCAN_BACKEND=clamav
-CV_SCAN_COMMAND=/usr/bin/clamscan
 ```
 
 Valores indispensables de FastAPI (con los mismos secretos compartidos):
@@ -127,32 +123,30 @@ MATCH_PROVIDER=groq
 GEMINI_API_KEY=<clave-nueva-de-gemini>
 GROQ_API_KEY=<clave-de-groq>
 SERVICE_API_TOKEN=<token-servicio>
-CV_RESULT_CALLBACK_URL=http://127.0.0.1:8000/ia/llegue/
+CV_RESULT_CALLBACK_URL=http://127.0.0.1:8080/ia/llegue/
 CV_RESULT_CALLBACK_HMAC_SECRET=<secreto-callback-hmac>
 CELERY_BROKER_URL=redis://127.0.0.1:6379/0
 CELERY_RESULT_BACKEND=redis://127.0.0.1:6379/1
 JOB_STORE_REDIS_URL=redis://127.0.0.1:6379/2
 CHANNEL_REDIS_URL=redis://127.0.0.1:6379/3
 MATCH_REDIS_URL=redis://127.0.0.1:6379/4
-CV_SCAN_ENABLED=true
-CV_SCAN_BACKEND=clamav
-CV_SCAN_COMMAND=/usr/bin/clamscan
 ```
 
 Copiar del `.env.example` los presupuestos y modelos confirmados para la cuenta
 real. `GEMINI_REQUESTS_PER_DAY` y demás límites locales deben coincidir con la
 cuota visible en AI Studio; el plan gratuito puede cambiar. Configurar
-`EMAIL_HOST_USER` y `EMAIL_HOST_PASSWORD` en Django si se envían correos.
+`EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` y `DEFAULT_FROM_EMAIL` en Django para
+activar los correos SMTP de registro, aprobación y recuperación incorporados en
+`develop`. Para probar sin enviar, usar el backend de consola.
 No activar DOC/RTF (`CV_LEGACY_CONVERTER_IMAGE`) sin construir y probar la
 imagen aislada de LibreOffice.
 
-Actualizar firmas de ClamAV antes de habilitar cargas. En Ubuntu el servicio
-`clamav-freshclam` suele actualizar automáticamente; verificar que descargó
-firmas. Probar `clamscan --no-summary /etc/hosts` y confirmar código de salida
-0. Los códigos 1 (infectado) y 2 (error) bloquean la carga. En producción el
-arranque de FastAPI exige el escáner configurado.
-
 ## 5. Migraciones y archivos
+
+El callback pasa por Caddy en `8080`, que comunica el esquema HTTPS a Django.
+Por eso `127.0.0.1` está incluido en `ALLOWED_HOSTS`. No apuntarlo directamente
+a `8000` con `SECURE_SSL_REDIRECT=true`: recibiría una redirección en lugar de
+la confirmación de entrega.
 
 Si es una instalación nueva:
 
@@ -211,6 +205,12 @@ se puede reconstruir mediante el comando de importación.
 
 Los archivos listos para copiar están en `deploy/systemd/` y
 `deploy/Caddyfile`. Sus rutas presuponen `/srv/ien` y el usuario `ienapp`.
+Comprobar la configuración compartida antes de iniciar los procesos:
+
+```bash
+sudo -iu ienapp /srv/ien/BolsaTrabajo/.venv/bin/python /srv/ien/BolsaTrabajo/deploy/check_config.py
+```
+
 Antes de habilitarlos, validar permisos de lectura para Caddy en `staticfiles/`
 y solo medios públicos. Caddy debe poder atravesar los directorios padre;
 se recomienda ACL de lectura para el usuario `caddy`, nunca para
@@ -291,5 +291,4 @@ Referencias: [Django: lista de producción](https://docs.djangoproject.com/en/5.
 [Django: archivos estáticos](https://docs.djangoproject.com/en/5.2/howto/static-files/deployment/),
 [Cloudflare Tunnel](https://developers.cloudflare.com/tunnel/get-started/),
 [Caddy `reverse_proxy`](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy),
-[ClamAV](https://docs.clamav.net/manual/Usage/Scanning.html),
 [PostgreSQL/libpq](https://www.postgresql.org/docs/current/libpq-connect.html).
