@@ -1,7 +1,10 @@
 # Bolsa de Trabajo IEN (Django)
 
-Aplicación web de la bolsa de trabajo. Para el análisis de CV usa el
-microservicio FastAPI ubicado en el repositorio `ia_api/backend`.
+Aplicación web de la Bolsa de Trabajo IEN. Permite registrar postulantes y
+empresas, moderar y consultar ofertas, guardar favoritas, cargar CV privados,
+analizarlos con IA, comparar perfiles con ofertas y consultar cursos. El análisis
+de CV y la compatibilidad usan el microservicio FastAPI del repositorio
+`ia_api/backend`. La aplicación no registra postulaciones ni contrataciones.
 
 Para desplegar los dos servicios en una VPS, seguir
 [docs/DESPLIEGUE_VPS.md](docs/DESPLIEGUE_VPS.md).
@@ -21,6 +24,7 @@ residuos locales, documentos históricos y candidatos a simplificar en el códig
 - Python 3.12 (recomendado)
 - Git
 - Docker y Docker Compose (necesarios para Redis, usado por Celery)
+- Node.js y npm para las pruebas JavaScript y de navegador
 - PostgreSQL para producción; en desarrollo podés seguir usando SQLite
 - Una clave válida de Groq; se configura en el repositorio del microservicio
 
@@ -29,8 +33,8 @@ residuos locales, documentos históricos y candidatos a simplificar en el códig
 Cloná ambos repositorios en carpetas vecinas o elegí las rutas que prefieras:
 
 ```bash
-git clone <URL-DEL-REPOSITORIO-DJANGO> BolsaTrabajo
-git clone <URL-DEL-REPOSITORIO-IA> ia_api
+git clone https://github.com/Deathstone16/BolsaTrabajo.git BolsaTrabajo
+git clone --branch ia-match https://github.com/IENbolsa2026/ia_api.git ia_api
 ```
 
 ### 1. Preparar Django
@@ -150,8 +154,11 @@ En `BolsaTrabajo/.env`:
 | `CHANNEL_REDIS_URL` | Redis compartido para avisos WebSocket; debe apuntar a la misma instancia y base `/3` que FastAPI (por defecto `redis://localhost:6379/3`). |
 | `IA_API_TOKEN` | Generá un secreto aleatorio distinto del callback y copialo también en `SERVICE_API_TOKEN` de FastAPI. Django lo envía como `Authorization: Bearer ...` para autenticar su llamada al microservicio. |
 | `IA_CALLBACK_URL` | Reservada para una URL pública fija; el código actual no la utiliza. Dejala vacía. La URL efectiva del callback se configura en FastAPI con `CV_RESULT_CALLBACK_URL`. |
-| `EMAIL_HOST_USER` | Dirección de la cuenta Gmail que enviará correos. Puede quedar vacía si no necesitás email local. |
-| `EMAIL_HOST_PASSWORD` | [Contraseña de aplicación de Google](https://support.google.com/accounts/answer/185833?hl=es), no la contraseña habitual de Gmail. Requiere verificación en dos pasos; puede quedar vacía si no enviás correos. |
+| `EMAIL_BACKEND` | SMTP por defecto. Para probar sin enviar, usá `django.core.mail.backends.console.EmailBackend`. |
+| `EMAIL_HOST`, `EMAIL_PORT` | Servidor y puerto del proveedor SMTP; la plantilla usa Gmail y el puerto `587`. |
+| `EMAIL_USE_TLS`, `EMAIL_USE_SSL`, `EMAIL_TIMEOUT` | Para puerto `587`, TLS activado y SSL desactivado. Para un proveedor que use `465`, configurá SSL y desactivá TLS. El tiempo de espera predeterminado es 15 segundos. |
+| `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` | Cuenta y contraseña SMTP. Con Gmail, usá una [contraseña de aplicación](https://support.google.com/accounts/answer/185833?hl=es), no tu contraseña habitual. No subas estos valores a Git. |
+| `DEFAULT_FROM_EMAIL` | Remitente autorizado por el proveedor; si queda vacío, se usa `EMAIL_HOST_USER`. |
 
 En `ia_api/backend/.env` se parte de la [plantilla del microservicio](https://github.com/IENbolsa2026/ia_api/blob/ia-match/backend/.env.example):
 
@@ -234,6 +241,27 @@ WebSocket al postulante conectado. Si la conexión en vivo falla, el navegador
 consulta el estado cada 10 segundos. El enlace del aviso lleva a
 `/perfil/#cv-analysis`.
 
+## Pruebas
+
+Desde `BolsaTrabajo`, con el entorno y las dependencias instalados:
+
+```bash
+.venv/bin/python manage.py check
+.venv/bin/python manage.py makemigrations --check --dry-run
+.venv/bin/python -m unittest ientrabajo.test_database_settings ientrabajo.test_proxy_settings
+.venv/bin/python manage.py test usuarios categorias ofertas cursos ia matching moderacion emails
+npm ci
+npm run test:js
+npm run test:e2e
+```
+
+En Windows reemplazá `.venv/bin/python` por `.\.venv\Scripts\python.exe`.
+Las pruebas E2E necesitan los servicios locales en marcha; la variante
+`npm run test:e2e:live` usa IA real y consume cuota de Groq. La suite del
+microservicio se ejecuta en su propio repositorio. Consultá la
+[estrategia de pruebas](docs/pruebas/estrategia.md) para el alcance y los casos
+críticos.
+
 ## Puertos locales
 
 | Servicio | Puerto | Uso |
@@ -241,6 +269,29 @@ consulta el estado cada 10 segundos. El enlace del aviso lleva a
 | Django | 8000 | Interfaz web y callback `/ia/llegue/` |
 | FastAPI | 8001 | API de análisis de CV |
 | Redis | 6379 | Cola entre FastAPI y Celery |
+
+## Correo de recuperación y aprobación de empresas
+
+Los dos correos salen desde Django con la misma configuración SMTP de
+`BolsaTrabajo/.env`; FastAPI y Groq no intervienen. Completá las variables
+`EMAIL_*` de la plantilla con una cuenta remitente habilitada por tu proveedor y
+reiniciá Django. Para probar localmente sin enviar mensajes reales, cambiá
+`EMAIL_BACKEND` a `django.core.mail.backends.console.EmailBackend`: el correo se
+mostrará en la terminal del servidor, incluido el enlace de recuperación.
+
+El enlace para recuperar la contraseña se genera con el dominio y el protocolo
+de la petición. Antes de usarlo en producción, configurá el dominio en
+`ALLOWED_HOSTS` y el proxy HTTPS como indica el
+[procedimiento de despliegue](docs/operaciones/despliegue.md); un enlace a
+`localhost` solo sirve en tu propia máquina. El formulario responde igual si
+la cuenta existe o no, para no revelar usuarios registrados.
+
+Al aprobar una empresa desde moderación o desde el admin de Django, el sistema
+guarda la aprobación y manda el aviso al email del oferente con un enlace a su
+panel. Guardar nuevamente una empresa ya aprobada no reenvía el correo. Si SMTP
+falla, la aprobación permanece guardada: moderación muestra una advertencia y
+el admin registra el error. Revisá la configuración antes de reenviar la
+notificación por un medio acordado.
 
 ## Recomendaciones de cursos
 
