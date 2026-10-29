@@ -1,0 +1,76 @@
+# Solo recursos Free; PostgreSQL y archivos se crean en Neon, según la guía.
+services:
+  - type: keyvalue
+    name: ien-cache-demo
+    plan: free
+    region: virginia
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []
+
+  - type: web
+    name: ien-bolsa-demo
+    runtime: docker
+    plan: free
+    region: virginia
+    branch: feature/rag-contexto-cv
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health/
+    autoDeployTrigger: 'off'
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: ientrabajo.settings.render
+      - key: DEBUG
+        value: 'false'
+      - key: DB_ENGINE
+        value: postgresql
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_URL_UNPOOLED
+        sync: false
+      - key: AWS_ENDPOINT_URL_S3
+        sync: false
+      - key: AWS_STORAGE_BUCKET_NAME
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_REGION
+        sync: false
+      - key: CHANNEL_REDIS_URL
+        fromService:
+          type: keyvalue
+          name: ien-cache-demo
+          property: connectionString
+      - key: MATCH_CACHE_REDIS_URL
+        fromService:
+          type: keyvalue
+          name: ien-cache-demo
+          property: connectionString
+      - key: IA_API_URL
+        sync: false
+      - key: IA_OFFER_API_URL
+        sync: false
+      - key: IA_API_TOKEN
+        sync: false
+      - key: IA_CALLBACK_HMAC_SECRET
+        sync: false
+      - key: MATCH_API_URL
+        sync: false
+      - key: MATCH_API_HTTP_URL
+        sync: false
+      - key: MATCH_API_TOKEN
+        sync: false
+      - key: MATCH_MODEL_VERSION
+        value: groq:qwen/qwen3.8-27b:strict-low
+      - key: EMAIL_BACKEND
+        value: ientrabajo.email_backends.BrevoEmailBackend
+      - key: BREVO_API_KEY
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+      - key: IEN_CONTACT_EMAIL
+        sync: false
