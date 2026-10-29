@@ -318,13 +318,14 @@ def update_match_status(request_id: str, status: str, error: str = '') -> Result
         'processing': ResultadoCompatibilidad.Estado.PROCESANDO,
         'rate_limited': ResultadoCompatibilidad.Estado.RATE_LIMITED,
         'failed': ResultadoCompatibilidad.Estado.ERROR,
+        'cancelled': ResultadoCompatibilidad.Estado.CANCELADO,
     }.get(status, match.estado)
     order = {
         ResultadoCompatibilidad.Estado.PENDIENTE: 0,
         ResultadoCompatibilidad.Estado.RATE_LIMITED: 1,
         ResultadoCompatibilidad.Estado.PROCESANDO: 2,
     }
-    if state in {ResultadoCompatibilidad.Estado.ERROR} or order.get(state, -1) >= order.get(match.estado, -1):
+    if state in {ResultadoCompatibilidad.Estado.ERROR, ResultadoCompatibilidad.Estado.CANCELADO} or order.get(state, -1) >= order.get(match.estado, -1):
         match.estado = state
     if error:
         match.error = error[:1000]

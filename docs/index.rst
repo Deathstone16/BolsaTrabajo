@@ -60,6 +60,7 @@ instalación en servidor, seguir la guía de despliegue.
    mantenimiento/analisis-limpieza
    mantenimiento/reorganizacion-documentacion
    DESPLIEGUE_VPS
+   IMPLEMENTACION_VPS_2026-10-29
    INFERENCIA_CV_V7
 
 Índices

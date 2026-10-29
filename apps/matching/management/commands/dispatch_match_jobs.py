@@ -111,6 +111,12 @@ class Command(BaseCommand):
                         event.error = 'El matcher devolvió un error.'
                         event.save(update_fields=['estado', 'error', 'actualizado_en'])
                         return
+                    if status == 'cancelled':
+                        update_match_status(str(match.request_id), 'cancelled')
+                        event.estado = EventoSalida.Estado.ENVIADO
+                        event.error = ''
+                        event.save(update_fields=['estado', 'error', 'actualizado_en'])
+                        return
         except Exception:
             logger.exception('Falló la entrega del match %s.', match.request_id)
             event.refresh_from_db(fields=['estado'])

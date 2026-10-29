@@ -29,7 +29,6 @@ from .profile_skills import split_profile_skills
 
 
 @override_settings(
-    CV_SCAN_ENABLED=False,
     CV_LEGACY_CONVERTER_IMAGE='',
     IA_API_URL='http://api-externa.test/api/v1/cv-analyses',
     IA_API_TOKEN='token-de-servicio',

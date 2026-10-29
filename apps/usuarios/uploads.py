@@ -321,45 +321,6 @@ except Exception:
 '''
 
 
-def scan_cv_upload(upload):
-    """Escanea antes de guardar; cualquier error del motor bloquea el reemplazo."""
-    if not getattr(settings, 'CV_SCAN_ENABLED', False):
-        return
-    command = getattr(settings, 'CV_SCAN_COMMAND', '')
-    backend = getattr(settings, 'CV_SCAN_BACKEND', 'defender').strip().lower()
-    timeout = getattr(settings, 'CV_SCAN_TIMEOUT_SECONDS', 30)
-    if not command or backend not in {'defender', 'clamav'}:
-        raise ValidationError('El escáner de archivos no está configurado; el CV no se guardó.')
-    root = Path(settings.BASE_DIR) / 'private_uploads' / 'quarantine'
-    root.mkdir(parents=True, exist_ok=True)
-    suffix = Path(upload.name).suffix.lower()
-    try:
-        with tempfile.NamedTemporaryFile(prefix='cv-', suffix=suffix, dir=root, delete=False) as handle:
-            temp_path = Path(handle.name)
-            upload.seek(0)
-            for chunk in upload.chunks():
-                handle.write(chunk)
-        arguments = (
-            [command, '--no-summary', str(temp_path)] if backend == 'clamav'
-            else [command, '-Scan', '-ScanType', '3', '-File', str(temp_path), '-DisableRemediation']
-        )
-        completed = subprocess.run(
-            arguments,
-            capture_output=True,
-            timeout=timeout,
-            check=False,
-            shell=False,
-        )
-        if completed.returncode != 0:
-            raise ValidationError('El escáner no pudo confirmar que el CV sea seguro; no se guardó.')
-    except (OSError, subprocess.SubprocessError):
-        raise ValidationError('El escáner de archivos no está disponible; no se guardó el CV.')
-    finally:
-        if 'temp_path' in locals():
-            temp_path.unlink(missing_ok=True)
-        upload.seek(0)
-
-
 def normalize_image_upload(upload, *, max_bytes, max_side=IMAGE_MAX_SIDE):
     if upload.size > max_bytes:
         raise ValidationError('La imagen supera el tamaño máximo permitido.')

@@ -26,7 +26,7 @@ from django.contrib.auth import logout as auth_logout
 from .models import Postulante, Oferente
 from .models import Usuario
 from ia.models import CVVersion, EstadoPerfil, PerfilCV
-from .uploads import normalize_image_upload, scan_cv_upload, validate_cv_upload
+from .uploads import normalize_image_upload, validate_cv_upload
 
 token_generator = PasswordResetTokenGenerator()
 
@@ -246,7 +246,6 @@ def cargar_cv(postulante, archivo):
         archivo: Archivo subido desde el formulario.
     """
     extension, _declared_type, tamano = validate_cv_upload(archivo)
-    scan_cv_upload(archivo)
     postulante = Postulante.objects.select_for_update().get(pk=postulante.pk)
     digest = sha256()
     archivo.seek(0)

@@ -2,7 +2,7 @@
 
 Componente 06 de la guía. Responsable sugerido: infraestructura junto con desarrollo. Actualizar cuando cambien infraestructura o procedimientos; verificar en cada release.
 
-Revisión: 22/10/2026. El repositorio tiene configuración y comandos locales, pero no una plataforma productiva ni unidades de servicio declaradas. Este runbook es una base operativa; deploy, rollback y restauración productivos requieren ensayo en staging y registro de evidencia.
+Revisión: 29/10/2026. La [guía de VPS Ubuntu](../DESPLIEGUE_VPS.md) es el procedimiento vigente e incluye Caddy, unidades systemd, dependencias fijadas y verificación de configuración. Este documento conserva el contexto operativo; el despliegue, rollback y restauración requieren ensayo en el servidor real.
 
 ## Ambientes y configuración
 
