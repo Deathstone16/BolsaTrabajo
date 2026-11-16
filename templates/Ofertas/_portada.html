@@ -1,0 +1,27 @@
+<div class="ien-company-photo ien-company-cover" data-profile-photo data-max-mb="5">
+  <label for="id_banner" class="block text-sm font-medium">Portada de la empresa (opcional)</label>
+  <div class="ien-company-photo-preview">
+    <img {% if oferente.banner %}src="{{ oferente.banner.url }}"{% else %}hidden{% endif %} alt="Portada actual" data-photo-preview>
+    <span data-photo-placeholder {% if oferente.banner %}hidden{% endif %}>Tu portada</span>
+  </div>
+  <input id="id_banner" type="file" name="banner" accept="image/jpeg,image/png,image/webp" class="input-ien" aria-describedby="portada-ayuda" data-photo-input>
+  <p id="portada-ayuda" class="text-xs text-[#6B645C]">Subí una imagen JPG, PNG o WebP de hasta 5 MB, o elegí un color de fondo. Recomendamos una imagen horizontal.</p>
+  <div class="ien-cover-background">
+    <label for="cover-color">Color de fondo</label>
+    <input id="cover-color" type="color" value="#512da8" data-cover-color>
+    <button type="button" class="btn-ghost" data-cover-background>Usar este color</button>
+  </div>
+  <div class="ien-photo-editor" data-photo-editor hidden>
+    <canvas width="1200" height="240" data-photo-canvas role="img" aria-label="Vista previa del recorte de portada"></canvas>
+    <label for="cover-zoom">Zoom</label>
+    <input id="cover-zoom" data-photo-zoom type="range" min="1" max="3" step="0.01" value="1">
+    <label for="cover-x">Posición horizontal</label>
+    <input id="cover-x" data-photo-x type="range" min="0" max="100" value="50">
+    <label for="cover-y">Posición vertical</label>
+    <input id="cover-y" data-photo-y type="range" min="0" max="100" value="50">
+    <button type="button" class="btn-ghost" data-photo-reset>Restablecer encuadre</button>
+    <p class="text-xs text-[#6B645C]">La portada se actualiza al guardar los cambios.</p>
+  </div>
+  <p data-photo-error class="text-sm text-red-500" role="alert" hidden></p>
+  {% for error in form.banner.errors %}<p class="text-sm text-red-500" role="alert">{{ error }}</p>{% endfor %}
+</div>

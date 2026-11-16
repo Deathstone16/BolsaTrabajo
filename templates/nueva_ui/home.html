@@ -18,8 +18,8 @@
       <form method="get" action="{% url 'buscar_empleo' %}" class="panel ien-home-search" aria-labelledby="filtro-titulo">
         <h2 id="filtro-titulo">¿Qué trabajo buscás?</h2>
         <div>
-          <label for="home-q">Puesto o título</label>
-          <input id="home-q" name="q" type="search" class="input-ien" placeholder="Ej. administrativo, docente…" />
+          <label for="home-q">Puesto, empresa o palabra clave</label>
+          <input id="home-q" name="q" type="search" class="input-ien" placeholder="Ej. administrativo, Python, Excel…" />
         </div>
         <div class="ien-home-filter-pair">
           <div>
@@ -50,11 +50,15 @@
           <h2 id="cursos-titulo" class="ien-section-title"><span data-icon="graduation-cap" class="inline h-7 w-7" aria-hidden="true"></span> Cursos del IEN</h2>
           <p class="ien-home-intro">Seguí desarrollando tus habilidades. Consultá los contenidos, la duración y la modalidad de las propuestas del IEN.</p>
         </div>
-        <a href="{% url 'cursos:listado' %}" class="btn-ghost">Ver todos los cursos <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
       </div>
-      <div class="ien-course-grid">
+      <div class="ien-course-grid ien-home-course-preview">
         {% for curso in cursos %}{% include 'cursos/_card.html' %}{% empty %}<p class="panel ien-home-empty">Todavía no hay cursos disponibles.</p>{% endfor %}
       </div>
+      {% if cursos %}
+        <div class="ien-home-course-action">
+          <a href="{% url 'cursos:listado' %}" class="btn-ghost">Ver todos los cursos <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+        </div>
+      {% endif %}
     </div>
   </section>
 

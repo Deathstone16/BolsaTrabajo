@@ -1,5 +1,5 @@
 <div class="panel overflow-hidden mb-6">
-  <div class="h-48 bg-gradient-to-r from-primary/20 to-primary/10">
+  <div class="ien-company-cover-header bg-gradient-to-r from-primary/20 to-primary/10">
     {% if oferente.banner %}
       <img src="{{ oferente.banner.url }}" class="w-full h-full object-cover">
     {% endif %}
@@ -15,7 +15,10 @@
         </div>
       {% endif %}
       <div class="flex-1 mt-16 md:mt-20">
-        <h1 class="text-3xl font-bold tracking-tight text-[#26222E]">{{ oferente.nombre_empresa }}</h1>
+        <div class="ien-company-heading">
+          <h1 class="text-3xl font-bold tracking-tight text-[#26222E]">{{ oferente.nombre_empresa }}</h1>
+          {% include 'Ofertas/_sitio-web.html' %}
+        </div>
         {% include "nueva_ui/partials/_breadcrumbs.html" with current=oferente.nombre_empresa parent_url="buscar_empleo" parent_label="Buscar empleo" only %}
         <div class="flex flex-wrap gap-3 text-sm text-muted-foreground mt-2">
           {% if oferente.industria %}
@@ -27,11 +30,6 @@
           {% if oferente.tamano_empresa %}
             <span><span data-icon="users" class="h-4 w-4 inline"></span> {{ oferente.get_tamano_empresa_display }}</span>
           {% endif %}
-          {% if oferente.sitio_web %}
-            <a href="{{ oferente.sitio_web }}" target="_blank" class="hover:text-primary transition-colors">
-              <span data-icon="globe" class="h-4 w-4 inline"></span> {{ oferente.sitio_web }}
-            </a>
-          {% endif %}
           {% if oferente.telefono %}
             <span><span data-icon="phone" class="h-4 w-4 inline"></span> {{ oferente.telefono }}</span>
           {% endif %}
@@ -39,6 +37,7 @@
         {% if oferente.descripcion %}
           <p class="text-muted-foreground mt-4">{{ oferente.descripcion }}</p>
         {% endif %}
+        {% include 'Ofertas/_contacto.html' %}
       </div>
     </div>
   </div>

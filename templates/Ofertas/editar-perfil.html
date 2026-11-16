@@ -119,11 +119,13 @@
 
           <div class="grid md:grid-cols-2 gap-4">
             <div class="space-y-2">
-              <label class="block text-sm font-medium">Sitio web</label>
-              <input type="url" name="sitio_web" value="{{ form.sitio_web.value|default:'' }}"
+              <label for="id_empresa_sitio_web" class="block text-sm font-medium">Página de la empresa (opcional)</label>
+              <input id="id_empresa_sitio_web" type="url" name="sitio_web" value="{{ form.sitio_web.value|default:'' }}" aria-describedby="sitio-web-ayuda"
                      placeholder="https://www.ejemplo.com" maxlength="300"
                      class="input-ien focus:outline-none focus:ring-2 focus:ring-ring">
               {% if form.sitio_web.errors %}<p class="text-sm text-red-500">{{ form.sitio_web.errors.0 }}</p>{% endif %}
+              <p id="sitio-web-ayuda" class="text-xs text-[#6B645C]">Agregá el enlace con https:// para que puedan visitar tu página desde el perfil. Podés dejarlo vacío.</p>
+              {% include 'Ofertas/_sitio-web.html' %}
             </div>
 
             <div class="space-y-2">
@@ -136,31 +138,17 @@
           </div>
         </div>
 
+        {% include 'Ofertas/_contacto-form.html' with contact_form=form %}
+
         <div class="space-y-4 mt-8">
           <h3 class="font-medium flex items-center gap-2">
             <span data-icon="image" class="h-5 w-5 text-primary"></span>Imágenes
           </h3>
 
           <div class="grid md:grid-cols-2 gap-4">
-            <div class="space-y-2">
-              <label class="block text-sm font-medium">Logo</label>
-              {% if oferente.logo %}
-                <img src="{{ oferente.logo.url }}" alt="Logo actual" class="w-20 h-20 object-cover rounded-lg border border-border">
-              {% endif %}
-              <input type="file" name="logo" accept="image/*"
-                     class="input-ien focus:outline-none focus:ring-2 focus:ring-ring">
-              {% if form.logo.errors %}<p class="text-sm text-red-500">{{ form.logo.errors.0 }}</p>{% endif %}
-            </div>
+            {% include 'Ofertas/_foto-perfil.html' with photo_field=form.logo %}
 
-            <div class="space-y-2">
-              <label class="block text-sm font-medium">Banner</label>
-              {% if oferente.banner %}
-                <img src="{{ oferente.banner.url }}" alt="Banner actual" class="w-full h-20 object-cover rounded-lg border border-border">
-              {% endif %}
-              <input type="file" name="banner" accept="image/*"
-                     class="input-ien focus:outline-none focus:ring-2 focus:ring-ring">
-              {% if form.banner.errors %}<p class="text-sm text-red-500">{{ form.banner.errors.0 }}</p>{% endif %}
-            </div>
+            {% include 'Ofertas/_portada.html' %}
           </div>
         </div>
 
@@ -182,5 +170,6 @@
 {% endblock %}
 
 {% block extra_js %}
+  <script src="{% static_v 'js/profile-photo.js' %}"></script>
   <script src="{% static_v 'js/cuit-input.js' %}"></script>
 {% endblock %}

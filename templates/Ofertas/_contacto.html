@@ -1,0 +1,7 @@
+{% if oferente.contacto_nombre %}
+  <section class="ien-company-contact" aria-label="Contacto de la empresa">
+    <h2>Responsable de la empresa</h2>
+    {% if oferente.contacto_nombre %}<p class="ien-company-contact-name">{{ oferente.contacto_nombre }}</p>{% endif %}
+    {% if oferente.contacto_cargo %}<p class="text-sm text-[#6B645C]">{{ oferente.contacto_cargo }}</p>{% endif %}
+  </section>
+{% endif %}

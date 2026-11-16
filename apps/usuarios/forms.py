@@ -87,8 +87,13 @@ class OferenteForm(forms.ModelForm):
         fields = [
             'nombre_empresa', 'cuit', 'descripcion', 'industria',
             'tamano_empresa', 'ubicacion', 'anio_fundacion',
-            'sitio_web', 'telefono', 'logo', 'banner'
+            'sitio_web', 'telefono', 'logo', 'banner',
+            'contacto_nombre', 'contacto_cargo',
         ]
+        widgets = {
+            'contacto_nombre': forms.TextInput(attrs={'class': 'input-ien', 'placeholder': 'Ej. María Pérez'}),
+            'contacto_cargo': forms.TextInput(attrs={'class': 'input-ien', 'placeholder': 'Ej. Recursos Humanos'}),
+        }
 
     def clean_cuit(self):
         cuit = self.cleaned_data['cuit']

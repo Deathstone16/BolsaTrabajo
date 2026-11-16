@@ -17,7 +17,7 @@ def _contexto_home():
     return {
         'vista_activa': 'inicio',
         'ofertas_destacadas': destacadas,
-        'cursos': cursos,
+        'cursos': cursos[:6],
         'modalidad_choices': Oferta.MODALIDAD_CHOICES,
         'experiencia_choices': Oferta.EXPERIENCIA_CHOICES,
         'total_ofertas': ofertas_activas.count(),

@@ -19,13 +19,14 @@
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
     <div class="panel mb-6 overflow-hidden">
-      <div class="h-48 bg-gradient-to-r from-[#512DA8]/25 to-[#FFDE59]/25">
+      <div class="ien-company-cover-header bg-gradient-to-r from-[#512DA8]/25 to-[#FFDE59]/25">
         {% if oferente.banner %}
           <img src="{{ oferente.banner.url }}" alt="" class="h-full w-full object-cover">
         {% endif %}
       </div>
       <div class="px-8 pb-8">
         <div class="relative -mt-16 flex flex-col gap-6 md:flex-row">
+          <div class="ien-company-avatar">
           {% if oferente.logo %}
             <img src="{{ oferente.logo.url }}" alt="{{ oferente.nombre_empresa }}"
                  class="h-32 w-32 rounded-3xl border-4 border-white bg-white object-cover shadow-lg">
@@ -34,8 +35,12 @@
               {{ oferente.nombre_empresa|slice:":2"|upper }}
             </div>
           {% endif %}
+          </div>
           <div class="mt-4 flex-1 md:mt-20">
-            <h1 class="text-3xl font-bold tracking-tight text-[#26222E]">{{ oferente.nombre_empresa }}</h1>
+            <div class="ien-company-heading">
+              <h1 class="text-3xl font-bold tracking-tight text-[#26222E]">{{ oferente.nombre_empresa }}</h1>
+              {% include 'Ofertas/_sitio-web.html' %}
+            </div>
         {% include "nueva_ui/partials/_breadcrumbs.html" with current="Mi panel" only %}
             <div class="mt-3 flex flex-wrap gap-2">
               {% if oferente.industria %}
@@ -51,15 +56,10 @@
             {% if oferente.descripcion %}
               <p class="mt-4 max-w-3xl leading-relaxed text-[#6B645C]">{{ oferente.descripcion }}</p>
             {% endif %}
+            {% include 'Ofertas/_contacto.html' %}
           </div>
         </div>
       </div>
-    </div>
-
-    {# badge_css y badge_icon los devuelve apps/usuarios/estado_oferente.py #}
-    <div class="{{ oferente.estado_obj.badge_css }} mb-6 flex items-center gap-3 rounded-2xl border px-5 py-4">
-      <span data-icon="{{ oferente.estado_obj.badge_icon }}" class="h-5 w-5 shrink-0"></span>
-      <span class="font-semibold">{{ oferente.estado_obj.badge_text }}</span>
     </div>
 
     <div class="panel p-8">
@@ -132,8 +132,10 @@
               <input type="number" name="anio_fundacion" value="{{ form_perfil.anio_fundacion.value|default:'' }}" class="input-ien">
             </div>
             <div class="space-y-1.5">
-              <label class="block text-sm">Sitio web</label>
-              <input type="url" name="sitio_web" value="{{ form_perfil.sitio_web.value|default:'' }}" class="input-ien">
+              <label for="id_panel_sitio_web" class="block text-sm">Página de la empresa (opcional)</label>
+              <input id="id_panel_sitio_web" type="url" name="sitio_web" value="{{ form_perfil.sitio_web.value|default:'' }}" placeholder="https://www.ejemplo.com" maxlength="300" aria-describedby="panel-sitio-web-ayuda" class="input-ien">
+              <p id="panel-sitio-web-ayuda" class="text-xs text-[#6B645C]">Este enlace se muestra en tu perfil. Podés dejarlo vacío.</p>
+              {% include 'Ofertas/_sitio-web.html' %}
             </div>
             <div class="space-y-1.5">
               <label class="block text-sm">Teléfono</label>
@@ -146,22 +148,7 @@
             <textarea id="id_panel_descripcion" data-character-limit="2000" name="descripcion" rows="4" class="input-ien resize-none">{{ form_perfil.descripcion.value|default:'' }}</textarea>
           </div>
 
-          <div class="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
-            <div class="space-y-1.5">
-              <label class="block text-sm">Logo</label>
-              {% if oferente.logo %}
-                <img src="{{ oferente.logo.url }}" alt="" class="mb-2 h-20 w-20 rounded-2xl object-cover">
-              {% endif %}
-              <input type="file" name="logo" accept="image/*" class="w-full text-sm text-[#6B645C]">
-            </div>
-            <div class="space-y-1.5">
-              <label class="block text-sm">Banner</label>
-              {% if oferente.banner %}
-                <img src="{{ oferente.banner.url }}" alt="" class="mb-2 h-20 w-full rounded-2xl object-cover">
-              {% endif %}
-              <input type="file" name="banner" accept="image/*" class="w-full text-sm text-[#6B645C]">
-            </div>
-          </div>
+          {% include 'Ofertas/_contacto-form.html' with contact_form=form_perfil %}
 
           <button type="submit" class="btn-ien mt-8 !py-3.5">
             Guardar cambios <span data-icon="check" class="h-4 w-4"></span>

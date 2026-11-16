@@ -6,6 +6,7 @@ y funciones de utilidad para el dominio de ofertas.
 """
 
 from django.db import transaction
+from django.db.models import Q
 from .models import Oferta, OfertaFavorita
 
 from django.shortcuts import get_object_or_404
@@ -74,7 +75,7 @@ def obtener_ofertas_activas(busqueda='', modalidad='', experiencia=''):
     """Busca ofertas activas con filtros opcionales.
 
     Args:
-        busqueda (str): Filtro por título o nombre de puesto.
+        busqueda (str): Palabras del título, empresa, descripción o requisitos.
         modalidad (str): Filtro exacto por modalidad.
         experiencia (str): Filtro exacto por experiencia requerida.
 
@@ -84,8 +85,18 @@ def obtener_ofertas_activas(busqueda='', modalidad='', experiencia=''):
     ofertas = Oferta.objects.filter(
         estado='activa',
     ).select_related('empresa__oferente', 'categoria').order_by('-fecha_publicacion')
-    if busqueda:
-        ofertas = ofertas.filter(titulo__icontains=busqueda) | ofertas.filter(nombre_puesto__icontains=busqueda)
+    for palabra in busqueda.split():
+        coincidencias = Q(
+            es_confidencial=False,
+            empresa__oferente__nombre_empresa__icontains=palabra,
+        )
+        for campo in (
+            'titulo', 'nombre_puesto', 'descripcion', 'categoria__nombre',
+            'habilidades_duras', 'habilidades_blandas', 'habilidades_requeridas',
+            'requisitos_obligatorios', 'requisitos_deseables',
+        ):
+            coincidencias |= Q(**{f'{campo}__icontains': palabra})
+        ofertas = ofertas.filter(coincidencias)
     if modalidad:
         ofertas = ofertas.filter(modalidad=modalidad)
     if experiencia:

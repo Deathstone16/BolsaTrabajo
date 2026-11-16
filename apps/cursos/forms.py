@@ -6,6 +6,40 @@ from .models import Curso, Categoria
 
 INPUT_CLASS = "w-full px-4 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/30"
 
+
+class CursoFiltroForm(forms.Form):
+    """Filtros públicos con opciones tomadas del catálogo activo."""
+
+    q = forms.CharField(
+        label='Buscar por título', required=False, max_length=120,
+        widget=forms.TextInput(attrs={'type': 'search', 'placeholder': 'Ej. Excel, administración…'}),
+    )
+    categoria = forms.ModelChoiceField(
+        label='Categoría', required=False, queryset=Categoria.objects.none(),
+        empty_label='Todas las categorías',
+    )
+    modalidad = forms.ChoiceField(
+        label='Modalidad', required=False,
+        choices=[('', 'Todas las modalidades'), *Curso.TIPO_CHOICES],
+    )
+    duracion = forms.ChoiceField(label='Duración', required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        activos = Curso.objects.filter(activo=True)
+        self.fields['categoria'].queryset = Categoria.objects.filter(
+            pk__in=activos.values('categoria_id'),
+        ).order_by('nombre')
+        duraciones = activos.exclude(duracion='').order_by('duracion').values_list(
+            'duracion', flat=True,
+        ).distinct()
+        self.fields['duracion'].choices = [('', 'Todas las duraciones')] + [
+            (duracion, duracion) for duracion in duraciones
+        ]
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'input-ien'
+
+
 class CursoForm(forms.ModelForm):
     """Crea o edita los datos y la imagen de un curso."""
     descripcion = DescripcionField()

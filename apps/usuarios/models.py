@@ -106,6 +106,15 @@ class Oferente(models.Model):
     anio_fundacion = models.IntegerField(null=True, blank=True)
     sitio_web = models.URLField(max_length=300, null=True, blank=True)
     telefono = models.CharField(max_length=50, null=True, blank=True)
+    contacto_nombre = models.CharField('Nombre del responsable', max_length=150)
+    contacto_cargo = models.CharField('Cargo o área', max_length=100, blank=True)
+    contacto_email = models.EmailField('Email de contacto', blank=True)
+    contacto_telefono = models.CharField('Teléfono de contacto', max_length=50, blank=True)
+
+    @property
+    def contacto_telefono_enlace(self):
+        numero = ''.join(caracter for caracter in self.contacto_telefono if caracter.isdigit())
+        return ('+' if self.contacto_telefono.startswith('+') else '') + numero
 
     def aprobar(self):
         """Aprueba la empresa cambiando estado a aprobado."""

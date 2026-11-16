@@ -1,0 +1,24 @@
+<div id="foto-perfil" class="ien-company-photo" data-profile-photo>
+  <label for="id_logo" class="block text-sm font-medium">Foto de perfil o logo</label>
+  <div class="ien-company-photo-preview">
+    <img {% if oferente.logo %}src="{{ oferente.logo.url }}"{% else %}hidden{% endif %}
+         alt="Foto de perfil de {{ oferente.nombre_empresa }}" data-photo-preview>
+    <span data-photo-placeholder {% if oferente.logo %}hidden{% endif %}>{{ oferente.nombre_empresa|slice:":2"|upper }}</span>
+  </div>
+  <input id="id_logo" type="file" name="logo" accept="image/jpeg,image/png,image/webp"
+         class="input-ien" aria-describedby="foto-perfil-ayuda" data-photo-input>
+  <p id="foto-perfil-ayuda" class="text-xs text-[#6B645C]">Elegí una foto o el logo de tu empresa. JPG, PNG o WebP, hasta 2 MB. Ajustá el encuadre y guardá los cambios para actualizarla.</p>
+  <div class="ien-photo-editor" data-photo-editor hidden>
+    <canvas width="512" height="512" data-photo-canvas role="img" aria-label="Vista previa del recorte de la foto de perfil"></canvas>
+    <label for="photo-zoom">Zoom</label>
+    <input id="photo-zoom" data-photo-zoom type="range" min="1" max="3" step="0.01" value="1">
+    <label for="photo-x">Posición horizontal</label>
+    <input id="photo-x" data-photo-x type="range" min="0" max="100" value="50">
+    <label for="photo-y">Posición vertical</label>
+    <input id="photo-y" data-photo-y type="range" min="0" max="100" value="50">
+    <button type="button" class="btn-ghost" data-photo-reset>Restablecer encuadre</button>
+    <p class="text-xs text-[#6B645C]">Así se verá tu foto. El recorte se aplica al guardar los cambios.</p>
+  </div>
+  <p data-photo-error class="text-sm text-red-500" role="alert" hidden></p>
+  {% for error in photo_field.errors %}<p class="text-sm text-red-500" role="alert">{{ error }}</p>{% endfor %}
+</div>

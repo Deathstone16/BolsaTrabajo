@@ -8,8 +8,28 @@
     <h1 id="cursos-listado-titulo" class="ien-section-title"><span data-icon="graduation-cap" class="inline h-7 w-7" aria-hidden="true"></span> Cursos del IEN</h1>
     {% include 'nueva_ui/partials/_breadcrumbs.html' with current='Cursos' only %}
     <p class="ien-home-intro">Explorá las capacitaciones disponibles y consultá qué podés aprender, cuánto duran y cómo se cursan.</p>
+    <form method="get" action="{% url 'cursos:listado' %}" class="panel ien-course-filters" aria-label="Filtrar cursos">
+      <div class="ien-course-filter-fields">
+        {% for field in filtros %}
+          <div>
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% for error in field.errors %}<p class="ien-course-filter-error" role="alert">{{ error }}</p>{% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+      <div class="ien-course-filter-actions">
+        <button type="submit" class="btn-ien"><span data-icon="search" class="h-4 w-4" aria-hidden="true"></span> Buscar cursos</button>
+        {% if hay_filtros %}<a href="{% url 'cursos:listado' %}" class="btn-ghost">Limpiar filtros</a>{% endif %}
+      </div>
+    </form>
+    <p class="ien-course-results" role="status">{{ total_resultados }} curso{{ total_resultados|pluralize }} encontrado{{ total_resultados|pluralize }}</p>
     <div class="ien-course-grid">
-      {% for curso in cursos %}{% include 'cursos/_card.html' with course_heading_level=2 %}{% empty %}<p class="panel ien-home-empty">Todavía no hay cursos disponibles. Volvé a consultar próximamente.</p>{% endfor %}
+      {% for curso in cursos %}
+        {% include 'cursos/_card.html' with course_heading_level=2 %}
+      {% empty %}
+        <p class="panel ien-home-empty">{% if filtros.errors %}Revisá los filtros para realizar la búsqueda.{% elif hay_filtros %}No encontramos cursos con esos filtros. Probá con otro título o limpiá los filtros para ver todas las opciones.{% else %}Todavía no hay cursos disponibles. Volvé a consultar próximamente.{% endif %}</p>
+      {% endfor %}
     </div>
   </div>
 </section>
