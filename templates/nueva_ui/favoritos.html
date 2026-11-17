@@ -32,15 +32,23 @@
             <div class="relative flex items-start justify-between gap-4">
               <div class="flex items-start gap-4">
                 <div class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#512DA8]/10 text-base font-bold text-[#512DA8]">
-                {% if oferta.empresa.oferente %}{{ oferta.empresa.oferente.nombre_empresa|slice:":2"|upper }}{% else %}IEN{% endif %}
+                {% if oferta.es_confidencial %}
+                  <span data-icon="lock" class="h-5 w-5" aria-hidden="true"></span>
+                {% elif oferta.empresa.oferente %}
+                  {{ oferta.empresa.oferente.nombre_empresa|slice:":2"|upper }}
+                {% else %}
+                  IEN
+                {% endif %}
                 </div>
                 <div>
                     <h3 class="text-lg font-semibold text-[#26222E] transition-colors hover:text-[#512DA8]">
                     {% if oferta.estado == 'activa' %}<a href="{% url 'detalle_oferta' oferta.pk %}">{{ oferta.titulo }}</a>{% else %}{{ oferta.titulo }}{% endif %}
                   </h3>
-                  {% if oferta.empresa.oferente %}
+                  {% if oferta.es_confidencial %}
+                    <p class="mt-0.5 text-sm text-[#6B645C]">Empresa confidencial</p>
+                  {% elif oferta.empresa.oferente %}
                     <p class="mt-0.5 text-sm text-[#6B645C]">{{ oferta.empresa.oferente.nombre_empresa }}</p>
-                {% endif %}
+                  {% endif %}
                 {% if oferta.descripcion %}
                     <p class="mt-1 line-clamp-2 text-sm text-[#6B645C]">{{ oferta.descripcion }}</p>
                 {% endif %}

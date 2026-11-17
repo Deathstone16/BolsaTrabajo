@@ -45,7 +45,14 @@
 </div>
 <div class="ien-offer-section">
   {% include 'Ofertas/_campo-oferta.html' with field=form.fecha_cierre %}
-  <label class="ien-offer-confidential">{{ form.es_confidencial }} Publicación confidencial (oculta el nombre de la empresa)</label>
+  <div>
+    <label class="ien-offer-confidential">{{ form.es_confidencial }} Publicación confidencial</label>
+    <p class="mt-2 text-sm text-[#6B645C]">
+      Si la activás, la oferta sigue apareciendo en la búsqueda, pero sin el nombre, el logo ni el enlace a tu empresa. Tampoco se lista en el perfil público de la empresa.
+      El título, la descripción y los requisitos siguen visibles: evitá incluir ahí datos que identifiquen a tu empresa.
+      Si la dejás desactivada, se muestra el nombre de tu empresa.
+    </p>
+  </div>
   <div class="ien-offer-actions">
     <button type="submit" class="btn-ien">{{ submit_text|default:'Publicar oferta' }}</button>
     <a href="{% url 'dashboard_empresa' %}" class="btn-ghost">Cancelar</a>
