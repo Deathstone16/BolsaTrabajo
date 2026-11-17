@@ -101,10 +101,13 @@
       <div class="ien-home-offers">
         {% for oferta in ofertas_destacadas %}
           <article class="panel ien-home-offer">
-            <div>
-              <h3>{{ oferta.titulo }}</h3>
-              <p>{% if oferta.es_confidencial %}Empresa confidencial{% elif oferta.empresa.oferente %}{{ oferta.empresa.oferente.nombre_empresa }}{% else %}Empresa{% endif %}</p>
-              <p class="ien-card-meta">Publicada el {{ oferta.fecha_publicacion|date:"d/m/Y" }}</p>
+            <div class="ien-home-offer-heading">
+              {% include 'nueva_ui/partials/_oferta_avatar.html' with oferta=oferta only %}
+              <div>
+                <h3>{{ oferta.titulo }}</h3>
+                <p>{% if oferta.es_confidencial %}Empresa confidencial{% elif oferta.empresa.oferente %}{{ oferta.empresa.oferente.nombre_empresa }}{% else %}Empresa{% endif %}</p>
+                <p class="ien-card-meta">Publicada el {{ oferta.fecha_publicacion|date:"d/m/Y" }}</p>
+              </div>
             </div>
             <div class="ien-offer-meta">
               {% if oferta.ubicacion %}<span>{{ oferta.ubicacion }}</span>{% endif %}
