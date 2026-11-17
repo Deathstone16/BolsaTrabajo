@@ -148,24 +148,42 @@ body {
 .ien-company-contact-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 1rem; margin-top: 1rem; }
 .ien-company-contact-fields label { display: block; font-size: 0.875rem; margin-bottom: 0.5rem; }
 .ien-company-contact-fields input { width: 100%; }
-.ien-company-contact { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
-.ien-company-contact h2 { font-size: 0.75rem; font-weight: 500; color: var(--muted-foreground); }
-.ien-company-contact-name { margin-top: 0.5rem; font-size: 0.9375rem; font-weight: 600; }
-.ien-company-contact-links { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; margin-top: 0.75rem; }
-.ien-company-contact-links a { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--primary); font-size: 0.8125rem; overflow-wrap: anywhere; }
-.ien-company-contact-links a:hover { text-decoration: underline; }
+.ien-company-contact { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 1rem clamp(1rem, 4vw, 3rem); margin-top: 1.5rem; padding: 1rem 1.25rem; border-radius: 0.85rem; background: var(--muted); }
+.ien-company-contact-item { display: flex; align-items: flex-start; gap: 0.65rem; min-width: 0; overflow-wrap: anywhere; }
+.ien-company-contact-icon { flex: 0 0 1.15rem; width: 1.15rem; height: 1.15rem; color: var(--primary); }
+.ien-company-contact-label { font-size: 0.75rem; font-weight: 500; color: var(--muted-foreground); }
+.ien-company-contact-value { margin-top: 0.2rem; font-size: 0.9375rem; font-weight: 600; }
+.ien-company-contact-value.ien-text-link { display: inline-block; }
 .ien-company-photo { display: grid; align-content: start; gap: 0.75rem; scroll-margin-top: 7rem; }
-.ien-company-photo-preview { display: grid; place-items: center; width: 6rem; height: 6rem; overflow: hidden; border-radius: 1rem; background: var(--muted); color: var(--primary); font-size: 1.75rem; font-weight: 600; }
+.ien-company-photo-preview { display: grid; place-items: center; width: 7rem; height: 7rem; overflow: hidden; border-radius: 1rem; background: var(--muted); color: var(--primary); font-size: 1.75rem; font-weight: 600; }
 .ien-company-photo-preview img { width: 100%; height: 100%; object-fit: cover; }
 .ien-company-photo-preview [hidden] { display: none; }
 .ien-company-photo .input-ien { width: 100%; }
+.ien-photo-upload-control { display: grid; gap: 0.4rem; }
+.ien-photo-picker { display: flex; align-items: center; gap: 0.8rem; width: 100%; padding: 0.85rem 1rem; border: 2px dashed color-mix(in srgb, var(--primary) 42%, var(--border)); border-radius: 1rem; background: color-mix(in srgb, var(--primary) 5%, var(--card)); color: var(--foreground); cursor: pointer; transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease, transform 0.1s ease; }
+.ien-photo-picker:hover { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, var(--card)); box-shadow: 0 8px 20px color-mix(in srgb, var(--primary) 14%, transparent); }
+.ien-photo-picker:active { transform: scale(0.99); border-color: var(--primary); background: color-mix(in srgb, var(--primary) 17%, var(--card)); box-shadow: 0 0 0 5px color-mix(in srgb, var(--primary) 20%, transparent); }
+.ien-photo-upload-control:focus-within .ien-photo-picker { border-color: var(--primary); box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 18%, transparent); }
+.ien-photo-picker.has-file { border-style: solid; border-color: #16835f; background: color-mix(in srgb, #16835f 9%, var(--card)); box-shadow: 0 0 0 4px color-mix(in srgb, #16835f 12%, transparent); }
+.ien-photo-picker svg { flex: 0 0 auto; width: 1.7rem; height: 1.7rem; color: var(--primary); fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ien-photo-picker.has-file svg { color: #16835f; }
+.ien-photo-picker-copy { display: grid; gap: 0.1rem; min-width: 0; text-align: left; }
+.ien-photo-picker-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.9rem; }
+.ien-photo-picker-copy small { color: #6B645C; font-size: 0.72rem; }
+.ien-photo-picker-action { margin-left: auto; padding: 0.42rem 0.7rem; border-radius: 9999px; background: var(--primary); color: white; font-size: 0.75rem; font-weight: 700; }
+.ien-photo-picker.has-file .ien-photo-picker-action { background: #16835f; }
+.ien-photo-picker-status { margin: 0; color: #6B645C; font-size: 0.75rem; }
+.ien-photo-picker-status.is-ready { color: #116a4d; font-weight: 600; }
 .ien-photo-editor { display: grid; gap: 0.6rem; padding: 1rem; border: 1px solid var(--border); border-radius: 1rem; background: var(--card); }
 .ien-photo-editor[hidden] { display: none; }
-.ien-photo-editor canvas { width: 100%; max-width: 16rem; aspect-ratio: 1; border-radius: 1rem; background: var(--muted); }
+.ien-photo-editor canvas { width: 100%; max-width: 16rem; aspect-ratio: 1; border-radius: 1rem; background: var(--muted); cursor: grab; touch-action: none; user-select: none; }
+.ien-photo-editor canvas:active, .ien-photo-editor canvas.is-dragging { cursor: grabbing; }
+.ien-photo-editor canvas:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 45%, transparent); outline-offset: 3px; }
 .ien-photo-editor label { font-size: 0.8125rem; }
 .ien-photo-editor input { width: 100%; accent-color: var(--primary); }
 .ien-photo-editor .btn-ghost { padding: 0.5rem 0.75rem; font-size: 0.8125rem; }
-.ien-company-cover .ien-company-photo-preview { width: 100%; height: auto; aspect-ratio: 5 / 1; font-size: 1rem; }
+.ien-photo-drag-help { margin: 0; color: #6B645C; font-size: 0.75rem; line-height: 1.45; }
+.ien-company-cover .ien-company-photo-preview { width: 100%; height: 7rem; aspect-ratio: auto; font-size: 1rem; }
 .ien-company-cover-header { aspect-ratio: 5 / 1; min-height: 8rem; overflow: hidden; }
 .ien-company-cover .ien-photo-editor canvas { max-width: 100%; aspect-ratio: 5 / 1; }
 .ien-cover-background { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; font-size: 0.8125rem; }

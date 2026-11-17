@@ -39,6 +39,7 @@ class FlujosIntegracionRamasTests(TestCase):
             reverse('registro') + '?tipo=oferente',
             {
                 'nombre_empresa': 'Empresa de prueba',
+                'contacto_nombre': 'Responsable de prueba',
                 'cuit': '20-12345678-6',
                 'email': 'empresa-integracion@example.com',
                 'password1': 'Clave-segura-123!',

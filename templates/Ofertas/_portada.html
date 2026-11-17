@@ -4,21 +4,32 @@
     <img {% if oferente.banner %}src="{{ oferente.banner.url }}"{% else %}hidden{% endif %} alt="Portada actual" data-photo-preview>
     <span data-photo-placeholder {% if oferente.banner %}hidden{% endif %}>Tu portada</span>
   </div>
-  <input id="id_banner" type="file" name="banner" accept="image/jpeg,image/png,image/webp" class="input-ien" aria-describedby="portada-ayuda" data-photo-input>
-  <p id="portada-ayuda" class="text-xs text-[#6B645C]">Subí una imagen JPG, PNG o WebP de hasta 5 MB, o elegí un color de fondo. Recomendamos una imagen horizontal.</p>
+  <div class="ien-photo-upload-control">
+    <input id="id_banner" type="file" name="banner" accept="image/jpeg,image/png,image/webp" class="sr-only"
+           aria-describedby="portada-ayuda portada-estado" data-photo-input>
+    <label for="id_banner" class="ien-photo-picker" data-photo-picker>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>
+      <span class="ien-photo-picker-copy">
+        <strong data-photo-picker-label>Elegir imagen de portada</strong>
+        <small>JPG, PNG o WebP · máximo 5 MB</small>
+      </span>
+      <span class="ien-photo-picker-action" data-photo-picker-action>Seleccionar</span>
+    </label>
+    <p id="portada-estado" class="ien-photo-picker-status" data-photo-status aria-live="polite">Ninguna portada nueva seleccionada.</p>
+  </div>
+  <p id="portada-ayuda" class="text-xs text-[#6B645C]">Recomendamos una imagen horizontal. También podés elegir un color de fondo.</p>
   <div class="ien-cover-background">
     <label for="cover-color">Color de fondo</label>
     <input id="cover-color" type="color" value="#512da8" data-cover-color>
     <button type="button" class="btn-ghost" data-cover-background>Usar este color</button>
   </div>
   <div class="ien-photo-editor" data-photo-editor hidden>
-    <canvas width="1200" height="240" data-photo-canvas role="img" aria-label="Vista previa del recorte de portada"></canvas>
+    <canvas width="1200" height="240" data-photo-canvas role="img" tabindex="0"
+            aria-label="Vista previa del recorte de portada"
+            aria-describedby="cover-drag-help"></canvas>
+    <p id="cover-drag-help" class="ien-photo-drag-help">Arrastrá la imagen dentro del marco para elegir qué parte se verá. También podés usar las flechas del teclado.</p>
     <label for="cover-zoom">Zoom</label>
     <input id="cover-zoom" data-photo-zoom type="range" min="1" max="3" step="0.01" value="1">
-    <label for="cover-x">Posición horizontal</label>
-    <input id="cover-x" data-photo-x type="range" min="0" max="100" value="50">
-    <label for="cover-y">Posición vertical</label>
-    <input id="cover-y" data-photo-y type="range" min="0" max="100" value="50">
     <button type="button" class="btn-ghost" data-photo-reset>Restablecer encuadre</button>
     <p class="text-xs text-[#6B645C]">La portada se actualiza al guardar los cambios.</p>
   </div>

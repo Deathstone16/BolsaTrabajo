@@ -16,6 +16,7 @@ class FotoPerfilOferenteTests(TestCase):
             oferente = Oferente.objects.create(
                 usuario=usuario, nombre_empresa='Empresa de prueba', cuit='30-12345678-1',
                 estado_validacion=Oferente.EstadoValidacion.APROBADO,
+                contacto_nombre='Responsable Demo',
             )
             self.client.force_login(usuario)
             panel = self.client.get(reverse('dashboard_empresa'))

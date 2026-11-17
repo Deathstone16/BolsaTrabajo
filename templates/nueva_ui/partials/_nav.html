@@ -1,19 +1,25 @@
 {% load static %}
 {# Nav del rediseno, con la logica de sesion y roles que ya traia templates/base.html #}
-<header id="global-nav" {% if user.is_authenticated and user.is_staff %}data-admin-header{% endif %} {% if user.is_authenticated and user.oferente and not user.is_staff %}data-employer-header{% endif %} class="sticky top-0 z-50 border-b border-[rgba(110,85,55,0.16)] bg-[#F8F3F0]/85 backdrop-blur-xl">
+<header id="global-nav" {% if not home_only and user.is_authenticated and user.is_staff %}data-admin-header{% endif %} {% if not home_only and user.is_authenticated and user.oferente and not user.is_staff %}data-employer-header{% endif %} class="sticky top-0 z-50 border-b border-[rgba(110,85,55,0.16)] bg-[#F8F3F0]/85 backdrop-blur-xl">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex h-16 items-center justify-between gap-6">
-      <a href="{% url 'home' %}" class="group flex items-center gap-3">
+    <div class="flex h-16 items-center justify-between {% if home_only %}gap-3{% else %}gap-6{% endif %}">
+      {% if home_only %}<div class="flex items-center gap-3">{% else %}<a href="{% url 'home' %}" class="group flex items-center gap-3">{% endif %}
         <span class="relative grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#512DA8] to-[#43218F] text-base font-bold tracking-tight text-white shadow-[0_10px_24px_-10px_rgba(81,45,168,0.55)]">
           <span class="-mt-0.5">IEN</span>
           <span class="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#FFDE59]"></span>
         </span>
         <span class="flex flex-col leading-none">
           <span class="font-semibold text-[#26222E] tracking-tight">IEN Empleo</span>
-          <span class="pt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-[#512DA8]">Bolsa de trabajo · Chaco</span>
+          <span class="pt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-[#512DA8]{% if home_only %} hidden sm:block{% endif %}">Bolsa de trabajo · Chaco</span>
         </span>
-      </a>
+      {% if home_only %}</div>{% else %}</a>{% endif %}
 
+      {% if home_only %}
+        <a href="{% url 'home' %}" class="btn-ghost shrink-0 text-sm !py-2">
+          <span data-icon="arrow-left" class="h-4 w-4" aria-hidden="true"></span>
+          Volver al inicio
+        </a>
+      {% else %}
       <div class="ien-nav-desktop hidden md:flex items-center gap-7">
         {% if user.is_authenticated and user.is_staff %}
           {% include 'nueva_ui/partials/_nav_admin.html' %}
@@ -33,7 +39,7 @@
           dashboard_empresa, asi que duplicaba Mi panel. Para publicar esta el
           boton "Nueva oferta" dentro del panel, que abre el modal.
         {% endcomment %}
-        {% if user.is_authenticated and user.oferente and user.oferente.estado_obj.puede_publicar %}
+        {% if user.is_authenticated and user.oferente and user.oferente.puede_publicar %}
           <a href="{% url 'dashboard_empresa' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Mi panel</a>
           <a href="{% url 'editar_perfil_empresa' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Mi empresa</a>
         {% endif %}
@@ -70,9 +76,11 @@
       <button class="nav-burger md:hidden grid h-10 w-10 place-items-center rounded-xl border border-[rgba(110,85,55,0.16)] bg-white" aria-label="Abrir menú">
         <span data-icon="menu" class="h-5 w-5"></span>
       </button>
+      {% endif %}
     </div>
   </div>
 
+  {% if not home_only %}
   <div class="nav-mobile hidden border-t border-[rgba(110,85,55,0.16)] bg-[#F8F3F0] px-4 pb-6 pt-4 md:hidden">
     <div class="flex flex-col gap-2">
       {% if user.is_authenticated and user.is_staff %}
@@ -85,7 +93,7 @@
       {% if not user.is_authenticated or user.postulante %}
         <a href="{% url 'buscar_empleo' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Buscar empleo</a>
       {% endif %}
-      {% if user.is_authenticated and user.oferente and user.oferente.estado_obj.puede_publicar %}
+      {% if user.is_authenticated and user.oferente and user.oferente.puede_publicar %}
         <a href="{% url 'dashboard_empresa' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Mi panel</a>
       {% endif %}
       {% if user.is_authenticated and user.postulante %}
@@ -103,4 +111,5 @@
       {% endif %}
     </div>
   </div>
+  {% endif %}
 </header>

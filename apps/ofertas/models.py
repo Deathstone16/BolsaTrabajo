@@ -7,6 +7,7 @@ incluyendo campos de puesto, requisitos, estado y fechas.
 
 from django.db import models
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from .state import ESTADOS
 from categorias.models import Categoria
@@ -93,6 +94,9 @@ class Oferta(models.Model):
 
     def aprobar(self):
         """Aprueba la oferta (pendiente → activa). Lanza ValueError si la transición es inválida."""
+        oferente = getattr(self.empresa, 'oferente', None)
+        if not oferente or not oferente.puede_publicar:
+            raise ValidationError('La empresa debe estar aprobada y tener un responsable antes de publicar ofertas.')
         self.get_state().aprobar(self)
 
     def rechazar(self, motivo=None):

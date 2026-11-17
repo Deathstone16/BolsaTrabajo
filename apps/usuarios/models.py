@@ -7,6 +7,7 @@ con su manager y patrón de estados de validación.
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.core.exceptions import ValidationError
 from .estado_oferente import ESTADOS, Pendiente
 from .validators import validar_cuit
 
@@ -109,6 +110,7 @@ class Oferente(models.Model):
     contacto_nombre = models.CharField('Nombre del responsable', max_length=150)
     contacto_cargo = models.CharField('Cargo o área', max_length=100, blank=True)
     contacto_email = models.EmailField('Email de contacto', blank=True)
+    correo_publico = models.EmailField('Correo de contacto público', blank=True)
     contacto_telefono = models.CharField('Teléfono de contacto', max_length=50, blank=True)
 
     @property
@@ -116,8 +118,22 @@ class Oferente(models.Model):
         numero = ''.join(caracter for caracter in self.contacto_telefono if caracter.isdigit())
         return ('+' if self.contacto_telefono.startswith('+') else '') + numero
 
+    @property
+    def tiene_responsable(self):
+        """Indica si la empresa identificó a una persona responsable."""
+        return bool((self.contacto_nombre or '').strip())
+
+    @property
+    def puede_publicar(self):
+        """Exige aprobación institucional y un responsable identificable."""
+        return self.estado_obj.puede_publicar() and self.tiene_responsable
+
     def aprobar(self):
         """Aprueba la empresa cambiando estado a aprobado."""
+        if not self.tiene_responsable:
+            raise ValidationError({
+                'contacto_nombre': 'La empresa debe indicar un responsable antes de ser aprobada.'
+            })
         self.estado_validacion = self.EstadoValidacion.APROBADO
         self.save(update_fields=['estado_validacion'])
 

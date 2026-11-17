@@ -7,6 +7,7 @@ y funciones de utilidad para el dominio de ofertas.
 
 from django.db import transaction
 from django.db.models import Q
+from django.core.exceptions import ValidationError
 from .models import Oferta, OfertaFavorita
 
 from django.shortcuts import get_object_or_404
@@ -36,6 +37,9 @@ def crear_oferta_laboral(usuario_empresa, form_oferta):
         Oferta: Instancia de la oferta creada.
     """
     
+    oferente = getattr(usuario_empresa, 'oferente', None)
+    if not oferente or not oferente.puede_publicar:
+        raise ValidationError('Completá el responsable de la empresa antes de publicar una oferta.')
     oferta = form_oferta.save(commit=False)
     oferta.empresa = usuario_empresa
     return activar_y_programar_analisis(oferta)

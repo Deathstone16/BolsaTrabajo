@@ -18,8 +18,11 @@ from usuarios.decorators import oferente_required, oferente_validado_required, p
 def validacion_pendiente(request):
     """Muestra a la empresa el estado pendiente de validación de su perfil."""
     oferente = request.user.oferente
-    if oferente.estado_validacion == oferente.EstadoValidacion.APROBADO:
+    if oferente.puede_publicar:
         return redirect('dashboard_empresa')
+    if oferente.estado_validacion == oferente.EstadoValidacion.APROBADO and not oferente.tiene_responsable:
+        messages.warning(request, 'Completá el nombre de la persona responsable para habilitar la publicación de ofertas.')
+        return redirect('editar_perfil_empresa')
     email_contacto_url = obtener_url_contacto(request.user.email)
     return render(request, 'Ofertas/validacion_pendiente.html', {
         'email_contacto_url': email_contacto_url,

@@ -11,6 +11,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 
 from cursos.models import Curso
 from categorias.models import Categoria, Habilidad
@@ -228,7 +229,12 @@ def aprobar_empresa(request, pk):
     """Aprueba por POST el perfil de una empresa."""
     if request.method == 'POST':
         empresa = services.obtener_empresa(pk)
-        if usuarios_service.aprobar_empresa(empresa):
+        try:
+            aprobada = usuarios_service.aprobar_empresa(empresa)
+        except ValidationError:
+            messages.error(request, 'No se puede aprobar la empresa hasta que informe una persona responsable.')
+            aprobada = False
+        if aprobada:
             dashboard_url = request.build_absolute_uri(reverse('dashboard_empresa'))
             try:
                 usuarios_service.enviar_email_aprobacion(empresa, dashboard_url)
@@ -237,7 +243,7 @@ def aprobar_empresa(request, pk):
                 messages.warning(request, 'Empresa aprobada, pero no se pudo enviar el correo de aviso.')
             else:
                 messages.success(request, 'Empresa aprobada y notificada por correo.')
-        else:
+        elif empresa.estado_validacion == Oferente.EstadoValidacion.APROBADO:
             messages.info(request, 'La empresa ya estaba aprobada; no se envió otro correo.')
     return redirect('mod_listar_empresas')
 
@@ -290,8 +296,8 @@ def aprobar_oferta(request, pk):
         try:
             services.aprobar_oferta(pk)
             messages.success(request, 'Oferta aprobada correctamente.')
-        except ValueError as e:
-            messages.error(request, str(e))
+        except (ValueError, ValidationError) as e:
+            messages.error(request, e.messages[0] if isinstance(e, ValidationError) else str(e))
     return redirect('mod_detalle_oferta', pk=pk)
 
 @staff_required

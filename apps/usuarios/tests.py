@@ -25,6 +25,20 @@ class RegistroOferenteTests(TestCase):
 
         self.assertContains(response, 'data-cuit-input')
         self.assertContains(response, 'cuit-input.js')
+
+    def test_confirmacion_empresa_muestra_solo_acceso_a_inicio_en_cabecera(self):
+        response = self.client.get(reverse('registro_exitoso') + '?tipo=oferente')
+        cabecera = response.content.decode().split('<header', 1)[1].split('</header>', 1)[0]
+
+        self.assertIn('IEN Empleo', cabecera)
+        self.assertIn('Volver al inicio', cabecera)
+        self.assertEqual(cabecera.count('href='), 1)
+        self.assertNotIn('Abrir menú', cabecera)
+        self.assertNotIn('Buscar empleo', cabecera)
+        self.assertNotIn('Crear cuenta', cabecera)
+        self.assertContains(response, 'Consultar estado')
+
+
 class CuitValidatorTests(TestCase):
     def test_acepta_cuit_valido_con_o_sin_guiones(self):
         for cuit in ('20-12345678-6', '20123456786'):
@@ -47,6 +61,8 @@ class CuitValidatorTests(TestCase):
         form = RegistroOferenteForm(data={
             'nombre_empresa': 'Empresa de prueba',
             'cuit': '20123456786',
+            'contacto_nombre': 'María Pérez',
+            'contacto_cargo': 'Recursos Humanos',
             'email': 'empresa-cuit@example.com',
             'password1': 'Clave-segura-123!',
             'password2': 'Clave-segura-123!',
@@ -55,6 +71,19 @@ class CuitValidatorTests(TestCase):
         self.assertTrue(form.is_valid(), form.errors.as_json())
         self.assertEqual(form.cleaned_data['cuit'], '20-12345678-6')
         self.assertEqual(normalizar_cuit('20123456786'), '20-12345678-6')
+
+    def test_registro_exige_responsable_de_empresa(self):
+        form = RegistroOferenteForm(data={
+            'nombre_empresa': 'Empresa de prueba',
+            'cuit': '20123456786',
+            'contacto_nombre': '   ',
+            'email': 'sin-responsable@example.com',
+            'password1': 'Clave-segura-123!',
+            'password2': 'Clave-segura-123!',
+        })
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('contacto_nombre', form.errors)
 
 
 class CVAndImageUploadValidationTests(SimpleTestCase):

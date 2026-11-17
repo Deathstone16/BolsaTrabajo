@@ -2,6 +2,14 @@
 
 {% block title %}{{ titulo }} · IEN Empleo{% endblock %}
 
+{% block chrome_top %}
+  {% if pendiente_validacion %}
+    {% include 'nueva_ui/partials/_nav.html' with home_only=True %}
+  {% else %}
+    {{ block.super }}
+  {% endif %}
+{% endblock %}
+
 {% block content %}
 <section class="relative flex min-h-[70vh] items-center justify-center overflow-hidden bg-[#F8F3F0] px-4 py-16">
 

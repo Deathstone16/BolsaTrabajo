@@ -1,7 +1,32 @@
-{% if oferente.contacto_nombre %}
+{% if oferente.tiene_responsable or oferente.telefono or oferente.correo_publico %}
   <section class="ien-company-contact" aria-label="Contacto de la empresa">
-    <h2>Responsable de la empresa</h2>
-    {% if oferente.contacto_nombre %}<p class="ien-company-contact-name">{{ oferente.contacto_nombre }}</p>{% endif %}
-    {% if oferente.contacto_cargo %}<p class="text-sm text-[#6B645C]">{{ oferente.contacto_cargo }}</p>{% endif %}
+    {% if oferente.tiene_responsable %}
+      <div class="ien-company-contact-item">
+        <span class="ien-company-contact-icon" data-icon="user" aria-hidden="true"></span>
+        <div>
+          <p class="ien-company-contact-label">Responsable de la empresa</p>
+          <p class="ien-company-contact-value">{{ oferente.contacto_nombre }}</p>
+          {% if oferente.contacto_cargo %}<p class="text-sm text-[#6B645C]">{{ oferente.contacto_cargo }}</p>{% endif %}
+        </div>
+      </div>
+    {% endif %}
+    {% if oferente.telefono %}
+      <div class="ien-company-contact-item">
+        <span class="ien-company-contact-icon" data-icon="phone" aria-hidden="true"></span>
+        <div>
+          <p class="ien-company-contact-label">Teléfono de la empresa</p>
+          <p class="ien-company-contact-value">{{ oferente.telefono }}</p>
+        </div>
+      </div>
+    {% endif %}
+    {% if oferente.correo_publico %}
+      <div class="ien-company-contact-item">
+        <span class="ien-company-contact-icon" data-icon="mail" aria-hidden="true"></span>
+        <div>
+          <p class="ien-company-contact-label">Correo de contacto</p>
+          <a class="ien-company-contact-value ien-text-link" href="mailto:{{ oferente.correo_publico|urlencode:'@' }}">{{ oferente.correo_publico }}</a>
+        </div>
+      </div>
+    {% endif %}
   </section>
 {% endif %}

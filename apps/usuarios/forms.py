@@ -19,7 +19,7 @@ class CuitField(forms.CharField):
     def __init__(self, **kwargs):
         kwargs.setdefault('max_length', 13)
         kwargs.setdefault('label', 'CUIT de la empresa')
-        kwargs.setdefault('help_text', 'Ingresá el CUIT tal como figura en tu constancia de inscripción. Son 11 números y podés escribirlo con o sin guiones.')
+        kwargs.setdefault('help_text', 'Ingresá los 11 números del CUIT. Los guiones se agregan automáticamente.')
         kwargs.setdefault('error_messages', {
             'required': 'Ingresá el CUIT de tu empresa.',
             'max_length': 'El CUIT debe tener 11 números, con o sin guiones.',
@@ -63,11 +63,29 @@ class RegistroOferenteForm(RegistroBaseForm):
     """Registra una cuenta empresarial con nombre comercial y CUIT."""
     nombre_empresa = forms.CharField(max_length=200, label='Nombre de la empresa')
     cuit = CuitField()
+    contacto_nombre = forms.CharField(
+        max_length=150,
+        label='Nombre del responsable',
+        help_text='Persona responsable o referente de RRHH de la empresa.',
+        strip=True,
+    )
+    contacto_cargo = forms.CharField(
+        max_length=100,
+        label='Cargo o área del responsable',
+        required=False,
+        strip=True,
+    )
 
     def clean_cuit(self):
         cuit = self.cleaned_data['cuit']
         validar_cuit(cuit)
         return normalizar_cuit(cuit)
+
+    def clean_contacto_nombre(self):
+        nombre = self.cleaned_data.get('contacto_nombre', '').strip()
+        if not nombre:
+            raise forms.ValidationError('Ingresá el nombre de la persona responsable de la empresa.')
+        return nombre
 
 class LoginForm(forms.Form):
     """Recibe las credenciales utilizadas por el servicio de autenticación."""
@@ -88,11 +106,12 @@ class OferenteForm(forms.ModelForm):
             'nombre_empresa', 'cuit', 'descripcion', 'industria',
             'tamano_empresa', 'ubicacion', 'anio_fundacion',
             'sitio_web', 'telefono', 'logo', 'banner',
-            'contacto_nombre', 'contacto_cargo',
+            'contacto_nombre', 'contacto_cargo', 'correo_publico',
         ]
         widgets = {
             'contacto_nombre': forms.TextInput(attrs={'class': 'input-ien', 'placeholder': 'Ej. María Pérez'}),
             'contacto_cargo': forms.TextInput(attrs={'class': 'input-ien', 'placeholder': 'Ej. Recursos Humanos'}),
+            'correo_publico': forms.EmailInput(attrs={'class': 'input-ien', 'placeholder': 'Ej. rrhh@empresa.com.ar'}),
         }
 
     def clean_cuit(self):

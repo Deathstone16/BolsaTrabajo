@@ -50,7 +50,7 @@
     </div>
     <h3 class="mt-6 text-lg font-semibold text-[#26222E]">No hay ofertas publicadas</h3>
     <p class="mt-2 text-sm text-[#6B645C]">Publicá tu primera oferta para atraer talento.</p>
-    {% if oferente.estado_obj.puede_publicar %}
+    {% if oferente.puede_publicar %}
       <a href="{% url 'crear_oferta' %}" class="btn-ien mt-6">
   Publicar primera oferta <span data-icon="arrow-right" class="h-4 w-4"></span>
   </a>

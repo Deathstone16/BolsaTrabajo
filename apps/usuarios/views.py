@@ -38,6 +38,8 @@ def registro(request):
                     password=form.cleaned_data['password1'],
                     nombre_empresa=form.cleaned_data['nombre_empresa'],
                     cuit=form.cleaned_data['cuit'],
+                    contacto_nombre=form.cleaned_data['contacto_nombre'],
+                    contacto_cargo=form.cleaned_data['contacto_cargo'],
                 )
             else:
                 services.registrar_postulante(

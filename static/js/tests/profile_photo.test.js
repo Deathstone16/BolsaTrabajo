@@ -32,11 +32,14 @@ test('photo and cover crop independently and submit both processed images togeth
       '[data-photo-editor]': element({hidden: true}),
       '[data-photo-error]': element(),
       '[data-photo-zoom]': element({value: '1'}),
-      '[data-photo-x]': element({value: '50'}),
-      '[data-photo-y]': element({value: '50'}),
+      '[data-photo-picker]': element(),
+      '[data-photo-picker-label]': element({textContent: name === 'logo' ? 'Elegir foto o logo' : 'Elegir imagen de portada'}),
+      '[data-photo-picker-action]': element({textContent: 'Seleccionar'}),
+      '[data-photo-status]': element({textContent: 'Ninguna imagen nueva seleccionada.'}),
       '[data-photo-reset]': element(),
       '[data-photo-canvas]': element({
         width, height,
+        getBoundingClientRect: () => ({width, height}),
         getContext: () => ({clearRect() {}, drawImage(...args) { draws.push(args); }}),
         toBlob(callback) { callback(new Blob(['processed'], {type: 'image/webp'})); },
       }),
@@ -69,11 +72,20 @@ test('photo and cover crop independently and submit both processed images togeth
     input.files = [new File(['image'], 'original.png', {type: 'image/png'})];
     await input.events.change();
     assert.equal(editor.controls['[data-photo-editor]'].hidden, false);
+    assert.equal(editor.controls['[data-photo-picker-label]'].textContent, 'original.png');
+    assert.equal(editor.controls['[data-photo-picker-action]'].textContent, 'Listo');
+    assert.match(editor.controls['[data-photo-status]'].textContent, /Imagen lista/);
   }
   assert.deepEqual(photo.draws.at(-1).slice(1, 5), [250, 0, 500, 500]);
   photo.controls['[data-photo-zoom]'].value = '2';
   photo.controls['[data-photo-zoom]'].events.input();
   assert.deepEqual(photo.draws.at(-1).slice(1, 5), [375, 125, 250, 250]);
+  const photoCanvas = photo.controls['[data-photo-canvas]'];
+  photoCanvas.events.pointerdown({button: 0, pointerId: 1, clientX: 100, clientY: 100, preventDefault() {}});
+  photoCanvas.events.pointermove({pointerId: 1, clientX: 228, clientY: 100, preventDefault() {}});
+  photoCanvas.events.pointerup({pointerId: 1});
+  assert.ok(Math.abs(photo.draws.at(-1)[1] - 312.5) < 0.0001);
+  assert.deepEqual(photo.draws.at(-1).slice(2, 5), [125, 250, 250]);
   assert.equal(cover.draws.at(-1)[3], 1000);
   let prevented = false;
   await form.events.submit({preventDefault() { prevented = true; }});

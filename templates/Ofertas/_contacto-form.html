@@ -1,9 +1,9 @@
 <fieldset class="ien-company-contact-form">
   <legend>Responsable de la empresa</legend>
-  <p class="text-sm text-[#6B645C]">Indicá el nombre del responsable o referente de RRHH. Para contactarlo se usan los datos de la empresa.</p>
+  <p class="text-sm text-[#6B645C]">Indicá el nombre del responsable o referente de RRHH. Podés agregar un correo laboral para mostrarlo en el perfil público.</p>
   <div class="ien-company-contact-fields">
     {% for field in contact_form %}
-      {% if field.name == 'contacto_nombre' or field.name == 'contacto_cargo' %}
+      {% if field.name == 'contacto_nombre' or field.name == 'contacto_cargo' or field.name == 'correo_publico' %}
         <div>
           <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} (obligatorio){% else %} (opcional){% endif %}</label>
           {{ field }}

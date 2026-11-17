@@ -8,21 +8,38 @@
     const canvas = container.querySelector('[data-photo-canvas]');
     const error = container.querySelector('[data-photo-error]');
     const zoom = container.querySelector('[data-photo-zoom]');
-    const horizontal = container.querySelector('[data-photo-x]');
-    const vertical = container.querySelector('[data-photo-y]');
+    const picker = container.querySelector('[data-photo-picker]');
+    const pickerLabel = container.querySelector('[data-photo-picker-label]');
+    const pickerAction = container.querySelector('[data-photo-picker-action]');
+    const photoStatus = container.querySelector('[data-photo-status]');
+    const initialPickerLabel = pickerLabel ? pickerLabel.textContent : '';
+    const initialPhotoStatus = photoStatus ? photoStatus.textContent : '';
     const original = preview.getAttribute('src');
     const form = input.form;
     let source = null;
     let pending = false;
     let version = 0;
+    let positionX = 50;
+    let positionY = 50;
+    let drag = null;
 
-    function draw() {
-      if (!source) return;
+    const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value));
+
+    function cropMetrics() {
       const scale = Math.max(canvas.width / source.width, canvas.height / source.height) * Number(zoom.value);
       const width = canvas.width / scale;
       const height = canvas.height / scale;
-      const x = (source.width - width) * Number(horizontal.value) / 100;
-      const y = (source.height - height) * Number(vertical.value) / 100;
+      return {
+        width,
+        height,
+        x: (source.width - width) * positionX / 100,
+        y: (source.height - height) * positionY / 100,
+      };
+    }
+
+    function draw() {
+      if (!source) return;
+      const {x, y, width, height} = cropMetrics();
       const context = canvas.getContext('2d');
       context.clearRect(0, 0, canvas.width, canvas.height);
       context.drawImage(source, x, y, width, height, 0, 0, canvas.width, canvas.height);
@@ -30,13 +47,74 @@
 
     function reset() {
       zoom.value = '1';
-      horizontal.value = vertical.value = '50';
+      positionX = positionY = 50;
+      draw();
+    }
+
+    function startDrag(event) {
+      if (!source || (event.button !== undefined && event.button !== 0)) return;
+      event.preventDefault();
+      const metrics = cropMetrics();
+      drag = {
+        pointerId: event.pointerId,
+        clientX: event.clientX,
+        clientY: event.clientY,
+        cropX: metrics.x,
+        cropY: metrics.y,
+        cropWidth: metrics.width,
+        cropHeight: metrics.height,
+      };
+      if (canvas.setPointerCapture && event.pointerId !== undefined) canvas.setPointerCapture(event.pointerId);
+      if (canvas.classList) canvas.classList.add('is-dragging');
+    }
+
+    function moveDrag(event) {
+      if (!drag || (drag.pointerId !== undefined && event.pointerId !== drag.pointerId)) return;
+      event.preventDefault();
+      const bounds = canvas.getBoundingClientRect ? canvas.getBoundingClientRect() : {width: canvas.width, height: canvas.height};
+      const renderedWidth = bounds.width || canvas.width;
+      const renderedHeight = bounds.height || canvas.height;
+      const maxX = Math.max(0, source.width - drag.cropWidth);
+      const maxY = Math.max(0, source.height - drag.cropHeight);
+      const cropX = clamp(drag.cropX - (event.clientX - drag.clientX) * drag.cropWidth / renderedWidth, 0, maxX);
+      const cropY = clamp(drag.cropY - (event.clientY - drag.clientY) * drag.cropHeight / renderedHeight, 0, maxY);
+      positionX = maxX ? cropX / maxX * 100 : 50;
+      positionY = maxY ? cropY / maxY * 100 : 50;
+      draw();
+    }
+
+    function finishDrag(event) {
+      if (!drag || (drag.pointerId !== undefined && event.pointerId !== drag.pointerId)) return;
+      if (canvas.releasePointerCapture && event.pointerId !== undefined) canvas.releasePointerCapture(event.pointerId);
+      drag = null;
+      if (canvas.classList) canvas.classList.remove('is-dragging');
+    }
+
+    function moveWithKeyboard(event) {
+      if (!source || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+      event.preventDefault();
+      const step = event.shiftKey ? 10 : 2;
+      if (event.key === 'ArrowLeft') positionX = clamp(positionX + step, 0, 100);
+      if (event.key === 'ArrowRight') positionX = clamp(positionX - step, 0, 100);
+      if (event.key === 'ArrowUp') positionY = clamp(positionY + step, 0, 100);
+      if (event.key === 'ArrowDown') positionY = clamp(positionY - step, 0, 100);
       draw();
     }
 
     function showError(message) {
       error.textContent = message;
       error.hidden = !message;
+    }
+
+    function setPickerState(state, fileName = '') {
+      if (!picker) return;
+      if (picker.classList) picker.classList.toggle('has-file', state === 'ready');
+      if (pickerLabel) pickerLabel.textContent = fileName || initialPickerLabel;
+      if (pickerAction) pickerAction.textContent = state === 'ready' ? 'Listo' : state === 'loading' ? 'Cargando…' : 'Seleccionar';
+      if (photoStatus) {
+        photoStatus.textContent = state === 'ready' ? 'Imagen lista. Arrastrala para ajustar el encuadre.' : state === 'loading' ? 'Cargando la imagen seleccionada…' : initialPhotoStatus;
+        if (photoStatus.classList) photoStatus.classList.toggle('is-ready', state === 'ready');
+      }
     }
 
     function restore() {
@@ -68,6 +146,7 @@
         if (version !== currentVersion) return;
         input.value = '';
         restore();
+        setPickerState('idle');
         showError(cause.message.startsWith('La imagen') ? cause.message : 'No pudimos abrir la imagen. Elegí un archivo JPG, PNG o WebP.');
       } finally {
         if (version === currentVersion) pending = false;
@@ -79,18 +158,26 @@
       showError('');
       restore();
       const file = input.files[0];
-      if (!file) return;
+      if (!file) { setPickerState('idle'); return; }
       const maxMB = Number(container.dataset.maxMb || 2);
       if (file.size > maxMB * 1024 * 1024 || !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
         input.value = '';
+        setPickerState('idle');
         showError(`Elegí una imagen JPG, PNG o WebP de hasta ${maxMB} MB.`);
         return;
       }
+      setPickerState('loading', file.name);
       const url = URL.createObjectURL(file);
       await loadImage(url, currentVersion);
       URL.revokeObjectURL(url);
+      if (source && version === currentVersion) setPickerState('ready', file.name);
     });
-    [zoom, horizontal, vertical].forEach((control) => control.addEventListener('input', draw));
+    zoom.addEventListener('input', draw);
+    canvas.addEventListener('pointerdown', startDrag);
+    canvas.addEventListener('pointermove', moveDrag);
+    canvas.addEventListener('pointerup', finishDrag);
+    canvas.addEventListener('pointercancel', finishDrag);
+    canvas.addEventListener('keydown', moveWithKeyboard);
     container.querySelector('[data-photo-reset]').addEventListener('click', reset);
 
     const backgroundButton = container.querySelector('[data-cover-background]');
@@ -103,7 +190,11 @@
       context.fillRect(0, 0, background.width, background.height);
       input.value = '';
       showError('');
-      loadImage(background.toDataURL('image/png'), ++version);
+      const backgroundVersion = ++version;
+      setPickerState('loading', 'Portada de color');
+      loadImage(background.toDataURL('image/png'), backgroundVersion).then(() => {
+        if (source && version === backgroundVersion) setPickerState('ready', 'Portada de color');
+      });
     });
 
     if (!editors.has(form)) editors.set(form, []);

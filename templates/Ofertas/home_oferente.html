@@ -56,9 +56,9 @@
             {% if oferente.descripcion %}
               <p class="mt-4 max-w-3xl leading-relaxed text-[#6B645C]">{{ oferente.descripcion }}</p>
             {% endif %}
-            {% include 'Ofertas/_contacto.html' %}
           </div>
         </div>
+        {% include 'Ofertas/_contacto.html' %}
       </div>
     </div>
 
@@ -81,7 +81,7 @@
             <p class="kicker">Tus publicaciones</p>
             <h2 class="mt-2 text-2xl font-bold tracking-tight text-[#26222E]">Mis ofertas publicadas</h2>
           </div>
-          {% if oferente.estado_obj.puede_publicar %}
+          {% if ofertas and oferente.puede_publicar %}
             <a href="{% url 'crear_oferta' %}" class="btn-ien !py-2.5 text-sm">
               <span data-icon="plus" class="h-4 w-4"></span> Nueva oferta
             </a>

@@ -8,6 +8,7 @@ en caso contrario.
 
 from functools import wraps
 
+from django.contrib import messages
 from django.shortcuts import redirect
 
 
@@ -73,7 +74,11 @@ def oferente_validado_required(view_func):
     @oferente_required
     @wraps(view_func)
     def _wrapped(request, *args, **kwargs):
-        if not request.user.oferente.estado_obj.puede_publicar():
+        oferente = request.user.oferente
+        if oferente.estado_validacion == oferente.EstadoValidacion.APROBADO and not oferente.tiene_responsable:
+            messages.warning(request, 'Completá el nombre de la persona responsable antes de publicar ofertas.')
+            return redirect('editar_perfil_empresa')
+        if not oferente.puede_publicar:
             return redirect("validacion_pendiente")
         return view_func(request, *args, **kwargs)
 

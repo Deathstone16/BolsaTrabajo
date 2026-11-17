@@ -18,6 +18,7 @@ class ConfidencialidadOfertaTests(TestCase):
             usuario=cls.empresa, nombre_empresa='ZX Empresa reservada', cuit='30-12345678-1',
             logo='empresas/logos/logo-reservado.webp',
             estado_validacion=Oferente.EstadoValidacion.APROBADO,
+            contacto_nombre='Responsable de prueba',
         )
         cls.usuario = Usuario.objects.create_user(email='postulante-confidencial@example.invalid')
         Postulante.objects.create(usuario=cls.usuario)

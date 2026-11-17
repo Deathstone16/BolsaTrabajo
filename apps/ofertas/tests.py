@@ -25,6 +25,7 @@ class OfertaFormTests(TestCase):
             estado_validacion=Oferente.EstadoValidacion.APROBADO,
             nombre_empresa="Empresa de prueba",
             cuit="30-12345678-9",
+            contacto_nombre="Responsable Demo",
         )
         self.data = {
             "titulo": "Desarrollador backend",
@@ -189,7 +190,7 @@ class OfertaFormTests(TestCase):
         )
         other = Usuario.objects.create_user(email='otra-empresa@example.com', password='test-password')
         Oferente.objects.create(usuario=other, estado_validacion=Oferente.EstadoValidacion.APROBADO,
-                                nombre_empresa='Otra', cuit='20-12345678-6')
+                                nombre_empresa='Otra', cuit='20-12345678-6', contacto_nombre='Responsable Demo')
         self.client.force_login(other)
         response = self.client.get(reverse('editar_oferta', args=[oferta.pk]))
         self.assertRedirects(response, reverse('dashboard_empresa'))
@@ -265,6 +266,7 @@ class EmpleosGuardadosTests(TestCase):
         Oferente.objects.create(
             usuario=self.offer.empresa, nombre_empresa='Empresa de prueba', cuit='30-12345678-1',
             estado_validacion=Oferente.EstadoValidacion.APROBADO,
+            contacto_nombre='Responsable Demo',
         )
         self.client.force_login(self.offer.empresa)
         for url in (reverse('buscar_empleo'), reverse('detalle_oferta', args=[self.offer.pk])):

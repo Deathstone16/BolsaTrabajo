@@ -73,13 +73,18 @@ def registrar_postulante(email, password, first_name, last_name):
     return user
 
 @transaction.atomic
-def registrar_oferente(email, password, nombre_empresa, cuit):
+def registrar_oferente(email, password, nombre_empresa, cuit, contacto_nombre, contacto_cargo=''):
     """Registra un nuevo usuario y le crea un perfil de Oferente (empresa)."""
+    contacto_nombre = (contacto_nombre or '').strip()
+    if not contacto_nombre:
+        raise ValidationError('La empresa debe indicar una persona responsable.')
     user = Usuario.objects.create_user(email=email, password=password)
     Oferente.objects.create(
         usuario=user,
         nombre_empresa=nombre_empresa,
-        cuit=cuit
+        cuit=cuit,
+        contacto_nombre=contacto_nombre,
+        contacto_cargo=(contacto_cargo or '').strip(),
     )
     return user
 
@@ -157,7 +162,7 @@ def enviar_a_revision(oferente):
 
 
 def puede_publicar_ofertas(oferente):
-    """Verifica si un oferente puede publicar ofertas (solo empresas aprobadas).
+    """Verifica si un oferente aprobado también informó un responsable.
 
     Args:
         oferente: Instancia del modelo Oferente.
@@ -165,8 +170,7 @@ def puede_publicar_ofertas(oferente):
     Returns:
         bool: True si el estado es aprobado.
     """
-    """Regla de negocio: solo empresas aprobadas pueden publicar."""
-    return oferente.estado_obj.puede_publicar()
+    return oferente.puede_publicar
 
 
 def obtener_url_contacto(email_usuario=None):

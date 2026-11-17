@@ -30,15 +30,12 @@
           {% if oferente.tamano_empresa %}
             <span><span data-icon="users" class="h-4 w-4 inline"></span> {{ oferente.get_tamano_empresa_display }}</span>
           {% endif %}
-          {% if oferente.telefono %}
-            <span><span data-icon="phone" class="h-4 w-4 inline"></span> {{ oferente.telefono }}</span>
-          {% endif %}
         </div>
         {% if oferente.descripcion %}
           <p class="text-muted-foreground mt-4">{{ oferente.descripcion }}</p>
         {% endif %}
-        {% include 'Ofertas/_contacto.html' %}
       </div>
     </div>
+    {% include 'Ofertas/_contacto.html' %}
   </div>
 </div>
