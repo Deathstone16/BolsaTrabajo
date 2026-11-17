@@ -8,6 +8,7 @@
     <h1 class="ien-section-title">{{ curso.nombre }}</h1>
     {% include 'nueva_ui/partials/_breadcrumbs.html' with current=curso.nombre parent_url='cursos:listado' parent_label='Cursos' only %}
     <article class="panel mt-8 p-6 sm:p-8">
+      {% include 'cursos/_cover.html' with curso=curso detalle=True only %}
       <h2 class="text-xl font-semibold">Sobre el curso</h2>
       <p class="mt-4 whitespace-pre-line leading-relaxed text-[#6B645C]">{{ curso.descripcion }}</p>
       <dl class="ien-course-details">

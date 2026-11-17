@@ -708,7 +708,21 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 .ien-course-filter-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.25rem; }
 .ien-course-filter-error { margin-top: 0.5rem; color: var(--destructive, #b91c1c); font-size: 0.875rem; }
 .ien-course-results { margin-top: 1.5rem; color: var(--muted-foreground); font-size: 0.875rem; }
-.ien-course-card { display: flex; flex-direction: column; align-items: start; padding: 1.75rem; }
+.ien-course-card { display: flex; flex-direction: column; align-items: start; padding: 1.5rem; }
+.ien-course-cover {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  margin-bottom: 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.875rem;
+  overflow: hidden;
+}
+.ien-course-cover img { display: block; width: 100%; height: 100%; min-height: 0; object-fit: contain; }
+.ien-course-cover--detail { margin-bottom: 1.5rem; }
+.ien-course-cover--placeholder { background: rgba(255, 255, 255, 0.34); color: var(--primary); }
 .ien-card-meta { color: var(--muted-foreground); font-size: 0.75rem; line-height: 1.6; }
 .ien-course-card h2, .ien-course-card h3 { margin-top: 0.75rem; font-size: 1.125rem; }
 .ien-course-description { margin-top: 0.75rem; font-size: 0.875rem; color: var(--muted-foreground); line-height: 1.7; }
