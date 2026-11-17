@@ -21,6 +21,7 @@
       <thead>
         <tr class="border-b border-border">
           <th class="text-left py-3 px-4 font-medium text-muted-foreground">Nombre</th>
+          <th class="text-left py-3 px-4 font-medium text-muted-foreground">Tipo</th>
           <th class="text-left py-3 px-4 font-medium text-muted-foreground">Acciones</th>
         </tr>
       </thead>
@@ -28,6 +29,7 @@
         {% for habilidad in habilidades %}
         <tr class="border-b border-border hover:bg-muted/50 transition-colors">
           <td class="py-3 px-4">{{ habilidad.nombre }}</td>
+          <td class="py-3 px-4">{% if habilidad.tipo_habilidad == 'B' %}Habilidad blanda{% else %}Habilidad técnica{% endif %}</td>
           <td class="py-3 px-4 flex gap-2">
             <a href="{% url 'mod_modificar_habilidad' habilidad.id %}"
                class="px-3 py-1 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-xs">
@@ -44,7 +46,7 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="2" class="py-8 text-center text-muted-foreground">No hay habilidades cargadas para esta categoría.</td>
+          <td colspan="3" class="py-8 text-center text-muted-foreground">Esta categoría todavía no tiene habilidades. Usá «Añadir habilidad» para crear la primera.</td>
         </tr>
         {% endfor %}
       </tbody>

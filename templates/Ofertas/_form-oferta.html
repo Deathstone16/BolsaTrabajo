@@ -1,210 +1,53 @@
 {% load static %}
-
 {{ form.non_field_errors }}
-
 {% if form.errors %}
-<div class="mb-6 rounded-2xl border border-[#d4183d]/30 bg-[#d4183d]/10 p-4 text-[#d4183d]">
-  <p class="mb-1 font-semibold">Corregí los siguientes errores:</p>
-  <ul class="list-disc pl-5 text-sm">
-    {% for field, errors in form.errors.items %}
-      {% for error in errors %}
-        <li>{{ field|capfirst }}: {{ error }}</li>
-      {% endfor %}
-    {% endfor %}
-  </ul>
+<div class="ien-offer-errors" role="alert">
+  <p>Revisá los campos marcados antes de publicar.</p>
+  <ul>{% for field in form %}{% for error in field.errors %}<li>{{ field.label }}: {{ error }}</li>{% endfor %}{% endfor %}</ul>
 </div>
 {% endif %}
-
 <div class="space-y-4">
-  <h3 class="flex items-center gap-2 text-lg font-semibold text-[#26222E]">
-    <span data-icon="briefcase" class="h-5 w-5 text-[#512DA8]"></span>Información básica
-  </h3>
-
-  <div class="space-y-2">
-    <label class="block text-sm">Título de la oferta</label>
-    <input type="text" name="titulo" value="{{ form.titulo.value|default:'' }}" placeholder="Ej. Buscamos desarrollador Full Stack"
-           class="input-ien" required>
-    {% if form.titulo.errors %}<p class="text-sm text-[#d4183d]">{{ form.titulo.errors.0 }}</p>{% endif %}
-  </div>
-
-  <div class="space-y-2">
-    <label class="block text-sm">Nombre del puesto</label>
-    <input type="text" name="nombre_puesto" value="{{ form.nombre_puesto.value|default:'' }}" placeholder="Ej. Desarrollador Full Stack"
-           class="input-ien" required>
-    {% if form.nombre_puesto.errors %}<p class="text-sm text-[#d4183d]">{{ form.nombre_puesto.errors.0 }}</p>{% endif %}
-  </div>
-
-  <div class="space-y-2">
-    <label class="block text-sm">Categoría</label>
-    <select name="categoria" class="input-ien">
-      <option value="">Seleccionar categoría</option>
-      {% for categoria in form.fields.categoria.queryset %}
-        <option value="{{ categoria.id }}" {% if form.categoria.value|stringformat:"s" == categoria.id|stringformat:"s" %}selected{% endif %}>
-          {{ categoria.nombre }}
-        </option>
-      {% endfor %}
-    </select>
-  </div>
-
+  <h3 class="text-lg font-semibold">Información del puesto</h3>
+  {% include 'Ofertas/_campo-oferta.html' with field=form.titulo help='Título que verán los postulantes. Ej. Buscamos desarrollador Full Stack.' %}
+  {% include 'Ofertas/_campo-oferta.html' with field=form.nombre_puesto help='Nombre del cargo. Ej. Desarrollador Full Stack.' %}
+  {% include 'Ofertas/_campo-oferta.html' with field=form.categoria %}
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div class="space-y-2">
-      <label class="block text-sm"><span data-icon="map-pin" class="inline h-4 w-4"></span> Ubicación</label>
-      <div class="relative">
-        <input autocomplete="off" id="input-ubicacion" type="text" name="ubicacion" value="{{ form.ubicacion.value|default:'' }}" placeholder="Ej. Villa María, Córdoba"
-              maxlength="100" class="input-ien" required>
-        <ul id="sugerencias-ubicacion"
-            class="hidden absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-2xl border border-[rgba(110,85,55,0.16)] bg-white text-sm shadow-lg">
-        </ul>
-      </div>
-      {% if form.ubicacion.errors %}<p class="text-sm text-[#d4183d]">{{ form.ubicacion.errors.0 }}</p>{% endif %}
-    </div>
-    <div class="space-y-2">
-      <label class="block text-sm">Modalidad</label>
-      <select name="modalidad" class="input-ien">
-        {% for value, label in form.fields.modalidad.choices %}
-          <option value="{{ value }}" {% if form.modalidad.value == value %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-      </select>
-    </div>
+    {% include 'Ofertas/_campo-oferta.html' with field=form.ubicacion help='Ej. Resistencia, Chaco.' %}
+    {% include 'Ofertas/_campo-oferta.html' with field=form.modalidad %}
   </div>
-  {% if form.warnings %}<div class="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"><p class="font-semibold">Revisá la clasificación antes de publicar</p>{% for warning in form.warnings %}<p class="mt-1">{{ warning }}</p>{% endfor %}</div>{% endif %}
+  {% include 'Ofertas/_campo-oferta.html' with field=form.descripcion help='Contá las tareas y responsabilidades. Las habilidades y condiciones se agregan abajo, una sola vez.' %}
 </div>
-
-<div class="space-y-4 border-t border-[rgba(110,85,55,0.16)] pt-8 mt-8" id="requirements-editor">
-  <h3 class="flex items-center gap-2 text-lg font-semibold text-[#26222E]">Requisitos y criterios</h3>
+<div class="ien-offer-section" id="requirements-editor">
+  <h3 class="text-lg font-semibold">Habilidades y requisitos</h3>
+  <p class="text-sm text-[#6B645C]">Cargá cada habilidad o condición una sola vez. Elegí si es indispensable o si suma valor, y revisá su tipo en la lista.</p>
   {% if form.instance.pk and form.instance.requiere_revision_requisitos %}
-    <p class="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">Esta oferta necesita una revisión. Los requisitos anteriores aparecen como deseables por defecto; mové al campo obligatorio únicamente lo que deba cumplirse.</p>
+    <p class="ien-requirement-notice">Revisá esta oferta histórica: los requisitos anteriores aparecen como deseables. Mové a obligatorios solo lo indispensable.</p>
   {% endif %}
-  <div class="space-y-2">
-    <label for="id_requisitos_obligatorios" class="block text-sm font-semibold">Requisitos obligatorios</label>
-    {{ form.requisitos_obligatorios }}
-    <p class="text-xs text-[#6B645C]">TODO requisito incluido aquí será obligatorio. Separá cada requisito con un salto de línea; hasta 100 caracteres por línea.</p>
-    <div id="categorias-obligatorias" class="space-y-2" aria-live="polite"></div>
-    {% if form.requisitos_obligatorios.errors %}<p class="text-sm text-[#d4183d]">{{ form.requisitos_obligatorios.errors.0 }}</p>{% endif %}
-  </div>
-  <div class="space-y-2">
-    <label for="id_requisitos_deseables" class="block text-sm font-semibold">Requisitos deseables</label>
-    {{ form.requisitos_deseables }}
-    <p class="text-xs text-[#6B645C]">Incluí conocimientos o experiencia que suman valor, pero cuya ausencia no implica incumplir un requisito obligatorio.</p>
-    {% if form.requisitos_deseables.errors %}<p class="text-sm text-[#d4183d]">{{ form.requisitos_deseables.errors.0 }}</p>{% endif %}
-  </div>
+  {% include 'Ofertas/_lista-requisitos.html' with field=form.requisitos_obligatorios kind='mandatory' %}
+  {% include 'Ofertas/_lista-requisitos.html' with field=form.requisitos_deseables kind='desirable' %}
   {{ form.categorias_requisitos }}
-  {% if form.categorias_requisitos.errors %}<p class="text-sm text-[#d4183d]">{{ form.categorias_requisitos.errors.0 }}</p>{% endif %}
-  <div class="rounded-xl bg-[#F8F3F0] p-4"><p class="font-semibold text-sm">Resumen revisable para la publicación</p><ul id="resumen-requisitos" class="mt-2 list-disc space-y-1 pl-5 text-sm text-[#6B645C]"></ul></div>
+  {% for error in form.categorias_requisitos.errors %}<p class="ien-required-message" role="alert">{{ error }}</p>{% endfor %}
+  {% for warning in form.warnings %}<p class="ien-requirement-notice">{{ warning }}</p>{% endfor %}
 </div>
-
-<div class="space-y-4 border-t border-[rgba(110,85,55,0.16)] pt-8 mt-8">
-  <h3 class="flex items-center gap-2 text-lg font-semibold text-[#26222E]">
-    <span data-icon="file-text" class="h-5 w-5 text-[#512DA8]"></span>Descripción del puesto
-  </h3>
-
-  <div class="space-y-2">
-    <label class="block text-sm" for="id_oferta_descripcion">Descripción</label>
-    <textarea id="id_oferta_descripcion" data-character-limit="2000" name="descripcion" rows="5" placeholder="Describe las responsabilidades y actividades del puesto..."
-              class="input-ien resize-none" required>{{ form.descripcion.value|default:'' }}</textarea>
-    {% if form.descripcion.errors %}<p class="text-sm text-[#d4183d]">{{ form.descripcion.errors.0 }}</p>{% endif %}
-  </div>
-</div>
-
-<div class="space-y-4 border-t border-[rgba(110,85,55,0.16)] pt-8 mt-8">
-  <h3 class="flex items-center gap-2 text-lg font-semibold text-[#26222E]">
-    <span data-icon="wrench" class="h-5 w-5 text-[#512DA8]"></span>Habilidades
-  </h3>
-
+<div class="ien-offer-section">
+  <h3 class="text-lg font-semibold">Experiencia y formación</h3>
+  <p class="text-sm text-[#6B645C]">Definilas acá para no repetirlas en las listas anteriores. Seleccioná «No solicitado» cuando no sean necesarias.</p>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <fieldset class="space-y-3 rounded-2xl border border-[#512DA8]/25 bg-[#512DA8]/5 p-4">
-      <legend class="px-2 text-sm font-semibold text-[#512DA8]">Habilidades técnicas (duras)</legend>
-      <p class="text-xs text-[#6B645C]">Mínimo 1, máximo 10. Elegí una sugerencia con clic o Enter.</p>
-      <div class="relative">
-        <input type="text" id="tags-input-duras" placeholder="Escribí una habilidad técnica"
-               class="input-ien" autocomplete="off">
-        <ul id="tags-dropdown-duras"
-            class="absolute z-10 mt-1 hidden max-h-48 w-full overflow-y-auto rounded-2xl border border-[rgba(110,85,55,0.16)] bg-white shadow-lg"></ul>
-      </div>
-      <div id="tags-container-duras" class="flex min-h-8 flex-wrap gap-2"></div>
-      {{ form.habilidades_duras }}
-      {% if form.habilidades_duras.errors %}<p class="text-sm text-[#d4183d]">{{ form.habilidades_duras.errors.0 }}</p>{% endif %}
-    </fieldset>
-
-    <fieldset class="space-y-3 rounded-2xl border border-emerald-600/25 bg-emerald-600/5 p-4">
-      <legend class="px-2 text-sm font-semibold text-emerald-700">Habilidades blandas</legend>
-      <p class="text-xs text-[#6B645C]">Máximo 10. Elegí una sugerencia con clic o Enter.</p>
-      <div class="relative">
-        <input type="text" id="tags-input-blandas" placeholder="Escribí una habilidad blanda"
-               class="input-ien" autocomplete="off">
-        <ul id="tags-dropdown-blandas"
-            class="absolute z-10 mt-1 hidden max-h-48 w-full overflow-y-auto rounded-2xl border border-[rgba(110,85,55,0.16)] bg-white shadow-lg"></ul>
-      </div>
-      <div id="tags-container-blandas" class="flex min-h-8 flex-wrap gap-2"></div>
-      {{ form.habilidades_blandas }}
-      {% if form.habilidades_blandas.errors %}<p class="text-sm text-[#d4183d]">{{ form.habilidades_blandas.errors.0 }}</p>{% endif %}
-    </fieldset>
-  </div>
-</div>
-
-<div class="space-y-4 border-t border-[rgba(110,85,55,0.16)] pt-8 mt-8">
-  <h3 class="flex items-center gap-2 text-lg font-semibold text-[#26222E]">
-    <span data-icon="graduation-cap" class="h-5 w-5 text-[#512DA8]"></span>Experiencia y educación
-  </h3>
-
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div class="space-y-2">
-      <label class="block text-sm"><span data-icon="clock" class="inline h-4 w-4"></span> Experiencia requerida</label>
-      <div class="flex items-center gap-2">
-        <select name="experiencia_requerida" class="input-ien">
-          {% for value, label in form.fields.experiencia_requerida.choices %}
-            <option value="{{ value }}" {% if form.experiencia_requerida.value == value %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-        <span class="text-sm text-[#6B645C]">años</span>
-      </div>
-      {% if form.experiencia_requerida.errors %}<p class="text-sm text-[#d4183d]">{{ form.experiencia_requerida.errors.0 }}</p>{% endif %}
-      <label class="block text-xs text-[#6B645C]">Clasificación</label>
-      {{ form.experiencia_clasificacion }}
+    <div class="space-y-3">
+      {% include 'Ofertas/_campo-oferta.html' with field=form.experiencia_requerida %}
+      {% include 'Ofertas/_campo-oferta.html' with field=form.experiencia_clasificacion %}
     </div>
-
-    <div class="space-y-2">
-      <label class="block text-sm">Nivel educativo</label>
-      <select name="nivel_educativo" class="input-ien">
-        {% for value, label in form.fields.nivel_educativo.choices %}
-          <option value="{{ value }}" {% if form.nivel_educativo.value == value %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-      </select>
-      {% if form.nivel_educativo.errors %}<p class="text-sm text-[#d4183d]">{{ form.nivel_educativo.errors.0 }}</p>{% endif %}
-      <label class="block text-xs text-[#6B645C]">Clasificación</label>
-      {{ form.educacion_clasificacion }}
+    <div class="space-y-3">
+      {% include 'Ofertas/_campo-oferta.html' with field=form.nivel_educativo %}
+      {% include 'Ofertas/_campo-oferta.html' with field=form.educacion_clasificacion %}
     </div>
   </div>
 </div>
-<script src="{% static 'ofertas/requirements.js' %}" defer></script>
-
-<div class="space-y-4 border-t border-[rgba(110,85,55,0.16)] pt-8 mt-8">
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div class="space-y-2">
-      <label class="flex items-center gap-2 text-sm"><span data-icon="calendar" class="h-4 w-4 text-[#512DA8]"></span> Fecha de cierre</label>
-      <input type="date" name="fecha_cierre" value="{% if form.fecha_cierre.value %}{{ form.fecha_cierre.value|date:'Y-m-d' }}{% endif %}"
-             class="input-ien">
-      
-      {% if form.fecha_cierre.errors %}<p class="text-sm text-[#d4183d]">{{ form.fecha_cierre.errors.0 }}</p>{% endif %}
-    </div>
-    <div class="flex items-center justify-between pt-6">
-      <div>
-        <label class="block text-sm">Publicación confidencial</label>
-        <p class="text-sm text-[#6B645C]">Oculta el nombre de la empresa</p>
-      </div>
-      <label class="relative inline-flex items-center cursor-pointer">
-        <input type="checkbox" name="es_confidencial" class="sr-only peer"
-               {% if form.es_confidencial.value %}checked{% endif %}>
-        <div class="switch-track"></div>
-      </label>
-    </div>
+<div class="ien-offer-section">
+  {% include 'Ofertas/_campo-oferta.html' with field=form.fecha_cierre %}
+  <label class="ien-offer-confidential">{{ form.es_confidencial }} Publicación confidencial (oculta el nombre de la empresa)</label>
+  <div class="ien-offer-actions">
+    <button type="submit" class="btn-ien">{{ submit_text|default:'Publicar oferta' }}</button>
+    <a href="{% url 'dashboard_empresa' %}" class="btn-ghost">Cancelar</a>
   </div>
-
-<div class="flex gap-4 pt-4">
-    <button type="submit" class="btn-ien flex-1 !py-3.5">
-      {{ submit_text|default:"Publicar oferta" }}
-    </button>
-    <a href="{% url 'dashboard_empresa' %}" class="btn-ghost !py-3.5">
-      Cancelar
-    </a>
-  </div>
+</div>

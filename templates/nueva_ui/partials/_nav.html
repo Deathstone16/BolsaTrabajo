@@ -1,6 +1,6 @@
 {% load static %}
 {# Nav del rediseno, con la logica de sesion y roles que ya traia templates/base.html #}
-<header id="global-nav" class="sticky top-0 z-50 border-b border-[rgba(110,85,55,0.16)] bg-[#F8F3F0]/85 backdrop-blur-xl">
+<header id="global-nav" {% if user.is_authenticated and user.is_staff %}data-admin-header{% endif %} {% if user.is_authenticated and user.oferente and not user.is_staff %}data-employer-header{% endif %} class="sticky top-0 z-50 border-b border-[rgba(110,85,55,0.16)] bg-[#F8F3F0]/85 backdrop-blur-xl">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex h-16 items-center justify-between gap-6">
       <a href="{% url 'home' %}" class="group flex items-center gap-3">
@@ -14,7 +14,12 @@
         </span>
       </a>
 
-      <div class="hidden md:flex items-center gap-7">
+      <div class="ien-nav-desktop hidden md:flex items-center gap-7">
+        {% if user.is_authenticated and user.is_staff %}
+          {% include 'nueva_ui/partials/_nav_admin.html' %}
+        {% elif user.is_authenticated and user.oferente %}
+          {% include 'nueva_ui/partials/_nav_empresa.html' %}
+        {% else %}
         <a href="{% url 'home' %}" class="nav-link text-sm font-medium transition-colors hover:text-[#512DA8] {% if vista_activa == 'inicio' %}text-[#512DA8]{% else %}text-[#6B645C]{% endif %}">Inicio</a>
 
         <a href="{% url 'cursos:listado' %}" class="nav-link text-sm font-medium transition-colors hover:text-[#512DA8] {% if vista_activa == 'cursos' %}text-[#512DA8]{% else %}text-[#6B645C]{% endif %}">Cursos</a>
@@ -59,6 +64,7 @@
             <a href="{% url 'login' %}" class="btn-ien ml-2 text-sm !py-2">Ingresar <span data-icon="arrow-up-right" class="h-4 w-4"></span></a>
           {% endif %}
         </div>
+        {% endif %}
       </div>
 
       <button class="nav-burger md:hidden grid h-10 w-10 place-items-center rounded-xl border border-[rgba(110,85,55,0.16)] bg-white" aria-label="Abrir menú">
@@ -69,6 +75,11 @@
 
   <div class="nav-mobile hidden border-t border-[rgba(110,85,55,0.16)] bg-[#F8F3F0] px-4 pb-6 pt-4 md:hidden">
     <div class="flex flex-col gap-2">
+      {% if user.is_authenticated and user.is_staff %}
+        {% include 'nueva_ui/partials/_nav_admin.html' with mobile=True %}
+      {% elif user.is_authenticated and user.oferente %}
+        {% include 'nueva_ui/partials/_nav_empresa.html' with mobile=True %}
+      {% else %}
       <a href="{% url 'home' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Inicio</a>
       <a href="{% url 'cursos:listado' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Cursos</a>
       {% if not user.is_authenticated or user.postulante %}
@@ -88,6 +99,7 @@
       {% else %}
         <a href="{% url 'registro' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Crear cuenta</a>
         <a href="{% url 'login' %}" class="btn-ien">Ingresar <span data-icon="arrow-up-right" class="h-4 w-4"></span></a>
+      {% endif %}
       {% endif %}
     </div>
   </div>

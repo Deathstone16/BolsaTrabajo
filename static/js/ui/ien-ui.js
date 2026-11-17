@@ -120,6 +120,20 @@
     });
   }
 
+  function initCuentaEmpresa() {
+    document.querySelectorAll('.ien-employer-account').forEach(function (menu) {
+      document.addEventListener('click', function (event) {
+        if (!menu.contains(event.target)) menu.open = false;
+      });
+      menu.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+          menu.open = false;
+          menu.querySelector('summary').focus();
+        }
+      });
+    });
+  }
+
     /*
    * Favoritos: se persisten en el backend via POST a data-url. El estado
    * inicial viene de data-save-on (servidor); al alternar se re-renderiza.
@@ -370,6 +384,7 @@
     initReveal(document);
     startCounters(document);
     initBurger();
+    initCuentaEmpresa();
     initFavoritos();
     initMensajesDjango();
     initAvisoPendiente();

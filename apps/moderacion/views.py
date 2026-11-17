@@ -5,6 +5,9 @@ import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.views.decorators.http import require_GET
+from django.conf import settings
 from django.urls import reverse
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
@@ -22,6 +25,42 @@ from ofertas.forms import HabilidadForm
 from ofertas import services as ofertas_services
 from .forms import RechazarEmpresaForm
 from . import services
+from .models import SolicitudEmpresa
+
+
+@staff_member_required
+@require_GET
+def notificaciones_empresas(request):
+    solicitudes = SolicitudEmpresa.objects.select_related('empresa')
+    pending = solicitudes.filter(resuelta_en__isnull=True, empresa__estado_validacion='pendiente').count()
+    response = JsonResponse({
+        'pendientes': pending,
+        'recientes': [{
+            'empresa': item.empresa.nombre_empresa,
+            'estado': item.get_estado_display(),
+            'fecha': item.creada_en.isoformat(),
+            'url': reverse('mod_detalle_empresa', args=[item.empresa_id]),
+        } for item in solicitudes[:5]],
+    })
+    response['Cache-Control'] = 'no-store'
+    return response
+
+
+@staff_member_required
+def solicitudes_empresas(request):
+    solicitudes = SolicitudEmpresa.objects.select_related('empresa')
+    estado = request.GET.get('estado', '')
+    if estado in ('pendiente', 'aprobado', 'rechazado'):
+        solicitudes = solicitudes.filter(estado=estado)
+        if estado == 'pendiente':
+            solicitudes = solicitudes.filter(empresa__estado_validacion='pendiente')
+    else:
+        estado = ''
+    return render(request, 'moderacion/solicitudes_empresas.html', {
+        'pagina': Paginator(solicitudes, 25).get_page(request.GET.get('page')),
+        'estado': estado,
+        'reminder_hours': settings.IEN_COMPANY_REMINDER_HOURS,
+    })
 
 
 logger = logging.getLogger(__name__)
@@ -309,7 +348,7 @@ def crear_habilidad(request, categoria_id):
             return redirect('mod_listar_habilidades', categoria_id=categoria.id)
         messages.error(request, 'Corregí los errores del formulario')
     else:
-        form = HabilidadForm()
+        form = HabilidadForm(instance=Habilidad(categoria=categoria))
     return render(request, 'moderacion/crear_habilidad.html', {
         'form': form, 'categoria': categoria,
     })

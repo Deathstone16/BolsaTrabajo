@@ -101,12 +101,14 @@
                     </div>
                   </div>
 
+                  {% if user.is_authenticated and user.postulante %}
                   <button type="button" data-save="{{ oferta.pk }}"
                           data-url="{% url 'alternar_favorita' oferta.pk %}"
                           data-save-on="{% if oferta.pk in ids_favoritas %}true{% else %}false{% endif %}"
                           class="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[#512DA8]/30 bg-white text-[#512DA8]/45 transition-colors hover:border-[#512DA8] hover:bg-[#512DA8] hover:text-white">
                   <span data-icon="bookmark" class="h-4 w-4"></span>
                   </button>
+                  {% endif %}
                 </div>
 
                 <div class="relative mt-5 flex flex-wrap items-center gap-2">

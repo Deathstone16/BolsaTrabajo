@@ -57,6 +57,9 @@
   {% endblock %}
 
   <script src="{% static_v 'js/ui/ien-ui.js' %}"></script>
+  {% if user.is_authenticated and user.is_staff %}
+    <script src="{% static_v 'js/admin-notifications.js' %}"></script>
+  {% endif %}
   <script src="{% static_v 'js/character-limit.js' %}"></script>
   {% if cv_notification_token %}
     <script id="cv-notifications-config"

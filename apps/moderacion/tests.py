@@ -112,13 +112,15 @@ class ModeracionOfertasTests(TestCase):
 
         self.assertEqual(contexto['total'], 1)
 
-    def test_empresa_aprobada_ve_estado_validado_en_su_panel(self):
+    def test_empresa_aprobada_accede_al_panel_sin_aviso_de_validacion(self):
         empresa = Oferente.objects.get(nombre_empresa='Empresa de prueba')
         self.client.force_login(empresa.usuario)
 
         response = self.client.get(reverse('dashboard_empresa'))
 
-        self.assertContains(response, 'Empresa Validada')
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'Empresa Validada')
+        self.assertContains(response, reverse('crear_oferta'))
 
     def test_empresa_aprobada_no_ve_pantalla_pendiente(self):
         empresa = Oferente.objects.get(nombre_empresa='Empresa de prueba')

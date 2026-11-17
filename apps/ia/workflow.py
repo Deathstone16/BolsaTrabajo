@@ -45,7 +45,12 @@ def offer_snapshot(oferta) -> dict[str, Any]:
     def skills(value: str) -> list[str]:
         return sorted({item.strip() for item in (value or '').split(',') if item.strip()}, key=str.casefold)
 
-    requirements = oferta.requisitos_estructurados or []
+    # El tipo elegido para un deseable es metadata del editor; el contrato de IA
+    # mantiene la categoría «desirables» para conservar su ponderación.
+    requirements = [
+        {key: value for key, value in item.items() if key != 'skill_category'}
+        for item in (oferta.requisitos_estructurados or [])
+    ]
     if oferta.requiere_revision_requisitos:
         raise ValueError('La clasificación de requisitos de esta oferta necesita revisión antes del análisis.')
     return {

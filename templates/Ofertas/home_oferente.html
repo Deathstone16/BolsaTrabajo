@@ -97,13 +97,13 @@
         <p class="kicker">Tu empresa</p>
         <h2 class="mt-2 text-2xl font-bold tracking-tight text-[#26222E]">Información de la empresa</h2>
 
-        <form method="post" action="{% url 'editar_perfil_empresa' %}" enctype="multipart/form-data" class="mt-8">
+        <form method="post" action="{% url 'editar_perfil_empresa' %}" enctype="multipart/form-data" class="mt-8" data-company-validation>
           {% csrf_token %}
 
           <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
             <div class="space-y-1.5">
-              <label class="block text-sm">Nombre de la empresa</label>
-              <input type="text" name="nombre_empresa" value="{{ form_perfil.nombre_empresa.value|default:'' }}" class="input-ien">
+              <label for="id_panel_nombre" class="block text-sm">Nombre de la empresa</label>
+              <input id="id_panel_nombre" type="text" name="nombre_empresa" value="{{ form_perfil.nombre_empresa.value|default:'' }}" class="input-ien" required>
             </div>
             <div class="space-y-1.5">
               <label class="block text-sm" for="id_panel_cuit">{{ form_perfil.cuit.label }}</label>
@@ -164,6 +164,7 @@
 
 {% block extra_js %}
   <script src="{% static_v 'js/cuit-input.js' %}"></script>
+  <script src="{% static_v 'js/company-validation.js' %}"></script>
   <script src="{% static_v 'js/habilidades.js' %}"></script>
   <script src="{% static_v 'js/dashboard.js' %}"></script>
 {% endblock %}

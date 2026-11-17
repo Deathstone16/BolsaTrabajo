@@ -115,14 +115,16 @@ class SupervisorTests(SimpleTestCase):
     @patch('deploy.start.subprocess.Popen')
     def test_failed_dispatcher_stops_remaining_processes(self, popen, run, signal):
         from deploy.start import run as start
-        children = [Mock(), Mock(), Mock()]
+        children = [Mock(), Mock(), Mock(), Mock()]
         children[0].poll.return_value = None
         children[1].poll.return_value = 1
         children[2].poll.return_value = None
+        children[3].poll.return_value = None
         popen.side_effect = children
         self.assertEqual(start(), 1)
         children[0].terminate.assert_called_once()
         children[2].terminate.assert_called_once()
+        children[3].terminate.assert_called_once()
 
     @patch('deploy.start.signal.signal')
     @patch('deploy.start.subprocess.run')

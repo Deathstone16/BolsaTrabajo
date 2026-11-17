@@ -124,7 +124,7 @@ def actualizar_estado_oferta(oferta_id, nuevo_estado):
 #
 def listar_habilidades_por_tipo(tipo_id):
     """Devuelve las habilidades asociadas a una categoría."""
-    return Habilidad.objects.filter(categoria_id=tipo_id)
+    return Habilidad.objects.filter(categoria_id=tipo_id).order_by('nombre')
 #
 def crear_habilidad(form):
     """Persiste una habilidad a partir de un formulario validado."""

@@ -6,6 +6,7 @@ para cursos, categorías, empresas y ofertas.
 """
 
 from django.shortcuts import get_object_or_404
+from django.db.models import Count
 from cursos.models import Curso, Categoria
 from usuarios.models import Oferente
 from ofertas.models import Oferta
@@ -38,7 +39,7 @@ def obtener_curso(curso_id):
 
 def listar_categorias_contexto():
     """Construye el contexto con todas las categorías."""
-    return {'categorias': Categoria.objects.all()}
+    return {'categorias': Categoria.objects.annotate(total_habilidades=Count('habilidad')).order_by('nombre')}
 
 
 # ============================================================

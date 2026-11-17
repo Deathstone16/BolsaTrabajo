@@ -25,7 +25,7 @@
     </div>
 
     <div class="panel p-8">
-      <form method="post" action="{% url 'editar_oferta' oferta.pk %}">
+      <form data-required-validation method="post" action="{% url 'editar_oferta' oferta.pk %}">
         {% csrf_token %}
         {% include 'Ofertas/_form-oferta.html' with submit_text="Guardar cambios" %}
       </form>
@@ -36,6 +36,7 @@
 
 {% block extra_js %}
   <script src="{% static_v 'js/habilidades.js' %}"></script>
-  <script src="{% static_v 'js/dashboard.js' %}"></script>
+  <script src="{% static_v 'ofertas/requirements.js' %}"></script>
+  <script src="{% static_v 'js/company-validation.js' %}"></script>
   <script src="{% static_v 'js/autocompletar_ubicacion.js' %}"></script>
 {% endblock %}

@@ -1,0 +1,40 @@
+{% with route=request.resolver_match.url_name %}
+<nav class="ien-admin-nav{% if mobile %} ien-admin-nav-mobile{% endif %}" aria-label="Navegación de administración">
+  <a href="{% url 'mod_listar_empresas' %}" class="ien-employer-link" {% if route == 'mod_listar_empresas' or route == 'mod_detalle_empresa' %}aria-current="page"{% endif %}>Empresas</a>
+  <a href="{% url 'mod_listar_ofertas' %}" class="ien-employer-link" {% if route == 'mod_listar_ofertas' or route == 'mod_detalle_oferta' %}aria-current="page"{% endif %}>Ofertas</a>
+  <details class="ien-employer-account">
+    <summary>Catálogo <span aria-hidden="true" class="ien-account-chevron">⌄</span></summary>
+    <div class="ien-account-dropdown ien-admin-catalog">
+      <a href="{% url 'mod_listar_cursos' %}">Cursos</a>
+      <a href="{% url 'mod_listar_categorias' %}">Categorías y habilidades</a>
+    </div>
+  </details>
+  <div class="ien-employer-actions">
+    <details class="ien-employer-account ien-admin-bell" data-admin-notifications-url="{% url 'mod_notificaciones_empresas' %}">
+      <summary aria-label="Solicitudes de empresas: {{ solicitudes_empresa_pendientes }} pendiente{{ solicitudes_empresa_pendientes|pluralize }}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+        {% if mobile %}<span>Solicitudes de empresas</span>{% endif %}
+        <span class="ien-admin-badge" data-admin-notification-dot aria-hidden="true" {% if not solicitudes_empresa_pendientes %}hidden{% endif %}></span>
+      </summary>
+      <div class="ien-account-dropdown ien-admin-notifications">
+        <p class="ien-account-name">Solicitudes de empresas</p>
+        <p class="ien-account-email" data-admin-notification-count aria-live="polite">{{ solicitudes_empresa_pendientes }} pendiente{{ solicitudes_empresa_pendientes|pluralize }} de revisión</p>
+        <ul data-admin-notification-items>
+          {% for solicitud in solicitudes_empresa_recientes %}
+            <li><a href="{% url 'mod_detalle_empresa' solicitud.empresa_id %}"><strong>{{ solicitud.empresa.nombre_empresa }}</strong><span>{{ solicitud.get_estado_display }} · {{ solicitud.creada_en|date:'d/m H:i' }}</span></a></li>
+          {% empty %}<li class="ien-admin-notification-empty">Todavía no hay solicitudes.</li>{% endfor %}
+        </ul>
+        <a href="{% url 'mod_solicitudes_empresas' %}" class="ien-admin-history-link">Ver historial completo →</a>
+      </div>
+    </details>
+    <details class="ien-employer-account">
+      <summary><span class="ien-account-avatar" aria-hidden="true">{{ user.first_name|default:'A'|slice:':1'|upper }}</span><span>Mi cuenta</span><span class="ien-account-chevron" aria-hidden="true">⌄</span></summary>
+      <div class="ien-account-dropdown">
+        <p class="ien-account-name">{{ user.first_name|default:'Administración' }}</p>
+        <p class="ien-account-email">{{ user.email }}</p>
+        <form method="post" action="{% url 'logout' %}" class="form-logout">{% csrf_token %}<button type="submit" class="ien-account-logout"><span data-icon="log-out" class="h-4 w-4" aria-hidden="true"></span> Salir</button></form>
+      </div>
+    </details>
+  </div>
+</nav>
+{% endwith %}

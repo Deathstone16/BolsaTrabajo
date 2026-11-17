@@ -61,6 +61,7 @@
           </div>
         </div>
 
+        {% if user.is_authenticated and user.postulante %}
         <button type="button" data-save="{{ oferta.pk }}"
                 data-url="{% url 'alternar_favorita' oferta.pk %}"
                 data-save-on="{{ favorita|yesno:'true,false' }}"
@@ -68,6 +69,7 @@
           <span data-icon="bookmark" class="h-4 w-4"></span>
           <span data-save-label>Guardar</span>
         </button>
+        {% endif %}
       </div>
 
       <div class="mt-7 flex flex-wrap gap-2">

@@ -6,7 +6,7 @@
   <div class="mb-8">
     <h1 class="text-3xl font-bold tracking-tight text-[#26222E] mb-2">Modificar Categoria</h1>
         {% include "nueva_ui/partials/_breadcrumbs.html" with current="Modificar categoría" parent_url="mod_listar_categorias" parent_label="Categorías" only %}
-    <p class="text-muted-foreground">Actualizá el nombre de la categoria</p>
+    <p class="text-muted-foreground">Actualizá el nombre de la categoría.</p>
   </div>
 
   <div class="panel p-6">
@@ -36,5 +36,11 @@
     </form>
 </div>
 
+  <section class="panel p-6 mt-6" aria-label="Habilidades de la categoría">
+    <h2 class="text-lg font-semibold">Habilidades de {{ categoria.nombre }}</h2>
+    <p class="text-sm text-muted-foreground mt-2">Consultá la lista de habilidades de esta categoría para crear nuevas o editar las existentes.</p>
+    <a href="{% url 'mod_listar_habilidades' categoria.id %}" class="btn-ghost mt-4">Gestionar habilidades</a>
+    <a href="{% url 'mod_crear_habilidad' categoria.id %}" class="btn-ien mt-4">Añadir habilidad</a>
+  </section>
 </div>
 {% endblock %}

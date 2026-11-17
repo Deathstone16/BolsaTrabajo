@@ -107,6 +107,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'ia.context_processors.cv_notifications',
                 'ientrabajo.context_processors.contacto_ien',
+                'moderacion.context_processors.solicitudes_empresas',
             ],
             # {% static_v %} disponible en todas las plantillas: agrega la version
             # del archivo a la URL para que el navegador no use JS/CSS viejo cacheado.
@@ -256,3 +257,6 @@ if not DEBUG:
 
 # Correo público de contacto. Definirlo en el entorno cuando el IEN lo confirme.
 IEN_CONTACT_EMAIL = os.environ.get('IEN_CONTACT_EMAIL', '').strip()
+IEN_REVIEW_EMAILS = [email.strip() for email in os.environ.get('IEN_REVIEW_EMAILS', '').split(',') if email.strip()]
+IEN_COMPANY_REMINDER_HOURS = max(1, int(os.environ.get('IEN_COMPANY_REMINDER_HOURS', '24')))
+IEN_PUBLIC_URL = os.environ.get('IEN_PUBLIC_URL', 'http://127.0.0.1:8000' if DEBUG else '').rstrip('/')

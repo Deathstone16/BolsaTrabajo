@@ -42,7 +42,7 @@
       </div>
       {% endif %}
 
-      <form method="post" action="{% url 'editar_perfil_empresa' %}" enctype="multipart/form-data">
+      <form method="post" action="{% url 'editar_perfil_empresa' %}" enctype="multipart/form-data" data-company-validation>
         {% csrf_token %}
 
         <div class="space-y-4">
@@ -51,8 +51,8 @@
           </h3>
 
           <div class="space-y-2">
-            <label class="block text-sm font-medium">Nombre de la empresa</label>
-            <input type="text" name="nombre_empresa" value="{{ form.nombre_empresa.value|default:'' }}"
+            <label for="id_empresa_nombre" class="block text-sm font-medium">Nombre de la empresa</label>
+            <input id="id_empresa_nombre" type="text" name="nombre_empresa" value="{{ form.nombre_empresa.value|default:'' }}"
                    placeholder="Ej. Acme SA" maxlength="200"
                    class="input-ien focus:outline-none focus:ring-2 focus:ring-ring" required>
             {% if form.nombre_empresa.errors %}<p class="text-sm text-red-500">{{ form.nombre_empresa.errors.0 }}</p>{% endif %}
@@ -172,4 +172,5 @@
 {% block extra_js %}
   <script src="{% static_v 'js/profile-photo.js' %}"></script>
   <script src="{% static_v 'js/cuit-input.js' %}"></script>
+  <script src="{% static_v 'js/company-validation.js' %}"></script>
 {% endblock %}
