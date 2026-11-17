@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const cvInput = document.getElementById('cv-input');
     const feedback = document.getElementById('cv-feedback');
-    const uploadArea = document.getElementById('cv-upload-area');
     const formUpload = document.getElementById('form-cv-upload');
     const formEliminar = document.getElementById('form-eliminar-cv');
     const formAnalizar = document.getElementById('form-analizar-cv');
@@ -19,7 +18,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const ICONO_OK = '<svg class="ic h-5 w-5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 6"></path></svg>';
     const ICONO_ERROR = '<svg class="ic h-5 w-5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>';
 
+    const fotoInput = document.getElementById('cv-profile-photo');
+    const botonFoto = fotoInput?.form.querySelector('[data-avatar-picker]');
+    const camposFoto = fotoInput?.closest('[data-avatar-fields]');
+    if (botonFoto && camposFoto && typeof fotoInput.form.requestSubmit === 'function') {
+        botonFoto.addEventListener('click', () => fotoInput.click());
+        fotoInput.addEventListener('change', () => {
+            if (fotoInput.files.length) fotoInput.form.requestSubmit();
+        });
+        camposFoto.hidden = true;
+        botonFoto.disabled = false;
+    }
+
     if (!cvInput) return;
+
+    const botonArchivo = formUpload?.querySelector('[data-cv-file-picker]');
+    const selectorNativo = formUpload?.querySelector('[data-cv-native-upload]');
+    if (botonArchivo && selectorNativo) {
+        botonArchivo.addEventListener('click', () => cvInput.click());
+        cvInput.required = false;
+        selectorNativo.hidden = true;
+        botonArchivo.hidden = false;
+    }
 
     cvInput.addEventListener('change', function(e) {
         const archivo = e.target.files[0];
@@ -144,8 +164,7 @@ document.addEventListener('DOMContentLoaded', function() {
             cancelarTemporizadorDemora();
             restaurarBotonAnalizar(botonAnalisisActual || botonInicial, textoBotonOriginal || textoInicial);
             if (payload.status === 'completado') {
-                const perfilUrl = formAnalizar.dataset.perfilUrl;
-                mostrarEstadoAnalisis('completado', payload.mensaje, perfilUrl);
+                mostrarEstadoAnalisis('completado', payload.mensaje);
                 mostrarBotonPerfil();
             } else {
                 mostrarEstadoAnalisis('error', payload.mensaje || 'No se pudo analizar el CV.');
@@ -277,29 +296,26 @@ document.addEventListener('DOMContentLoaded', function() {
      * o el error. Se puede seguir navegando: el analisis corre en otro servicio.
      */
 
-    function mostrarEstadoAnalisis(estado, mensaje, resultadoUrl) {
+    function mostrarEstadoAnalisis(estado, mensaje) {
         if (!panelAnalisis) { mostrarFeedback(estado === 'pendiente' ? 'loading' : (estado === 'completado' ? 'success' : 'error'), mensaje || ''); return; }
         const icono = panelAnalisis.querySelector('[data-analisis-icono]');
         const titulo = panelAnalisis.querySelector('[data-analisis-titulo]');
         const texto = panelAnalisis.querySelector('[data-analisis-mensaje]');
-        const link = panelAnalisis.querySelector('[data-analisis-link]');
         const barra = panelAnalisis.querySelector('[data-analisis-barra]');
 
         panelAnalisis.classList.remove('hidden');
-        link.style.display = 'none';  // .btn-ien le gana a .hidden
         barra.classList.toggle('hidden', estado !== 'pendiente');
 
         if (estado === 'pendiente') {
             icono.className = 'grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#512DA8]/10 text-[#512DA8]';
             icono.innerHTML = SPINNER;
-            titulo.textContent = 'Analizando tu CV por paquetes…';
+            titulo.textContent = 'Analizando tu CV…';
             texto.textContent = mensaje || 'Puede tardar varios minutos según la disponibilidad del servicio.';
         } else if (estado === 'completado') {
             icono.className = 'grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#27AE60]/15 text-[#27AE60]';
             icono.innerHTML = ICONO_OK;
             titulo.textContent = '¡Tu perfil está listo!';
             texto.textContent = mensaje || 'Ya podés ver el perfil profesional que se usa en el match.';
-            if (resultadoUrl) { link.href = resultadoUrl; link.style.display = ''; }
         } else {
             icono.className = 'grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#d4183d]/10 text-[#d4183d]';
             icono.innerHTML = ICONO_ERROR;

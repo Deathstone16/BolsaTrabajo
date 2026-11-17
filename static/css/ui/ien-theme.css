@@ -824,6 +824,82 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 
 .ien-profile-next { background: #f3edfb; border-color: rgba(81, 45, 168, 0.2); }
 
+.ien-cv-layout { display: grid; grid-template-areas: "cv" "sidebar"; gap: 1.5rem; }
+.ien-cv-layout > aside { grid-area: sidebar; }
+.ien-cv-content { grid-area: cv; scroll-margin-top: 6rem; }
+.ien-cv-card { padding: clamp(1rem, 3vw, 1.5rem); }
+.ien-cv-card [data-cv-file-picker][hidden] { display: none; }
+.ien-cv-filename { overflow-wrap: anywhere; }
+.ien-cv-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; }
+.ien-cv-content .ien-cv-link {
+  color: var(--primary-600);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: .15em;
+}
+.ien-cv-card button.ien-cv-link { color: #b91c1c; cursor: pointer; }
+.ien-cv-help {
+  border-top: 1px solid var(--border);
+  color: var(--muted-foreground);
+  margin-top: 1rem;
+  padding-top: .875rem;
+}
+.ien-cv-help a { display: inline-block; margin-inline-start: .25rem; }
+.ien-cv-analysis-status {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: .875rem;
+}
+.ien-cv-formats { display: flex; flex-wrap: wrap; gap: .375rem; }
+.ien-cv-replace { border-top: 1px solid var(--border); padding-top: .875rem; }
+.ien-avatar-form { display: grid; justify-items: center; gap: .5rem; width: 100%; }
+.ien-avatar-picture { position: relative; display: block; width: 4rem; height: 4rem; }
+.ien-avatar-picker {
+  display: grid;
+  justify-items: center;
+  gap: .375rem;
+  padding: .125rem .375rem;
+  border-radius: .75rem;
+  color: var(--primary-600);
+  font-size: .8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ien-avatar-picker:disabled { cursor: default; }
+.ien-avatar-picker:hover:not(:disabled) > span:last-child { text-decoration: underline; }
+.ien-avatar-picker:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.ien-avatar-badge {
+  position: absolute;
+  bottom: 0;
+  right: -.125rem;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--card);
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+}
+.ien-avatar-fields { display: grid; justify-items: center; gap: .5rem; width: 100%; }
+.ien-avatar-fields input { max-width: 100%; font-size: .8125rem; }
+.ien-avatar-fields[hidden] { display: none; }
+.ien-cv-benefits-grid { display: grid; gap: .875rem; }
+@media (min-width: 48rem) {
+  .ien-cv-benefits-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.ien-cv-content :is(button, a, input):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+@media (min-width: 64rem) {
+  .ien-cv-layout {
+    grid-template-areas: "sidebar cv";
+    grid-template-columns: 16rem minmax(0, 1fr);
+    gap: 2rem;
+  }
+}
+
 .ien-home-search { background: #e7ddf6; border-color: rgba(81, 45, 168, 0.25); }
 .ien-company-guide { background: #f3edfb; border-color: rgba(81, 45, 168, 0.2); }
 

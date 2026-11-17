@@ -6,9 +6,36 @@
 <aside>
   <div class="panel sticky top-28 p-6">
     <div class="flex flex-col items-center gap-2 border-b border-[rgba(110,85,55,0.16)] pb-6">
-      <div class="grid h-16 w-16 place-items-center rounded-full bg-[#512DA8]/10 text-xl font-bold text-[#512DA8]">
-        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
-      </div>
+      {% with foto_perfil=request.user.postulante.foto %}
+        {% if seccion == 'cv' %}
+          <form method="post" enctype="multipart/form-data" action="{% url 'mi_perfil' %}" class="ien-avatar-form">
+            {% csrf_token %}
+            <button type="button" class="ien-avatar-picker" data-avatar-picker disabled aria-describedby="cv-photo-help">
+        {% endif %}
+              <span class="ien-avatar-picture">
+                {% if foto_perfil %}
+                  <img src="{{ foto_perfil.url }}" alt="" width="64" height="64" class="h-16 w-16 rounded-full object-cover">
+                {% else %}
+                  <span aria-hidden="true" class="grid h-16 w-16 place-items-center rounded-full bg-[#512DA8]/10 text-xl font-bold text-[#512DA8]">
+                    {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+                  </span>
+                {% endif %}
+                {% if seccion == 'cv' %}
+                  <span class="ien-avatar-badge" aria-hidden="true"><span data-icon="upload" class="h-3 w-3"></span></span>
+                {% endif %}
+              </span>
+        {% if seccion == 'cv' %}
+              <span>{% if foto_perfil %}Cambiar foto{% else %}Cargar foto{% endif %}</span>
+            </button>
+            <div class="ien-avatar-fields" data-avatar-fields>
+              <label for="cv-profile-photo" class="sr-only">Seleccionar foto de perfil</label>
+              <input id="cv-profile-photo" type="file" name="foto" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required aria-describedby="cv-photo-help">
+              <button class="btn-ghost !py-2 text-sm" type="submit">Guardar foto</button>
+            </div>
+            <p id="cv-photo-help" class="text-center text-xs text-[#6B645C]">JPG, PNG o WebP, hasta 2 MiB. Se guarda sin metadatos.</p>
+          </form>
+        {% endif %}
+      {% endwith %}
       <p class="text-center text-sm font-semibold text-[#26222E]">{{ request.user.get_full_name }}</p>
       {% if postulante.dni %}
         <p class="text-center font-mono text-xs text-[#6B645C]">{{ postulante.dni }}</p>
