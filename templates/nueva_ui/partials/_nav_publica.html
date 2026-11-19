@@ -1,0 +1,13 @@
+<nav class="ien-public-nav{% if mobile %} ien-public-nav-mobile{% endif %}" aria-label="Navegación principal{% if mobile %} móvil{% endif %}">
+  <a href="{% url 'home' %}" class="nav-link"{% if vista_activa == 'inicio' %} aria-current="page"{% endif %}>Inicio</a>
+  <a href="{% url 'cursos:listado' %}" class="nav-link"{% if vista_activa == 'cursos' %} aria-current="page"{% endif %}>Cursos</a>
+  {% if not user.is_authenticated or user.postulante %}<a href="{% url 'buscar_empleo' %}" class="nav-link"{% if vista_activa == 'buscar' %} aria-current="page"{% endif %}>Buscar empleo</a>{% endif %}
+</nav>
+<div class="ien-public-actions{% if mobile %} ien-public-actions-mobile{% endif %}">
+  {% if user.is_authenticated %}
+    {% include 'nueva_ui/partials/_nav_postulante.html' with mobile=mobile %}
+  {% else %}
+    <a href="{% url 'registro' %}" class="ien-header-register">Crear cuenta</a>
+    <a href="{% url 'login' %}" class="btn-ien ien-header-login">Ingresar <span data-icon="arrow-up-right" class="h-4 w-4" aria-hidden="true"></span></a>
+  {% endif %}
+</div>

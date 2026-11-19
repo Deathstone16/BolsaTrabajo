@@ -1303,3 +1303,86 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
   .ien-postulante-layout { grid-template-columns: 16rem minmax(0, 1fr); align-items: start; }
 }
 @media (prefers-reduced-motion: reduce) { .ien-postulante-nav-link { transition: none; } }
+
+/* Navegación flotante con vidrio blanco y acentos IEN. */
+:root { --ien-header-row: 4.5rem; --ien-header-top: 1rem; --ien-header-space: calc(var(--ien-header-row) + var(--ien-header-top) + 2px); }
+.ien-floating-header {
+  position: sticky; top: var(--ien-header-top); z-index: 50;
+  width: calc(100% - 2rem); max-width: 80rem; margin: var(--ien-header-top) auto 0;
+  border: 1px solid rgba(215, 198, 238, .85); border-radius: 1.375rem;
+  background: #fffdfd; color: #26222e;
+  box-shadow: 0 10px 32px -20px rgba(36, 17, 67, .48);
+}
+@supports ((backdrop-filter: blur(18px)) or (-webkit-backdrop-filter: blur(18px))) {
+  .ien-floating-header { background: rgba(255, 253, 255, .87); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
+}
+.ien-floating-shell { padding-inline: 1.25rem; }
+.ien-floating-bar { display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; height: var(--ien-header-row); }
+.ien-header-brand { display: inline-flex; flex-shrink: 0; align-items: center; gap: .75rem; border-radius: .75rem; text-decoration: none; }
+.ien-header-logo { position: relative; display: grid; place-items: center; flex-shrink: 0; width: 2.5rem; height: 2.5rem; border-radius: .875rem; background: linear-gradient(135deg, #512da8, #43218f); color: #fff; font-weight: 700; font-size: 1rem; letter-spacing: -.04em; box-shadow: 0 5px 16px -8px rgba(67, 33, 143, .55); }
+.ien-header-logo > span { position: absolute; top: .35rem; right: .35rem; width: .375rem; height: .375rem; border-radius: 50%; background: #ffde59; }
+.ien-header-brand-text { display: flex; flex-direction: column; gap: .375rem; line-height: 1; }
+.ien-header-brand-name { color: #26222e; font-size: 1rem; font-weight: 600; letter-spacing: -.025em; }
+.ien-header-brand-subtitle { color: #512da8; font-family: 'JetBrains Mono', monospace; font-size: .5625rem; text-transform: uppercase; letter-spacing: .19em; }
+.ien-floating-header .ien-nav-desktop { display: none; align-items: center; gap: 1.5rem; }
+.ien-public-nav { display: flex; align-items: center; gap: .25rem; }
+.ien-floating-header .nav-link, .ien-floating-header .ien-employer-link { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: .625rem .875rem; border-radius: 999px; color: #5a5066; font-size: .875rem; font-weight: 500; white-space: nowrap; text-decoration: none; transition: background-color .16s ease, color .16s ease; }
+.ien-floating-header .nav-link:hover, .ien-floating-header .ien-employer-link:hover { background: #f0e8fa; color: #43218f; }
+.ien-floating-header .nav-link[aria-current], .ien-floating-header .ien-employer-link[aria-current] { background: #e8ddf6; color: #43218f; font-weight: 600; }
+.ien-public-actions { display: flex; align-items: center; gap: 1rem; padding-left: 1.25rem; border-left: 1px solid #ded2ec; }
+.ien-header-register { color: #554b62; font-size: .875rem; font-weight: 500; text-decoration: none; }
+.ien-header-register:hover { color: #43218f; }
+.ien-floating-header .ien-header-login, .ien-floating-header .ien-header-back { min-height: 2.75rem; padding: .625rem 1rem; font-size: .875rem; }
+.ien-header-user-name { max-width: 8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ien-floating-header .ien-employer-account > summary { min-height: 2.75rem; gap: .5rem; padding: .375rem .625rem; border-radius: 999px; }
+.ien-floating-header .ien-employer-account > summary:hover, .ien-floating-header .ien-employer-account[open] > summary, .ien-floating-header .ien-header-account-current { background: #eee5f8; }
+.ien-floating-header .ien-account-dropdown { border-color: #ded2ef; background: #fffdfd; box-shadow: 0 12px 32px -12px rgba(36, 17, 67, .3); }
+.ien-header-account-link { display: flex; align-items: center; gap: .625rem; min-height: 2.75rem; margin-top: .375rem; padding: .625rem; border-radius: .625rem; color: #554b62; font-size: .8125rem; }
+.ien-header-account-link:hover, .ien-header-account-link[aria-current] { background: #eee5f8; color: #43218f; }
+.ien-floating-header .nav-burger { display: grid; place-items: center; flex-shrink: 0; width: 2.75rem; height: 2.75rem; padding: 0; border: 1px solid #ded2ef; border-radius: .875rem; background: rgba(255, 255, 255, .8); color: #43218f; cursor: pointer; }
+.ien-floating-header a:focus-visible, .ien-floating-header button:focus-visible, .ien-floating-header summary:focus-visible { outline: 2px solid #512da8; outline-offset: 3px; }
+.ien-floating-header .nav-mobile { max-height: calc(100vh - 7rem); max-height: calc(100dvh - 7rem); overflow-y: auto; margin: 0 .75rem .75rem; padding: .75rem; border: 1px solid #e7ddf3; border-radius: 1rem; background: rgba(255, 253, 255, .96); }
+.ien-floating-header .nav-mobile:not(.hidden) { display: block; animation: ien-header-menu-in .16s ease-out; }
+.ien-public-nav-mobile { display: grid; align-items: stretch; gap: .25rem; }
+.ien-public-nav-mobile .nav-link { justify-content: flex-start; border-radius: .75rem; }
+.ien-public-actions-mobile { display: grid; gap: .75rem; margin-top: .75rem; padding: .75rem 0 0; border-top: 1px solid #e7ddf3; border-left: 0; }
+.ien-public-actions-mobile .ien-header-register { min-height: 2.75rem; display: flex; align-items: center; padding: .625rem .875rem; }
+.ien-postulante-account-mobile > summary { width: 100%; }
+.ien-postulante-account-mobile .ien-account-dropdown { position: static; width: 100%; max-width: none; margin-top: .5rem; box-shadow: none; }
+.ien-home .ien-home-hero-section { margin-top: calc(-1 * var(--ien-header-space)); padding-top: calc(4.5rem + var(--ien-header-space)); }
+@keyframes ien-header-menu-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+@media (min-width: 1024px) {
+  .ien-floating-header .ien-nav-desktop { display: flex; }
+  .ien-floating-header .nav-burger, .ien-floating-header .nav-mobile, .ien-floating-header .nav-mobile:not(.hidden) { display: none; }
+}
+@media (max-width: 639px) {
+  :root { --ien-header-row: 4rem; --ien-header-top: .75rem; }
+  .ien-floating-header { width: calc(100% - 1.5rem); border-radius: 1.125rem; }
+  .ien-floating-shell { padding-inline: .75rem; }
+  .ien-header-brand-subtitle { display: none; }
+  .ien-header-brand-name { font-size: .9375rem; }
+  .ien-header-brand { gap: .625rem; }
+  .ien-floating-header .ien-header-back { padding-inline: .75rem; font-size: .75rem; }
+  .ien-home .ien-home-hero-section { padding-top: calc(3rem + var(--ien-header-space)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ien-floating-header .nav-link, .ien-floating-header .ien-employer-link, .ien-floating-header .ien-account-chevron { transition: none; }
+  .ien-floating-header .nav-mobile:not(.hidden) { animation: none; }
+}
+
+/* Entrada única del título: enfoque suave y dibujo del subrayado. */
+.ien-home-title-animated .ien-home-title-accent { position: relative; background-image: none; }
+.ien-title-underline { position: absolute; left: 0; bottom: 0; width: 100%; height: .32em; overflow: visible; pointer-events: none; }
+.ien-title-underline path { fill: none; stroke: #ffde59; stroke-width: 14; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .ien-home-title-animated { animation: ien-title-blur-fade .85s cubic-bezier(.22, 1, .36, 1) both; }
+  .ien-title-underline path { animation: ien-title-underline-draw .5s cubic-bezier(.4, 0, .2, 1) .6s both; }
+}
+@keyframes ien-title-blur-fade {
+  from { opacity: 0; filter: blur(5px); transform: translateY(6px); }
+  to { opacity: 1; filter: blur(0); transform: translateY(0); }
+}
+@keyframes ien-title-underline-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
