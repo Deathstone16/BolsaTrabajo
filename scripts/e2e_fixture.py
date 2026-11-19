@@ -180,10 +180,12 @@ def seed(path: Path, live_ai: bool) -> dict:
                 Oferente.objects.create(
                     usuario=company, estado_validacion=Oferente.EstadoValidacion.APROBADO,
                     nombre_empresa=f"E2E Empresa {run_id[:8]}", cuit=generated_cuit(),
+                    contacto_nombre="Responsable E2E", contacto_cargo="RRHH", correo_publico="rrhh@example.com",
                 )
                 Oferente.objects.create(
                     usuario=other_company, estado_validacion=Oferente.EstadoValidacion.APROBADO,
                     nombre_empresa=f"E2E Empresa alternativa {run_id[:8]}", cuit=generated_cuit(),
+                    contacto_nombre="Responsable E2E", contacto_cargo="RRHH", correo_publico="rrhh@example.com",
                 )
                 category = Categoria.objects.create(nombre=f"E2E {run_id}")
                 state["category_id"] = category.pk

@@ -10,8 +10,10 @@ en cualquier plantilla sin {% load %}:
     <script src="{% static_v 'js/ui/ien-ui.js' %}"></script>
 """
 import os
+from urllib.parse import urljoin, urlsplit
 
 from django import template
+from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.templatetags.static import static
 
@@ -26,3 +28,11 @@ def static_v(ruta):
         return url
     version = int(os.path.getmtime(archivo))
     return '%s%sv=%d' % (url, '&' if '?' in url else '?', version)
+
+
+@register.simple_tag
+def public_static_v(ruta):
+    """Devuelve una URL absoluta para recursos estáticos usados en correos."""
+    url = urljoin(settings.IEN_PUBLIC_URL + '/', static_v(ruta))
+    parsed = urlsplit(url)
+    return url if parsed.scheme in ('https', 'http') and parsed.netloc else ''

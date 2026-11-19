@@ -3,7 +3,7 @@
   <a href="{% url 'mod_listar_empresas' %}" class="ien-employer-link" {% if route == 'mod_listar_empresas' or route == 'mod_detalle_empresa' %}aria-current="page"{% endif %}>Empresas</a>
   <a href="{% url 'mod_listar_ofertas' %}" class="ien-employer-link" {% if route == 'mod_listar_ofertas' or route == 'mod_detalle_oferta' %}aria-current="page"{% endif %}>Ofertas</a>
   <details class="ien-employer-account">
-    <summary>Catálogo <span aria-hidden="true" class="ien-account-chevron">⌄</span></summary>
+    <summary>Catálogo <span class="ien-account-chevron" aria-hidden="true"></span></summary>
     <div class="ien-account-dropdown ien-admin-catalog">
       <a href="{% url 'mod_listar_cursos' %}">Cursos</a>
       <a href="{% url 'mod_listar_categorias' %}">Categorías y habilidades</a>
@@ -28,7 +28,11 @@
       </div>
     </details>
     <details class="ien-employer-account">
-      <summary><span class="ien-account-avatar" aria-hidden="true">{{ user.first_name|default:'A'|slice:':1'|upper }}</span><span>Mi cuenta</span><span class="ien-account-chevron" aria-hidden="true">⌄</span></summary>
+      <summary>
+        <span class="ien-account-avatar" aria-hidden="true">{{ user.first_name|default:'A'|slice:':1'|upper }}</span>
+        <span>Mi cuenta</span>
+        <span class="ien-account-chevron" aria-hidden="true"></span>
+      </summary>
       <div class="ien-account-dropdown">
         <p class="ien-account-name">{{ user.first_name|default:'Administración' }}</p>
         <p class="ien-account-email">{{ user.email }}</p>

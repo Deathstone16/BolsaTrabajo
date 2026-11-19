@@ -17,6 +17,7 @@ class FotoPerfilOferenteTests(TestCase):
                 usuario=usuario, nombre_empresa='Empresa de prueba', cuit='30-12345678-1',
                 estado_validacion=Oferente.EstadoValidacion.APROBADO,
                 contacto_nombre='Responsable Demo',
+                contacto_cargo='RRHH', correo_publico='rrhh@example.com',
             )
             self.client.force_login(usuario)
             panel = self.client.get(reverse('dashboard_empresa'))
@@ -27,6 +28,7 @@ class FotoPerfilOferenteTests(TestCase):
             response = self.client.post(reverse('editar_perfil_empresa'), {
                 'nombre_empresa': oferente.nombre_empresa, 'cuit': oferente.cuit,
                 'contacto_nombre': 'María Pérez',
+                'contacto_cargo': 'RRHH', 'correo_publico': 'rrhh@example.com',
                 'logo': SimpleUploadedFile('foto.png', image.getvalue(), content_type='image/png'),
                 'banner': SimpleUploadedFile('portada.png', image.getvalue(), content_type='image/png'),
                 'sitio_web': 'https://example.com',

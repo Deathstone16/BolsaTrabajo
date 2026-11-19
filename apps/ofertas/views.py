@@ -20,8 +20,8 @@ def validacion_pendiente(request):
     oferente = request.user.oferente
     if oferente.puede_publicar:
         return redirect('dashboard_empresa')
-    if oferente.estado_validacion == oferente.EstadoValidacion.APROBADO and not oferente.tiene_responsable:
-        messages.warning(request, 'Completá el nombre de la persona responsable para habilitar la publicación de ofertas.')
+    if oferente.estado_validacion == oferente.EstadoValidacion.APROBADO and not oferente.responsable_completo:
+        messages.warning(request, 'Completá el nombre, el cargo y el correo de contacto del responsable para publicar ofertas.')
         return redirect('editar_perfil_empresa')
     email_contacto_url = obtener_url_contacto(request.user.email)
     return render(request, 'Ofertas/validacion_pendiente.html', {

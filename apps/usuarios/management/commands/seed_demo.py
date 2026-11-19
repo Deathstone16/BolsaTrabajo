@@ -53,6 +53,8 @@ class Command(BaseCommand):
             user = self.account(alias, name)
             Oferente.objects.update_or_create(usuario=user, defaults={
                 'nombre_empresa': name, 'cuit': f'30-0000000{index}-0', 'industria': industry,
+                'contacto_nombre': 'Responsable Demo', 'contacto_cargo': 'RRHH',
+                'correo_publico': f'rrhh-{alias}@demo.example.test',
                 'estado_validacion': state, 'tamano_empresa': '11-50', 'ubicacion': 'Córdoba, Argentina',
                 'anio_fundacion': 2018 + index, 'sitio_web': 'https://example.test',
                 'descripcion': 'Empresa ficticia para probar la bolsa de empleo. Todos los datos son de demostración.',

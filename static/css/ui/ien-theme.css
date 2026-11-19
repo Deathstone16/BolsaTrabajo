@@ -224,10 +224,89 @@ body {
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
-.input-ien:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(81, 45, 168, 0.12); background: #fff; }
+.input-ien:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(81, 45, 168, 0.12); background-color: #fff; }
+
+/* Single-choice fields keep their native form and keyboard behavior. */
+main select:not([multiple], [size]:not([size="1"])) {
+  appearance: none;
+  padding-inline-end: 2.5rem;
+  background-image:
+    linear-gradient(45deg, transparent 42%, var(--primary) 42% 62%, transparent 62%),
+    linear-gradient(-45deg, transparent 42%, var(--primary) 42% 62%, transparent 62%);
+  background-position: right calc(1rem + 5px) center, right 1rem center;
+  background-size: 5px 8px;
+  background-repeat: no-repeat;
+}
+main select:not([multiple], [size]:not([size="1"])):enabled { cursor: pointer; }
+
+@supports (appearance: base-select) and selector(select::picker(select)) {
+  main select:not([multiple], [size]:not([size="1"])),
+  main select:not([multiple], [size]:not([size="1"]))::picker(select) {
+    appearance: base-select;
+  }
+  main select:not([multiple], [size]:not([size="1"])) {
+    gap: 0.75rem;
+    padding-inline-end: 1rem;
+    background-image: none;
+  }
+  main select:not([multiple], [size]:not([size="1"]))::picker-icon {
+    content: "";
+    align-self: center;
+    flex-shrink: 0;
+    width: 0.45rem;
+    height: 0.45rem;
+    margin-inline-start: auto;
+    margin-inline-end: 0.15rem;
+    border: solid var(--primary);
+    border-width: 0 1.5px 1.5px 0;
+    transform: translateY(-2px) rotate(45deg);
+  }
+  main select:not([multiple], [size]:not([size="1"])):open::picker-icon {
+    transform: translateY(1px) rotate(225deg);
+  }
+  main select:not([multiple], [size]:not([size="1"]))::picker(select) {
+    margin-block: 0.3rem;
+    padding: 0.3rem;
+    max-width: calc(100vw - 2rem);
+    max-height: min(20rem, 48vh);
+    border: 1px solid var(--border);
+    border-radius: 0.9rem;
+    background: var(--card);
+    color: var(--foreground);
+    box-shadow: 0 12px 28px rgba(38, 34, 46, 0.14);
+  }
+  main select:not([multiple], [size]:not([size="1"])) option {
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.6rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  main select:not([multiple], [size]:not([size="1"])) option:enabled:is(:hover, :focus-visible) {
+    background: var(--muted);
+    color: var(--foreground);
+  }
+  main select:not([multiple], [size]:not([size="1"])) option:checked {
+    background: color-mix(in srgb, var(--primary) 12%, var(--card));
+    color: var(--primary);
+    font-weight: 600;
+  }
+  main select:not([multiple], [size]:not([size="1"])) option::checkmark {
+    order: 1;
+    margin-inline-start: auto;
+  }
+}
+
+@media (forced-colors: active) {
+  main select:not([multiple], [size]:not([size="1"])) {
+    appearance: auto;
+    padding-inline-end: 1rem;
+    background-image: none;
+  }
+}
+
 .ien-required-marker { color: #b91c1c; font-weight: 600; }
 .ien-required-message { margin-top: 0.4rem; color: #b91c1c; font-size: 0.8125rem; }
-:is([data-company-validation], [data-required-validation]) .input-ien.ien-field-invalid { border-color: #b91c1c; background: #fff7f7; }
+:is([data-company-validation], [data-required-validation]) .input-ien.ien-field-invalid { border-color: #b91c1c; background-color: #fff7f7; }
 :is([data-company-validation], [data-required-validation]) .input-ien.ien-field-invalid:focus { box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.14); }
 .ien-offer-section { margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border); display: grid; gap: 1rem; }
 .ien-offer-errors { border: 1px solid #fecaca; border-radius: 1rem; padding: 1rem; margin-bottom: 1.5rem; background: #fff7f7; color: #b91c1c; }
@@ -243,7 +322,7 @@ body {
 .ien-requirement-items { display: grid; gap: 0.75rem; list-style: none; padding: 0; }
 .ien-requirement-item { display: grid; gap: 0.6rem; padding: 0.875rem; background: var(--muted); border-radius: 0.75rem; }
 .ien-requirement-item > span { overflow-wrap: anywhere; font-weight: 500; font-size: 0.875rem; }
-.ien-requirement-item select { font-size: 0.8125rem; background: var(--card); }
+.ien-requirement-item select { font-size: 0.8125rem; background-color: var(--card); }
 .ien-requirement-item-actions { display: flex; flex-wrap: wrap; gap: 1rem; }
 .ien-requirement-item-actions button { color: var(--primary); font-size: 0.75rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .ien-requirement-item-actions button:last-child { color: #b91c1c; }
@@ -252,20 +331,169 @@ body {
 .ien-offer-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
 .ien-offer-confidential { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; }
 .ien-employer-nav { display: flex; align-items: center; gap: 1.5rem; }
-.ien-employer-link { font-size: 0.875rem; font-weight: 500; color: var(--muted-foreground); }
-.ien-employer-link:hover, .ien-employer-link[aria-current] { color: var(--primary); }
+.ien-employer-link, .ien-employer-account > summary { font: inherit; font-size: 0.875rem; font-weight: 500; color: var(--muted-foreground); }
+#global-nav { --ien-header-gap: clamp(1rem, 2vw, 1.75rem); }
+#global-nav .ien-nav-desktop { gap: var(--ien-header-gap); }
+.ien-header-row { min-height: 4.5rem; gap: 0.75rem; }
+.ien-header-brand {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  border-radius: 0.75rem;
+}
+.ien-header-brand img { display: block; height: auto; }
+.ien-brand-seal {
+  display: block;
+  flex-shrink: 0;
+  border: 1px solid rgb(255 255 255 / 45%);
+  border-radius: 50%;
+}
+.ien-header-links, .ien-header-actions {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+.ien-header-links { gap: .25rem; }
+.ien-header-actions {
+  gap: 1rem;
+  justify-self: end;
+  padding-inline-start: 1.25rem;
+  border-inline-start: 1px solid #ded2ec;
+}
+@media (min-width: 1024px) {
+  .ien-header-row:has(.ien-header-links) {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+  }
+  .ien-nav-desktop:has(> .ien-header-links) { display: contents; }
+}
+.ien-header-link, #global-nav .ien-employer-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: .625rem .875rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #5a5066;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color 0.16s ease, background-color 0.16s ease;
+}
+#global-nav :is(.ien-header-link, .ien-employer-link):is(:hover, :focus-visible) {
+  background: #f0e8fa;
+  color: var(--primary-600);
+}
+#global-nav :is(.ien-header-link, .ien-employer-link)[aria-current] {
+  background: #e8ddf6;
+  color: var(--primary-600);
+  font-weight: 600;
+}
+#global-nav .nav-mobile :is(.ien-header-link, .ien-employer-link) {
+  justify-content: flex-start;
+  border-radius: .75rem;
+}
+#global-nav :is(.ien-employer-account:not(.ien-admin-bell) > summary, .ien-admin-catalog a):is(:hover, :focus-visible) {
+  color: var(--primary);
+  font-weight: 700;
+}
+.ien-header-register { color: #554b62; font-size: .875rem; font-weight: 500; }
+.ien-header-register:hover { color: var(--primary-600); }
+.ien-header-login { min-height: 2.75rem; padding: .625rem 1rem; font-size: .875rem; }
+.ien-header-user-name { max-width: 8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#global-nav .ien-postulante-account > summary {
+  min-height: 2.75rem;
+  padding: .375rem .625rem;
+  border-radius: 999px;
+}
+#global-nav .ien-postulante-account > summary:is(:hover, .ien-header-account-current),
+#global-nav .ien-postulante-account[open] > summary,
+.ien-header-account-link:is(:hover, [aria-current]) { background: #eee5f8; color: var(--primary-600); }
+.ien-postulante-account .ien-account-dropdown {
+  border-color: #ded2ef;
+  background: #fffdfd;
+  box-shadow: 0 12px 32px -12px rgba(36, 17, 67, .3);
+  white-space: normal;
+}
+.ien-header-account-link {
+  display: flex;
+  align-items: center;
+  gap: .625rem;
+  min-height: 2.75rem;
+  margin-top: .375rem;
+  padding: .625rem;
+  border-radius: .625rem;
+  color: #554b62;
+  font: inherit;
+  font-size: .8125rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.ien-header-account-link > [data-icon] { flex-shrink: 0; }
+.ien-postulante-account .form-logout {
+  margin-top: .375rem;
+  border-top: 1px solid var(--border);
+}
+.ien-postulante-account button.ien-header-account-link {
+  width: 100%;
+  text-align: start;
+  cursor: pointer;
+}
+#global-nav :is(.ien-header-brand, .ien-header-link, .ien-header-register, .ien-header-account-link, .nav-burger):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+#global-nav .nav-burger {
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border: 1px solid #512da83d;
+  border-radius: 0.8rem;
+  background: var(--card);
+  color: var(--primary-600);
+  cursor: pointer;
+}
+#global-nav .nav-burger[aria-expanded="true"] {
+  border-color: var(--primary);
+  background: #512da81a;
+}
+@media (max-width: 767px) {
+  #global-nav .nav-burger { display: grid; }
+  .ien-header-row { min-height: 4rem; }
+  .nav-mobile .ien-header-actions {
+    display: grid;
+    gap: .75rem;
+    padding: .75rem 0 0;
+    border-inline-start: 0;
+    border-top: 1px solid #ded2ec;
+  }
+  .nav-mobile .ien-header-register { display: flex; align-items: center; min-height: 2.75rem; padding: .625rem .875rem; }
+  .nav-mobile .ien-postulante-account .ien-account-chevron { margin-inline-start: auto; }
+  .nav-mobile .ien-postulante-account .ien-account-dropdown { position: static; width: 100%; max-width: none; margin-top: .5rem; box-shadow: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ien-header-link, #global-nav .ien-employer-link { transition: none; }
+}
 .ien-employer-actions { display: flex; align-items: center; gap: 1rem; padding-left: 1.25rem; border-left: 1px solid var(--border); }
 .ien-employer-publish { padding: 0.6rem 1rem; font-size: 0.8125rem; box-shadow: none; white-space: nowrap; }
 .ien-employer-publish:hover { box-shadow: 0 4px 12px rgba(81, 45, 168, 0.12); }
 .ien-employer-account { position: relative; }
-.ien-employer-account summary { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem; border-radius: 0.75rem; cursor: pointer; list-style: none; font-size: 0.8125rem; }
-.ien-employer-account summary::-webkit-details-marker { display: none; }
-.ien-employer-account summary:hover, .ien-employer-account[open] summary { background: var(--muted); }
+.ien-employer-account > summary { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.55rem; border-radius: 0.75rem; cursor: pointer; list-style: none; }
+.ien-employer-account > summary::marker { content: ""; }
+.ien-employer-account > summary::-webkit-details-marker { display: none; }
+.ien-employer-account > summary:hover, .ien-employer-account[open] > summary { background: var(--muted); color: var(--primary); }
 .ien-employer-account summary:focus-visible, .ien-employer-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
 .ien-account-avatar { display: grid; place-items: center; flex-shrink: 0; width: 2rem; height: 2rem; overflow: hidden; border-radius: 50%; background: rgba(81, 45, 168, 0.1); color: var(--primary); font-weight: 600; }
 .ien-account-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.ien-account-chevron { transition: transform 0.2s ease; }
-.ien-employer-account[open] .ien-account-chevron { transform: rotate(180deg); }
+.ien-account-chevron { display: grid; place-items: center; flex: 0 0 1.25rem; width: 1.25rem; height: 1.25rem; font-size: 0; }
+.ien-account-chevron::before { content: ""; width: 0.42rem; height: 0.42rem; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: translateY(-1px) rotate(45deg); transition: transform 0.18s ease; }
+.ien-employer-account[open] > summary .ien-account-chevron::before { transform: translateY(1px) rotate(225deg); }
+.ien-employer-nav-mobile .ien-account-chevron, .ien-admin-nav-mobile .ien-account-chevron { margin-left: auto; }
+@media (prefers-reduced-motion: reduce) {
+  .ien-account-chevron::before { transition: none; }
+}
 .ien-account-dropdown { position: absolute; right: 0; top: calc(100% + 0.75rem); z-index: 60; width: 17rem; max-width: calc(100vw - 2rem); padding: 1rem; border: 1px solid var(--border); border-radius: 1rem; background: var(--card); box-shadow: 0 12px 30px rgba(38, 34, 46, 0.12); }
 .ien-account-name { font-size: 0.875rem; font-weight: 600; overflow-wrap: anywhere; }
 .ien-account-email { margin-top: 0.25rem; font-size: 0.75rem; color: var(--muted-foreground); overflow-wrap: anywhere; }
@@ -276,6 +504,7 @@ body {
 .ien-employer-nav-mobile > .ien-employer-link:hover { background: var(--card); }
 .ien-employer-nav-mobile .ien-employer-actions { display: grid; gap: 0.5rem; padding-left: 0; border-left: 0; }
 .ien-employer-nav-mobile .ien-employer-account { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border); }
+.ien-employer-nav-mobile .ien-employer-account > summary { padding-inline: 1rem; }
 .ien-employer-nav-mobile .ien-account-dropdown { position: static; width: 100%; max-width: none; margin-top: 0.5rem; box-shadow: none; }
 .ien-admin-nav { display: flex; align-items: center; gap: 1.5rem; }
 .ien-admin-catalog { display: grid; gap: 0.5rem; }
@@ -674,8 +903,13 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 .ien-home-container { width: 100%; max-width: 80rem; margin: 0 auto; padding: 0 2rem; }
 .ien-home-section { padding: 4.5rem 0; }
 .ien-home-section-alt { background: var(--card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-.ien-home-hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: center; gap: 5rem; }
-.ien-home-title { max-width: 12ch; margin-top: 1.25rem; font-size: clamp(2.4rem, 4.2vw, 3.75rem); line-height: 1.12; letter-spacing: -0.035em; }
+.ien-home-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.13fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(1.5rem, 5vw, 5rem);
+}
+.ien-home-title { margin-top: 1rem; font-size: clamp(2.1rem, 4.2vw, 3.75rem); font-weight: 800; line-height: 1.06; letter-spacing: -0.045em; }
 .ien-home-title-accent {
   display: inline-block;
   color: var(--primary);
@@ -687,9 +921,10 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
   background-size: 100% 0.32em;
 }
 .ien-home-intro { max-width: 42rem; margin-top: 1rem; color: var(--muted-foreground); line-height: 1.8; }
-.ien-home-stats { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 2rem; color: var(--muted-foreground); font-size: 0.875rem; }
-.ien-home-stats strong { color: var(--primary); font-size: 1.25rem; }
-.ien-home-search { display: grid; gap: 1.25rem; padding: 2rem; box-shadow: 0 18px 50px -30px rgba(60, 40, 80, 0.25); }
+.ien-home-stats { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; color: var(--foreground); font-size: 0.875rem; }
+.ien-home-stats p { padding: 0.35rem 0.7rem; border: 1px solid rgba(81, 45, 168, 0.18); border-radius: 999px; background: #f7f3fc; }
+.ien-home-stats strong { color: var(--primary); font-weight: 700; }
+.ien-home-search { display: grid; gap: 1rem; padding: clamp(1.25rem, 2.1vw, 2rem); box-shadow: 0 14px 36px -18px rgba(60, 40, 80, 0.35); }
 .ien-home-search h2 { font-size: 1.35rem; }
 .ien-home-search label { display: block; margin-bottom: 0.5rem; font-size: 0.875rem; }
 .ien-home-search input, .ien-home-search select { min-height: 3rem; }
@@ -829,7 +1064,7 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 .ien-breadcrumbs [aria-current] { overflow-wrap: anywhere; }
 @media (max-width: 1023px) {
   .ien-course-filter-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .ien-home-hero { gap: 2.5rem; }
+  .ien-home-hero { gap: 1.5rem; }
   .ien-course-grid, .ien-home-offers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 767px) {
@@ -837,7 +1072,6 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
   .ien-home-container { padding: 0 1.25rem; }
   .ien-home-section { padding: 3rem 0; }
   .ien-home-hero, .ien-course-grid, .ien-steps-grid, .ien-home-offers { grid-template-columns: minmax(0, 1fr); }
-  .ien-home-title { max-width: 16ch; }
   .ien-home-search { padding: 1.5rem; }
   .ien-section-heading { align-items: start; flex-direction: column; }
   .ien-home-offer { padding: 1.5rem; }
@@ -947,7 +1181,7 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
   }
 }
 
-.ien-home-search { background: #e7ddf6; border-color: rgba(81, 45, 168, 0.25); }
+.ien-home-search { background: #fdfaff; border-color: rgba(81, 45, 168, 0.2); }
 .ien-company-guide { background: #f3edfb; border-color: rgba(81, 45, 168, 0.2); }
 
 .ien-course-card:nth-child(3n+1) { background: #e7ddf6; }
@@ -1019,18 +1253,8 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
   border-color: #cdb7e8;
   box-shadow: 0 8px 24px -20px rgba(67, 33, 143, .35);
 }
-.ien-design-cv .ien-cv-card > h2 { color: #43218f; }
-.ien-design-cv #cv-upload-area {
-  padding: 1.25rem;
-  border: 1.5px dashed #b496d8;
-  border-radius: 1rem;
-  background: #fffdfb;
-}
-.ien-cv-upload-icon { display: block; width: 1.75rem; height: 1.75rem; margin-bottom: .75rem; color: #512da8; }
-.ien-cv-file-heading { font-size: .9375rem; font-weight: 600; color: #43218f; }
-.ien-cv-file-description { margin: .375rem 0 1rem; color: #6b645c; font-size: .8125rem; line-height: 1.6; }
-.ien-design-cv .ien-cv-benefits-grid > .panel { border-color: #dbccec; }
-.ien-design-cv .ien-cv-benefits-grid > .panel:nth-child(2) { background: #f3edfb; }
+.ien-design-cv .ien-cv-dropzone { border-color: #b496d8; }
+.ien-design-cv .ien-cv-dropzone h2 { color: #43218f; }
 @media (max-width: 639px) {
   .ien-job-save { padding: .625rem; }
   .ien-job-footer .ien-job-open { width: 100%; margin: .375rem 0 0; }
@@ -1070,11 +1294,14 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
   pointer-events: none;
 }
 .ien-home-hero-section .ien-home-hero { position: relative; z-index: 2; }
-.ien-home-hero-section .kicker { color: var(--ien-hero-accent); }
 .ien-home-hero-section .ien-home-title { color: #fff; }
 .ien-home-hero-section .ien-home-title-accent { color: var(--ien-hero-accent); }
 .ien-home-hero-section .ien-home-intro,
 .ien-home-hero-section .ien-home-stats { color: var(--ien-hero-text); }
+.ien-home-hero-section .ien-home-stats p {
+  border-color: rgba(255, 255, 255, .3);
+  background: rgba(37, 20, 65, .82);
+}
 .ien-home-hero-section .ien-home-stats strong { color: #fff; }
 .ien-home-hero-section .ien-home-search {
   background: rgba(37, 20, 65, .94);
@@ -1264,10 +1491,10 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 
 .ien-home-courses-section .ien-section-heading { align-items: center; }
 .ien-home-courses-section .ien-section-heading > div:first-child { flex: 1; }
-.ien-course-heading-actions { display: flex; flex-direction: column; align-items: flex-end; gap: .875rem; width: 22rem; max-width: 100%; }
-.ien-home-course-search { display: grid; gap: .5rem; width: 100%; }
-.ien-home-course-search-main { display: flex; align-items: center; gap: .5rem; }
-.ien-home-course-search .input-ien { flex: 1; width: 100%; min-height: 2.75rem; padding: .625rem .875rem; background: #fffdfd; font-size: .875rem; }
+.ien-course-heading-actions { display: flex; flex-direction: column; align-items: flex-end; gap: .5rem; width: 22rem; max-width: 100%; }
+.ien-home-course-search { display: grid; gap: .75rem; }
+.ien-home-course-search-main { display: flex; align-items: center; gap: .5rem; width: 100%; }
+.ien-home-course-search .input-ien { width: 100%; min-height: 2.75rem; padding-block: .625rem; background: #fffdfd; font-size: .875rem; }
 .ien-home-course-search .btn-ien { flex-shrink: 0; min-height: 2.75rem; gap: .375rem; padding: .625rem .875rem; font-size: .875rem; }
 @media (max-width: 767px) {
   .ien-home-courses-section .ien-section-heading { align-items: stretch; }
@@ -1275,15 +1502,71 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 }
 
 /* Los filtros del inicio reutilizan las opciones del catálogo. */
-.ien-home-course-filter-options { width: 100%; border: 1px solid #ded2ef; border-radius: .875rem; background: rgba(255, 253, 255, .8); }
-.ien-home-course-filter-options summary { display: flex; align-items: center; gap: .5rem; min-height: 2.75rem; padding: .625rem .875rem; color: #43218f; font-size: .8125rem; font-weight: 600; cursor: pointer; list-style: none; }
+.ien-home-course-filter-options summary {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  width: fit-content;
+  min-height: 2.75rem;
+  margin-inline-start: auto;
+  padding: .625rem .875rem;
+  border: 1px solid #ded2ef;
+  border-radius: .875rem;
+  background: #fffdfd;
+  color: #43218f;
+  font-size: .8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
 .ien-home-course-filter-options summary::-webkit-details-marker { display: none; }
-.ien-home-course-filter-options summary::after { content: "+"; margin-left: auto; font-size: 1.125rem; line-height: 1; }
-.ien-home-course-filter-options[open] summary::after { content: "−"; }
+.ien-home-course-filter-options summary::after {
+  content: "";
+  width: .42rem;
+  height: .42rem;
+  margin: -.2rem .1rem 0 .35rem;
+  border: solid currentColor;
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
+.ien-home-course-filter-options[open] summary,
+.ien-home-course-filter-options summary:hover { background: #efe6f9; }
+.ien-home-course-filter-options[open] summary::after { transform: translateY(.2rem) rotate(225deg); }
 .ien-home-course-filter-options summary:focus-visible { outline: 2px solid #43218f; outline-offset: 3px; border-radius: .875rem; }
-.ien-home-course-filter-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: .75rem; padding: .25rem .875rem .875rem; }
+.ien-home-course-filter-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: .75rem;
+  margin-top: .625rem;
+  padding: .875rem;
+  border: 1px solid #ded2ef;
+  border-radius: .875rem;
+  background: rgba(255, 253, 255, .8);
+}
 .ien-home-course-filter-fields label { display: block; margin-bottom: .375rem; color: #26222e; font-size: .8125rem; }
-.ien-home-course-search .ien-home-course-filter-submit { margin: 0 .875rem .875rem; }
+@media (max-width: 959px) {
+  .ien-home-course-filter-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ien-home-course-filter-fields button { grid-column: 1 / -1; justify-self: end; }
+}
+@media (max-width: 639px) {
+  .ien-home-course-filter-fields { grid-template-columns: minmax(0, 1fr); }
+  .ien-home-course-filter-fields button { justify-self: stretch; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ien-home-course-filter-options summary::after { transition: transform .22s ease; }
+  @supports (interpolate-size: allow-keywords) and selector(details::details-content) {
+    .ien-home-course-filter-options { interpolate-size: allow-keywords; }
+    .ien-home-course-filter-options::details-content {
+      display: flow-root;
+      block-size: 0;
+      overflow: clip;
+      opacity: 0;
+      transition: block-size .24s ease, opacity .2s ease, content-visibility .24s allow-discrete;
+    }
+    .ien-home-course-filter-options[open]::details-content { block-size: auto; opacity: 1; }
+  }
+}
 
 /* Una misma barra lateral para CV, perfil, datos y favoritos. */
 .ien-postulante-sidebar-panel { background: #f3edfb; border-color: #d7c6ee; }

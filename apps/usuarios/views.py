@@ -40,6 +40,7 @@ def registro(request):
                     cuit=form.cleaned_data['cuit'],
                     contacto_nombre=form.cleaned_data['contacto_nombre'],
                     contacto_cargo=form.cleaned_data['contacto_cargo'],
+                    correo_publico=form.cleaned_data['correo_publico'],
                 )
             else:
                 services.registrar_postulante(

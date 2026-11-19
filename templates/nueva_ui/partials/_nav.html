@@ -2,16 +2,9 @@
 {# Nav del rediseno, con la logica de sesion y roles que ya traia templates/base.html #}
 <header id="global-nav" {% if not home_only and user.is_authenticated and user.is_staff %}data-admin-header{% endif %} {% if not home_only and user.is_authenticated and user.oferente and not user.is_staff %}data-employer-header{% endif %} class="sticky top-0 z-50 border-b border-[rgba(110,85,55,0.16)] bg-[#F8F3F0]/85 backdrop-blur-xl">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex h-16 items-center justify-between {% if home_only %}gap-3{% else %}gap-6{% endif %}">
-      {% if home_only %}<div class="flex items-center gap-3">{% else %}<a href="{% url 'home' %}" class="group flex items-center gap-3">{% endif %}
-        <span class="relative grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#512DA8] to-[#43218F] text-base font-bold tracking-tight text-white shadow-[0_10px_24px_-10px_rgba(81,45,168,0.55)]">
-          <span class="-mt-0.5">IEN</span>
-          <span class="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#FFDE59]"></span>
-        </span>
-        <span class="flex flex-col leading-none">
-          <span class="font-semibold text-[#26222E] tracking-tight">IEN Empleo</span>
-          <span class="pt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-[#512DA8]{% if home_only %} hidden sm:block{% endif %}">Bolsa de trabajo · Chaco</span>
-        </span>
+    <div class="ien-header-row flex items-center justify-between">
+      {% if home_only %}<div class="ien-header-brand">{% else %}<a href="{% url 'home' %}" class="ien-header-brand">{% endif %}
+        <img src="{% static_v 'img/ien-trabajo.png' %}" alt="ien trabajo" width="138" height="46">
       {% if home_only %}</div>{% else %}</a>{% endif %}
 
       {% if home_only %}
@@ -20,96 +13,61 @@
           Volver al inicio
         </a>
       {% else %}
-      <div class="ien-nav-desktop hidden md:flex items-center gap-7">
+      <div class="ien-nav-desktop hidden md:flex items-center">
         {% if user.is_authenticated and user.is_staff %}
           {% include 'nueva_ui/partials/_nav_admin.html' %}
         {% elif user.is_authenticated and user.oferente %}
           {% include 'nueva_ui/partials/_nav_empresa.html' %}
         {% else %}
-        <a href="{% url 'home' %}" class="nav-link text-sm font-medium transition-colors hover:text-[#512DA8] {% if vista_activa == 'inicio' %}text-[#512DA8]{% else %}text-[#6B645C]{% endif %}">Inicio</a>
+        <nav class="ien-header-links" aria-label="Navegación principal">
+          <a href="{% url 'home' %}" class="ien-header-link" {% if vista_activa == 'inicio' %}aria-current="page"{% endif %}>Inicio</a>
+          <a href="{% url 'cursos:listado' %}" class="ien-header-link" {% if vista_activa == 'cursos' %}aria-current="page"{% endif %}>Cursos</a>
+          {% if not user.is_authenticated or user.postulante %}
+            <a href="{% url 'buscar_empleo' %}" class="ien-header-link" {% if vista_activa == 'buscar' %}aria-current="page"{% endif %}>Buscar empleo</a>
+          {% endif %}
+        </nav>
 
-        <a href="{% url 'cursos:listado' %}" class="nav-link text-sm font-medium transition-colors hover:text-[#512DA8] {% if vista_activa == 'cursos' %}text-[#512DA8]{% else %}text-[#6B645C]{% endif %}">Cursos</a>
-
-        {% if not user.is_authenticated or user.postulante %}
-          <a href="{% url 'buscar_empleo' %}" class="nav-link text-sm font-medium transition-colors hover:text-[#512DA8] {% if vista_activa == 'buscar' %}text-[#512DA8]{% else %}text-[#6B645C]{% endif %}">Buscar empleo</a>
-        {% endif %}
-
-        {% comment %}
-          No va un enlace a crear_oferta: esa vista en GET hace redirect a
-          dashboard_empresa, asi que duplicaba Mi panel. Para publicar esta el
-          boton "Nueva oferta" dentro del panel, que abre el modal.
-        {% endcomment %}
-        {% if user.is_authenticated and user.oferente and user.oferente.puede_publicar %}
-          <a href="{% url 'dashboard_empresa' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Mi panel</a>
-          <a href="{% url 'editar_perfil_empresa' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Mi empresa</a>
-        {% endif %}
-
-        {% if user.is_authenticated and user.postulante %}
-          <a href="{% url 'mi_perfil' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Mi perfil</a>
-        {% endif %}
-
-        {% if user.is_staff %}
-          <a href="{% url 'mod_listar_empresas' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Empresas</a>
-          <a href="{% url 'mod_listar_ofertas' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Ofertas</a>
-          <a href="{% url 'mod_listar_cursos' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Gestionar cursos</a>
-          <a href="{% url 'mod_listar_categorias' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Habilidades</a>
-        {% endif %}
-
-        <div class="flex items-center gap-3">
+        <div class="ien-header-actions">
           {% if user.is_authenticated %}
-            <span class="chip">
-              {{ user.first_name|default:user.email }}
-              {% if user.is_staff %}· Staff{% elif user.oferente %}· Empresa{% else %}· Postulante{% endif %}
-            </span>
-            <form method="post" action="{% url 'logout' %}" class="form-logout">
-              {% csrf_token %}
-              <button type="submit" class="btn-ghost text-sm !py-2">Salir <span data-icon="log-out" class="h-4 w-4"></span></button>
-            </form>
+            {% include 'nueva_ui/partials/_nav_session.html' %}
           {% else %}
-            <a href="{% url 'registro' %}" class="text-sm font-medium text-[#6B645C] transition-colors hover:text-[#512DA8]">Crear cuenta</a>
-            <a href="{% url 'login' %}" class="btn-ien ml-2 text-sm !py-2">Ingresar <span data-icon="arrow-up-right" class="h-4 w-4"></span></a>
+            <a href="{% url 'registro' %}" class="ien-header-register">Crear cuenta</a>
+            <a href="{% url 'login' %}" class="btn-ien ien-header-login">Ingresar <span data-icon="arrow-up-right" class="h-4 w-4" aria-hidden="true"></span></a>
           {% endif %}
         </div>
         {% endif %}
       </div>
 
-      <button class="nav-burger md:hidden grid h-10 w-10 place-items-center rounded-xl border border-[rgba(110,85,55,0.16)] bg-white" aria-label="Abrir menú">
-        <span data-icon="menu" class="h-5 w-5"></span>
+      <button type="button" class="nav-burger md:hidden" aria-label="Menú principal" aria-expanded="false" aria-controls="global-nav-mobile">
+        <span data-icon="menu" class="h-5 w-5" aria-hidden="true"></span>
       </button>
       {% endif %}
     </div>
   </div>
 
   {% if not home_only %}
-  <div class="nav-mobile hidden border-t border-[rgba(110,85,55,0.16)] bg-[#F8F3F0] px-4 pb-6 pt-4 md:hidden">
+  <nav id="global-nav-mobile" aria-label="Navegación principal" class="nav-mobile hidden border-t border-[rgba(110,85,55,0.16)] px-4 pb-6 pt-3 md:hidden">
     <div class="flex flex-col gap-2">
       {% if user.is_authenticated and user.is_staff %}
         {% include 'nueva_ui/partials/_nav_admin.html' with mobile=True %}
       {% elif user.is_authenticated and user.oferente %}
         {% include 'nueva_ui/partials/_nav_empresa.html' with mobile=True %}
       {% else %}
-      <a href="{% url 'home' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Inicio</a>
-      <a href="{% url 'cursos:listado' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Cursos</a>
-      {% if not user.is_authenticated or user.postulante %}
-        <a href="{% url 'buscar_empleo' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Buscar empleo</a>
-      {% endif %}
-      {% if user.is_authenticated and user.oferente and user.oferente.puede_publicar %}
-        <a href="{% url 'dashboard_empresa' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Mi panel</a>
-      {% endif %}
-      {% if user.is_authenticated and user.postulante %}
-        <a href="{% url 'mi_perfil' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Mi perfil</a>
-      {% endif %}
-      {% if user.is_authenticated %}
-        <form method="post" action="{% url 'logout' %}" class="form-logout">
-          {% csrf_token %}
-          <button type="submit" class="btn-ghost w-full">Salir <span data-icon="log-out" class="h-4 w-4"></span></button>
-        </form>
-      {% else %}
-        <a href="{% url 'registro' %}" class="rounded-xl px-4 py-3 text-sm font-medium hover:bg-white">Crear cuenta</a>
-        <a href="{% url 'login' %}" class="btn-ien">Ingresar <span data-icon="arrow-up-right" class="h-4 w-4"></span></a>
-      {% endif %}
+        <a href="{% url 'home' %}" class="ien-header-link" {% if vista_activa == 'inicio' %}aria-current="page"{% endif %}>Inicio</a>
+        <a href="{% url 'cursos:listado' %}" class="ien-header-link" {% if vista_activa == 'cursos' %}aria-current="page"{% endif %}>Cursos</a>
+        {% if not user.is_authenticated or user.postulante %}
+          <a href="{% url 'buscar_empleo' %}" class="ien-header-link" {% if vista_activa == 'buscar' %}aria-current="page"{% endif %}>Buscar empleo</a>
+        {% endif %}
+        <div class="ien-header-actions">
+          {% if user.is_authenticated %}
+            {% include 'nueva_ui/partials/_nav_session.html' %}
+          {% else %}
+            <a href="{% url 'registro' %}" class="ien-header-register">Crear cuenta</a>
+            <a href="{% url 'login' %}" class="btn-ien ien-header-login">Ingresar <span data-icon="arrow-up-right" class="h-4 w-4" aria-hidden="true"></span></a>
+          {% endif %}
+        </div>
       {% endif %}
     </div>
-  </div>
+  </nav>
   {% endif %}
 </header>

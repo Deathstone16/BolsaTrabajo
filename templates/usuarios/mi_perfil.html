@@ -4,172 +4,139 @@
 
 {% block title %}Mi CV y análisis · IEN Empleo{% endblock %}
 
+{% block cv_background_progress %}{% endblock %}
+
 {% block content %}
 <div class="ien-design-cv min-h-screen bg-[#F8F3F0] py-6 sm:py-8">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="ien-cv-layout">
-      <div class="ien-cv-content min-w-0" id="cv-analysis">
+    <div class="ien-cv-layout ien-cv-layout--manage">
+      {% include "usuarios/_sidebar_postulante.html" with seccion="cv" %}
+
+      <div class="ien-cv-content min-w-0" id="cv-analysis"
+           data-cv-state="{% if not version_cv_actual %}sin-cv{% elif ultimo_analisis.estado == 'pendiente' %}pendiente{% elif ultimo_analisis.estado == 'error' %}error{% elif perfil_cv or ultimo_analisis.estado == 'completado' %}completado{% else %}sin-analisis{% endif %}">
         <header>
           {% include "nueva_ui/partials/_breadcrumbs.html" with current="Mi CV" %}
           <h1 class="mt-2 text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">Mi CV y análisis</h1>
-          <p class="ien-cv-intro">Tu experiencia es el punto de partida. Cargá tu CV y descubrí tus habilidades.</p>
+          <p id="cv-analysis-description" class="ien-cv-intro">Cargá tu CV, revisá su estado y consultá tu perfil profesional.</p>
         </header>
 
         <section id="perfil-siguiente-paso" class="panel ien-profile-next ien-cv-card mt-5" aria-labelledby="siguiente-paso-titulo">
           {% if version_cv_actual %}
-            <h2 id="siguiente-paso-titulo" class="mb-4 text-lg font-semibold">Tu CV cargado</h2>
-            <div class="flex flex-wrap items-center justify-between gap-4">
-              <div class="flex min-w-0 items-center gap-4">
-                <div class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#512DA8]/10">
-                  <span data-icon="file-text" class="h-6 w-6 text-[#512DA8]"></span>
+            <div class="ien-cv-file-row">
+              <div class="ien-cv-file-info">
+                <div class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#512DA8]/10" aria-hidden="true">
+                  <span data-icon="file-text" class="h-5 w-5 text-[#512DA8]"></span>
                 </div>
                 <div class="min-w-0">
-                  <p class="ien-cv-filename text-sm font-semibold text-[#26222E]">{{ version_cv_actual.nombre_original }}</p>
-                  <p class="font-mono text-xs text-[#6B645C]">Versión {{ version_cv_actual.numero }} · {{ version_cv_actual.formato|upper }}</p>
-                  {% if postulante.cv_fecha_carga %}
-                    <p class="font-mono text-xs text-[#6B645C]">
-                      Cargado el {{ postulante.cv_fecha_carga|date:"d/m/Y" }} a las {{ postulante.cv_fecha_carga|date:"H:i" }}
-                    </p>
-                  {% endif %}
+                  <h2 id="siguiente-paso-titulo" class="ien-cv-filename text-sm font-semibold text-[#26222E]">{{ version_cv_actual.nombre_original }}</h2>
+                  <p class="text-xs text-[#6B645C]">
+                    Versión {{ version_cv_actual.numero }} · {{ version_cv_actual.formato|upper }}
+                    · {{ version_cv_actual.creado_en|date:"d/m/Y" }}
+                  </p>
                 </div>
               </div>
-              <div class="flex flex-wrap items-center gap-2">
-                {% comment %}
-                  Los ids y data-* del formulario los usa cv_upload.js.
-                {% endcomment %}
-                <form method="post"
-                      action="{% url 'ia:solicitar_analisis' %}"
-                      class="inline"
-                      id="form-analizar-cv"
-                      data-estado-url="{% url 'ia:estado_analisis' 0 %}"
-                      data-ultimo-analisis-id="{% if ultimo_analisis %}{{ ultimo_analisis.id }}{% endif %}"
-                      data-ultimo-analisis-estado="{% if ultimo_analisis %}{{ ultimo_analisis.estado }}{% endif %}"
-                      data-version-cv-id="{{ version_cv_actual.pk }}">
-                  {% csrf_token %}
-                  <button type="submit" aria-describedby="cv-analysis-description" class="btn-ien !py-2 text-sm">
-                    <span data-icon="sparkles" class="h-4 w-4" aria-hidden="true"></span> Analizar CV
-                  </button>
-                </form>
-                <a id="boton-ver-perfil"
-                   href="{% url 'ia:perfil_profesional' %}"
-                   class="btn-ghost !py-2 text-sm"{% if not perfil_cv %} style="display:none"{% endif %}>
-                  Ver mi perfil profesional
-                </a>
+              <div class="ien-cv-file-actions">
+                <span class="chip ien-cv-state-chip">
+                  <span data-cv-status="sin-analisis">Sin analizar</span>
+                  <span data-cv-status="pendiente">En análisis</span>
+                  <span data-cv-status="completado">Listo</span>
+                  <span data-cv-status="error">Error de análisis</span>
+                </span>
+                <details class="ien-cv-file-menu">
+                  <summary aria-label="Acciones del CV" title="Acciones del CV">···</summary>
+                  <div class="ien-cv-file-menu-content">
+                    {% include "usuarios/_cv_upload_form.html" %}
+                    <a href="{% url 'descargar_cv' version_cv_actual.pk %}" class="ien-cv-menu-action">Descargar CV</a>
+                    <form method="post" action="{% url 'eliminar_cv' %}" id="form-eliminar-cv">
+                      {% csrf_token %}
+                      <button type="submit" class="ien-cv-menu-action ien-cv-menu-delete">Eliminar CV</button>
+                    </form>
+                  </div>
+                </details>
               </div>
             </div>
-            <div id="analisis-estado"
-                 class="ien-cv-analysis-status mt-4 overflow-hidden {% if not ultimo_analisis or ultimo_analisis.estado != 'pendiente' %}hidden{% endif %}"
-                 role="status" aria-live="polite">
-              <div class="flex items-start gap-4 p-5">
-                <div data-analisis-icono class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#512DA8]/10 text-[#512DA8]">
-                  <svg class="ic h-5 w-5 animate-spin" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.2-8.56"></path></svg>
-                </div>
-                <div class="min-w-0 flex-1">
-                  <p data-analisis-titulo class="font-semibold text-[#26222E]">Analizando tu CV…</p>
-                  <p data-analisis-mensaje class="mt-1 text-sm text-[#6B645C]">Puede tardar varios minutos según la disponibilidad del servicio.</p>
-                </div>
-              </div>
-              <div data-analisis-barra class="barra-indeterminada" aria-hidden="true"><span></span></div>
-            </div>
 
-          {% else %}
-            <h2 id="siguiente-paso-titulo" class="text-lg font-semibold">Empezá por cargar tu CV</h2>
-            <p class="mt-1 text-sm leading-relaxed text-[#6B645C]">Subí tu archivo para poder analizar tus habilidades y experiencia.</p>
-          {% endif %}
-
-          <form method="post" enctype="multipart/form-data" action="{% url 'mi_perfil' %}" id="form-cv-upload" class="mt-4{% if version_cv_actual %} ien-cv-replace{% endif %}">
-            {% csrf_token %}
-            <div id="cv-upload-area">
-              <span data-icon="upload" class="ien-cv-upload-icon" aria-hidden="true"></span>
-              {% if version_cv_actual %}
-                <h3 class="font-semibold text-[#26222E]">Actualizar CV</h3>
-                <p class="mb-2 text-sm text-[#6B645C]">El nuevo archivo reemplazará tu CV actual.</p>
-              {% else %}
-                <p class="ien-cv-file-heading">Elegí el archivo de tu CV</p>
-                <p class="ien-cv-file-description">Al seleccionarlo, se carga y queda guardado en tu perfil.</p>
-              {% endif %}
-              <div data-cv-native-upload>
-                <label class="sr-only" for="cv-input">Archivo de CV</label>
-                <input type="file" id="cv-input" name="cv" class="block max-w-full text-sm" aria-describedby="cv-file-formats"
-                       accept="{% for formato in cv_formatos %}.{{ formato }}{% if not forloop.last %},{% endif %}{% endfor %}" required>
-                <button type="submit" class="{% if version_cv_actual %}btn-ghost{% else %}btn-ien{% endif %} mt-3 !py-2 text-sm">{% if version_cv_actual %}Actualizar CV{% else %}Cargar CV{% endif %}</button>
-              </div>
-              <div class="ien-cv-actions">
-                <button type="button" data-cv-file-picker hidden aria-describedby="cv-file-formats" class="{% if version_cv_actual %}btn-ghost{% else %}btn-ien{% endif %} !py-2 text-sm">
-                  <span data-icon="upload" class="h-4 w-4" aria-hidden="true"></span>
-                  {% if version_cv_actual %}Seleccionar nuevo CV{% else %}Seleccionar archivo{% endif %}
-                </button>
-                <div id="cv-file-formats" class="ien-cv-formats">
-                  {% for formato in cv_formatos %}<span class="chip">{{ formato|upper }}</span>{% endfor %}
-                  <span class="chip">Máx. 5 MiB</span>
-                </div>
-              </div>
-            </div>
-          </form>
-
-          {% if version_cv_actual %}
-            <div class="mt-3 ien-cv-actions">
-              <a href="{% url 'descargar_cv' version_cv_actual.pk %}" class="ien-cv-link text-sm">
-                Descargar CV
-              </a>
-              <form method="post" action="{% url 'eliminar_cv' %}" id="form-eliminar-cv">
+            <div class="ien-cv-primary mt-4">
+              <form method="post"
+                    action="{% url 'ia:solicitar_analisis' %}"
+                    id="form-analizar-cv"
+                    data-estado-url="{% url 'ia:estado_analisis' 0 %}"
+                    data-ultimo-analisis-id="{% if ultimo_analisis %}{{ ultimo_analisis.id }}{% endif %}"
+                    data-ultimo-analisis-estado="{% if ultimo_analisis %}{{ ultimo_analisis.estado }}{% endif %}"
+                    data-version-cv-id="{{ version_cv_actual.pk }}">
                 {% csrf_token %}
-                <button type="submit"
-                        class="ien-cv-link text-sm">
-                  Eliminar CV
+                <button type="submit" aria-describedby="cv-analysis-description" class="btn-ien !py-2 text-sm">
+                  <span data-icon="sparkles" class="h-4 w-4" aria-hidden="true"></span>
+                  <span data-cv-analyze-label>Analizar CV</span>
+                  <span data-cv-retry-label>Reintentar</span>
                 </button>
               </form>
+              <a id="boton-ver-perfil" href="{% url 'ia:perfil_profesional' %}" class="btn-ien !py-2 text-sm">
+                Ver mi perfil profesional
+              </a>
+            </div>
+            <div id="analisis-estado"
+                 class="ien-cv-analysis-status mt-4 overflow-hidden {% if ultimo_analisis.estado != 'pendiente' and ultimo_analisis.estado != 'error' %}hidden{% endif %}"
+                 data-analysis-state="{% if ultimo_analisis.estado == 'pendiente' or ultimo_analisis.estado == 'error' %}{{ ultimo_analisis.estado }}{% endif %}"
+                 role="status" aria-live="polite">
+              <div class="ien-cv-analysis-content flex items-start gap-4 p-5">
+                {% include 'nueva_ui/partials/_cv_thinking_mark.html' only %}
+                <div data-analisis-icono aria-hidden="true"></div>
+                <div class="min-w-0 flex-1">
+                  <p data-analisis-titulo class="font-semibold text-[#26222E]">{% if ultimo_analisis.estado == 'error' %}No se pudo analizar el CV{% else %}Analizando tu CV…{% endif %}</p>
+                  <p data-analisis-mensaje class="mt-1 text-sm text-[#6B645C]">{% if ultimo_analisis.estado == 'error' %}Podés volver a intentarlo.{% else %}Podés seguir navegando. Te avisamos cuando termine.{% endif %}</p>
+                </div>
+              </div>
+            </div>
+          {% else %}
+            <div class="ien-cv-dropzone">
+              <span data-icon="upload" class="ien-cv-dropzone-icon" aria-hidden="true"></span>
+              <h2 id="siguiente-paso-titulo" class="text-lg font-semibold">Empezá por cargar tu CV</h2>
+              <p class="text-sm text-[#6B645C]">Arrastrá el archivo acá o elegilo desde tu dispositivo.</p>
+              {% include "usuarios/_cv_upload_form.html" %}
             </div>
           {% endif %}
 
           <div id="cv-feedback" class="mt-4 hidden" role="status"></div>
-          <p id="cv-analysis-description" class="ien-cv-help text-sm leading-relaxed">
-            El análisis identifica tus habilidades y experiencia. Para ver tu compatibilidad con un puesto, elegí “Calcular compatibilidad” en el detalle de la oferta.
-            <a href="{% url 'buscar_empleo' %}" class="ien-cv-link">Ver empleos</a>
-          </p>
         </section>
 
-        {% if perfil_cv and perfil_cv.estado == 'ready' %}
-          <section class="panel ien-cv-card mt-5" aria-labelledby="cv-summary-title">
-            <h2 id="cv-summary-title" class="mb-4 text-lg font-semibold">Resumen del análisis</h2>
-            <div data-profile-skills>
-              <div class="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p class="text-sm font-semibold text-[#26222E]">Perfil para compatibilidad</p>
-                  <p class="mt-1 text-sm text-[#6B645C]">Versión {{ perfil_cv.version }} · actualizado {{ perfil_cv.actualizado_en|date:"d/m/Y H:i" }}</p>
-                  {% if resumen_profesional %}<p class="mt-3 max-w-2xl text-sm text-[#6B645C]">{{ resumen_profesional|human_text }}</p>{% endif %}
-                  <div class="mt-5" id="habilidades-blandas-perfil">
-                    <p class="text-sm font-semibold text-emerald-700">Habilidades blandas detectadas</p>
-                    <div class="mt-2 flex flex-wrap gap-2">
-                      {% for habilidad in habilidades_blandas %}
-                        <span class="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">{{ habilidad.name|human_text }}</span>
-                      {% empty %}<p class="text-sm text-[#6B645C]">Todavía no se detectaron habilidades blandas respaldadas por el CV.</p>{% endfor %}
-                    </div>
+        {% if version_cv_actual %}
+          <details class="panel ien-cv-card ien-cv-optional ien-cv-result mt-5">
+            <summary id="cv-summary-title">Resumen del análisis</summary>
+            {% if perfil_cv.estado == 'ready' %}
+              {% with contenido=perfil_cv.contenido %}
+                <div data-profile-skills class="mt-4">
+                  <p class="text-sm font-semibold">Habilidades detectadas</p>
+                  <div class="mt-2 flex flex-wrap gap-2" id="habilidades-blandas-perfil">
+                    {% for habilidad in contenido.skills|slice:":8" %}
+                      <span class="chip">{{ habilidad.name|human_text }}</span>
+                    {% empty %}
+                      <p class="text-sm text-[#6B645C]">Todavía no hay habilidades registradas.</p>
+                    {% endfor %}
                   </div>
+                  <dl class="ien-cv-result-counts mt-4">
+                    <div><dt>Experiencias laborales</dt><dd>{{ contenido.work_experience|length }}</dd></div>
+                    <div><dt>Estudios</dt><dd>{{ contenido.education|academic_education|length }}</dd></div>
+                  </dl>
                 </div>
-                <a class="btn-ghost !py-2 text-sm" href="{% url 'ia:editar_perfil_cv' %}">Editar información</a>
-              </div>
+                <a class="ien-cv-link text-sm" href="{% url 'ia:editar_perfil_cv' %}">Editar información</a>
+              {% endwith %}
+            {% elif perfil_cv.estado == 'processing' %}
+              <p class="mt-3 text-sm text-[#6B645C]">Estamos actualizando tu perfil para compatibilidad.</p>
+            {% elif perfil_cv.estado == 'error' %}
+              <p class="mt-3 text-sm text-[#6B645C]">No pudimos actualizar tu perfil.</p>
+              <a class="ien-cv-link text-sm" href="{% url 'ia:editar_perfil_cv' %}">Editar información</a>
+            {% endif %}
+            <div class="mt-3">
+              <button type="submit" form="form-analizar-cv" class="ien-cv-link text-sm">Volver a analizar CV</button>
             </div>
-            {% include "ia/_projects.html" with projects=perfil_cv.contenido.projects only %}
-            {% include "ia/_education.html" with education=perfil_cv.contenido.education only %}
-          </section>
-        {% elif perfil_cv and perfil_cv.estado == 'processing' %}
-          <div class="panel mt-5 p-5" role="status">
-            <p class="text-sm font-semibold text-[#26222E]">Actualizando tu perfil para compatibilidad</p>
-            <p class="mt-1 text-sm text-[#6B645C]">Estamos normalizando tu edición. Podés seguir usando la plataforma mientras termina.</p>
-          </div>
-        {% elif perfil_cv and perfil_cv.estado == 'error' %}
-          <div class="panel mt-5 p-5">
-            <p class="text-sm font-semibold text-[#26222E]">No pudimos actualizar el perfil</p>
-            <p class="mt-1 text-sm text-[#6B645C]">Podés revisar la información y enviarla nuevamente.</p>
-            <a class="btn-ghost mt-4 !py-2 text-sm" href="{% url 'ia:editar_perfil_cv' %}">Editar información</a>
-          </div>
+          </details>
         {% endif %}
 
         {% with historial=postulante.versiones_cv.all %}
           {% if historial|length > 1 or historial and not version_cv_actual %}
-            <section class="panel ien-cv-card mt-5" aria-labelledby="cv-history-title">
-              <h2 id="cv-history-title" class="font-semibold">Historial privado de CV</h2>
+            <details class="panel ien-cv-card ien-cv-optional mt-5">
+              <summary id="cv-history-title">Historial privado de CV</summary>
               <ul class="mt-3 space-y-2">
                 {% for version in historial %}
                   {% if not version_cv_actual or version.pk != version_cv_actual.pk %}
@@ -180,39 +147,11 @@
                   {% endif %}
                 {% endfor %}
               </ul>
-            </section>
+            </details>
           {% endif %}
         {% endwith %}
-
-        <section class="mt-6" aria-labelledby="ien-cv-benefits-title">
-          <h2 id="ien-cv-benefits-title" class="text-xl font-bold tracking-tight text-[#26222E]">¿Por qué IEN Empleo?</h2>
-          <div class="ien-cv-benefits-grid mt-4">
-            <div class="panel p-5">
-              <div class="grid h-11 w-11 place-items-center rounded-2xl bg-[#512DA8]/10">
-                <span data-icon="shield" class="h-5 w-5 text-[#512DA8]"></span>
-              </div>
-              <h3 class="mt-3 font-semibold text-[#26222E]">Privacidad total</h3>
-              <p class="mt-1 text-sm leading-relaxed text-[#6B645C]">Tus datos están protegidos y solo vos decidís quién puede ver tu CV.</p>
-            </div>
-            <div class="panel p-5">
-              <div class="grid h-11 w-11 place-items-center rounded-2xl bg-[#512DA8]/10">
-                <span data-icon="trending-up" class="h-5 w-5 text-[#512DA8]"></span>
-              </div>
-              <h3 class="mt-3 font-semibold text-[#26222E]">Análisis de habilidades</h3>
-              <p class="mt-1 text-sm leading-relaxed text-[#6B645C]">Identificamos tus fortalezas y las comparamos con el mercado actual.</p>
-            </div>
-            <div class="panel p-5">
-              <div class="grid h-11 w-11 place-items-center rounded-2xl bg-[#512DA8]/10">
-                <span data-icon="sparkles" class="h-5 w-5 text-[#512DA8]"></span>
-              </div>
-              <h3 class="mt-3 font-semibold text-[#26222E]">Matching inteligente</h3>
-              <p class="mt-1 text-sm leading-relaxed text-[#6B645C]">Recibí ofertas personalizadas basadas en tu experiencia real.</p>
-            </div>
-          </div>
-        </section>
       </div>
 
-      {% include "usuarios/_sidebar_postulante.html" with seccion="cv" %}
     </div>
   </div>
 </div>

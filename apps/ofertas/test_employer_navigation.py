@@ -24,7 +24,7 @@ class NavegacionOferenteTests(TestCase):
         user = Usuario.objects.create_user(email='menu@example.com')
         Oferente.objects.create(usuario=user, nombre_empresa='Empresa de prueba',
                                cuit='30-12345678-1', estado_validacion=estado,
-                               contacto_nombre='Responsable Demo')
+                               contacto_nombre='Responsable Demo', contacto_cargo='RRHH', correo_publico='rrhh@example.com')
         return user
 
     def test_menu_aprobado_tiene_las_mismas_acciones_en_escritorio_y_movil(self):
@@ -68,11 +68,12 @@ class NavegacionOferenteTests(TestCase):
         self.assertContains(con_oferta, 'Nueva oferta')
         self.assertNotContains(con_oferta, 'Publicar primera oferta')
 
-    def test_empresa_aprobada_legacy_sin_responsable_debe_completar_perfil(self):
+    def test_empresa_aprobada_con_responsable_incompleto_debe_editar_perfil(self):
         user = Usuario.objects.create_user(email='legacy-sin-responsable@example.com')
         Oferente.objects.create(
             usuario=user, nombre_empresa='Empresa legacy', cuit='30-12345678-1',
             estado_validacion=Oferente.EstadoValidacion.APROBADO,
+            contacto_nombre='Responsable de prueba',
         )
         self.client.force_login(user)
 
@@ -86,9 +87,17 @@ class NavegacionOferenteTests(TestCase):
         self.assertIn('>Cursos</a>', anonymous)
         self.assertIn('>Buscar empleo</a>', anonymous)
         self.assertNotIn('ien-employer-nav', anonymous)
-        user = Usuario.objects.create_user(email='postulante-menu@example.com')
+        user = Usuario.objects.create_user(email='postulante-menu@example.com', first_name='Benjamín')
         Postulante.objects.create(usuario=user)
         candidate = self.render_nav(user, '/')
-        self.assertIn('>Mi perfil</a>', candidate)
+        self.assertEqual(candidate.count('> Mi perfil</a>'), 2)
+        self.assertEqual(candidate.count('> Favoritos</a>'), 2)
         self.assertIn('>Cursos</a>', candidate)
         self.assertNotIn('ien-employer-nav', candidate)
+        self.assertIn('/img/ien-trabajo', candidate)
+        self.assertIn('alt="ien trabajo"', candidate)
+        self.assertNotIn('>Postulante<', candidate)
+        self.assertEqual(candidate.count('aria-label="Menú de mi cuenta"'), 2)
+        self.assertEqual(candidate.count('> Cerrar sesión</button>'), 2)
+        self.assertIn('class="ien-header-user-name">Benjamín</span>', candidate)
+        self.assertNotIn('Bolsa de trabajo · Chaco', candidate)

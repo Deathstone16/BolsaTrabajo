@@ -20,13 +20,16 @@ from .reminders import enviar_recordatorios_empresas
 class RecordatoriosEmpresasTests(TestCase):
     def empresa(self, nombre='Empresa de prueba'):
         user = Usuario.objects.create_user(email=f'empresa-{Usuario.objects.count()}@example.com')
-        return Oferente.objects.create(usuario=user, nombre_empresa=nombre, cuit='30-12345678-1', contacto_nombre='Responsable Demo')
+        return Oferente.objects.create(usuario=user, nombre_empresa=nombre, cuit='30-12345678-1', contacto_nombre='Responsable Demo', contacto_cargo='RRHH', correo_publico='rrhh@example.com')
 
     def vencer(self, empresa):
         SolicitudEmpresa.objects.filter(empresa=empresa).update(recordar_desde=timezone.now() - timedelta(minutes=1))
 
     def test_registro_crea_alerta_sin_enviar_correo_ni_duplicar_al_guardar(self):
-        user = usuarios_services.registrar_oferente('nueva@example.com', 'clave', 'Nueva', '30-12345678-1', 'Responsable Demo')
+        user = usuarios_services.registrar_oferente(
+            'nueva@example.com', 'clave', 'Nueva', '30-12345678-1',
+            'Responsable Demo', 'RRHH', 'rrhh@example.com',
+        )
         solicitud = SolicitudEmpresa.objects.get(empresa=user.oferente)
         self.assertAlmostEqual((solicitud.recordar_desde - solicitud.creada_en).total_seconds(), 86400, delta=2)
         user.oferente.save()

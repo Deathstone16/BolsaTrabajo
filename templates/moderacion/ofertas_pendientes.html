@@ -18,7 +18,7 @@
             class="w-full pl-9 pr-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
     </div>
     <div class="relative">
-    <span data-icon="filter" class="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"></span>
+    <span data-icon="filter" class="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"></span>
     <select id="filtro-estado" onchange="window.location.href=this.value"
             class="pl-9 pr-8 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none">
         <option value="{% url 'mod_listar_ofertas' %}" {% if not filtro_actual %}selected{% endif %}>Todos los estados</option>

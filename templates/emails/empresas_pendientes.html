@@ -1,7 +1,8 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><title>Empresas pendientes · IEN Empleo</title></head>
 <body style="margin:0;background:#F8F3F0;font-family:Arial,sans-serif;color:#26222E;padding:32px 16px;">
 <table role="presentation" style="width:100%;max-width:580px;margin:auto;background:#FEFCF9;border:1px solid #e8ded4;border-radius:16px;"><tr><td style="padding:32px;">
-<p style="color:#512DA8;font-weight:bold;">IEN Empleo</p><h1 style="font-size:24px;">Empresas pendientes de revisión</h1>
+{% include 'emails/_logo.html' only %}
+<h1 style="font-size:24px;">Empresas pendientes de revisión</h1>
 <p style="line-height:1.7;">Hay {{ cantidad }} solicitud{{ cantidad|pluralize:'es' }} pendientes desde hace al menos {{ horas }} horas. Podés revisarlas cuando retomes la gestión.</p>
 <ul style="padding-left:20px;line-height:1.8;">{% for solicitud in solicitudes %}<li><strong>{{ solicitud.empresa.nombre_empresa }}</strong> · {{ solicitud.creada_en|date:'d/m/Y H:i' }}</li>{% endfor %}</ul>
 <p style="margin:28px 0;"><a href="{{ review_url }}" style="display:inline-block;padding:14px 20px;background:#512DA8;border-radius:10px;color:white;text-decoration:none;">Revisar solicitudes</a></p>

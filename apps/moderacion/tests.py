@@ -29,6 +29,7 @@ class ModeracionOfertasTests(TestCase):
             cuit='30-12345678-9',
             estado_validacion=Oferente.EstadoValidacion.APROBADO,
             contacto_nombre='Responsable Demo',
+            contacto_cargo='RRHH', correo_publico='rrhh@example.com',
         )
         categoria = Categoria.objects.create(nombre='Tecnología')
         self.oferta = Oferta.objects.create(
@@ -140,6 +141,7 @@ class ModeracionOfertasTests(TestCase):
         usuario = Usuario.objects.create_user(email='pendiente@example.com', password='clave-segura')
         empresa = Oferente.objects.create(
             usuario=usuario, nombre_empresa='Empresa pendiente', cuit='30-12345678-9', contacto_nombre='Responsable Demo',
+            contacto_cargo='RRHH', correo_publico='rrhh@example.com',
         )
         self.client.force_login(self.staff)
         url = reverse('mod_aprobar_empresa', args=[empresa.pk])
@@ -182,6 +184,7 @@ class ModeracionOfertasTests(TestCase):
         usuario = Usuario.objects.create_user(email='sin-smtp@example.com', password='clave-segura')
         empresa = Oferente.objects.create(
             usuario=usuario, nombre_empresa='Empresa sin SMTP', cuit='30-12345678-9', contacto_nombre='Responsable Demo',
+            contacto_cargo='RRHH', correo_publico='rrhh@example.com',
         )
         self.client.force_login(self.staff)
         url = reverse('mod_aprobar_empresa', args=[empresa.pk])
@@ -204,6 +207,7 @@ class ModeracionOfertasTests(TestCase):
         usuario = Usuario.objects.create_user(email='admin-empresa@example.com', password='clave-segura')
         empresa = Oferente.objects.create(
             usuario=usuario, nombre_empresa='Empresa administrada', cuit='30-12345678-9', contacto_nombre='Responsable Demo',
+            contacto_cargo='RRHH', correo_publico='rrhh@example.com',
         )
         request = RequestFactory().post('/admin/usuarios/oferente/')
         request.user = self.staff

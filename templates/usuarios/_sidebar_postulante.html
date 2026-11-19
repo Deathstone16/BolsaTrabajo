@@ -1,5 +1,5 @@
 {# Navegación compartida de las pantallas del postulante. #}
-<aside class="ien-postulante-sidebar">
+<aside class="ien-postulante-sidebar{% if seccion == 'cv' %} ien-cv-sidebar{% endif %}">
   <div class="panel ien-postulante-sidebar-panel sticky top-28 p-6">
     <div class="ien-postulante-sidebar-identity">
       {% with foto_perfil=request.user.postulante.foto %}

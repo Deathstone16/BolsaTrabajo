@@ -124,16 +124,18 @@ class Oferente(models.Model):
         return bool((self.contacto_nombre or '').strip())
 
     @property
+    def responsable_completo(self):
+        return self.tiene_responsable and bool(self.contacto_cargo.strip() and self.correo_publico.strip())
+
+    @property
     def puede_publicar(self):
-        """Exige aprobación institucional y un responsable identificable."""
-        return self.estado_obj.puede_publicar() and self.tiene_responsable
+        """Exige aprobación institucional y los datos completos del responsable."""
+        return self.estado_obj.puede_publicar() and self.responsable_completo
 
     def aprobar(self):
         """Aprueba la empresa cambiando estado a aprobado."""
-        if not self.tiene_responsable:
-            raise ValidationError({
-                'contacto_nombre': 'La empresa debe indicar un responsable antes de ser aprobada.'
-            })
+        if not self.responsable_completo:
+            raise ValidationError('Completá el nombre, el cargo y el correo de contacto del responsable.')
         self.estado_validacion = self.EstadoValidacion.APROBADO
         self.save(update_fields=['estado_validacion'])
 

@@ -75,8 +75,8 @@ def oferente_validado_required(view_func):
     @wraps(view_func)
     def _wrapped(request, *args, **kwargs):
         oferente = request.user.oferente
-        if oferente.estado_validacion == oferente.EstadoValidacion.APROBADO and not oferente.tiene_responsable:
-            messages.warning(request, 'Completá el nombre de la persona responsable antes de publicar ofertas.')
+        if oferente.estado_validacion == oferente.EstadoValidacion.APROBADO and not oferente.responsable_completo:
+            messages.warning(request, 'Completá el nombre, el cargo y el correo de contacto del responsable antes de publicar ofertas.')
             return redirect('editar_perfil_empresa')
         if not oferente.puede_publicar:
             return redirect("validacion_pendiente")

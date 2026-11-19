@@ -30,7 +30,7 @@ class RegistroOferenteTests(TestCase):
         response = self.client.get(reverse('registro_exitoso') + '?tipo=oferente')
         cabecera = response.content.decode().split('<header', 1)[1].split('</header>', 1)[0]
 
-        self.assertIn('IEN Empleo', cabecera)
+        self.assertIn('ien trabajo', cabecera)
         self.assertIn('Volver al inicio', cabecera)
         self.assertEqual(cabecera.count('href='), 1)
         self.assertNotIn('Abrir menú', cabecera)
@@ -63,6 +63,7 @@ class CuitValidatorTests(TestCase):
             'cuit': '20123456786',
             'contacto_nombre': 'María Pérez',
             'contacto_cargo': 'Recursos Humanos',
+            'correo_publico': 'rrhh@example.com',
             'email': 'empresa-cuit@example.com',
             'password1': 'Clave-segura-123!',
             'password2': 'Clave-segura-123!',
@@ -84,6 +85,8 @@ class CuitValidatorTests(TestCase):
 
         self.assertFalse(form.is_valid())
         self.assertIn('contacto_nombre', form.errors)
+        self.assertIn('contacto_cargo', form.errors)
+        self.assertIn('correo_publico', form.errors)
 
 
 class CVAndImageUploadValidationTests(SimpleTestCase):

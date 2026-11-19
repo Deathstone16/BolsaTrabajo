@@ -10,6 +10,7 @@ from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.conf import settings
 from django.core.mail import send_mail
+from django.core.validators import validate_email
 from django.db import transaction
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -73,18 +74,22 @@ def registrar_postulante(email, password, first_name, last_name):
     return user
 
 @transaction.atomic
-def registrar_oferente(email, password, nombre_empresa, cuit, contacto_nombre, contacto_cargo=''):
+def registrar_oferente(email, password, nombre_empresa, cuit, contacto_nombre, contacto_cargo, correo_publico):
     """Registra un nuevo usuario y le crea un perfil de Oferente (empresa)."""
     contacto_nombre = (contacto_nombre or '').strip()
-    if not contacto_nombre:
-        raise ValidationError('La empresa debe indicar una persona responsable.')
+    contacto_cargo = (contacto_cargo or '').strip()
+    correo_publico = (correo_publico or '').strip()
+    if not contacto_nombre or not contacto_cargo:
+        raise ValidationError('Indicá el nombre y el cargo de la persona responsable.')
+    validate_email(correo_publico)
     user = Usuario.objects.create_user(email=email, password=password)
     Oferente.objects.create(
         usuario=user,
         nombre_empresa=nombre_empresa,
         cuit=cuit,
         contacto_nombre=contacto_nombre,
-        contacto_cargo=(contacto_cargo or '').strip(),
+        contacto_cargo=contacto_cargo,
+        correo_publico=correo_publico,
     )
     return user
 

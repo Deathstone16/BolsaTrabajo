@@ -40,6 +40,7 @@ class FlujosIntegracionRamasTests(TestCase):
             {
                 'nombre_empresa': 'Empresa de prueba',
                 'contacto_nombre': 'Responsable de prueba',
+                'contacto_cargo': 'RRHH', 'correo_publico': 'rrhh@example.com',
                 'cuit': '20-12345678-6',
                 'email': 'empresa-integracion@example.com',
                 'password1': 'Clave-segura-123!',
@@ -87,6 +88,9 @@ class FlujosIntegracionRamasTests(TestCase):
         self.assertContains(response, 'js/cv_upload.js')
         self.assertContains(response, 'id="perfil-siguiente-paso"', count=1)
         self.assertContains(response, 'Empezá por cargar tu CV')
+        self.assertContains(response, 'data-cv-state="sin-cv"')
+        self.assertContains(response, 'class="ien-cv-dropzone"')
+        self.assertNotContains(response, 'class="ien-cv-file-menu"')
 
     def test_analisis_pendiente_tiene_indicador_global_solo_para_su_propietario(self):
         usuario, postulante = self.crear_postulante()
@@ -98,12 +102,24 @@ class FlujosIntegracionRamasTests(TestCase):
         postulante.save(update_fields=['cv_version_actual'])
         analysis = AnalisisCV.objects.create(postulante=postulante, version_cv=version)
         self.client.force_login(usuario)
-        for url in (reverse('home'), reverse('buscar_empleo'), reverse('mi_perfil')):
+        for url in (reverse('home'), reverse('buscar_empleo')):
             response = self.client.get(url)
             self.assertEqual(response.context['cv_pending_analysis_id'], analysis.pk)
-            self.assertContains(response, 'id="cv-analysis-global"')
+            self.assertContains(response, 'id="cv-analysis-global"', count=1)
             self.assertContains(response, 'Podés seguir navegando. Te avisaremos cuando esté listo.')
             self.assertContains(response, f'data-user-id="{usuario.pk}"')
+            self.assertContains(response, 'ien-cv-thinking-mark--bloom', count=1)
+            if url == reverse('home'):
+                html = response.content.decode()
+                self.assertLess(html.index('class="ien-home-section ien-home-hero-section"'), html.index('id="cv-analysis-global"'))
+                self.assertLess(html.index('id="cv-analysis-global"'), html.index('<h1 id="inicio-titulo"'))
+        response = self.client.get(reverse('mi_perfil'))
+        self.assertEqual(response.context['cv_pending_analysis_id'], analysis.pk)
+        self.assertNotContains(response, 'id="cv-analysis-global"')
+        self.assertContains(response, 'id="analisis-estado"')
+        self.assertContains(response, 'id="cv-notifications-config"')
+        self.assertContains(response, 'ien-cv-thinking-mark--bloom', count=1)
+        self.assertContains(response, 'data-cv-state="pendiente"')
         other, _ = self.crear_postulante('otro-progreso@example.com')
         self.client.force_login(other)
         self.assertEqual(self.client.get(reverse('home')).context['cv_pending_analysis_id'], '')
@@ -125,7 +141,18 @@ class FlujosIntegracionRamasTests(TestCase):
         self.assertContains(response, 'CV de prueba.pdf')
         self.assertContains(response, 'id="form-analizar-cv"')
         self.assertContains(response, 'id="form-cv-upload"')
+        self.assertContains(response, 'data-cv-state="sin-analisis"')
+        self.assertContains(response, 'class="ien-cv-file-menu"')
+        self.assertNotContains(response, 'class="ien-cv-dropzone"')
         self.assertNotContains(response, 'Empezá por cargar tu CV')
+
+        for estado in (AnalisisCV.Estado.COMPLETADO, AnalisisCV.Estado.ERROR):
+            with self.subTest(estado=estado):
+                AnalisisCV.objects.update_or_create(postulante=postulante, version_cv=version, defaults={'estado': estado})
+                response = self.client.get(reverse('mi_perfil'))
+                self.assertContains(response, f'data-cv-state="{estado}"')
+                if estado == AnalisisCV.Estado.ERROR:
+                    self.assertContains(response, 'No se pudo analizar el CV')
 
     def test_descarga_cv_no_filtra_archivos_a_anonimos_ni_a_otro_postulante(self):
         _, propietario = self.crear_postulante()

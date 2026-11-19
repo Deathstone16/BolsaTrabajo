@@ -4,7 +4,7 @@
   la logica de campos quedo igual para no cambiar el comportamiento.
 {% endcomment %}
 {% for field in form %}
-<div class="space-y-1.5 {% if field.html_name == 'email' or field.html_name == 'direccion' or field.html_name == 'nombre_empresa' or field.html_name == 'cuit' or field.html_name == 'contacto_nombre' or field.html_name == 'contacto_cargo' %}col-span-2{% endif %}">
+<div class="space-y-1.5 {% if field.html_name == 'email' or field.html_name == 'direccion' or field.html_name == 'nombre_empresa' or field.html_name == 'cuit' or field.html_name == 'contacto_nombre' or field.html_name == 'contacto_cargo' or field.html_name == 'correo_publico' %}col-span-2{% endif %}">
   <label class="block text-sm" for="{{ field.id_for_label }}">{{ field.label }}</label>
   {% if field.field.widget.input_type == 'password' %}<div class="password-field">{% endif %}
   <input type="{{ field.field.widget.input_type }}"
@@ -20,7 +20,7 @@
     {% include 'usuarios/_password_toggle.html' with input_id=field.id_for_label password_label=field.label only %}
   </div>
   {% endif %}
-  {% if field.html_name == 'cuit' or field.html_name == 'contacto_nombre' %}
+  {% if field.html_name == 'cuit' or field.html_name == 'contacto_nombre' or field.html_name == 'correo_publico' %}
     <p id="{{ field.id_for_label }}_help" class="text-xs leading-relaxed text-[#6B645C]">{{ field.help_text }}</p>
   {% endif %}
   {% if field.errors %}

@@ -19,6 +19,7 @@ class ConfidencialidadOfertaTests(TestCase):
             logo='empresas/logos/logo-reservado.webp',
             estado_validacion=Oferente.EstadoValidacion.APROBADO,
             contacto_nombre='Responsable de prueba',
+            contacto_cargo='RRHH', correo_publico='rrhh@example.com',
         )
         cls.usuario = Usuario.objects.create_user(email='postulante-confidencial@example.invalid')
         Postulante.objects.create(usuario=cls.usuario)

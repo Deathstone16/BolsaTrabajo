@@ -30,9 +30,10 @@ class ContactoEmpresaTests(TestCase):
         response = self.client.get(reverse('perfil_oferente', args=[self.oferente.pk]))
         self.assertNotContains(response, 'aria-label="Contacto de la empresa"')
 
-    def test_responsible_name_saves_without_personal_email_or_phone(self):
+    def test_public_contact_shows_company_phone_and_keeps_login_email_private(self):
         response = self.client.post(reverse('editar_perfil_empresa'), {
             **self.datos, 'contacto_nombre': 'María Pérez', 'contacto_cargo': 'RRHH',
+            'correo_publico': 'rrhh@example.com',
             'telefono': '+54 362 555 0123',
         })
         self.assertRedirects(response, reverse('dashboard_empresa') + '#empresa')
@@ -44,19 +45,23 @@ class ContactoEmpresaTests(TestCase):
         self.assertContains(response, 'RRHH')
         self.assertContains(response, 'Teléfono de la empresa')
         self.assertContains(response, '+54 362 555 0123', count=1)
-        self.assertNotContains(response, 'mailto:')
+        self.assertContains(response, 'href="mailto:rrhh@example.com"')
         self.assertNotContains(response, self.usuario.email)
 
-    def test_role_is_optional_and_whitespace_name_is_rejected(self):
-        form = OferenteForm({**self.datos, 'contacto_nombre': 'María Pérez'}, instance=self.oferente)
-        self.assertTrue(form.is_valid(), form.errors)
-        form = OferenteForm({**self.datos, 'contacto_nombre': '   '}, instance=self.oferente)
+    def test_blank_name_and_role_and_invalid_email_are_rejected(self):
+        form = OferenteForm({
+            **self.datos, 'contacto_nombre': '   ', 'contacto_cargo': '   ',
+            'correo_publico': 'correo-invalido',
+        }, instance=self.oferente)
         self.assertFalse(form.is_valid())
         self.assertIn('contacto_nombre', form.errors)
+        self.assertIn('contacto_cargo', form.errors)
+        self.assertIn('correo_publico', form.errors)
 
     def test_public_contact_email_is_saved_separately_from_the_login(self):
         response = self.client.post(reverse('editar_perfil_empresa'), {
             **self.datos, 'contacto_nombre': 'María Pérez',
+            'contacto_cargo': 'RRHH',
             'correo_publico': 'rrhh+empleo@example.com',
         })
         self.assertRedirects(response, reverse('dashboard_empresa') + '#empresa')

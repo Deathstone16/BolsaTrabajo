@@ -72,8 +72,11 @@ class RegistroOferenteForm(RegistroBaseForm):
     contacto_cargo = forms.CharField(
         max_length=100,
         label='Cargo o área del responsable',
-        required=False,
-        strip=True,
+    )
+    correo_publico = forms.EmailField(
+        max_length=254,
+        label='Correo de contacto público',
+        help_text='Se muestra en el perfil de la empresa. Puede ser distinto del correo de acceso.',
     )
 
     def clean_cuit(self):
@@ -99,6 +102,11 @@ class OferenteForm(forms.ModelForm):
     """Edita la información pública y de contacto de una empresa."""
     descripcion = DescripcionField(required=False)
     cuit = CuitField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['contacto_cargo'].required = True
+        self.fields['correo_publico'].required = True
 
     class Meta:
         model = Oferente

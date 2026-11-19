@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const formUpload = document.getElementById('form-cv-upload');
     const formEliminar = document.getElementById('form-eliminar-cv');
     const formAnalizar = document.getElementById('form-analizar-cv');
-    const botonPerfil = document.getElementById('boton-ver-perfil');
+    const pantallaCV = document.getElementById('cv-analysis');
     let versionCvActualId = Number(formAnalizar ? formAnalizar.dataset.versionCvId : 0);
     const AVISO_DEMORA_MS = 20000;
     let analisisActualId = null;
@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Tienen que estar arriba: el codigo de inicio usa mostrarEstadoAnalisis
     // cuando la pagina carga con un analisis pendiente.
     const panelAnalisis = document.getElementById('analisis-estado');
-    const SPINNER = '<svg class="ic h-5 w-5 animate-spin" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.2-8.56"></path></svg>';
     const ICONO_OK = '<svg class="ic h-5 w-5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 6"></path></svg>';
     const ICONO_ERROR = '<svg class="ic h-5 w-5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>';
 
@@ -29,8 +28,31 @@ document.addEventListener('DOMContentLoaded', function() {
         botonArchivo.hidden = false;
     }
 
-    cvInput.addEventListener('change', function(e) {
-        const archivo = e.target.files[0];
+    cvInput.addEventListener('change', () => procesarArchivo(cvInput.files[0]));
+
+    const zonaCarga = formUpload?.closest('.ien-cv-dropzone');
+    if (zonaCarga) {
+        zonaCarga.addEventListener('dragover', (event) => {
+            if (!Array.from(event.dataTransfer?.types || []).includes('Files')) return;
+            event.preventDefault();
+            zonaCarga.classList.add('is-dragging');
+        });
+        zonaCarga.addEventListener('dragleave', (event) => {
+            if (!zonaCarga.contains(event.relatedTarget)) zonaCarga.classList.remove('is-dragging');
+        });
+        zonaCarga.addEventListener('drop', (event) => {
+            event.preventDefault();
+            zonaCarga.classList.remove('is-dragging');
+            const archivos = event.dataTransfer?.files;
+            if (archivos?.length > 1) {
+                mostrarFeedback('error', 'Seleccioná un solo archivo de CV.');
+                return;
+            }
+            procesarArchivo(archivos?.[0]);
+        });
+    }
+
+    function procesarArchivo(archivo) {
         if (!archivo) return;
 
         // Validar formato
@@ -58,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Caso reemplazar CV - crear form temporal
             enviarCVReemplazo(archivo);
         }
-    });
+    }
 
     // Eliminar CV
     if (formEliminar) {
@@ -131,7 +153,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.success) {
                     marcarBotonAnalisisPendiente(boton);
-                    ocultarBotonPerfil();
                     mostrarEstadoAnalisis('pendiente');
                     iniciarTemporizadorDemora();
                     consultarEstadoAnalisis(data.analisis_id, boton, textoOriginal);
@@ -153,7 +174,6 @@ document.addEventListener('DOMContentLoaded', function() {
             restaurarBotonAnalizar(botonAnalisisActual || botonInicial, textoBotonOriginal || textoInicial);
             if (payload.status === 'completado') {
                 mostrarEstadoAnalisis('completado', payload.mensaje);
-                mostrarBotonPerfil();
             } else {
                 mostrarEstadoAnalisis('error', payload.mensaje || 'No se pudo analizar el CV.');
             }
@@ -201,14 +221,6 @@ document.addEventListener('DOMContentLoaded', function() {
         boton.innerHTML = 'Análisis en proceso';
     }
 
-    function ocultarBotonPerfil() {
-        if (botonPerfil) botonPerfil.style.display = 'none';
-    }
-
-    function mostrarBotonPerfil() {
-        if (botonPerfil) botonPerfil.style.display = '';
-    }
-
     function enviarCV(archivo) {
         const formData = new FormData();
         formData.append('cv', archivo);
@@ -226,8 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                    ocultarBotonPerfil();
-                    versionCvActualId = Number(data.version_cv_id) || 0;
+                versionCvActualId = Number(data.version_cv_id) || 0;
                 if (window.IenUI) window.IenUI.avisoTrasRecarga('exito', data.mensaje || 'CV cargado con éxito.');
                 location.reload();
             } else {
@@ -258,8 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                    ocultarBotonPerfil();
-                    versionCvActualId = Number(data.version_cv_id) || 0;
+                versionCvActualId = Number(data.version_cv_id) || 0;
                 if (window.IenUI) window.IenUI.avisoTrasRecarga('exito', data.mensaje || 'CV reemplazado con éxito.');
                 location.reload();
             } else {
@@ -280,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     /*
      * Panel #analisis-estado de mi_perfil.html. Mientras el servicio externo
-     * procesa el CV muestra spinner y barra animada; al terminar, el resultado
+     * procesa el CV muestra un indicador de actividad; al terminar, el resultado
      * o el error. Se puede seguir navegando: el analisis corre en otro servicio.
      */
 
@@ -289,16 +299,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const icono = panelAnalisis.querySelector('[data-analisis-icono]');
         const titulo = panelAnalisis.querySelector('[data-analisis-titulo]');
         const texto = panelAnalisis.querySelector('[data-analisis-mensaje]');
-        const barra = panelAnalisis.querySelector('[data-analisis-barra]');
 
+        panelAnalisis.dataset.analysisState = estado;
+        if (pantallaCV) pantallaCV.dataset.cvState = estado;
         panelAnalisis.classList.remove('hidden');
-        barra.classList.toggle('hidden', estado !== 'pendiente');
 
         if (estado === 'pendiente') {
-            icono.className = 'grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#512DA8]/10 text-[#512DA8]';
-            icono.innerHTML = SPINNER;
             titulo.textContent = 'Analizando tu CV…';
-            texto.textContent = mensaje || 'Puede tardar varios minutos según la disponibilidad del servicio.';
+            texto.textContent = mensaje || 'Podés seguir navegando. Te avisamos cuando termine.';
         } else if (estado === 'completado') {
             icono.className = 'grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#27AE60]/15 text-[#27AE60]';
             icono.innerHTML = ICONO_OK;

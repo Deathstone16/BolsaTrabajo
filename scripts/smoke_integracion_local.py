@@ -173,6 +173,7 @@ def run(args):
         cuit_digit = 0 if cuit_digit == 11 else 9 if cuit_digit == 10 else cuit_digit
         Oferente.objects.create(
             usuario=company_user, nombre_empresa=f"Prueba integración {run_id[:8]}", cuit=cuit_base + str(cuit_digit),
+            contacto_nombre="Responsable de prueba", contacto_cargo="RRHH", correo_publico="rrhh@example.com",
             estado_validacion=Oferente.EstadoValidacion.APROBADO,
         )
         category = Categoria.objects.create(nombre=f"Smoke integración {run_id}")

@@ -232,7 +232,7 @@ def aprobar_empresa(request, pk):
         try:
             aprobada = usuarios_service.aprobar_empresa(empresa)
         except ValidationError:
-            messages.error(request, 'No se puede aprobar la empresa hasta que informe una persona responsable.')
+            messages.error(request, 'No se puede aprobar la empresa hasta que informe el nombre, el cargo y el correo de contacto del responsable.')
             aprobada = False
         if aprobada:
             dashboard_url = request.build_absolute_uri(reverse('dashboard_empresa'))

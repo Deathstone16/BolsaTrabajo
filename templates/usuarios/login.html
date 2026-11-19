@@ -15,7 +15,9 @@
     <div class="pointer-events-none absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-[#512DA8]/40 blur-[120px]" aria-hidden="true"></div>
 
     <div class="relative max-w-md">
-      <a href="{% url 'home' %}" class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#512DA8] to-[#43218F] text-lg font-bold tracking-tight text-white shadow-[0_10px_24px_-10px_rgba(81,45,168,0.55)]">IEN</a>
+      <a href="{% url 'home' %}" class="block w-fit rounded-full">
+        <img class="ien-brand-seal" src="{% static_v 'img/ien-sello.png' %}" alt="ien trabajo" width="56" height="56">
+      </a>
       <p class="kicker !text-[#FFDE59] mt-10">Bolsa oficial del IEN · Chaco</p>
       <h1 class="mt-4 text-3xl font-bold leading-tight tracking-tight sm:text-4xl">Tu próximo trabajo te está mirando.</h1>
       <p class="mt-4 leading-relaxed text-white/70">Ingresá para ver tu porcentaje de match, gestionar postulaciones y recibir recomendaciones de cursos gratuitos.</p>
@@ -29,9 +31,8 @@
 
   <div class="order-1 flex items-center justify-center bg-[#F8F3F0] px-4 py-12 lg:order-2 lg:px-16">
     <div class="w-full max-w-md">
-      <a href="{% url 'home' %}" class="mb-8 inline-flex items-center gap-2 lg:hidden">
-        <span class="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-[#512DA8] to-[#43218F] text-base font-bold text-white">IEN</span>
-        <span class="text-lg font-semibold tracking-tight">IEN Empleo</span>
+      <a href="{% url 'home' %}" class="mb-8 inline-flex lg:hidden">
+        <img src="{% static_v 'img/ien-trabajo.png' %}" alt="ien trabajo" width="138" height="46">
       </a>
 
       <p class="kicker">Hola de nuevo</p>

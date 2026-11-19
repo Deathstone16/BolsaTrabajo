@@ -114,9 +114,13 @@
     var burger = document.querySelector(".nav-burger");
     var mobile = document.querySelector(".nav-mobile");
     if (!burger || !mobile) return;
-    burger.addEventListener("click", function () { mobile.classList.toggle("hidden"); });
+    function setOpen(open) {
+      mobile.classList.toggle("hidden", !open);
+      burger.setAttribute("aria-expanded", String(open));
+    }
+    burger.addEventListener("click", function () { setOpen(mobile.classList.contains("hidden")); });
     mobile.addEventListener("click", function (e) {
-      if (e.target.closest("a")) mobile.classList.add("hidden");
+      if (e.target.closest("a")) setOpen(false);
     });
   }
 

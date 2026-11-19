@@ -38,9 +38,10 @@ class OferenteAdminForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
-        if (cleaned.get('estado_validacion') == Oferente.EstadoValidacion.APROBADO
-                and not (cleaned.get('contacto_nombre') or '').strip()):
-            self.add_error('contacto_nombre', 'Indicá un responsable antes de aprobar la empresa.')
+        if cleaned.get('estado_validacion') == Oferente.EstadoValidacion.APROBADO:
+            for campo in ('contacto_nombre', 'contacto_cargo', 'correo_publico'):
+                if campo not in self.errors and not cleaned.get(campo):
+                    self.add_error(campo, 'Completá este dato antes de aprobar la empresa.')
         return cleaned
 
 @admin.register(Usuario)

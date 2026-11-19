@@ -1,0 +1,6 @@
+{% public_static_v 'img/ien-trabajo.png' as logo_url %}
+{% if logo_url %}
+  <img src="{{ logo_url }}" alt="IEN Trabajo" width="156" height="52" style="display:block;width:156px;height:52px;border:0;color:#2C154D;font:700 18px Arial,sans-serif;">
+{% else %}
+  <span style="color:#2C154D;font:700 18px Arial,sans-serif;">IEN Trabajo</span>
+{% endif %}

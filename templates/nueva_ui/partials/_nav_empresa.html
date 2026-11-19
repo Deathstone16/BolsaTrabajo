@@ -14,7 +14,7 @@
     <summary>
       <span class="ien-account-avatar" aria-hidden="true">{% if user.oferente.logo %}<img src="{{ user.oferente.logo.url }}" alt="">{% else %}{{ user.oferente.nombre_empresa|slice:':1'|upper }}{% endif %}</span>
       <span>Mi cuenta</span>
-      <span class="ien-account-chevron" aria-hidden="true">⌄</span>
+      <span class="ien-account-chevron" aria-hidden="true"></span>
     </summary>
     <div class="ien-account-dropdown">
       <p class="ien-account-name">{{ user.oferente.nombre_empresa }}</p>
