@@ -59,3 +59,42 @@ class BusquedaEmpleoTests(TestCase):
         self.assertContains(response, self.oferta.titulo)
         self.assertContains(response, 'value="Excel"')
         self.assertEqual(response.context['total'], 1)
+
+    def test_locality_filter_uses_database_values_and_combines_with_existing_filters(self):
+        self.oferta.ubicacion = 'Villa de Prueba, Región de Prueba'
+        self.oferta.save(update_fields=['ubicacion'])
+        otra = Oferta.objects.create(
+            empresa=self.oferta.empresa, categoria=self.oferta.categoria,
+            titulo='Otro puesto', nombre_puesto='Analista',
+            ubicacion='Otra localidad', descripcion='Python y Excel',
+            habilidades_duras='Python', estado='activa', modalidad='remoto',
+            experiencia_requerida='2-3', fecha_cierre=self.oferta.fecha_cierre,
+        )
+        for valor in ('villa de prueba', '  VILLA DE PRUEBA  ', 'Región de Prueba'):
+            with self.subTest(ubicacion=valor):
+                response = self.client.get(reverse('buscar_empleo'), {
+                    'q': 'Excel', 'modalidad': 'remoto', 'experiencia': '2-3',
+                    'ubicacion': valor,
+                })
+                self.assertQuerySetEqual(response.context['ofertas'], [self.oferta])
+                self.assertEqual(response.context['ubicacion'], valor)
+                self.assertNotContains(response, otra.titulo)
+        self.assertFalse(obtener_ofertas_activas(ubicacion='No existe').exists())
+        self.assertEqual(obtener_ofertas_activas(ubicacion='   ').count(), 2)
+        self.assertFalse(obtener_ofertas_activas(
+            'Excel', modalidad='presencial', ubicacion='Villa de Prueba',
+        ).exists())
+
+    def test_locality_filter_keeps_confidentiality_and_excludes_non_active_offers(self):
+        self.oferta.ubicacion = 'Localidad de Prueba'
+        self.oferta.es_confidencial = True
+        self.oferta.save(update_fields=['ubicacion', 'es_confidencial'])
+        response = self.client.get(reverse('buscar_empleo'), {
+            'ubicacion': 'Localidad de Prueba',
+        })
+        self.assertContains(response, self.oferta.titulo)
+        self.assertContains(response, 'Empresa confidencial')
+        self.assertNotContains(response, self.oferta.empresa.oferente.nombre_empresa)
+        self.oferta.estado = 'pendiente'
+        self.oferta.save(update_fields=['estado'])
+        self.assertFalse(obtener_ofertas_activas(ubicacion='Localidad de Prueba').exists())

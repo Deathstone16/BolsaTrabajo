@@ -75,13 +75,16 @@ def eliminar_oferta_por_id(oferta_id):
     return False
 
 
-def obtener_ofertas_activas(busqueda='', modalidad='', experiencia=''):
+def obtener_ofertas_activas(
+    busqueda='', modalidad='', experiencia='', *, ubicacion=''
+):
     """Busca ofertas activas con filtros opcionales.
 
     Args:
         busqueda (str): Palabras del título, empresa, descripción o requisitos.
         modalidad (str): Filtro exacto por modalidad.
         experiencia (str): Filtro exacto por experiencia requerida.
+        ubicacion (str): Coincidencia parcial en la ubicación publicada.
 
     Returns:
         QuerySet de ofertas activas filtradas.
@@ -105,6 +108,8 @@ def obtener_ofertas_activas(busqueda='', modalidad='', experiencia=''):
         ofertas = ofertas.filter(modalidad=modalidad)
     if experiencia:
         ofertas = ofertas.filter(experiencia_requerida=experiencia)
+    if ubicacion.strip():
+        ofertas = ofertas.filter(ubicacion__icontains=ubicacion.strip())
     return ofertas
 
 

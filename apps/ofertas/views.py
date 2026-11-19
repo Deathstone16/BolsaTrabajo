@@ -208,8 +208,11 @@ def buscar_empleo(request):
     busqueda = request.GET.get('q', '')
     modalidad = request.GET.get('modalidad', '')
     experiencia = request.GET.get('experiencia', '')
+    ubicacion = request.GET.get('ubicacion', '')
 
-    ofertas = obtener_ofertas_activas(busqueda, modalidad, experiencia)
+    ofertas = obtener_ofertas_activas(
+        busqueda, modalidad, experiencia, ubicacion=ubicacion,
+    )
 
     return render(request, 'nueva_ui/buscar_empleo.html', {
         'vista_activa': 'buscar',
@@ -217,6 +220,7 @@ def buscar_empleo(request):
         'busqueda': busqueda,
         'modalidad': modalidad,
         'experiencia': experiencia,
+        'ubicacion': ubicacion,
         'modalidad_choices': Oferta.MODALIDAD_CHOICES,
         'experiencia_choices': Oferta.EXPERIENCIA_CHOICES,
         'total': ofertas.count(),
