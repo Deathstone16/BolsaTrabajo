@@ -834,7 +834,6 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 }
 @media (max-width: 767px) {
   .ien-course-filter-fields { grid-template-columns: minmax(0, 1fr); }
-  .ien-home-course-preview > .ien-course-card:nth-child(n+4) { display: none; }
   .ien-home-container { padding: 0 1.25rem; }
   .ien-home-section { padding: 3rem 0; }
   .ien-home-hero, .ien-course-grid, .ien-steps-grid, .ien-home-offers { grid-template-columns: minmax(0, 1fr); }
@@ -972,3 +971,335 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 .skill-picker-tags { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
 .skill-picker-remove { padding: .25rem .4rem; border: 0; border-radius: 999px; background: transparent; color: var(--primary); cursor: pointer; }
 .skill-picker-remove:focus-visible { outline: 2px solid var(--primary); }
+
+/* Prueba visual acotada a Buscar empleo y Mi CV. Base: base-diseno-2026-11-19. */
+.ien-design-jobs .ien-jobs-heading {
+  padding: 2.5rem 0;
+  background: #ece3f8;
+  border-bottom: 1px solid #d7c6ee;
+}
+.ien-jobs-intro, .ien-cv-intro { margin-top: .75rem; color: #51475e; font-size: .9375rem; line-height: 1.7; }
+.ien-design-jobs #filtros-form { background: #ece3f8; border-color: #d7c6ee; }
+.ien-jobs-filter-help { margin-top: .75rem; color: #51475e; font-size: .8125rem; line-height: 1.6; }
+.ien-jobs-apply { width: 100%; margin-top: 1.25rem; padding: .75rem 1rem; font-size: .875rem; }
+.ien-jobs-active-location { display: inline-flex; align-items: center; gap: .375rem; color: #51475e; font-size: .8125rem; }
+.ien-design-jobs .ien-job-card {
+  border-color: #dbccec;
+  background: #fffdfb;
+  box-shadow: 0 3px 16px -12px rgba(67, 33, 143, .24);
+}
+.ien-design-jobs .ien-job-card:nth-child(even) { background: #f6f0fc; }
+.ien-design-jobs .ien-job-title { color: #43218f; }
+.ien-job-title a:focus-visible { outline: 2px solid #512da8; outline-offset: 3px; border-radius: .125rem; }
+.ien-design-jobs .ien-job-card:hover { transform: translateY(-2px); border-color: #a58acb; }
+.ien-job-save {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: .375rem;
+  min-height: 2.75rem;
+  padding: .625rem .875rem;
+  border: 1px solid #cbb6e7;
+  border-radius: .75rem;
+  background: #fffdfb;
+  color: #43218f;
+  cursor: pointer;
+  font-size: .8125rem;
+  font-weight: 600;
+}
+.ien-job-save:focus-visible, .ien-job-open:focus-visible, .ien-jobs-apply:focus-visible {
+  outline: 2px solid #43218f;
+  outline-offset: 3px;
+}
+.ien-job-footer { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.ien-job-footer .ien-job-open { margin-left: auto; padding: .625rem 1rem; color: #43218f; background: #fffdfb; border-color: #cbb6e7; font-size: .8125rem; }
+.ien-design-cv .ien-profile-next {
+  background: #ece3f8;
+  border-color: #cdb7e8;
+  box-shadow: 0 8px 24px -20px rgba(67, 33, 143, .35);
+}
+.ien-design-cv .ien-cv-card > h2 { color: #43218f; }
+.ien-design-cv #cv-upload-area {
+  padding: 1.25rem;
+  border: 1.5px dashed #b496d8;
+  border-radius: 1rem;
+  background: #fffdfb;
+}
+.ien-cv-upload-icon { display: block; width: 1.75rem; height: 1.75rem; margin-bottom: .75rem; color: #512da8; }
+.ien-cv-file-heading { font-size: .9375rem; font-weight: 600; color: #43218f; }
+.ien-cv-file-description { margin: .375rem 0 1rem; color: #6b645c; font-size: .8125rem; line-height: 1.6; }
+.ien-design-cv .ien-cv-benefits-grid > .panel { border-color: #dbccec; }
+.ien-design-cv .ien-cv-benefits-grid > .panel:nth-child(2) { background: #f3edfb; }
+@media (max-width: 639px) {
+  .ien-job-save { padding: .625rem; }
+  .ien-job-footer .ien-job-open { width: 100%; margin: .375rem 0 0; }
+  .ien-design-jobs .ien-jobs-heading { padding-block: 2rem; }
+}
+
+/* Portada de prueba: fotografía ambiental y vidrio violeta solo en el inicio. */
+.ien-home-hero-section {
+  --ien-hero-surface: #251441;
+  --ien-hero-text: #f1eaf8;
+  --ien-hero-accent: #e5d5ff;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--ien-hero-surface);
+  color: #fff;
+}
+.ien-home-hero-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: blur(3px);
+  transform: scale(1.035);
+  pointer-events: none;
+  user-select: none;
+}
+.ien-home-hero-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(105deg, rgba(27, 16, 46, .88), rgba(42, 24, 70, .58) 65%, rgba(27, 16, 46, .74));
+  pointer-events: none;
+}
+.ien-home-hero-section .ien-home-hero { position: relative; z-index: 2; }
+.ien-home-hero-section .kicker { color: var(--ien-hero-accent); }
+.ien-home-hero-section .ien-home-title { color: #fff; }
+.ien-home-hero-section .ien-home-title-accent { color: var(--ien-hero-accent); }
+.ien-home-hero-section .ien-home-intro,
+.ien-home-hero-section .ien-home-stats { color: var(--ien-hero-text); }
+.ien-home-hero-section .ien-home-stats strong { color: #fff; }
+.ien-home-hero-section .ien-home-search {
+  background: rgba(37, 20, 65, .94);
+  border: 1px solid rgba(255, 255, 255, .3);
+  box-shadow: 0 16px 40px -20px rgba(13, 6, 27, .5);
+  color: #fff;
+}
+@supports ((backdrop-filter: blur(14px)) or (-webkit-backdrop-filter: blur(14px))) {
+  .ien-home-hero-section .ien-home-search {
+    background: rgba(37, 20, 65, .72);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+  }
+}
+.ien-home-hero-section .ien-home-search h2,
+.ien-home-hero-section .ien-home-search label { color: #fff; }
+.ien-home-hero-section .ien-home-search .input-ien {
+  background: #fbf8ff;
+  color: #26222e;
+  border-color: #cbbce3;
+  color-scheme: light;
+}
+.ien-home-hero-section .ien-home-search .input-ien::placeholder { color: #6b6175; }
+.ien-home-hero-section .ien-home-search .input-ien:focus-visible {
+  outline: 2px solid var(--ien-hero-accent);
+  outline-offset: 3px;
+}
+.ien-home-hero-section .ien-home-search .btn-ien {
+  background: #fff;
+  color: #43218f;
+  border-color: #fff;
+  box-shadow: none;
+}
+.ien-home-hero-section .ien-home-search .btn-ien:hover { background: #e5d5ff; border-color: #e5d5ff; }
+.ien-home-hero-section .ien-home-search .btn-ien:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+@media (max-width: 767px) {
+  .ien-home-hero-section::after {
+    background: linear-gradient(180deg, rgba(27, 16, 46, .86), rgba(42, 24, 70, .68) 60%, rgba(27, 16, 46, .82));
+  }
+  .ien-home-hero-section .ien-home-hero { gap: 2rem; }
+}
+
+/* Cursos: tarjetas blancas con vidrio suave, inspiradas en Glass Blog Card. */
+.ien-home-courses-section {
+  background: radial-gradient(ellipse at 8% 24%, #eee6fa 0, transparent 48%),
+              radial-gradient(ellipse at 95% 80%, #f1eaf8 0, transparent 46%), #faf7fd;
+}
+.ien-course-grid.ien-course-grid-glass {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+}
+.ien-course-card.ien-course-card-glass {
+  --ien-course-glow: #e1d0f5;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid #ded2ef;
+  border-radius: 1.5rem;
+  background: #fffdfd;
+  box-shadow: 0 8px 24px -20px rgba(67, 33, 143, .3);
+  transition: transform .18s ease-out, box-shadow .18s ease-out, border-color .18s ease-out;
+}
+.ien-course-card.ien-course-card-glass:nth-child(3n+2) { --ien-course-glow: #e9ddf7; }
+.ien-course-card.ien-course-card-glass:nth-child(3n) { --ien-course-glow: #f0e9f9; }
+@media (hover: hover) and (pointer: fine) {
+  .ien-course-card-glass:hover {
+    transform: translateY(-4px);
+    border-color: #b9a0dd;
+    box-shadow: 0 14px 32px -22px rgba(67, 33, 143, .4);
+  }
+}
+.ien-course-card-media {
+  position: relative;
+  padding: .625rem .625rem 2.6rem;
+  background: radial-gradient(ellipse at 88% 10%, var(--ien-course-glow), transparent 66%), #f4eefb;
+}
+.ien-course-cover[data-course-cover] { position: relative; }
+.ien-course-cover[data-course-cover] img { position: relative; z-index: 1; background: #fffdfb; }
+.ien-course-cover-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #7653a6;
+  background: radial-gradient(ellipse at 15% 95%, #c7b0e6 0, transparent 55%),
+              radial-gradient(ellipse at 85% 0%, #dfd0f1 0, transparent 62%), #eee6f8;
+}
+.ien-course-cover-icon { display: block; width: 2.25rem; height: 2.25rem; }
+.ien-course-cover--loaded .ien-course-cover-fallback { display: none; }
+.ien-course-cover--unavailable img { display: none !important; }
+.ien-course-card-glass .ien-course-cover {
+  aspect-ratio: 16 / 9;
+  max-height: 10rem;
+  margin: 0;
+  border: 1px solid rgba(81, 45, 168, .09);
+  border-radius: 1rem;
+}
+.ien-course-card-tags {
+  position: absolute;
+  bottom: .65rem;
+  left: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  color: #43218f;
+  font-size: .75rem;
+  line-height: 1.5;
+}
+.ien-course-card-tags > span { display: inline-flex; align-items: center; gap: .35rem; }
+.ien-course-card-tags > span + span::before { content: "·"; margin-right: .05rem; }
+.ien-course-card-body {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  margin-top: -.25rem;
+  padding: 1rem;
+  border-top: 1px solid #fff;
+  border-radius: 1.25rem 1.25rem 0 0;
+  background: #fffdfd;
+  color: #26222e;
+}
+@supports ((backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px))) {
+  .ien-course-card-body {
+    background: linear-gradient(135deg, rgba(255, 255, 255, .95), rgba(255, 253, 255, .87));
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+}
+.ien-course-card-glass .ien-course-card-body h2,
+.ien-course-card-glass .ien-course-card-body h3 { margin: 0; font-size: 1.0625rem; line-height: 1.4; overflow-wrap: anywhere; }
+.ien-course-card-glass .ien-course-description { margin-top: .625rem; color: #554b62; font-size: .8125rem; line-height: 1.6; }
+.ien-course-card-glass .ien-course-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: .625rem;
+  width: 100%;
+  margin: .875rem 0;
+  padding: .75rem 0 0;
+  font-size: .75rem;
+  border-top: 1px solid #ece3f5;
+}
+.ien-course-card-glass .ien-course-details > div { display: flex; align-items: baseline; gap: .5rem; }
+.ien-course-card-glass .ien-course-details dt { flex-shrink: 0; }
+.ien-course-card-glass .ien-course-details dd { margin: 0; color: #554b62; overflow-wrap: anywhere; }
+.ien-course-card-glass .ien-course-card-action { min-height: 2.75rem; margin-top: auto; padding: .625rem 1rem; font-size: .8125rem; }
+.ien-course-card-action:focus-visible { outline: 2px solid #43218f; outline-offset: 4px; }
+@media (max-width: 767px) {
+  .ien-home-courses-section .ien-section-heading { gap: 1.25rem; }
+  .ien-course-card-body { padding: 1rem; }
+  .ien-course-card-glass .ien-course-card-action { width: 100%; }
+}
+@media (max-width: 359px) {
+  .ien-course-card-glass .ien-course-details { grid-template-columns: minmax(0, 1fr); gap: .75rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ien-course-card.ien-course-card-glass { transition: none; }
+  .ien-course-card.ien-course-card-glass:hover { transform: none; }
+}
+
+/* Cuatro propuestas en escritorio, dos en tablet y una en móvil. */
+.ien-home-courses-section { padding-block: 3.25rem; }
+.ien-course-grid.ien-course-grid-glass { gap: 1.25rem; margin-top: 1.5rem; }
+#cursos-resultados { scroll-margin-top: 6rem; }
+.ien-course-pagination { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: .75rem; margin-top: 2rem; font-size: .875rem; }
+.ien-course-page-numbers { display: flex; align-items: center; flex-wrap: wrap; justify-content: center; gap: .375rem; }
+.ien-course-pagination a, .ien-course-page-current, .ien-course-page-step, .ien-course-page-ellipsis {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 2.75rem; min-height: 2.75rem;
+  padding: .5rem .75rem; border-radius: .75rem;
+}
+.ien-course-pagination a { background: #fffdfd; color: #43218f; border: 1px solid #ded2ef; text-decoration: none; }
+.ien-course-pagination a:hover { background: #eee6fa; border-color: #b9a0dd; }
+.ien-course-pagination a:focus-visible { outline: 2px solid #43218f; outline-offset: 3px; }
+.ien-course-page-current { background: #512da8; color: #fff; font-weight: 600; }
+.ien-course-page-step[aria-disabled] { color: #6b6175; border: 1px solid #e7dfeb; }
+@media (max-width: 1199px) {
+  .ien-course-grid.ien-course-grid-glass { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 639px) {
+  .ien-course-grid.ien-course-grid-glass { grid-template-columns: minmax(0, 1fr); }
+  .ien-home-courses-section { padding-block: 2.5rem; }
+}
+
+.ien-home-courses-section .ien-section-heading { align-items: center; }
+.ien-home-courses-section .ien-section-heading > div:first-child { flex: 1; }
+.ien-course-heading-actions { display: flex; flex-direction: column; align-items: flex-end; gap: .875rem; width: 22rem; max-width: 100%; }
+.ien-home-course-search { display: grid; gap: .5rem; width: 100%; }
+.ien-home-course-search-main { display: flex; align-items: center; gap: .5rem; }
+.ien-home-course-search .input-ien { flex: 1; width: 100%; min-height: 2.75rem; padding: .625rem .875rem; background: #fffdfd; font-size: .875rem; }
+.ien-home-course-search .btn-ien { flex-shrink: 0; min-height: 2.75rem; gap: .375rem; padding: .625rem .875rem; font-size: .875rem; }
+@media (max-width: 767px) {
+  .ien-home-courses-section .ien-section-heading { align-items: stretch; }
+  .ien-course-heading-actions { width: 100%; align-items: flex-start; }
+}
+
+/* Los filtros del inicio reutilizan las opciones del catálogo. */
+.ien-home-course-filter-options { width: 100%; border: 1px solid #ded2ef; border-radius: .875rem; background: rgba(255, 253, 255, .8); }
+.ien-home-course-filter-options summary { display: flex; align-items: center; gap: .5rem; min-height: 2.75rem; padding: .625rem .875rem; color: #43218f; font-size: .8125rem; font-weight: 600; cursor: pointer; list-style: none; }
+.ien-home-course-filter-options summary::-webkit-details-marker { display: none; }
+.ien-home-course-filter-options summary::after { content: "+"; margin-left: auto; font-size: 1.125rem; line-height: 1; }
+.ien-home-course-filter-options[open] summary::after { content: "−"; }
+.ien-home-course-filter-options summary:focus-visible { outline: 2px solid #43218f; outline-offset: 3px; border-radius: .875rem; }
+.ien-home-course-filter-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: .75rem; padding: .25rem .875rem .875rem; }
+.ien-home-course-filter-fields label { display: block; margin-bottom: .375rem; color: #26222e; font-size: .8125rem; }
+.ien-home-course-search .ien-home-course-filter-submit { margin: 0 .875rem .875rem; }
+
+/* Una misma barra lateral para CV, perfil, datos y favoritos. */
+.ien-postulante-sidebar-panel { background: #f3edfb; border-color: #d7c6ee; }
+.ien-postulante-sidebar-identity { display: flex; flex-direction: column; align-items: center; gap: .5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #ded2ec; }
+.ien-postulante-sidebar-nav { display: flex; flex-direction: column; gap: .375rem; margin-top: 1.5rem; }
+.ien-postulante-nav-link { display: flex; align-items: center; gap: .75rem; min-height: 2.75rem; padding: .625rem .75rem; border-radius: .75rem; color: #62576e; font-size: .875rem; line-height: 1.5; text-decoration: none; transition: background-color .15s ease, color .15s ease; }
+.ien-postulante-nav-link > [data-icon] { flex-shrink: 0; }
+.ien-postulante-nav-link:hover { background: #e8ddf6; color: #43218f; }
+.ien-postulante-nav-link.is-active { background: #512da8; color: #fff; font-weight: 600; box-shadow: 0 3px 8px -4px rgba(67, 33, 143, .5); }
+.ien-postulante-nav-link:focus-visible { outline: 2px solid #43218f; outline-offset: 3px; }
+.ien-postulante-nav-link.is-disabled { color: #80738f; background: transparent; }
+.ien-postulante-nav-note { margin-left: auto; flex-shrink: 0; font-size: .5rem; font-family: 'JetBrains Mono', monospace; font-weight: 400; text-transform: uppercase; }
+.ien-sidebar-avatar-feedback { color: #9f203b; font-size: .75rem; line-height: 1.5; text-align: center; }
+.ien-sidebar-avatar-feedback[hidden] { display: none; }
+.ien-postulante-layout { display: grid; gap: 2rem; }
+@media (min-width: 1024px) {
+  .ien-postulante-layout { grid-template-columns: 16rem minmax(0, 1fr); align-items: start; }
+}
+@media (prefers-reduced-motion: reduce) { .ien-postulante-nav-link { transition: none; } }

@@ -1,11 +1,12 @@
 """Consulta pública de los cursos activos del IEN."""
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, render
 from .forms import CursoFiltroForm
 from .models import Curso
 
 
 def listado(request):
-    cursos = Curso.objects.filter(activo=True).select_related('categoria').order_by('nombre')
+    cursos = Curso.objects.filter(activo=True).select_related('categoria').order_by('nombre', 'pk')
     filtros = CursoFiltroForm(request.GET)
     if filtros.is_valid():
         valores = filtros.cleaned_data
@@ -19,12 +20,19 @@ def listado(request):
             cursos = cursos.filter(duracion=valores['duracion'])
     else:
         cursos = cursos.none()
+    paginador = Paginator(cursos, 12)
+    pagina = paginador.get_page(request.GET.get('page'))
+    parametros = request.GET.copy()
+    parametros.pop('page', None)
     return render(request, 'cursos/listado.html', {
-        'cursos': cursos,
+        'cursos': pagina.object_list,
+        'pagina': pagina,
+        'paginas': paginador.get_elided_page_range(pagina.number, on_each_side=1, on_ends=1),
+        'pagination_query': parametros.urlencode(),
         'vista_activa': 'cursos',
         'filtros': filtros,
         'hay_filtros': any(request.GET.get(nombre, '').strip() for nombre in filtros.fields),
-        'total_resultados': cursos.count(),
+        'total_resultados': paginador.count,
     })
 
 

@@ -18,18 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const ICONO_OK = '<svg class="ic h-5 w-5" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L20 6"></path></svg>';
     const ICONO_ERROR = '<svg class="ic h-5 w-5" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>';
 
-    const fotoInput = document.getElementById('cv-profile-photo');
-    const botonFoto = fotoInput?.form.querySelector('[data-avatar-picker]');
-    const camposFoto = fotoInput?.closest('[data-avatar-fields]');
-    if (botonFoto && camposFoto && typeof fotoInput.form.requestSubmit === 'function') {
-        botonFoto.addEventListener('click', () => fotoInput.click());
-        fotoInput.addEventListener('change', () => {
-            if (fotoInput.files.length) fotoInput.form.requestSubmit();
-        });
-        camposFoto.hidden = true;
-        botonFoto.disabled = false;
-    }
-
     if (!cvInput) return;
 
     const botonArchivo = formUpload?.querySelector('[data-cv-file-picker]');

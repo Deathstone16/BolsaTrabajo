@@ -23,14 +23,39 @@
         {% if hay_filtros %}<a href="{% url 'cursos:listado' %}" class="btn-ghost">Limpiar filtros</a>{% endif %}
       </div>
     </form>
-    <p class="ien-course-results" role="status">{{ total_resultados }} curso{{ total_resultados|pluralize }} encontrado{{ total_resultados|pluralize }}</p>
-    <div class="ien-course-grid">
+    <p id="cursos-resultados" class="ien-course-results" role="status">{{ total_resultados }} curso{{ total_resultados|pluralize }} encontrado{{ total_resultados|pluralize }}{% if pagina.has_other_pages %}<span> · Mostrando {{ pagina.start_index }}–{{ pagina.end_index }}</span>{% endif %}</p>
+    <div class="ien-course-grid ien-course-grid-glass">
       {% for curso in cursos %}
         {% include 'cursos/_card.html' with course_heading_level=2 %}
       {% empty %}
         <p class="panel ien-home-empty">{% if filtros.errors %}Revisá los filtros para realizar la búsqueda.{% elif hay_filtros %}No encontramos cursos con esos filtros. Probá con otro título o limpiá los filtros para ver todas las opciones.{% else %}Todavía no hay cursos disponibles. Volvé a consultar próximamente.{% endif %}</p>
       {% endfor %}
     </div>
+    {% if pagina.has_other_pages %}
+      <nav class="ien-course-pagination" aria-label="Páginas de cursos">
+        {% if pagina.has_previous %}
+          <a class="ien-course-page-step" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ pagina.previous_page_number }}#cursos-resultados" rel="prev">Anterior</a>
+        {% else %}
+          <span class="ien-course-page-step" aria-disabled="true">Anterior</span>
+        {% endif %}
+        <div class="ien-course-page-numbers">
+          {% for numero in paginas %}
+            {% if numero == pagina.number %}
+              <span class="ien-course-page-current" aria-current="page" aria-label="Página {{ numero }}">{{ numero }}</span>
+            {% elif numero == pagina.paginator.ELLIPSIS %}
+              <span class="ien-course-page-ellipsis">{{ numero }}</span>
+            {% else %}
+              <a href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ numero }}#cursos-resultados" aria-label="Página {{ numero }}">{{ numero }}</a>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% if pagina.has_next %}
+          <a class="ien-course-page-step" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ pagina.next_page_number }}#cursos-resultados" rel="next">Siguiente</a>
+        {% else %}
+          <span class="ien-course-page-step" aria-disabled="true">Siguiente</span>
+        {% endif %}
+      </nav>
+    {% endif %}
   </div>
 </section>
 {% endblock %}

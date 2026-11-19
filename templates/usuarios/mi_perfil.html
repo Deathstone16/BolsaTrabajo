@@ -5,13 +5,14 @@
 {% block title %}Mi CV y análisis · IEN Empleo{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-[#F8F3F0] py-6 sm:py-8">
+<div class="ien-design-cv min-h-screen bg-[#F8F3F0] py-6 sm:py-8">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="ien-cv-layout">
       <div class="ien-cv-content min-w-0" id="cv-analysis">
         <header>
           {% include "nueva_ui/partials/_breadcrumbs.html" with current="Mi CV" %}
           <h1 class="mt-2 text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">Mi CV y análisis</h1>
+          <p class="ien-cv-intro">Tu experiencia es el punto de partida. Cargá tu CV y descubrí tus habilidades.</p>
         </header>
 
         <section id="perfil-siguiente-paso" class="panel ien-profile-next ien-cv-card mt-5" aria-labelledby="siguiente-paso-titulo">
@@ -79,9 +80,13 @@
           <form method="post" enctype="multipart/form-data" action="{% url 'mi_perfil' %}" id="form-cv-upload" class="mt-4{% if version_cv_actual %} ien-cv-replace{% endif %}">
             {% csrf_token %}
             <div id="cv-upload-area">
+              <span data-icon="upload" class="ien-cv-upload-icon" aria-hidden="true"></span>
               {% if version_cv_actual %}
                 <h3 class="font-semibold text-[#26222E]">Actualizar CV</h3>
                 <p class="mb-2 text-sm text-[#6B645C]">El nuevo archivo reemplazará tu CV actual.</p>
+              {% else %}
+                <p class="ien-cv-file-heading">Elegí el archivo de tu CV</p>
+                <p class="ien-cv-file-description">Al seleccionarlo, se carga y queda guardado en tu perfil.</p>
               {% endif %}
               <div data-cv-native-upload>
                 <label class="sr-only" for="cv-input">Archivo de CV</label>

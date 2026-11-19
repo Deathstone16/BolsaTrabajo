@@ -379,8 +379,24 @@
     });
   }
 
+  // Si falta un archivo de portada, se conserva la alternativa decorativa.
+  function initCourseCovers() {
+    document.querySelectorAll('[data-course-cover] img').forEach(function (image) {
+      var cover = image.closest('[data-course-cover]');
+      function update() {
+        var loaded = image.naturalWidth > 0;
+        cover.classList.toggle('ien-course-cover--loaded', loaded);
+        cover.classList.toggle('ien-course-cover--unavailable', !loaded);
+      }
+      image.addEventListener('load', update);
+      image.addEventListener('error', update);
+      if (image.complete) update();
+    });
+  }
+
   function init() {
     injectIcons(document);
+    initCourseCovers();
     initReveal(document);
     startCounters(document);
     initBurger();

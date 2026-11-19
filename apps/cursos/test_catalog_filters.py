@@ -60,3 +60,71 @@ class CatalogoFiltrosTests(TestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertTrue(response.context['filtros'].errors)
                 self.assertContains(response, 'Revisá los filtros')
+
+
+class CatalogoPaginacionTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.categoria = Categoria.objects.create(nombre='Tecnología de prueba')
+        cls.cursos = [
+            Curso.objects.create(
+                nombre=f'SQL {numero:02d}', categoria=cls.categoria,
+                descripcion='Capacitación de prueba.', duracion='8 semanas',
+                horario='A coordinar', tipo=Curso.VIRTUAL,
+            )
+            for numero in range(1, 14)
+        ]
+        cls.otro = Curso.objects.create(
+            nombre='Taller presencial', categoria=cls.categoria,
+            duracion='4 semanas', tipo=Curso.PRESENCIAL,
+        )
+        Curso.objects.create(
+            nombre='SQL retirado', categoria=cls.categoria,
+            duracion='8 semanas', tipo=Curso.VIRTUAL, activo=False,
+        )
+
+    def test_all_active_courses_can_be_reached_without_duplicates(self):
+        primera = self.client.get(reverse('cursos:listado'))
+        segunda = self.client.get(reverse('cursos:listado'), {'page': 2})
+        ids_primera = {curso.pk for curso in primera.context['cursos']}
+        ids_segunda = {curso.pk for curso in segunda.context['cursos']}
+        self.assertEqual(len(ids_primera), 12)
+        self.assertEqual(len(ids_segunda), 2)
+        self.assertFalse(ids_primera & ids_segunda)
+        self.assertEqual(ids_primera | ids_segunda, {curso.pk for curso in self.cursos} | {self.otro.pk})
+        self.assertEqual(segunda.context['total_resultados'], 14)
+        self.assertContains(primera, 'page=2#cursos-resultados')
+        self.assertContains(segunda, 'page=1#cursos-resultados')
+        self.assertNotContains(segunda, 'SQL retirado')
+
+    def test_filters_are_applied_before_pagination_and_remain_in_links(self):
+        filtros = {'q': 'SQL', 'categoria': self.categoria.pk,
+                   'modalidad': Curso.VIRTUAL, 'duracion': '8 semanas', 'page': 2}
+        response = self.client.get(reverse('cursos:listado'), filtros)
+        self.assertQuerySetEqual(response.context['cursos'], [self.cursos[-1]])
+        self.assertEqual(response.context['total_resultados'], 13)
+        self.assertNotContains(response, self.otro.nombre)
+        self.assertContains(response, 'aria-current="page"')
+        from urllib.parse import parse_qs
+        self.assertEqual(parse_qs(response.context['pagination_query']), {
+            'q': ['SQL'], 'categoria': [str(self.categoria.pk)],
+            'modalidad': [Curso.VIRTUAL], 'duracion': ['8 semanas'],
+        })
+        primera = self.client.get(reverse('cursos:listado'), {
+            key: value for key, value in filtros.items() if key != 'page'
+        })
+        self.assertEqual(primera.context['pagina'].number, 1)
+        self.assertEqual(len(primera.context['cursos']), 12)
+
+    def test_home_shows_four_active_courses_and_links_to_full_catalog(self):
+        response = self.client.get(reverse('home'))
+        self.assertEqual(len(response.context['cursos']), 4)
+        self.assertContains(response, 'Ver todos los cursos')
+        self.assertNotContains(response, 'SQL retirado')
+
+    def test_invalid_or_out_of_range_page_does_not_break_catalog(self):
+        for page in ('texto', '99999', '0'):
+            with self.subTest(page=page):
+                response = self.client.get(reverse('cursos:listado'), {'page': page})
+                self.assertEqual(response.status_code, 200)
+                self.assertTrue(response.context['cursos'])

@@ -1,9 +1,10 @@
-{% if curso.imagen %}
-  <div class="ien-course-cover{% if detalle %} ien-course-cover--detail{% endif %}">
-    <img src="{{ curso.imagen.url }}" alt=""{% if not detalle %} loading="lazy"{% endif %} decoding="async">
-  </div>
-{% elif not detalle %}
-  <div class="ien-course-cover ien-course-cover--placeholder" aria-hidden="true">
-    <span data-icon="graduation-cap" class="h-8 w-8"></span>
+{% if curso.imagen or not detalle %}
+  <div class="ien-course-cover{% if detalle %} ien-course-cover--detail{% endif %}" data-course-cover>
+    <span class="ien-course-cover-fallback" aria-hidden="true">
+      <span data-icon="graduation-cap" class="ien-course-cover-icon"></span>
+    </span>
+    {% if curso.imagen %}
+      <img src="{{ curso.imagen.url }}" alt=""{% if not detalle %} loading="lazy"{% endif %} decoding="async">
+    {% endif %}
   </div>
 {% endif %}
