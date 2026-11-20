@@ -33,10 +33,10 @@
         <span>Mi cuenta</span>
         <span class="ien-account-chevron" aria-hidden="true"></span>
       </summary>
-      <div class="ien-account-dropdown">
+      <div class="ien-account-dropdown ien-account-menu">
         <p class="ien-account-name">{{ user.first_name|default:'Administración' }}</p>
         <p class="ien-account-email">{{ user.email }}</p>
-        <form method="post" action="{% url 'logout' %}" class="form-logout">{% csrf_token %}<button type="submit" class="ien-account-logout"><span data-icon="log-out" class="h-4 w-4" aria-hidden="true"></span> Salir</button></form>
+        {% include 'nueva_ui/partials/_account_options.html' %}
       </div>
     </details>
   </div>

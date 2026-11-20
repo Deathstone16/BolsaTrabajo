@@ -1,0 +1,32 @@
+.ien-status-home { display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%; }
+.ien-status-layout { display: grid; place-items: center; min-height: calc(100dvh - 9rem); padding-block: 3rem; }
+.ien-status-card { width: 100%; max-width: 32rem; text-align: center; padding: clamp(1.25rem, 3vw, 2.25rem); }
+.ien-status-card h1 { margin-top: 1.25rem; font-size: clamp(1.7rem, 3.5vw, 2.2rem); font-weight: 800; line-height: 1.15; letter-spacing: -.04em; text-wrap: balance; }
+.ien-status-icon { width: 5rem; height: 5rem; margin-inline: auto; padding: .5rem; border-radius: 50%; color: #346444; background: #e9f1e6; }
+.ien-status-icon.is-pending { color: #251a43; background: #ffed9c; }
+.ien-status-icon.is-rejected { color: #a53548; background: #f9e5e6; }
+.ien-status-icon svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.ien-status-label { margin-top: 1rem; font-size: .8rem; font-weight: 600; color: #66532d; }
+.ien-status-label.is-success { color: #346444; }
+.ien-status-label.is-rejected { color: #a53548; }
+.ien-status-label + h1 { margin-top: .75rem; }
+.ien-status-description { margin-top: 1rem; font-size: .9rem; line-height: 1.75; color: #595367; }
+.ien-status-note { margin-top: 1rem; font-size: .8rem; line-height: 1.7; color: #595367; }
+.ien-status-detail { margin-top: 1.25rem; padding: 1rem; border: 1px solid #d6cba9; border-radius: .875rem; background: #f7efdf; text-align: left; overflow-wrap: anywhere; }
+.ien-status-detail.is-rejected { border-color: #dfafb8; background: #fff0ef; }
+.ien-status-detail h2 { font-size: .875rem; font-weight: 600; letter-spacing: 0; }
+.ien-status-detail p { margin-top: .5rem; font-size: .8rem; line-height: 1.8; color: #595367; white-space: pre-line; }
+.ien-status-actions { display: flex; flex-direction: column; align-items: stretch; gap: .875rem; margin-top: 1.5rem; }
+.ien-status-secondary { display: inline-flex; justify-content: center; align-items: center; gap: .5rem; font-size: .875rem; font-weight: 600; color: #512da8; }
+.ien-status-secondary:hover { text-decoration: underline; text-underline-offset: .25rem; }
+.ien-status-contact { margin-top: 1.25rem; }
+@media (prefers-reduced-motion: no-preference) {
+  .ien-status-icon { animation: ien-status-pop .55s cubic-bezier(.22, 1, .36, 1) both; }
+  .ien-status-ring { stroke-dasharray: 1; animation: ien-status-draw .65s ease-out both; transform: rotate(-90deg); transform-origin: center; }
+  .ien-status-mark, .ien-status-clock { stroke-dasharray: 1; animation: ien-status-draw .4s ease-out .5s both; }
+  .ien-status-clock { transform-origin: center; animation: ien-status-draw .4s ease-out .5s both, ien-status-clock-settle .6s ease-out .5s both; }
+}
+@keyframes ien-status-pop { from { opacity: 0; transform: scale(.75); } to { opacity: 1; transform: scale(1); } }
+@keyframes ien-status-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes ien-status-clock-settle { from { transform: rotate(-35deg); } to { transform: rotate(0); } }
+@media (max-width: 600px) { .ien-status-layout { min-height: calc(100dvh - 8rem); padding-block: 2rem; } }

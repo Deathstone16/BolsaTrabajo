@@ -1,0 +1,24 @@
+{% extends 'nueva_ui/base.html' %}
+
+{% block chrome_top %}{% endblock %}
+{% block chrome_bottom %}{% endblock %}
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static_v 'css/ui/auth.css' %}">
+  <link rel="stylesheet" href="{% static_v 'css/ui/status.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="ien-auth ien-status-page">
+  <header class="ien-auth-header">
+    <a href="{% url 'home' %}" class="ien-status-home">
+      <img src="{% static_v 'img/ien-trabajo.png' %}" alt="ien trabajo" width="138" height="46">
+      <span class="ien-auth-back"><span data-icon="arrow-left" aria-hidden="true"></span> Volver al inicio</span>
+    </a>
+  </header>
+  <div class="ien-status-layout">
+    <section class="ien-auth-card ien-status-card" aria-labelledby="status-title">
+      {% block status_content %}{% endblock %}
+    </section>
+  </div>
+</div>
+{% endblock %}

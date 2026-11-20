@@ -58,24 +58,22 @@
 
   <section class="ien-home-section ien-home-section-alt ien-home-courses-section" aria-labelledby="cursos-titulo">
     <div class="ien-home-container">
-      <form method="get" action="{% url 'cursos:listado' %}" class="ien-home-course-search" role="search" aria-label="Buscar cursos del IEN">
-        <div class="ien-section-heading">
-          <div>
-            <h2 id="cursos-titulo" class="ien-section-title">Cursos del IEN</h2>
-            <p class="ien-home-intro">Seguí desarrollando tus habilidades. Consultá los contenidos, la duración y la modalidad de las propuestas del IEN.</p>
-          </div>
-          <div class="ien-course-heading-actions">
-            <div class="ien-home-course-search-main">
-              <label class="sr-only" for="home-curso-q">Buscar cursos por título</label>
-              {{ filtros_cursos.q }}
-              <button type="submit" class="btn-ien"><span data-icon="search" class="h-4 w-4" aria-hidden="true"></span> Buscar</button>
-            </div>
-            {% if cursos %}<a href="{% url 'cursos:listado' %}" class="ien-text-link">Ver todos los cursos <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>{% endif %}
-          </div>
+      <div class="ien-course-section-heading">
+        <div>
+          <h2 id="cursos-titulo" class="ien-section-title">Cursos del IEN</h2>
+          <p class="ien-home-intro">Seguí desarrollando tus habilidades. Explorá los contenidos, la duración y la modalidad de cada propuesta.</p>
         </div>
-        <details class="ien-home-course-filter-options">
+        {% if cursos %}<a href="{% url 'cursos:listado' %}" class="btn-ghost ien-course-catalog-link">Ver todos los cursos <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>{% endif %}
+      </div>
+      <form method="get" action="{% url 'cursos:listado' %}" class="ien-home-course-search" role="search" aria-label="Buscar cursos del IEN">
+        <div class="ien-home-course-search-main">
+          <label class="sr-only" for="home-curso-q">Buscar cursos por título</label>
+          {{ filtros_cursos.q }}
+          <button type="submit" class="btn-ien"><span data-icon="search" class="h-4 w-4" aria-hidden="true"></span> Buscar</button>
+        </div>
+        <details class="ien-home-course-filter-options" data-course-filters>
           <summary><span data-icon="sliders" class="h-4 w-4" aria-hidden="true"></span> Filtros de cursos</summary>
-          <div class="ien-home-course-filter-fields">
+          <div class="ien-home-course-filter-fields" data-course-filter-panel>
             {% for field in filtros_cursos %}
               {% if field.name != 'q' %}
                 <div>
@@ -120,6 +118,49 @@
     </div>
   </section>
 
+  <section class="ien-home-section ien-landing-companies" aria-labelledby="empresas-pasos-titulo">
+    <div class="ien-home-container">
+      <h2 id="empresas-pasos-titulo" class="ien-section-title">Cómo publicar ofertas como empresa</h2>
+      <p class="ien-home-intro">Presentá tu empresa y compartí tus oportunidades laborales con la comunidad del IEN.</p>
+      <div class="ien-steps-grid">
+        <article class="ien-step">
+          <span class="ien-step-number">01</span>
+          <h3>Registrá tu empresa</h3>
+          <p>Creá tu cuenta de oferente con los datos de la empresa y de la persona responsable del contacto.</p>
+          {% if user.is_authenticated and user.oferente %}
+            <a href="{% url 'editar_perfil_empresa' %}" class="btn-ghost ien-step-link"><span class="ien-step-link-label">Ir a Mi empresa</span> <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+          {% else %}
+            <a href="{% url 'registro' %}?tipo=oferente" class="btn-ghost ien-step-link"><span class="ien-step-link-label">Registrar empresa</span> <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+          {% endif %}
+        </article>
+        <article class="ien-step">
+          <span class="ien-step-number">02</span>
+          <h3>Completá tu perfil</h3>
+          <p>Agregá la descripción, el logo, la portada y los datos de contacto. El equipo del IEN revisará tu empresa para habilitar la publicación de ofertas.</p>
+          {% if user.is_authenticated and user.oferente %}
+            <a href="{% url 'editar_perfil_empresa' %}" class="btn-ghost ien-step-link"><span class="ien-step-link-label">Completar perfil de empresa</span> <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+          {% else %}
+            <a href="{% url 'login' %}" class="btn-ghost ien-step-link"><span class="ien-step-link-label">Ingresar como empresa</span> <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+          {% endif %}
+        </article>
+        <article class="ien-step">
+          <span class="ien-step-number">03</span>
+          <h3>Publicá y gestioná tus ofertas</h3>
+          <p>Una vez aprobada tu empresa, publicá los puestos con sus requisitos y modalidad. Desde Mis ofertas podés consultar y administrar tus publicaciones.</p>
+          {% if user.is_authenticated and user.oferente %}
+            {% if user.oferente.puede_publicar %}
+              <a href="{% url 'crear_oferta' %}" class="btn-ghost ien-step-link"><span class="ien-step-link-label">Publicar una oferta</span> <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+            {% else %}
+              <a href="{% url 'validacion_pendiente' %}" class="btn-ghost ien-step-link"><span class="ien-step-link-label">Consultar estado de la empresa</span> <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+            {% endif %}
+          {% else %}
+            <a href="{% url 'login' %}" class="btn-ghost ien-step-link"><span class="ien-step-link-label">Ingresar para publicar</span> <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+          {% endif %}
+        </article>
+      </div>
+    </div>
+  </section>
+
   <section class="ien-home-section ien-home-section-alt ien-landing-offers" aria-labelledby="ofertas-titulo">
     <div class="ien-home-container">
       <div class="ien-section-heading">
@@ -143,8 +184,8 @@
               {% if oferta.ubicacion %}<span>{{ oferta.ubicacion }}</span>{% endif %}
               <span class="chip">{{ oferta.get_modalidad_display }}</span>
             </div>
-            <a href="{% url 'detalle_oferta' oferta.pk %}" class="btn-ghost" aria-label="Ver oferta: {{ oferta.titulo }}">
-              Ver oferta <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span>
+            <a href="{% url 'detalle_oferta' oferta.pk %}" class="btn-ghost ien-step-link" aria-label="Ver oferta: {{ oferta.titulo }}">
+              <span class="ien-step-link-label">Ver oferta</span> <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span>
             </a>
           </article>
         {% empty %}

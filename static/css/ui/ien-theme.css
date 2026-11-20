@@ -432,6 +432,12 @@ main select:not([multiple], [size]:not([size="1"])):enabled { cursor: pointer; }
   line-height: 1.4;
 }
 .ien-header-account-link > [data-icon] { flex-shrink: 0; }
+.ien-account-options { margin-top: .75rem; padding-top: .5rem; border-top: 1px solid var(--border); }
+.ien-account-options-logout { margin-top: .5rem; border-top: 1px solid var(--border); }
+.ien-account-options-logout button { width: 100%; text-align: start; cursor: pointer; }
+.ien-account-menu { max-height: calc(100dvh - 6rem); overflow-y: auto; overscroll-behavior: contain; }
+#global-nav .nav-mobile { max-height: calc(100dvh - 4.5rem); overflow-y: auto; overscroll-behavior: contain; }
+.nav-mobile .ien-account-menu { max-height: none; overflow: visible; }
 .ien-postulante-account .form-logout {
   margin-top: .375rem;
   border-top: 1px solid var(--border);
@@ -458,6 +464,17 @@ main select:not([multiple], [size]:not([size="1"])):enabled { cursor: pointer; }
 #global-nav .nav-burger[aria-expanded="true"] {
   border-color: var(--primary);
   background: #512da81a;
+}
+.ien-burger-lines { position: relative; display: block; width: 20px; height: 18px; }
+.ien-burger-lines > span { position: absolute; left: 0; width: 20px; height: 2px; border-radius: 2px; background: currentColor; transition: transform .24s ease, opacity .16s ease; }
+.ien-burger-lines > span:nth-child(1) { top: 2px; }
+.ien-burger-lines > span:nth-child(2) { top: 8px; }
+.ien-burger-lines > span:nth-child(3) { top: 14px; }
+.nav-burger[aria-expanded="true"] .ien-burger-lines > span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.nav-burger[aria-expanded="true"] .ien-burger-lines > span:nth-child(2) { opacity: 0; transform: scaleX(.5); }
+.nav-burger[aria-expanded="true"] .ien-burger-lines > span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+@media (prefers-reduced-motion: reduce) {
+  .ien-burger-lines > span { transition: none; }
 }
 @media (max-width: 767px) {
   #global-nav .nav-burger { display: grid; }
@@ -1586,3 +1603,31 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
   .ien-postulante-layout { grid-template-columns: 16rem minmax(0, 1fr); align-items: start; }
 }
 @media (prefers-reduced-motion: reduce) { .ien-postulante-nav-link { transition: none; } }
+
+/* Contacto institucional y crédito de desarrollo. */
+.ien-footer { background: #211437; color: #f7f1ff; border-top: 1px solid #ffffff14; }
+.ien-footer-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, .8fr) minmax(0, 1.1fr); gap: clamp(2rem, 5vw, 5rem); padding-block: clamp(2.5rem, 6vw, 4.5rem); }
+.ien-footer-brand { display: inline-flex; align-items: center; gap: .625rem; color: white; font-size: 1.25rem; font-weight: 700; }
+.ien-footer-brand img { width: 44px; height: 44px; object-fit: contain; border-radius: 50%; box-shadow: 0 0 0 1px #ffffff26; }
+.ien-footer-intro > p { max-width: 32ch; margin-top: 1rem; color: #d6cbe6; font-size: .875rem; line-height: 1.8; }
+.ien-footer h2 { margin-bottom: .5rem; font-size: .8125rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #ffde59; }
+.ien-footer-links, .ien-footer-contact { display: flex; flex-direction: column; align-items: start; gap: .65rem; }
+.ien-footer-links > a, .ien-footer-contact > a, .ien-footer-contact > p { display: inline-flex; align-items: center; gap: .6rem; min-height: 2rem; color: #e4daef; font-size: .875rem; line-height: 1.6; }
+.ien-footer [data-icon] { width: 1.125rem; height: 1.125rem; flex-shrink: 0; }
+.ien-footer-social { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1.5rem; }
+.ien-footer-social a { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; padding: .65rem .85rem; border: 1px solid #ffffff30; border-radius: .75rem; font-size: .8125rem; }
+.ien-footer-contact > .ien-footer-whatsapp { min-height: 2.75rem; margin-top: .5rem; padding: .65rem .9rem; border-radius: .75rem; background: #ffffff0d; border: 1px solid #ffffff30; }
+.ien-footer a { transition: color .2s ease, border-color .2s ease, background .2s ease; }
+.ien-footer a:hover { color: #ffde59; }
+.ien-footer-social a:hover, .ien-footer-whatsapp:hover { border-color: #ffde5970; background: #ffde590d; }
+.ien-footer a:focus-visible { outline: 2px solid #ffde59; outline-offset: 4px; border-radius: .25rem; }
+.ien-footer-bottom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1.5rem; border-top: 1px solid #ffffff24; color: #c8badb; font-size: .75rem; line-height: 1.8; }
+.ien-footer-bottom p > a { color: #efe4ff; }
+@media (max-width: 767px) {
+  .ien-footer-grid { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+  .ien-footer-intro > p { max-width: 40ch; }
+  .ien-footer-bottom { align-items: start; flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ien-footer a { transition: none; }
+}

@@ -52,6 +52,8 @@ body:has(.ien-home) #global-nav {
 }
 
 .ien-home .ien-landing-steps { background: #e9f1e6; }
+.ien-home .ien-landing-companies { background: #f7efdf; border-top: 1px solid #251a431a; }
+.ien-home .ien-landing-companies .ien-step-number { background: #e7ddf6; }
 .ien-home .ien-landing-offers { background: #ebe5f7; }
 .ien-home .ien-home-section-alt { border-color: #251a431a; }
 
@@ -90,9 +92,9 @@ body:has(.ien-home) #global-nav {
 .ien-home .ien-step h3 { color: var(--landing-ink); }
 
 @media (min-width: 768px) {
-  .ien-home .ien-step { position: relative; }
+  .ien-home :is(.ien-step, .ien-home-offer) { position: relative; }
   .ien-home .ien-step p { margin-bottom: 1rem; }
-  .ien-home .ien-step .ien-step-link {
+  .ien-home :is(.ien-step, .ien-home-offer) .ien-step-link {
     align-self: flex-end;
     padding: 0;
     border: 0;
@@ -112,7 +114,7 @@ body:has(.ien-home) #global-nav {
     inset: 0;
     border-radius: 1.15rem;
   }
-  .ien-home .ien-step .ien-step-link:focus-visible { outline: none; }
+  .ien-home :is(.ien-step, .ien-home-offer) .ien-step-link:focus-visible { outline: none; }
   .ien-step-link:focus-visible::after {
     outline: 2px solid var(--primary);
     outline-offset: 4px;
@@ -120,25 +122,24 @@ body:has(.ien-home) #global-nav {
 }
 
 @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
-  .ien-home .ien-step:hover {
+  .ien-home :is(.ien-step, .ien-home-offer):is(:hover, :focus-within) {
     border-color: var(--primary);
     box-shadow: 0 4px 0 #512da82b, 0 18px 32px -18px #43218f66;
   }
 }
 
 @media (min-width: 768px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .ien-home .ien-step {
+  .ien-home :is(.ien-step, .ien-home-offer) {
     transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
   }
-  .ien-home .ien-step:hover { transform: translateY(-4px); }
+  .ien-home :is(.ien-step, .ien-home-offer):is(:hover, :focus-within) { transform: translateY(-4px); }
   .ien-step-link [data-icon] { transition: transform .2s ease; }
-  .ien-home .ien-step:hover .ien-step-link [data-icon] { transform: translateX(4px); }
+  .ien-home :is(.ien-step, .ien-home-offer):is(:hover, :focus-within) .ien-step-link [data-icon] { transform: translateX(4px); }
 }
 
-.ien-home .ien-home-offer {
-  box-shadow: 0 4px 0 -1px #d9ccee, 0 5px 0 var(--landing-outline),
-              0 9px 0 -1px #e4d9f4, 0 10px 0 #83749c80;
-}
+.ien-home .ien-home-offers { gap: clamp(1.2rem, 3vw, 2.5rem); }
+.ien-home .ien-home-offer h3 { font-size: 1.125rem; line-height: 1.4; }
+.ien-home .ien-home-offer .ien-step-link { margin-top: auto; }
 .ien-home .ien-home-offer .ien-offer-avatar { border-color: #251a4326; }
 .ien-home .ien-landing-offers .btn-ghost {
   border-color: var(--landing-outline);
@@ -165,5 +166,55 @@ body:has(.ien-home) #global-nav {
     min-height: 2.5rem;
   }
   .ien-home .ien-step h3 { margin-top: 0.65rem; }
-  .ien-home .ien-step .ien-step-link { min-height: 2.75rem; padding: .6rem 1rem; }
+  .ien-home :is(.ien-step, .ien-home-offer) .ien-step-link { min-height: 2.75rem; padding: .6rem 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ien-home :is(.ien-step, .ien-home-offer), .ien-step-link [data-icon] {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* Cursos: encabezado y herramientas agrupados antes de las propuestas. */
+.ien-home .ien-home-courses-section { padding-block: clamp(2.5rem, 4.5vw, 4rem); }
+.ien-course-section-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.25rem 2rem; }
+.ien-course-section-heading > div { flex: 1 1 24rem; }
+.ien-course-section-heading .ien-section-title { margin-top: 0; font-size: clamp(1.9rem, 3.5vw, 2.75rem); }
+.ien-course-section-heading .ien-home-intro { max-width: 62ch; margin-top: .75rem; font-size: .9375rem; line-height: 1.7; }
+.ien-course-catalog-link { flex-shrink: 0; min-height: 2.75rem; padding: .6rem .9rem; font-size: .8125rem; border-color: #d7c7eb; background: #fffdfd; }
+.ien-home .ien-home-course-search { position: relative; z-index: 5; display: flex; align-items: center; gap: .75rem; margin-top: 1.5rem; padding: .75rem; border: 1px solid #e1d6ed; border-radius: 1.125rem; background: #fffdfdbf; }
+.ien-home-course-search-main { flex: 1 1 20rem; min-width: 0; }
+.ien-home-course-search-main .input-ien { flex: 1; min-width: 0; background: white; }
+.ien-home-course-search-main .btn-ien { box-shadow: none; }
+.ien-home-course-filter-options { flex: 0 0 auto; }
+.ien-home-course-filter-options summary { margin: 0; min-height: 2.75rem; white-space: nowrap; }
+.ien-home-course-filter-options summary::after { transition: transform .2s ease; }
+.ien-home-course-filter-options summary[aria-expanded="false"]::after { transform: rotate(45deg); }
+.ien-home-course-filter-options summary[aria-expanded="true"]::after { transform: translateY(.2rem) rotate(225deg); }
+.ien-home .ien-home-course-filter-fields { position: absolute; z-index: 10; inset-inline: 0; top: calc(100% + .5rem); margin-top: 0; padding: 1.25rem; background: #fffdfd; border-color: #d7c7eb; box-shadow: 0 12px 32px -12px #251a4340; }
+@supports selector(details::details-content) {
+  .ien-home-course-filter-options[data-course-filters]::details-content { block-size: auto; overflow: visible; opacity: 1; transition: none; }
+}
+.ien-home .ien-home-course-preview { grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 1.25rem; margin-top: 1.5rem; }
+@media (min-width: 768px) {
+  .ien-home-course-preview > .ien-course-card:only-child { display: grid; grid-template-columns: minmax(0, .75fr) minmax(0, 1.25fr); }
+  .ien-home-course-preview > .ien-course-card:only-child .ien-course-card-media { display: flex; flex-direction: column; padding: .75rem .75rem 2.75rem; }
+  .ien-home-course-preview > .ien-course-card:only-child .ien-course-cover { flex: 1; width: 100%; max-height: none; min-height: 13rem; aspect-ratio: auto; }
+  .ien-home-course-preview > .ien-course-card:only-child .ien-course-card-body { margin-top: 0; padding: 1.5rem 1.75rem; border: 0; border-radius: 0; }
+  .ien-home-course-preview > .ien-course-card:only-child h3 { font-size: clamp(1.15rem, 2vw, 1.4rem); }
+  .ien-home-course-preview > .ien-course-card:only-child .ien-course-details { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+}
+@media (max-width: 767px) {
+  .ien-course-section-heading { align-items: start; gap: 1rem; }
+  .ien-course-section-heading > div { flex-basis: 100%; }
+  .ien-home .ien-home-course-search { flex-wrap: wrap; padding: .625rem; }
+  .ien-home-course-search-main { flex-basis: 100%; }
+  .ien-home-course-filter-options { width: 100%; }
+  .ien-home-course-filter-options summary { width: 100%; justify-content: center; }
+  .ien-home .ien-home-course-filter-fields { max-height: min(26rem, 65dvh); overflow-y: auto; }
+  .ien-home .ien-home-course-preview { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ien-home-course-filter-options summary::after { transition: none; }
 }

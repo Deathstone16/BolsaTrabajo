@@ -124,13 +124,16 @@ class ModeracionOfertasTests(TestCase):
         self.assertNotContains(response, 'Empresa Validada')
         self.assertContains(response, reverse('crear_oferta'))
 
-    def test_empresa_aprobada_no_ve_pantalla_pendiente(self):
+    def test_empresa_aprobada_ve_confirmacion_y_acceso_a_publicar(self):
         empresa = Oferente.objects.get(nombre_empresa='Empresa de prueba')
         self.client.force_login(empresa.usuario)
 
         response = self.client.get(reverse('validacion_pendiente'))
 
-        self.assertRedirects(response, reverse('dashboard_empresa'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Tu empresa ya puede publicar')
+        self.assertContains(response, reverse('crear_oferta'))
+        self.assertNotContains(response, 'Pendiente de verificación')
 
     @override_settings(
         EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',

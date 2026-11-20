@@ -1,0 +1,12 @@
+<div class="ien-status-icon{% if estado == 'pendiente' %} is-pending{% elif estado == 'rechazado' %} is-rejected{% else %} is-success{% endif %}" aria-hidden="true">
+  <svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <circle class="ien-status-ring" cx="40" cy="40" r="34" pathLength="1"/>
+    {% if estado == 'pendiente' %}
+      <path class="ien-status-clock" d="M40 21v19l12 8" pathLength="1"/>
+    {% elif estado == 'rechazado' %}
+      <path class="ien-status-mark" d="m29 29 22 22m0-22L29 51" pathLength="1"/>
+    {% else %}
+      <path class="ien-status-mark" d="m24 40 11 11 23-24" pathLength="1"/>
+    {% endif %}
+  </svg>
+</div>

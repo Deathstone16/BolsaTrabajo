@@ -11,17 +11,10 @@
     <span class="ien-header-user-name">{{ user.first_name|default:'Mi cuenta' }}</span>
     <span class="ien-account-chevron" aria-hidden="true"></span>
   </summary>
-  <div class="ien-account-dropdown">
+  <div class="ien-account-dropdown ien-account-menu">
     <p class="ien-account-name">{{ user.get_full_name|default:'Mi cuenta' }}</p>
     <p class="ien-account-email">{{ user.email }}</p>
-    {% if user.postulante %}
-      <a class="ien-header-account-link" href="{% url 'mi_perfil' %}"{% if route == 'mi_perfil' or route == 'datos_personales' or namespace == 'ia' %} aria-current="location"{% endif %}><span data-icon="user" class="h-4 w-4" aria-hidden="true"></span> Mi perfil</a>
-      <a class="ien-header-account-link" href="{% url 'favoritos' %}"{% if route == 'favoritos' %} aria-current="page"{% endif %}><span data-icon="bookmark" class="h-4 w-4" aria-hidden="true"></span> Favoritos</a>
-    {% endif %}
-    <form method="post" action="{% url 'logout' %}" class="form-logout">
-      {% csrf_token %}
-      <button type="submit" class="ien-header-account-link"><span data-icon="log-out" class="h-4 w-4" aria-hidden="true"></span> Cerrar sesión</button>
-    </form>
+    {% include 'nueva_ui/partials/_account_options.html' %}
   </div>
 </details>
 {% endwith %}

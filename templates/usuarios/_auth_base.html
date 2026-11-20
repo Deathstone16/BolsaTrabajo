@@ -1,0 +1,45 @@
+{% extends 'nueva_ui/base.html' %}
+
+{% block chrome_top %}{% endblock %}
+{% block chrome_bottom %}{% endblock %}
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static_v 'css/ui/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="ien-auth">
+  <header class="ien-auth-header">
+    <a href="{% url 'home' %}" aria-label="IEN Trabajo · Inicio">
+      <img src="{% static_v 'img/ien-trabajo.png' %}" alt="ien trabajo" width="138" height="46">
+    </a>
+    <a href="{% url 'home' %}" class="ien-auth-back"><span data-icon="arrow-left" aria-hidden="true"></span> Volver al inicio</a>
+  </header>
+
+  <div class="ien-auth-layout">
+    <section class="ien-auth-story" aria-labelledby="auth-title">
+      {% if tipo == 'oferente' %}
+        <h1 id="auth-title">El próximo talento de tu empresa <span>está acá.</span></h1>
+        <p>Conectá con la comunidad del IEN y encontrá personas para hacer crecer tu equipo.</p>
+      {% else %}
+        <h1 id="auth-title">Tu próximo paso <span>empieza acá.</span></h1>
+        <p>Un espacio para conectar lo que sabés con nuevas oportunidades de trabajo y formación.</p>
+      {% endif %}
+      <ul class="ien-auth-benefits">
+        {% if tipo == 'oferente' %}
+          <li><span data-icon="building" aria-hidden="true"></span><div><strong>Presentá tu empresa</strong><span>Compartí quiénes son y qué buscan.</span></div></li>
+          <li><span data-icon="briefcase" aria-hidden="true"></span><div><strong>Publicá tus oportunidades</strong><span>Creá ofertas una vez aprobada tu empresa.</span></div></li>
+          <li><span data-icon="users" aria-hidden="true"></span><div><strong>Gestioná tus búsquedas</strong><span>Consultá tus publicaciones desde un solo lugar.</span></div></li>
+        {% else %}
+          <li><span data-icon="user" aria-hidden="true"></span><div><strong>Mostrá tu experiencia</strong><span>Completá tu perfil y compartí tus habilidades.</span></div></li>
+          <li><span data-icon="briefcase" aria-hidden="true"></span><div><strong>Encontrá oportunidades</strong><span>Explorá ofertas para tu próximo paso laboral.</span></div></li>
+          <li><span data-icon="graduation-cap" aria-hidden="true"></span><div><strong>Seguí aprendiendo</strong><span>Conocé las propuestas de formación del IEN.</span></div></li>
+        {% endif %}
+      </ul>
+    </section>
+
+    <section class="ien-auth-card" aria-label="Acceso a IEN Trabajo">
+      {% block auth_form %}{% endblock %}
+    </section>
+  </div>
+</div>
+{% endblock %}

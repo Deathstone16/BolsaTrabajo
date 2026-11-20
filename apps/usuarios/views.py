@@ -128,10 +128,11 @@ def datos_personales(request):
 
 
 @login_required
-@postulante_required
 def perfil_oferente(request, pk):
-    """Muestra el perfil público de una empresa aprobada."""
+    """Permite al postulante consultar empresas y al oferente ver su propio perfil."""
     oferente = get_object_or_404(Oferente, pk=pk)
+    if not (request.user.is_staff or hasattr(request.user, 'postulante') or oferente.usuario_id == request.user.pk):
+        return redirect('home')
     ofertas = oferente.usuario.oferta_set.filter(estado='activa', es_confidencial=False)
     return render(request, 'Ofertas/perfil_oferente_publico.html', {
         'oferente': oferente,

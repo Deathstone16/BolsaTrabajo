@@ -27,17 +27,80 @@ class NavegacionOferenteTests(TestCase):
                                contacto_nombre='Responsable Demo', contacto_cargo='RRHH', correo_publico='rrhh@example.com')
         return user
 
+    def test_estado_pendiente_no_habilita_publicar(self):
+        self.client.force_login(self.crear_oferente('pendiente'))
+        response = self.client.get(reverse('validacion_pendiente'))
+        self.assertContains(response, 'Tu empresa está siendo revisada')
+        self.assertContains(response, reverse('editar_perfil_empresa'))
+        self.assertNotContains(response, 'href="' + reverse('crear_oferta') + '"')
+
+    def test_rechazo_muestra_motivo_y_acceso_a_corregir(self):
+        user = self.crear_oferente('rechazado')
+        empresa = user.oferente
+        empresa.motivo_rechazo = 'Verificá el CUIT <documento>'
+        empresa.save(update_fields=['motivo_rechazo'])
+        self.client.force_login(user)
+        response = self.client.get(reverse('validacion_pendiente'))
+        self.assertContains(response, 'Tu registro fue rechazado')
+        self.assertContains(response, 'Verificá el CUIT &lt;documento&gt;')
+        self.assertContains(response, 'Corregir datos y reenviar')
+        self.assertNotContains(response, 'href="' + reverse('crear_oferta') + '"')
+
     def test_menu_aprobado_tiene_las_mismas_acciones_en_escritorio_y_movil(self):
         html = self.render_nav(self.crear_oferente())
         for label in ('Mis ofertas', 'Publicar oferta', 'Mi empresa', 'Mi cuenta'):
-            self.assertEqual(html.count('>' + label + '<') + html.count('> ' + label + '<'), 2)
-        self.assertEqual(html.count('href="' + reverse('crear_oferta') + '"'), 2)
+            esperado = 4 if label in ('Mis ofertas', 'Publicar oferta') else 2
+            self.assertEqual(html.count('>' + label + '<') + html.count('> ' + label + '<'), esperado)
+        self.assertEqual(html.count('href="' + reverse('crear_oferta') + '"'), 4)
         self.assertEqual(html.count('<details class="ien-employer-account">'), 2)
         self.assertNotIn('>Inicio</a>', html)
         self.assertNotIn('>Cursos</a>', html)
         self.assertNotIn('>Mi panel</a>', html)
         self.assertNotIn('>Buscar empleo</a>', html)
         self.assertIn('aria-current="page">Mis ofertas', html)
+
+    def test_dropdown_oferente_incluye_perfil_edicion_y_gestion(self):
+        user = self.crear_oferente()
+        request = RequestFactory().get('/')
+        request.user = user
+        html = render_to_string('nueva_ui/partials/_account_options.html', request=request)
+        for url in (reverse('perfil_oferente', args=[user.oferente.pk]),
+                    reverse('editar_perfil_empresa'), reverse('dashboard_empresa'),
+                    reverse('crear_oferta'), reverse('logout')):
+            self.assertIn(url, html)
+        self.assertNotIn(reverse('favoritos'), html)
+        self.assertNotIn(reverse('mod_listar_empresas'), html)
+
+    def test_dropdown_admin_incluye_toda_la_gestion(self):
+        user = Usuario.objects.create_user(email='admin-menu@example.com', is_staff=True)
+        request = RequestFactory().get('/')
+        request.user = user
+        html = render_to_string('nueva_ui/partials/_account_options.html', request=request)
+        for name in ('mod_listar_empresas', 'mod_listar_ofertas', 'mod_listar_cursos',
+                     'mod_listar_categorias', 'mod_solicitudes_empresas', 'logout'):
+            self.assertIn(reverse(name), html)
+        self.assertNotIn(reverse('admin:index'), html)
+        self.assertNotIn(reverse('mi_perfil'), html)
+
+    def test_dropdown_postulante_incluye_sus_secciones(self):
+        user = Usuario.objects.create_user(email='dropdown-postulante@example.com')
+        Postulante.objects.create(usuario=user)
+        request = RequestFactory().get('/')
+        request.user = user
+        html = render_to_string('nueva_ui/partials/_account_options.html', request=request)
+        for name in ('mi_perfil', 'ia:perfil_profesional', 'datos_personales', 'favoritos', 'logout'):
+            self.assertIn(reverse(name), html)
+        self.assertIn(reverse('mi_perfil') + '#cv-analysis', html)
+        self.assertNotIn(reverse('mod_listar_empresas'), html)
+        self.assertNotIn(reverse('crear_oferta'), html)
+
+    def test_oferente_puede_ver_su_perfil_pero_no_el_de_otra_empresa(self):
+        user = self.crear_oferente()
+        self.client.force_login(user)
+        self.assertContains(self.client.get(reverse('perfil_oferente', args=[user.oferente.pk])), user.oferente.nombre_empresa)
+        otro = Usuario.objects.create_user(email='otra-empresa-menu@example.com')
+        empresa = Oferente.objects.create(usuario=otro, nombre_empresa='Otra empresa', cuit='30-12345678-1')
+        self.assertRedirects(self.client.get(reverse('perfil_oferente', args=[empresa.pk])), reverse('home'))
 
     def test_empresa_pendiente_puede_editar_perfil_pero_no_publicar(self):
         html = self.render_nav(self.crear_oferente('pendiente'), reverse('validacion_pendiente'))
