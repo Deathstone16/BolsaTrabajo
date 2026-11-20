@@ -14,9 +14,10 @@
   <link rel="stylesheet" href="{% static_v 'css/ui/ien-theme.css' %}" />
   <link rel="stylesheet" href="{% static_v 'css/style.css' %}" />
   {% if cv_notification_token %}<link rel="stylesheet" href="{% static_v 'css/ui/cv-analysis.css' %}" />{% endif %}
+  <link rel="stylesheet" href="{% static_v 'css/ui/application.css' %}" />
   {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-[#F8F3F0] text-[#26222E] antialiased">
+<body class="{% block body_class %}ien-app-page{% endblock %} antialiased">
 
   {% comment %}
     Las pantallas de login y registro del diseno ocupan el alto completo y no
@@ -30,7 +31,7 @@
     {% include 'nueva_ui/partials/_cv_background_progress.html' %}
   {% endblock %}
 
-  <main>
+  <main class="ien-page-content">
     {% comment %}
       Los mensajes de Django salen como avisos flotantes (IenUI.aviso en
       static/js/ui/ien-ui.js). Van en JSON para no depender del markup; escapejs

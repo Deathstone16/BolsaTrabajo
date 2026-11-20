@@ -184,8 +184,8 @@ class PasswordResetRequestForm(forms.Form):
         label="Email",
         max_length=254,
         widget=forms.EmailInput(attrs={
-            'class': 'w-full px-4 py-2 rounded-lg border border-border bg-input-background '
-                     'focus:outline-none focus:ring-2 focus:ring-primary/30',
+            'class': 'input-ien',
+            'autocomplete': 'email',
             'placeholder': 'tu@email.com',
             'autofocus': True,
         })
@@ -209,8 +209,8 @@ class SetPasswordForm(DjangoSetPasswordForm):
         label="Nueva contraseña",
         strip=False,
         widget=forms.PasswordInput(attrs={
-            'class': 'w-full px-4 py-2 rounded-lg border border-border bg-input-background '
-                     'focus:outline-none focus:ring-2 focus:ring-primary/30 pr-10',
+            'class': 'input-ien password-input',
+            'autocomplete': 'new-password',
             'placeholder': 'Mínimo 8 caracteres',
             'id': 'nueva_contrasena',
         }),
@@ -219,8 +219,8 @@ class SetPasswordForm(DjangoSetPasswordForm):
         label="Confirmar contraseña",
         strip=False,
         widget=forms.PasswordInput(attrs={
-            'class': 'w-full px-4 py-2 rounded-lg border border-border bg-input-background '
-                     'focus:outline-none focus:ring-2 focus:ring-primary/30 pr-10',
+            'class': 'input-ien password-input',
+            'autocomplete': 'new-password',
             'placeholder': 'Repetí la contraseña',
             'id': 'confirmar_contrasena',
         }),

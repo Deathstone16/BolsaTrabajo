@@ -1,4 +1,5 @@
 {% extends 'nueva_ui/base.html' %}
+{% block body_class %}ien-access-page{% endblock %}
 
 {% block chrome_top %}{% endblock %}
 {% block chrome_bottom %}{% endblock %}
@@ -17,6 +18,7 @@
 
   <div class="ien-auth-layout">
     <section class="ien-auth-story" aria-labelledby="auth-title">
+      {% block auth_story %}
       {% if tipo == 'oferente' %}
         <h1 id="auth-title">El próximo talento de tu empresa <span>está acá.</span></h1>
         <p>Conectá con la comunidad del IEN y encontrá personas para hacer crecer tu equipo.</p>
@@ -35,6 +37,7 @@
           <li><span data-icon="graduation-cap" aria-hidden="true"></span><div><strong>Seguí aprendiendo</strong><span>Conocé las propuestas de formación del IEN.</span></div></li>
         {% endif %}
       </ul>
+      {% endblock %}
     </section>
 
     <section class="ien-auth-card" aria-label="Acceso a IEN Trabajo">

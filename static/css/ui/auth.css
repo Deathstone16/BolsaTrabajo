@@ -68,3 +68,4 @@
   .ien-auth-card { padding: 1.25rem; }
   .ien-auth-card form > .grid > div { grid-column: 1 / -1; }
 }
+.ien-auth-errors { padding: 1rem; border: 1px solid #dfafb8; border-radius: .75rem; background: #fff0ef; color: #a53548; font-size: .875rem; line-height: 1.7; }

@@ -13,12 +13,12 @@
         {% include "nueva_ui/partials/_breadcrumbs.html" with current="Buscar empleo" only %}
 
       <form method="get" action="{% url 'buscar_empleo' %}"
-            class="mt-8 flex max-w-3xl flex-col gap-2 rounded-3xl border border-[rgba(110,85,55,0.16)] bg-white p-2.5 shadow-[0_24px_60px_-30px_rgba(81,45,168,0.3)] sm:flex-row sm:items-center">
+            class="ien-job-search mt-8 flex max-w-3xl flex-col gap-2 rounded-3xl border border-[rgba(110,85,55,0.16)] bg-white p-2.5 shadow-[0_24px_60px_-30px_rgba(81,45,168,0.3)] sm:flex-row sm:items-center">
         {# Se arrastran los filtros activos para no perderlos al buscar por texto #}
         <input type="hidden" name="modalidad" value="{{ modalidad }}" />
         <input type="hidden" name="experiencia" value="{{ experiencia }}" />
         <input type="hidden" name="ubicacion" value="{{ ubicacion }}" />
-        <div class="flex flex-1 items-center gap-3 rounded-2xl bg-[#F3EDE5] px-4 py-3">
+        <div class="ien-job-search-field flex flex-1 items-center gap-3 rounded-2xl bg-[#F3EDE5] px-4 py-3">
           <span data-icon="search" class="h-5 w-5 shrink-0 text-[#512DA8]"></span>
           <input type="search" name="q" value="{{ busqueda }}" aria-label="Buscar por título, empresa o palabra clave, como Python o Excel"
                 placeholder="Buscar por título, empresa o palabra clave…"

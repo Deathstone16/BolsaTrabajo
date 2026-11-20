@@ -3,7 +3,7 @@
 {% block content %}
 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
 
-  <div class="mb-8 flex justify-between items-center">
+  <div class="mb-8 flex flex-wrap gap-4 justify-between items-center">
     <div>
       <h1 class="text-3xl font-bold tracking-tight text-[#26222E] mb-2">Habilidades — {{ categoria.nombre }}</h1>
         {% include "nueva_ui/partials/_breadcrumbs.html" with current=categoria.nombre parent_url="mod_listar_categorias" parent_label="Categorías" only %}
@@ -16,7 +16,7 @@
     </a>
   </div>
 
-  <div class="panel p-6">
+  <div class="ien-table-scroll panel p-6">
     <table class="w-full text-sm">
       <thead>
         <tr class="border-b border-border">

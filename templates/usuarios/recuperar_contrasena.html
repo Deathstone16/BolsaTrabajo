@@ -1,43 +1,22 @@
-{% extends 'nueva_ui/base.html' %}
-
-{% block content %}
-<div class="min-h-screen flex items-center justify-center bg-accent px-4">
-  <div class="panel w-full max-w-md p-8 space-y-6">
-
-    <div class="text-center space-y-2">
-      <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto">
-        <span data-icon="lock-keyhole" class="h-6 w-6 text-primary"></span>
-      </div>
-      <h1 class="text-2xl font-bold tracking-tight text-[#26222E]">Recuperar contraseña</h1>
-      <p class="text-muted-foreground text-sm">
-        Ingresá tu email y te enviamos un enlace para restablecer tu contraseña.
-      </p>
-    </div>
-
+{% extends 'usuarios/_auth_base.html' %}
+{% block title %}Recuperar contraseña · IEN Trabajo{% endblock %}
+{% block auth_story %}
+  <h1 id="auth-title">Volvé a conectar con tu <span>próximo paso.</span></h1>
+  <p>Recuperá el acceso a tu cuenta para seguir con tus búsquedas y oportunidades.</p>
+{% endblock %}
+{% block auth_form %}
+  <h2>Recuperar contraseña</h2>
+  <p class="ien-auth-form-intro">Ingresá tu email y te enviamos un enlace para restablecer tu contraseña.</p>
+  <form method="post" class="mt-6 space-y-5">
+    {% csrf_token %}
     {% if form.errors %}
-      <div class="bg-destructive/10 text-destructive text-sm rounded-lg px-4 py-3">
-        {% for field in form %}{% for error in field.errors %}{{ error }}{% endfor %}{% endfor %}
-        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
-      </div>
+      <div class="ien-auth-errors" role="alert">{{ form.non_field_errors }}{{ form.email.errors }}</div>
     {% endif %}
-
-    <form method="POST" class="space-y-4">
-      {% csrf_token %}
-      <div class="space-y-1">
-        <label class="text-sm font-medium">{{ form.email.label }}</label>
-        {{ form.email }}
-      </div>
-      <button type="submit"
-        class="btn-ien w-full !py-3">
-        Enviar enlace de recuperación
-      </button>
-    </form>
-
-    <p class="text-center text-sm text-muted-foreground">
-      ¿Recordaste tu contraseña?
-      <a href="{% url 'login' %}" class="text-primary hover:underline">Volver al inicio de sesión</a>
-    </p>
-
-  </div>
-</div>
+    <div class="space-y-1.5">
+      <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+      {{ form.email }}
+    </div>
+    <button type="submit" class="btn-ien w-full">Enviar enlace <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></button>
+  </form>
+  <p class="mt-6 text-sm text-[#6B645C]">¿Recordaste tu contraseña? <a href="{% url 'login' %}" class="font-semibold text-[#512DA8] hover:underline">Iniciá sesión</a></p>
 {% endblock %}

@@ -37,8 +37,8 @@ class RecuperacionCorreoTests(TestCase):
         self.assertIn('href="' + enlace.group() + '"', html)
         self.assertIn('#F8F3F0', html)
         self.assertIn('#512DA8', html)
-        self.assertIn('#FFDE59', html)
-        self.assertIn('Bolsa de trabajo &middot; Chaco', html)
+        self.assertIn('alt="IEN Trabajo"', html)
+        self.assertIn('IEN Empleo · Bolsa de Trabajo', html)
         self.assertNotIn('#2563eb', html)
 
         respuesta = self.client.post(urlsplit(enlace.group()).path, {
