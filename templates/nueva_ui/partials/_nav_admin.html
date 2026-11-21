@@ -1,7 +1,7 @@
 {% with route=request.resolver_match.url_name %}
 <nav class="ien-admin-nav{% if mobile %} ien-admin-nav-mobile{% endif %}" aria-label="Navegación de administración">
   <a href="{% url 'mod_listar_empresas' %}" class="ien-employer-link" {% if route == 'mod_listar_empresas' or route == 'mod_detalle_empresa' %}aria-current="page"{% endif %}>Empresas</a>
-  <a href="{% url 'mod_listar_ofertas' %}" class="ien-employer-link" {% if route == 'mod_listar_ofertas' or route == 'mod_detalle_oferta' %}aria-current="page"{% endif %}>Ofertas</a>
+  <a href="{% url 'mod_listar_ofertas' %}" class="ien-employer-link" {% if route == 'mod_listar_ofertas' or route == 'mod_detalle_oferta' %}aria-current="page"{% endif %}>Ofertas <span data-admin-offer-count {% if not admin_review_notifications.ofertas_pendientes %}hidden{% endif %}>({{ admin_review_notifications.ofertas_pendientes }})</span></a>
   <details class="ien-employer-account">
     <summary>Catálogo <span class="ien-account-chevron" aria-hidden="true"></span></summary>
     <div class="ien-account-dropdown ien-admin-catalog">
@@ -10,21 +10,22 @@
     </div>
   </details>
   <div class="ien-employer-actions">
-    <details class="ien-employer-account ien-admin-bell" data-admin-notifications-url="{% url 'mod_notificaciones_empresas' %}">
-      <summary aria-label="Solicitudes de empresas: {{ solicitudes_empresa_pendientes }} pendiente{{ solicitudes_empresa_pendientes|pluralize }}">
+    <details class="ien-employer-account ien-admin-bell" data-admin-notifications-url="{% url 'mod_notificaciones_admin' %}">
+      <summary aria-label="Notificaciones de revisión: {{ admin_review_notifications.pendientes }} pendiente{{ admin_review_notifications.pendientes|pluralize }}">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
-        {% if mobile %}<span>Solicitudes de empresas</span>{% endif %}
-        <span class="ien-admin-badge" data-admin-notification-dot aria-hidden="true" {% if not solicitudes_empresa_pendientes %}hidden{% endif %}></span>
+        {% if mobile %}<span>Notificaciones de revisión</span>{% endif %}
+        <span class="ien-admin-badge" data-admin-notification-dot aria-hidden="true" {% if not admin_review_notifications.pendientes %}hidden{% endif %}></span>
       </summary>
       <div class="ien-account-dropdown ien-admin-notifications">
-        <p class="ien-account-name">Solicitudes de empresas</p>
-        <p class="ien-account-email" data-admin-notification-count aria-live="polite">{{ solicitudes_empresa_pendientes }} pendiente{{ solicitudes_empresa_pendientes|pluralize }} de revisión</p>
+        <p class="ien-account-name">Pendientes de revisión</p>
+        <p class="ien-account-email" data-admin-notification-count aria-live="polite">{{ admin_review_notifications.empresas_pendientes }} empresa{{ admin_review_notifications.empresas_pendientes|pluralize }} y {{ admin_review_notifications.ofertas_pendientes }} oferta{{ admin_review_notifications.ofertas_pendientes|pluralize }}</p>
         <ul data-admin-notification-items>
-          {% for solicitud in solicitudes_empresa_recientes %}
-            <li><a href="{% url 'mod_detalle_empresa' solicitud.empresa_id %}"><strong>{{ solicitud.empresa.nombre_empresa }}</strong><span>{{ solicitud.get_estado_display }} · {{ solicitud.creada_en|date:'d/m H:i' }}</span></a></li>
+          {% for item in admin_review_notifications.recientes %}
+            <li><a href="{{ item.url }}"><strong>{{ item.titulo }}</strong><span>{{ item.tipo }}: {{ item.estado }}</span></a></li>
           {% empty %}<li class="ien-admin-notification-empty">Todavía no hay solicitudes.</li>{% endfor %}
         </ul>
-        <a href="{% url 'mod_solicitudes_empresas' %}" class="ien-admin-history-link">Ver historial completo →</a>
+        <a href="{% url 'mod_listar_ofertas' %}?estado=pendiente" class="ien-admin-history-link">Revisar ofertas pendientes →</a>
+        <a href="{% url 'mod_solicitudes_empresas' %}" class="ien-admin-history-link">Ver solicitudes de empresas →</a>
       </div>
     </details>
     <details class="ien-employer-account">

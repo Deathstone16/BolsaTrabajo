@@ -260,3 +260,5 @@ IEN_CONTACT_EMAIL = os.environ.get('IEN_CONTACT_EMAIL', '').strip()
 IEN_REVIEW_EMAILS = [email.strip() for email in os.environ.get('IEN_REVIEW_EMAILS', '').split(',') if email.strip()]
 IEN_COMPANY_REMINDER_HOURS = max(1, int(os.environ.get('IEN_COMPANY_REMINDER_HOURS', '24')))
 IEN_PUBLIC_URL = os.environ.get('IEN_PUBLIC_URL', 'http://127.0.0.1:8000' if DEBUG else '').rstrip('/')
+# Optional public HTTPS asset for email providers without inline MIME images.
+IEN_EMAIL_LOGO_URL = os.environ.get('IEN_EMAIL_LOGO_URL', '').strip()

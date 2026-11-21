@@ -2,7 +2,13 @@
   <svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
     <circle class="ien-status-ring" cx="40" cy="40" r="34" pathLength="1"/>
     {% if estado == 'pendiente' %}
-      <path class="ien-status-clock" d="M40 21v19l12 8" pathLength="1"/>
+      <g class="ien-status-clock-hand ien-status-clock-hour">
+        <path class="ien-status-clock-stroke" d="M40 40V26" pathLength="1"/>
+      </g>
+      <g class="ien-status-clock-hand ien-status-clock-minute">
+        <path class="ien-status-clock-stroke" d="M40 40V20" pathLength="1"/>
+      </g>
+      <circle cx="40" cy="40" r="2" fill="currentColor" stroke="none"/>
     {% elif estado == 'rechazado' %}
       <path class="ien-status-mark" d="m29 29 22 22m0-22L29 51" pathLength="1"/>
     {% else %}

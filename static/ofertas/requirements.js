@@ -26,10 +26,10 @@
   const form = root.closest('form');
   const mappingInput = form.querySelector('[name="categorias_requisitos"]');
   const labels = {
-    technical_skills: 'Técnica · Python, Excel, herramientas',
-    soft_skills: 'Habilidad blanda · comunicación, liderazgo',
+    technical_skills: 'Habilidad técnica',
+    soft_skills: 'Habilidad blanda',
     experience: 'Experiencia', education: 'Formación', languages: 'Idioma',
-    logistics: 'Disponibilidad, ubicación o modalidad',
+    logistics: 'Disponibilidad o modalidad',
   };
   const vocabulary = [...(window.HABILIDADES_DURAS || []), ...(window.HABILIDADES_BLANDAS || []), 'Excel'];
   let saved = {};

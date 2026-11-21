@@ -117,9 +117,9 @@ class OferenteForm(forms.ModelForm):
             'contacto_nombre', 'contacto_cargo', 'correo_publico',
         ]
         widgets = {
-            'contacto_nombre': forms.TextInput(attrs={'class': 'input-ien', 'placeholder': 'Ej. María Pérez'}),
-            'contacto_cargo': forms.TextInput(attrs={'class': 'input-ien', 'placeholder': 'Ej. Recursos Humanos'}),
-            'correo_publico': forms.EmailInput(attrs={'class': 'input-ien', 'placeholder': 'Ej. rrhh@empresa.com.ar'}),
+            'contacto_nombre': forms.TextInput(attrs={'class': 'input-ien', 'placeholder': 'Nombre completo'}),
+            'contacto_cargo': forms.TextInput(attrs={'class': 'input-ien', 'placeholder': 'Cargo o área'}),
+            'correo_publico': forms.EmailInput(attrs={'class': 'input-ien', 'placeholder': 'Correo de contacto'}),
         }
 
     def clean_cuit(self):

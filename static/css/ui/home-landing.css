@@ -7,7 +7,7 @@
 }
 
 body:has(.ien-home) #global-nav {
-  background-color: #eaf0f9f5;
+  background-color: #eaf0f9;
   border-bottom-color: #251a431a;
 }
 
@@ -43,8 +43,8 @@ body:has(.ien-home) #global-nav {
   .ien-title-underline path { animation: ien-title-underline-draw .5s cubic-bezier(.4, 0, .2, 1) .6s both; }
 }
 @keyframes ien-title-blur-fade {
-  from { opacity: 0; filter: blur(5px); transform: translateY(6px); }
-  to { opacity: 1; filter: blur(0); transform: translateY(0); }
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @keyframes ien-title-underline-draw {
   from { stroke-dashoffset: 1; }
@@ -137,7 +137,7 @@ body:has(.ien-home) #global-nav {
   .ien-home :is(.ien-step, .ien-home-offer):is(:hover, :focus-within) .ien-step-link [data-icon] { transform: translateX(4px); }
 }
 
-.ien-home .ien-home-offers { gap: clamp(1.2rem, 3vw, 2.5rem); }
+.ien-home .ien-home-offers { grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 1.25rem; margin-top: 1.5rem; }
 .ien-home .ien-home-offer h3 { font-size: 1.125rem; line-height: 1.4; }
 .ien-home .ien-home-offer .ien-step-link { margin-top: auto; }
 .ien-home .ien-home-offer .ien-offer-avatar { border-color: #251a4326; }
@@ -217,4 +217,22 @@ body:has(.ien-home) #global-nav {
 }
 @media (prefers-reduced-motion: reduce) {
   .ien-home-course-filter-options summary::after { transition: none; }
+}
+
+/* The latest jobs share the course catalog's spacing and card treatment. */
+.ien-home .ien-home-offer {
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid #ded2ef;
+  border-radius: 1.5rem;
+  background: linear-gradient(145deg, #f4eefb, #fffdfd 55%);
+  box-shadow: 0 8px 24px -20px rgba(67, 33, 143, .3);
+}
+.ien-home .ien-home-offer-heading > div { min-width: 0; }
+.ien-home .ien-home-offer-action { align-self: flex-start; margin-top: auto; min-height: 2.75rem; padding: .65rem 1rem; font-size: .875rem; }
+@media (hover: hover) and (pointer: fine) {
+  .ien-home .ien-home-offer:is(:hover, :focus-within) { border-color: #bda5dd; box-shadow: 0 16px 32px -22px rgba(67, 33, 143, .4); }
+}
+@media (max-width: 767px) {
+  .ien-home .ien-home-offers { grid-template-columns: minmax(0, 1fr); }
 }

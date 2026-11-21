@@ -15,7 +15,6 @@
       <div class="ien-cv-content min-w-0" id="cv-analysis"
            data-cv-state="{% if not version_cv_actual %}sin-cv{% elif ultimo_analisis.estado == 'pendiente' %}pendiente{% elif ultimo_analisis.estado == 'error' %}error{% elif perfil_cv or ultimo_analisis.estado == 'completado' %}completado{% else %}sin-analisis{% endif %}">
         <header>
-          {% include "nueva_ui/partials/_breadcrumbs.html" with current="Mi CV" %}
           <h1 class="mt-2 text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">Mi CV y análisis</h1>
           <p id="cv-analysis-description" class="ien-cv-intro">Cargá tu CV, revisá su estado y consultá tu perfil profesional.</p>
         </header>
@@ -74,6 +73,9 @@
               <a id="boton-ver-perfil" href="{% url 'ia:perfil_profesional' %}" class="btn-ien !py-2 text-sm">
                 Ver mi perfil profesional
               </a>
+              {% if ultimo_analisis.estado == 'completado' %}
+                <a href="{% url 'ia:ver_resultado' ultimo_analisis.id %}" class="btn-ghost !py-2 text-sm">Ver resultado del análisis</a>
+              {% endif %}
             </div>
             <div id="analisis-estado"
                  class="ien-cv-analysis-status mt-4 overflow-hidden {% if ultimo_analisis.estado != 'pendiente' and ultimo_analisis.estado != 'error' %}hidden{% endif %}"

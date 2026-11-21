@@ -20,7 +20,7 @@ class CursoFiltroForm(forms.Form):
     )
     modalidad = forms.ChoiceField(
         label='Modalidad', required=False,
-        choices=[('', 'Todas las modalidades'), *Curso.TIPO_CHOICES],
+        choices=[('', 'Todas'), *Curso.TIPO_CHOICES],
     )
     duracion = forms.ChoiceField(label='Duración', required=False)
 
@@ -40,35 +40,46 @@ class CursoFiltroForm(forms.Form):
             field.widget.attrs['class'] = 'input-ien'
 
 
+class CourseImageInput(forms.ClearableFileInput):
+    template_name = 'cursos/widgets/course_image.html'
+
+
 class CursoForm(forms.ModelForm):
     """Crea o edita los datos y la imagen de un curso."""
     descripcion = DescripcionField()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'input-ien'
+
     class Meta:
         model = Curso
         fields = ['nombre', 'categoria', 'imagen', 'descripcion', 'duracion', 'horario', 'tipo', 'habilidades', 'url_externa']
         labels = {
             'nombre': 'Nombre',
-            'categoria': 'Categoria',
+            'categoria': 'Categoría',
             'imagen': 'Imagen',
-            'descripcion': 'Descripcion',
-            'duracion': 'Duracion',
+            'descripcion': 'Descripción',
+            'duracion': 'Duración',
             'horario': 'Horario',
-            'tipo': 'Tipo',
+            'tipo': 'Modalidad',
             'habilidades': 'Habilidades que desarrolla',
-            'url_externa': 'URL externa',
+            'url_externa': 'Enlace del curso en el sitio del IEN',
         }
         help_texts = {
-            'habilidades': 'Seleccioná competencias que el curso desarrolla. Esto ayuda a recomendar opciones generales sin asumir contenidos no declarados.',
+            'url_externa': 'Enlace a la página de este curso en el sitio del IEN.',
+            'habilidades': 'Seleccioná las habilidades del curso. Usá Ctrl o Cmd para elegir varias.',
         }
         widgets = {
-            'nombre': forms.TextInput(attrs={'class': INPUT_CLASS, 'placeholder': 'Ej. Python desde cero'}),
+            'nombre': forms.TextInput(attrs={'class': INPUT_CLASS, 'placeholder': 'Nombre del curso'}),
             'categoria': forms.Select(attrs={'class': INPUT_CLASS}),
-            'imagen': forms.ClearableFileInput(attrs={'class': 'w-full px-4 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/30','id':'imagen-input'}),
+            'imagen': CourseImageInput(attrs={'class': 'w-full px-4 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/30','id':'imagen-input'}),
             'descripcion': forms.Textarea(attrs={'class': INPUT_CLASS, 'rows': 4, 'placeholder': 'Descripcion del curso'}),
-            'duracion': forms.TextInput(attrs={'class': INPUT_CLASS, 'placeholder': 'Ej. 6 meses'}),
-            'horario': forms.TextInput(attrs={'class': INPUT_CLASS, 'placeholder': 'Ej. Lunes y Miercoles 18:00 - 21:00'}),
+            'duracion': forms.TextInput(attrs={'class': INPUT_CLASS, 'placeholder': 'Duración del curso'}),
+            'horario': forms.TextInput(attrs={'class': INPUT_CLASS, 'placeholder': 'Días y horarios'}),
             'tipo': forms.Select(attrs={'class': INPUT_CLASS}),
-            'habilidades': forms.SelectMultiple(attrs={'class': INPUT_CLASS, 'size': 8}),
+            'habilidades': forms.SelectMultiple(attrs={'class': INPUT_CLASS, 'size': 4}),
             'url_externa': forms.URLInput(attrs={'class': INPUT_CLASS, 'placeholder': 'https://ien.edu.ar/cursos/...'}),
         }
 

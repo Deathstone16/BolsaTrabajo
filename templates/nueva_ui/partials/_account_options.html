@@ -1,29 +1,16 @@
 {% with route=request.resolver_match.url_name namespace=request.resolver_match.namespace %}
+{% if not user.is_staff %}
 <nav class="ien-account-options" aria-label="Opciones de mi cuenta">
-  {% if user.is_staff %}
-    <a class="ien-header-account-link" href="{% url 'mod_listar_empresas' %}"{% if route == 'mod_listar_empresas' %} aria-current="page"{% endif %}><span data-icon="building" class="h-4 w-4" aria-hidden="true"></span> Gestionar empresas</a>
-    <a class="ien-header-account-link" href="{% url 'mod_solicitudes_empresas' %}"{% if route == 'mod_solicitudes_empresas' %} aria-current="page"{% endif %}><span data-icon="clock" class="h-4 w-4" aria-hidden="true"></span> Solicitudes de empresas</a>
-    <a class="ien-header-account-link" href="{% url 'mod_listar_ofertas' %}"{% if route == 'mod_listar_ofertas' %} aria-current="page"{% endif %}><span data-icon="briefcase" class="h-4 w-4" aria-hidden="true"></span> Gestionar ofertas</a>
-    <a class="ien-header-account-link" href="{% url 'mod_listar_cursos' %}"{% if route == 'mod_listar_cursos' %} aria-current="page"{% endif %}><span data-icon="graduation-cap" class="h-4 w-4" aria-hidden="true"></span> Gestionar cursos</a>
-    <a class="ien-header-account-link" href="{% url 'mod_listar_categorias' %}"{% if route == 'mod_listar_categorias' %} aria-current="page"{% endif %}><span data-icon="sliders" class="h-4 w-4" aria-hidden="true"></span> Categorías y habilidades</a>
-    {% if user.is_superuser %}<a class="ien-header-account-link" href="{% url 'admin:index' %}"><span data-icon="sliders" class="h-4 w-4" aria-hidden="true"></span> Administración avanzada</a>{% endif %}
-  {% elif user.oferente %}
+  {% if user.oferente %}
     <a class="ien-header-account-link" href="{% url 'perfil_oferente' user.oferente.pk %}"{% if route == 'perfil_oferente' %} aria-current="page"{% endif %}><span data-icon="building" class="h-4 w-4" aria-hidden="true"></span> Ver mi perfil de empresa</a>
-    <a class="ien-header-account-link" href="{% url 'editar_perfil_empresa' %}"{% if route == 'editar_perfil_empresa' %} aria-current="page"{% endif %}><span data-icon="pencil" class="h-4 w-4" aria-hidden="true"></span> Editar perfil de empresa</a>
-    {% if user.oferente.puede_publicar %}
-      <a class="ien-header-account-link" href="{% url 'dashboard_empresa' %}"{% if route == 'dashboard_empresa' %} aria-current="page"{% endif %}><span data-icon="briefcase" class="h-4 w-4" aria-hidden="true"></span> Mis ofertas</a>
-      <a class="ien-header-account-link" href="{% url 'crear_oferta' %}"{% if route == 'crear_oferta' %} aria-current="page"{% endif %}><span data-icon="plus" class="h-4 w-4" aria-hidden="true"></span> Publicar oferta</a>
-    {% else %}
-      <a class="ien-header-account-link" href="{% url 'validacion_pendiente' %}"{% if route == 'validacion_pendiente' %} aria-current="page"{% endif %}><span data-icon="clock" class="h-4 w-4" aria-hidden="true"></span> Estado de mi cuenta</a>
-    {% endif %}
   {% elif user.postulante %}
-    <a class="ien-header-account-link" href="{% url 'mi_perfil' %}"{% if route == 'mi_perfil' %} aria-current="page"{% endif %}><span data-icon="user" class="h-4 w-4" aria-hidden="true"></span> Mi perfil</a>
     <a class="ien-header-account-link" href="{% url 'ia:perfil_profesional' %}"{% if route == 'perfil_profesional' and namespace == 'ia' %} aria-current="page"{% endif %}><span data-icon="briefcase" class="h-4 w-4" aria-hidden="true"></span> Perfil profesional</a>
     <a class="ien-header-account-link" href="{% url 'mi_perfil' %}#cv-analysis"><span data-icon="file-text" class="h-4 w-4" aria-hidden="true"></span> Mi CV y análisis</a>
     <a class="ien-header-account-link" href="{% url 'datos_personales' %}"{% if route == 'datos_personales' %} aria-current="page"{% endif %}><span data-icon="sliders" class="h-4 w-4" aria-hidden="true"></span> Mis datos personales</a>
     <a class="ien-header-account-link" href="{% url 'favoritos' %}"{% if route == 'favoritos' %} aria-current="page"{% endif %}><span data-icon="bookmark" class="h-4 w-4" aria-hidden="true"></span> Favoritos</a>
   {% endif %}
 </nav>
+{% endif %}
 <form method="post" action="{% url 'logout' %}" class="form-logout ien-account-options-logout">
   {% csrf_token %}
   <button type="submit" class="ien-header-account-link"><span data-icon="log-out" class="h-4 w-4" aria-hidden="true"></span> Cerrar sesión</button>

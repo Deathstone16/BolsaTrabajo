@@ -4,6 +4,7 @@
 {% block description %}{{ oferta.descripcion|truncatechars:150 }}{% endblock %}
 
 {% block extra_head %}
+<link rel="stylesheet" href="{% static_v 'css/ui/offer-detail.css' %}">
 <style>
   #match-percentage { font-variant-numeric: tabular-nums; }
   #match-cancel-button[hidden] { display: none; }
@@ -20,75 +21,41 @@
 {% endblock %}
 
 {% block content %}
-<section class="bg-[#F8F3F0] pb-16">
-
-  <div class="relative overflow-hidden border-b border-[rgba(110,85,55,0.16)] bg-[#F8F3F0] pb-10 pt-10">
-
-    <div class="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-
-      <div class="mt-6 flex flex-wrap items-start justify-between gap-6">
-        <div class="flex items-center gap-5">
-          <div class="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-3xl bg-[#512DA8] text-lg font-bold text-white shadow-[0_16px_40px_-16px_rgba(81,45,168,0.5)]">
-            {% if oferta.es_confidencial or not oferta.empresa.oferente %}
-              IEN
-            {% elif oferta.empresa.oferente.logo %}
-              <img src="{{ oferta.empresa.oferente.logo.url }}" alt="{{ oferta.empresa.oferente.nombre_empresa }}" class="h-full w-full object-cover" />
-            {% else %}
-              {{ oferta.empresa.oferente.nombre_empresa|slice:":2"|upper }}
-            {% endif %}
-          </div>
-
-          <div>
-            <div class="flex flex-wrap items-center gap-3">
-              <h1 class="text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">{{ oferta.titulo }}</h1>
-              <span class="chip">Publicado el {{ oferta.fecha_publicacion|date:"d/m/Y" }}</span>
-            </div>
-            {% include "nueva_ui/partials/_breadcrumbs.html" with current=oferta.titulo parent_url="buscar_empleo" parent_label="Buscar empleo" only %}
-            <p class="mt-2 flex flex-wrap items-center gap-2 text-[#6B645C]">
-              <span data-icon="building" class="h-4 w-4 text-[#512DA8]"></span>
-              {% if oferta.es_confidencial %}
-                Empresa confidencial
-              {% elif oferta.empresa.oferente %}
-                <a href="{% url 'perfil_oferente' oferta.empresa.oferente.pk %}" class="transition-colors hover:text-[#512DA8]">
-                  {{ oferta.empresa.oferente.nombre_empresa }}
-                </a>
-              {% endif %}
-              {% if oferta.nombre_puesto %}
-                <span class="text-[#6B645C]/50">·</span>
-                <span>{{ oferta.nombre_puesto }}</span>
-              {% endif %}
-            </p>
-          </div>
+<section class="ien-offer-detail pb-16">
+  <header class="ien-offer-detail-header">
+    <div class="ien-offer-detail-container">
+      <div class="ien-offer-detail-heading">
+        <div>
+          <h1>{{ oferta.titulo }}</h1>
+          {% if oferta.es_confidencial %}<p class="ien-offer-confidential-note">Empresa confidencial</p>{% endif %}
         </div>
-
         {% if user.is_authenticated and user.postulante %}
-        <button type="button" data-save="{{ oferta.pk }}"
-                data-url="{% url 'alternar_favorita' oferta.pk %}"
-                data-save-on="{{ favorita|yesno:'true,false' }}"
-                class="btn-ghost !py-2.5 text-sm">
-          <span data-icon="bookmark" class="h-4 w-4"></span>
-          <span data-save-label>Guardar</span>
-        </button>
+          <button type="button" data-save="{{ oferta.pk }}"
+                  data-url="{% url 'alternar_favorita' oferta.pk %}"
+                  data-save-on="{{ favorita|yesno:'true,false' }}"
+                  class="btn-ghost ien-offer-save">
+            <span data-icon="bookmark" class="h-4 w-4" aria-hidden="true"></span>
+            <span data-save-label>Guardar</span>
+          </button>
         {% endif %}
       </div>
-
-      <div class="mt-7 flex flex-wrap gap-2">
+      <dl class="ien-offer-facts" aria-label="Datos del puesto">
         {% if oferta.ubicacion %}
-          <span class="chip"><span data-icon="map-pin" class="h-3 w-3"></span> {{ oferta.ubicacion }}</span>
+          <div><dt><span data-icon="map-pin" aria-hidden="true"></span> Ubicación</dt><dd>{{ oferta.ubicacion }}</dd></div>
         {% endif %}
-        <span class="chip"><span data-icon="briefcase" class="h-3 w-3"></span> {{ oferta.get_modalidad_display }}</span>
-        <span class="chip"><span data-icon="clock" class="h-3 w-3"></span> {{ oferta.get_experiencia_requerida_display }}</span>
+        <div><dt><span data-icon="briefcase" aria-hidden="true"></span> Modalidad</dt><dd>{{ oferta.get_modalidad_display }}</dd></div>
+        <div><dt><span data-icon="clock" aria-hidden="true"></span> Experiencia</dt><dd>{{ oferta.get_experiencia_requerida_display }}</dd></div>
         {% if oferta.nivel_educativo %}
-          <span class="chip"><span data-icon="graduation-cap" class="h-3 w-3"></span> {{ oferta.get_nivel_educativo_display }}</span>
+          <div><dt><span data-icon="graduation-cap" aria-hidden="true"></span> Formación</dt><dd>{{ oferta.get_nivel_educativo_display }}</dd></div>
         {% endif %}
-      </div>
+      </dl>
     </div>
-  </div>
+  </header>
 
-  <div class="mx-auto mt-10 max-w-5xl px-4 sm:px-6 lg:px-8">
-    <div class="grid gap-8 lg:grid-cols-3">
+  <div class="ien-offer-detail-container ien-offer-detail-content">
+    <div class="ien-offer-detail-layout">
 
-      <div class="space-y-6 lg:col-span-2">
+      <div class="ien-offer-detail-main space-y-6">
         <div class="panel p-8">
           <h2 class="text-xl font-bold text-[#26222E]">Descripción del puesto</h2>
           <p class="mt-4 whitespace-pre-line leading-relaxed text-[#6B645C]">{{ oferta.descripcion }}</p>
@@ -101,7 +68,7 @@
               <h3 class="mt-5 text-sm font-semibold text-[#512DA8]">Habilidades técnicas</h3>
               <div class="mt-3 flex flex-wrap gap-2">
                 {% for habilidad in habilidades_duras %}
-                  <span class="rounded-full border border-[#512DA8]/25 bg-[#512DA8]/10 px-3 py-1 text-sm font-medium text-[#512DA8]">{{ habilidad }}</span>
+                  <span class="ien-offer-skill">{{ habilidad }}</span>
                 {% endfor %}
               </div>
             {% endif %}
@@ -110,7 +77,7 @@
               {% if habilidades_blandas %}
                 <div class="mt-3 flex flex-wrap gap-2">
                   {% for habilidad in habilidades_blandas %}
-                    <span class="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">{{ habilidad }}</span>
+                    <span class="ien-offer-skill ien-offer-skill-soft">{{ habilidad }}</span>
                   {% endfor %}
                 </div>
               {% else %}
@@ -121,10 +88,10 @@
         {% endif %}
       </div>
 
-      <div class="space-y-6">
+      <aside class="ien-offer-detail-aside space-y-6" aria-label="Compatibilidad e información de la oferta">
         {% if not user.is_authenticated or user.postulante %}
         <div class="panel p-6 text-center{% if match and match.estado != 'completed' and match.estado != 'error' %} is-calculating{% endif %}" id="match-card" data-config-hash="{{ match_config_hash }}" data-request-id="{% if match %}{{ match.request_id }}{% endif %}" data-status="{% if match %}{{ match.estado }}{% endif %}">
-          <h3 class="font-mono text-xs uppercase tracking-widest text-[#6B645C]">Match inteligente</h3>
+          <h2 class="ien-offer-match-title">Tu compatibilidad</h2>
           {% if oferta.requiere_revision_requisitos %}
             <p id="match-requisitos-pendientes" class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950" role="status">La empresa debe actualizar los requisitos de esta oferta. La compatibilidad estará disponible después de esa revisión.</p>
           {% endif %}
@@ -133,7 +100,7 @@
           {% else %}
           <div class="relative mx-auto mt-6 h-36 w-36">
             <svg class="h-36 w-36 -rotate-90" viewBox="0 0 120 120" aria-hidden="true">
-              <circle cx="60" cy="60" r="54" stroke="#F0E9E1" stroke-width="12" fill="none"></circle>
+              <circle cx="60" cy="60" r="54" stroke="#dce5d8" stroke-width="12" fill="none"></circle>
               <circle id="match-progress" data-value="{% if match and match.estado == 'completed' and match.match_percentage != None %}{{ match.match_percentage|floatformat:'2u' }}{% endif %}" cx="60" cy="60" r="54" pathLength="100" stroke="#512DA8" stroke-width="12" fill="none"
                       stroke-dasharray="{% if match and match.estado == 'completed' and match.match_percentage != None %}{{ match.match_percentage|floatformat:'2u' }}{% else %}0{% endif %} 100" stroke-linecap="round"></circle>
             </svg>
@@ -164,15 +131,16 @@
           {% endif %}
           <button id="match-cancel-button" type="button" class="btn-ghost mt-3 w-full" data-request-id="{% if match %}{{ match.request_id }}{% endif %}" {% if not match or match.estado == 'completed' or match.estado == 'error' or match.estado == 'cancelled' %}hidden{% endif %}>Cancelar match</button>
           {% endif %}
+          {% if not user.is_authenticated %}<a href="{% url 'login' %}" class="btn-ien ien-offer-match-login">Iniciar sesión</a>{% endif %}
         </div>
 
         {% endif %}
 
-        <div class="panel space-y-4 p-6">
-          <h3 class="font-semibold text-[#26222E]">Información adicional</h3>
+        <div class="panel ien-offer-extra space-y-4 p-6">
+          <h2 class="ien-offer-side-title">Sobre esta oferta</h2>
           <div class="flex items-center justify-between border-b border-[rgba(110,85,55,0.16)] pb-3">
-            <p class="text-sm text-[#6B645C]">Publicada</p>
-            <p class="text-sm font-semibold text-[#26222E]">{{ oferta.fecha_publicacion|date:"d/m/Y" }}</p>
+            <p class="text-sm text-[#6B645C]">Fecha de publicación</p>
+            <time datetime="{{ oferta.fecha_publicacion|date:'c' }}" class="text-sm font-semibold text-[#26222E]">{{ oferta.fecha_publicacion|date:'d/m/Y' }}</time>
           </div>
           {% if oferta.fecha_cierre %}
             <div class="flex items-center justify-between border-b border-[rgba(110,85,55,0.16)] pb-3">
@@ -186,15 +154,11 @@
               <p class="text-sm font-semibold text-[#26222E]">{{ oferta.categoria.nombre }}</p>
             </div>
           {% endif %}
-          <div class="flex items-center justify-between">
-            <p class="text-sm text-[#6B645C]">Modalidad</p>
-            <p class="text-sm font-semibold text-[#26222E]">{{ oferta.get_modalidad_display }}</p>
-          </div>
         </div>
 
         {% if not oferta.es_confidencial and oferta.empresa.oferente %}
           <a href="{% url 'perfil_oferente' oferta.empresa.oferente.pk %}"
-             class="group flex items-center gap-3 rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#FEFCF9] p-4 transition-all hover:-translate-y-0.5 hover:border-[#512DA8]/30 hover:shadow-lg">
+             class="ien-offer-company-link">
             <div class="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-2xl bg-[#512DA8]/10 text-sm font-bold text-[#512DA8]">
               {% if oferta.empresa.oferente.logo %}
                 <img src="{{ oferta.empresa.oferente.logo.url }}" alt="" class="h-full w-full object-cover" />
@@ -209,7 +173,7 @@
             <span data-icon="arrow-right" class="h-4 w-4 shrink-0 text-[#6B645C] transition-all group-hover:translate-x-1 group-hover:text-[#512DA8]"></span>
           </a>
         {% endif %}
-      </div>
+      </aside>
 
     </div>
   </div>

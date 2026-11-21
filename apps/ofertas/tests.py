@@ -132,6 +132,7 @@ class OfertaFormTests(TestCase):
         self.assertTrue(response.json()["success"], response.json())
 
         oferta = Oferta.objects.get(empresa=self.usuario)
+        self.assertEqual(oferta.estado, "pendiente")
         self.assertEqual(oferta.habilidades_duras, "Python, Django")
         self.assertEqual(oferta.habilidades_blandas, "Comunicación, Trabajo en equipo")
         self.assertEqual(
@@ -154,11 +155,15 @@ class OfertaFormTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["success"], response.json())
         oferta.refresh_from_db()
+        self.assertEqual(oferta.estado, "pendiente")
+        self.assertEqual(self.client.get(reverse('detalle_oferta', args=[oferta.pk])).status_code, 404)
+        from ia.models import TrabajoExtraccion
+        self.assertEqual(TrabajoExtraccion.objects.filter(oferta=oferta).count(), 0)
         self.assertEqual(oferta.habilidades_duras, "SQL")
         self.assertEqual(oferta.habilidades_blandas, "Liderazgo")
         self.assertEqual(oferta.habilidades_requeridas, "SQL, Liderazgo")
 
-    def test_oferente_puede_revisar_una_oferta_activa_legacy_y_reenvia_a_moderacion(self):
+    def test_oferente_puede_actualizar_requisitos_legacy_y_enviarlos_a_revision(self):
         oferta = Oferta.objects.create(
             empresa=self.usuario, categoria=self.categoria, titulo='Oferta histórica',
             nombre_puesto='Backend Developer', ubicacion='Córdoba', modalidad='remoto',
@@ -179,6 +184,19 @@ class OfertaFormTests(TestCase):
         oferta.refresh_from_db()
         self.assertEqual(oferta.estado, 'pendiente')
         self.assertFalse(oferta.requiere_revision_requisitos)
+
+    def test_editar_una_oferta_finalizada_no_la_republica(self):
+        form = OfertaForm(self.data)
+        self.assertTrue(form.is_valid(), form.errors)
+        oferta = form.save(commit=False)
+        oferta.empresa = self.usuario
+        oferta.estado = 'finalizada'
+        oferta.save()
+        self.client.force_login(self.usuario)
+        response = self.client.post(reverse('editar_oferta', args=[oferta.pk]), self.data)
+        self.assertEqual(response.status_code, 302)
+        oferta.refresh_from_db()
+        self.assertEqual(oferta.estado, 'finalizada')
 
     def test_otro_oferente_no_puede_revisar_oferta_legacy(self):
         oferta = Oferta.objects.create(
@@ -208,7 +226,7 @@ class OfertaFormTests(TestCase):
         url = reverse("detalle_oferta", args=[oferta.pk])
         response = self.client.get(url)
         self.assertContains(response, 'id="habilidades-blandas"')
-        self.assertContains(response, 'bg-emerald-50')
+        self.assertContains(response, 'ien-offer-skill-soft')
         self.assertContains(response, 'Comunicación')
         self.assertNotContains(response, 'No especificadas')
 

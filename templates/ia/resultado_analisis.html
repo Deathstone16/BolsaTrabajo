@@ -5,7 +5,7 @@
 
 {% block content %}
 {# Misma seccion que mi_perfil.html: contenedor max-w-7xl y sidebar del postulante. #}
-<div class="min-h-screen bg-[#F8F3F0] py-12">
+<div class="ien-analysis-result min-h-screen bg-[#F8F3F0] py-12">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="grid gap-8 lg:grid-cols-[16rem_1fr]">
 
@@ -13,21 +13,18 @@
 
       <div class="min-w-0">
 
-        <div><p class="kicker">Análisis con IA</p></div>
-        <h1 class="mt-3 text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">Resultado del análisis de CV</h1>
-        {% include "nueva_ui/partials/_breadcrumbs.html" with current="Análisis de CV" parent_url="mi_perfil" parent_label="Mi perfil" only %}
+        <h1 class="text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">Resultado del análisis de CV</h1>
         {% if analisis.respondido_en %}
-          <p class="mt-2 font-mono text-xs uppercase tracking-wider text-[#6B645C]">
-            Analizado el {{ analisis.respondido_en|date:"d/m/Y" }} a las {{ analisis.respondido_en|date:"H:i" }}
+          <p class="ien-analysis-date">
+            <span>Análisis realizado</span>
+            <time datetime="{{ analisis.respondido_en|date:'c' }}">{{ analisis.respondido_en|date:"j \d\e F \d\e Y" }}, {{ analisis.respondido_en|date:"H:i" }}</time>
           </p>
         {% endif %}
 
         {% if analisis.estado == 'completado' %}
           <div class="panel mt-8 p-8">
             <div class="flex items-center gap-3">
-              <div class="grid h-11 w-11 place-items-center rounded-2xl bg-[#512DA8]/10">
-                <span data-icon="file-text" class="h-5 w-5 text-[#512DA8]"></span>
-              </div>
+              <span class="ien-section-icon" aria-hidden="true"><span data-icon="file-text"></span></span>
               <h2 class="text-xl font-bold text-[#26222E]">Resumen profesional</h2>
             </div>
             <p class="mt-4 whitespace-pre-line leading-relaxed text-[#6B645C]">{{ resumen_profesional|human_text }}</p>
@@ -35,9 +32,7 @@
 
           <div class="panel mt-6 p-8" data-profile-skills>
             <div class="flex items-center gap-3">
-              <div class="grid h-11 w-11 place-items-center rounded-2xl bg-[#FFDE59]/35">
-                <span data-icon="sparkles" class="h-5 w-5 text-[#43218F]"></span>
-              </div>
+              <span class="ien-section-icon ien-section-icon--sun" aria-hidden="true"><span data-icon="sparkles"></span></span>
               <h2 class="text-xl font-bold text-[#26222E]">Habilidades detectadas</h2>
             </div>
 

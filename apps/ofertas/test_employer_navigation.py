@@ -43,15 +43,15 @@ class NavegacionOferenteTests(TestCase):
         response = self.client.get(reverse('validacion_pendiente'))
         self.assertContains(response, 'Tu registro fue rechazado')
         self.assertContains(response, 'Verificá el CUIT &lt;documento&gt;')
-        self.assertContains(response, 'Corregir datos y reenviar')
+        self.assertContains(response, 'Corregir datos')
         self.assertNotContains(response, 'href="' + reverse('crear_oferta') + '"')
 
     def test_menu_aprobado_tiene_las_mismas_acciones_en_escritorio_y_movil(self):
         html = self.render_nav(self.crear_oferente())
         for label in ('Mis ofertas', 'Publicar oferta', 'Mi empresa', 'Mi cuenta'):
-            esperado = 4 if label in ('Mis ofertas', 'Publicar oferta') else 2
+            esperado = 2
             self.assertEqual(html.count('>' + label + '<') + html.count('> ' + label + '<'), esperado)
-        self.assertEqual(html.count('href="' + reverse('crear_oferta') + '"'), 4)
+        self.assertEqual(html.count('href="' + reverse('crear_oferta') + '"'), 2)
         self.assertEqual(html.count('<details class="ien-employer-account">'), 2)
         self.assertNotIn('>Inicio</a>', html)
         self.assertNotIn('>Cursos</a>', html)
@@ -59,28 +59,41 @@ class NavegacionOferenteTests(TestCase):
         self.assertNotIn('>Buscar empleo</a>', html)
         self.assertIn('aria-current="page">Mis ofertas', html)
 
-    def test_dropdown_oferente_incluye_perfil_edicion_y_gestion(self):
+    def test_dropdown_oferente_no_repite_las_acciones_del_header(self):
         user = self.crear_oferente()
         request = RequestFactory().get('/')
         request.user = user
         html = render_to_string('nueva_ui/partials/_account_options.html', request=request)
-        for url in (reverse('perfil_oferente', args=[user.oferente.pk]),
-                    reverse('editar_perfil_empresa'), reverse('dashboard_empresa'),
-                    reverse('crear_oferta'), reverse('logout')):
-            self.assertIn(url, html)
+        self.assertIn(reverse('perfil_oferente', args=[user.oferente.pk]), html)
+        self.assertIn(reverse('logout'), html)
+        for name in ('editar_perfil_empresa', 'dashboard_empresa', 'crear_oferta', 'validacion_pendiente'):
+            self.assertNotIn(reverse(name), html)
         self.assertNotIn(reverse('favoritos'), html)
         self.assertNotIn(reverse('mod_listar_empresas'), html)
 
-    def test_dropdown_admin_incluye_toda_la_gestion(self):
+    def test_dropdown_admin_no_repite_gestion_del_header(self):
         user = Usuario.objects.create_user(email='admin-menu@example.com', is_staff=True)
         request = RequestFactory().get('/')
         request.user = user
         html = render_to_string('nueva_ui/partials/_account_options.html', request=request)
+        self.assertIn(reverse('logout'), html)
         for name in ('mod_listar_empresas', 'mod_listar_ofertas', 'mod_listar_cursos',
-                     'mod_listar_categorias', 'mod_solicitudes_empresas', 'logout'):
-            self.assertIn(reverse(name), html)
+                     'mod_listar_categorias', 'mod_solicitudes_empresas', 'admin:index', 'mi_perfil'):
+            self.assertNotIn(reverse(name), html)
+        self.assertNotIn('<nav', html)
+        header = self.render_nav(user)
+        for name in ('mod_listar_empresas', 'mod_listar_ofertas', 'mod_listar_cursos',
+                     'mod_listar_categorias', 'mod_solicitudes_empresas'):
+            self.assertEqual(header.count('href="' + reverse(name) + '"'), 2)
+
+    def test_menu_del_instituto_no_incluye_acceso_a_superadmin(self):
+        user = Usuario.objects.create_user(email='superadmin-menu@example.com', is_staff=True, is_superuser=True)
+        request = RequestFactory().get('/')
+        request.user = user
+        html = render_to_string('nueva_ui/partials/_account_options.html', request=request)
         self.assertNotIn(reverse('admin:index'), html)
-        self.assertNotIn(reverse('mi_perfil'), html)
+        self.assertIn(reverse('logout'), html)
+        self.assertNotIn(reverse('mod_listar_empresas'), html)
 
     def test_dropdown_postulante_incluye_sus_secciones(self):
         user = Usuario.objects.create_user(email='dropdown-postulante@example.com')
@@ -91,6 +104,7 @@ class NavegacionOferenteTests(TestCase):
         for name in ('mi_perfil', 'ia:perfil_profesional', 'datos_personales', 'favoritos', 'logout'):
             self.assertIn(reverse(name), html)
         self.assertIn(reverse('mi_perfil') + '#cv-analysis', html)
+        self.assertNotIn('href="' + reverse('mi_perfil') + '"', html)
         self.assertNotIn(reverse('mod_listar_empresas'), html)
         self.assertNotIn(reverse('crear_oferta'), html)
 
@@ -153,7 +167,8 @@ class NavegacionOferenteTests(TestCase):
         user = Usuario.objects.create_user(email='postulante-menu@example.com', first_name='Benjamín')
         Postulante.objects.create(usuario=user)
         candidate = self.render_nav(user, '/')
-        self.assertEqual(candidate.count('> Mi perfil</a>'), 2)
+        self.assertEqual(candidate.count('> Mi perfil</a>'), 0)
+        self.assertEqual(candidate.count('> Mi CV y análisis</a>'), 2)
         self.assertEqual(candidate.count('> Favoritos</a>'), 2)
         self.assertIn('>Cursos</a>', candidate)
         self.assertNotIn('ien-employer-nav', candidate)

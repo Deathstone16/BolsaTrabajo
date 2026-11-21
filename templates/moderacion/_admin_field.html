@@ -1,0 +1,6 @@
+<div class="ien-admin-field">
+  <label for="{{ field.id_for_label }}"{% if hide_label %} class="sr-only"{% endif %}>{{ field.label }}{% if not field.field.required %} <span>(opcional)</span>{% endif %}</label>
+  {{ field }}
+  {% if field.help_text %}<p class="ien-admin-field-help">{{ field.help_text }}</p>{% endif %}
+  {% for error in field.errors %}<p class="ien-required-message" role="alert">{{ error }}</p>{% endfor %}
+</div>

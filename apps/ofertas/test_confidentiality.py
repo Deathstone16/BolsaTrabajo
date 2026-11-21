@@ -76,3 +76,22 @@ class ConfidencialidadOfertaTests(TestCase):
         self.assert_empresa_oculta(self.client.get(reverse('detalle_oferta', args=[self.confidencial.pk])))
         self.client.force_login(self.empresa)
         self.assertContains(self.client.get(reverse('dashboard_empresa')), self.confidencial.titulo)
+
+    def test_serializacion_no_expone_identidad_de_empresa_confidencial(self):
+        from .dtos import OfertaDTO
+        from dataclasses import asdict
+        import json
+        dto = OfertaDTO.desde_modelo(self.confidencial)
+        payload = json.dumps(asdict(dto))
+        self.assertEqual(dto.empresa_nombre, 'Empresa confidencial')
+        self.assertEqual(dto.empresa_perfil_url, '')
+        self.assertNotIn(self.oferente.nombre_empresa, payload)
+        self.assertNotIn(self.oferente.logo.url, payload)
+        self.assertNotIn(self.empresa.email, payload)
+
+    def test_orden_de_landing_prioriza_ofertas_antes_de_cursos_y_guias(self):
+        response = self.client.get(reverse('home'))
+        html = response.content.decode()
+        self.assertLess(html.index('id="inicio-titulo"'), html.index('id="ofertas-titulo"'))
+        self.assertLess(html.index('id="ofertas-titulo"'), html.index('id="cursos-titulo"'))
+        self.assertLess(html.index('id="cursos-titulo"'), html.index('id="empresas-pasos-titulo"'))

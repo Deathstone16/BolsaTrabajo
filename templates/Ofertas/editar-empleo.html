@@ -4,27 +4,17 @@
 {% block title %}Editar oferta · IEN Empleo{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-[#F8F3F0] py-12">
+<div class="ien-employer-editor min-h-screen bg-[#F8F3F0]">
   <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-    <div class="mb-8">
-      <div class="mt-6 flex items-center gap-3">
-        <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[#512DA8]/10">
-          <span data-icon="pencil" class="h-6 w-6 text-[#512DA8]"></span>
-        </div>
-        <div>
-          <h1 class="text-3xl font-bold tracking-tight text-[#26222E]">Editar oferta</h1>
-        {% include "nueva_ui/partials/_breadcrumbs.html" with current="Editar oferta" parent_url="dashboard_empresa" parent_label="Mi panel" only %}
-        {% if oferta.requiere_revision_requisitos %}
-          <div role="alert" class="mt-5 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
-            Esta oferta histórica necesita revisar la clasificación de sus requisitos. Al guardarla, volverá a revisión antes de publicarse y habilitar el análisis de compatibilidad.
-          </div>
-        {% endif %}
-          <p class="mt-1 text-[#6B645C]">Modificá los datos y guardá. La oferta volverá a revisión.</p>
-        </div>
-      </div>
-    </div>
+    <header class="ien-employer-editor-heading">
+      <div class="ien-editor-title-row"><span class="ien-section-icon" aria-hidden="true"><span data-icon="pencil"></span></span><h1>Editar oferta</h1></div>
+      <p>Actualizá los datos de la publicación.</p>
+    </header>
+    {% if oferta.requiere_revision_requisitos %}
+      <aside role="note" class="ien-editor-legacy-note">Esta oferta necesita revisar la clasificación de sus requisitos. Verificá cuáles son obligatorios y cuáles deseables antes de guardar.</aside>
+    {% endif %}
 
-    <div class="panel p-8">
+    <div class="panel p-8 ien-employer-editor-form">
       <form data-required-validation method="post" action="{% url 'editar_oferta' oferta.pk %}">
         {% csrf_token %}
         {% include 'Ofertas/_form-oferta.html' with submit_text="Guardar cambios" %}

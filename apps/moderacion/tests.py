@@ -158,10 +158,10 @@ class ModeracionOfertasTests(TestCase):
         self.assertIn('http://testserver' + reverse('dashboard_empresa'), mensaje.body)
         html = mensaje.alternatives[0].content
         self.assertIn('http://testserver' + reverse('dashboard_empresa'), html)
-        self.assertIn('#F8F3F0', html)
+        self.assertIn('#eaf0f9', html)
         self.assertIn('#512DA8', html)
-        self.assertIn('alt="IEN Trabajo"', html)
-        self.assertIn('IEN Empleo · Bolsa de Trabajo', html)
+        self.assertIn('IEN Trabajo', html)
+        self.assertIn('Instituto Económico Nacional', html)
         self.assertNotIn('tusitio.com', html)
         self.assertNotIn('✅', html)
         self.assertNotIn('🎯', html)

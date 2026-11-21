@@ -2,6 +2,8 @@
 
 {% block title %}{{ titulo }} · IEN Trabajo{% endblock %}
 
+{% block status_navigation %}{% if mostrar_menu_postulante and user.is_authenticated %}<div class="ien-status-profile-nav">{% include 'usuarios/_sidebar_postulante.html' with seccion='datos' %}</div>{% endif %}{% endblock %}
+
 {% block status_content %}
   {% if pendiente_validacion %}
     {% include 'usuarios/_status_icon.html' with estado='pendiente' only %}

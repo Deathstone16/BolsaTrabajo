@@ -8,21 +8,21 @@
 {% endif %}
 <div class="space-y-4">
   <h3 class="text-lg font-semibold">Información del puesto</h3>
-  {% include 'Ofertas/_campo-oferta.html' with field=form.titulo help='Título que verán los postulantes. Ej. Buscamos desarrollador Full Stack.' %}
-  {% include 'Ofertas/_campo-oferta.html' with field=form.nombre_puesto help='Nombre del cargo. Ej. Desarrollador Full Stack.' %}
+  {% include 'Ofertas/_campo-oferta.html' with field=form.titulo help='Título que verán los postulantes.' %}
+  {% include 'Ofertas/_campo-oferta.html' with field=form.nombre_puesto %}
   {% include 'Ofertas/_campo-oferta.html' with field=form.categoria %}
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    {% include 'Ofertas/_campo-oferta.html' with field=form.ubicacion help='Ej. Resistencia, Chaco.' %}
+    {% include 'Ofertas/_campo-oferta.html' with field=form.ubicacion %}
     {% include 'Ofertas/_campo-oferta.html' with field=form.modalidad %}
   </div>
-  {% include 'Ofertas/_campo-oferta.html' with field=form.descripcion help='Contá las tareas y responsabilidades. Las habilidades y condiciones se agregan abajo, una sola vez.' %}
+  {% include 'Ofertas/_campo-oferta.html' with field=form.descripcion help='Describí las tareas y responsabilidades.' %}
 </div>
 <div class="ien-offer-section" id="requirements-editor">
   <h3 class="text-lg font-semibold">Habilidades y requisitos</h3>
-  <p class="text-sm text-[#6B645C]">Cargá cada habilidad o condición una sola vez. Elegí si es indispensable o si suma valor, y revisá su tipo en la lista.</p>
-  {% if form.instance.pk and form.instance.requiere_revision_requisitos %}
-    <p class="ien-requirement-notice">Revisá esta oferta histórica: los requisitos anteriores aparecen como deseables. Mové a obligatorios solo lo indispensable.</p>
-  {% endif %}
+  <details class="ien-form-help">
+    <summary>Cómo agregar requisitos</summary>
+    <p>Escribí un requisito y presioná Agregar o Enter. Para cargar varios, separalos con comas. Después elegí el tipo de cada uno.</p>
+  </details>
   {% include 'Ofertas/_lista-requisitos.html' with field=form.requisitos_obligatorios kind='mandatory' %}
   {% include 'Ofertas/_lista-requisitos.html' with field=form.requisitos_deseables kind='desirable' %}
   {{ form.categorias_requisitos }}
@@ -31,7 +31,7 @@
 </div>
 <div class="ien-offer-section">
   <h3 class="text-lg font-semibold">Experiencia y formación</h3>
-  <p class="text-sm text-[#6B645C]">Definilas acá para no repetirlas en las listas anteriores. Seleccioná «No solicitado» cuando no sean necesarias.</p>
+  <p class="text-sm text-[#6B645C]">Elegí el nivel y si es obligatorio, deseable o no se solicita.</p>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="space-y-3">
       {% include 'Ofertas/_campo-oferta.html' with field=form.experiencia_requerida %}
@@ -47,12 +47,13 @@
   {% include 'Ofertas/_campo-oferta.html' with field=form.fecha_cierre %}
   <div>
     <label class="ien-offer-confidential">{{ form.es_confidencial }} Publicación confidencial</label>
-    <p class="mt-2 text-sm text-[#6B645C]">
-      Si la activás, la oferta sigue apareciendo en la búsqueda, pero sin el nombre, el logo ni el enlace a tu empresa. Tampoco se lista en el perfil público de la empresa.
-      El título, la descripción y los requisitos siguen visibles: evitá incluir ahí datos que identifiquen a tu empresa.
-      Si la dejás desactivada, se muestra el nombre de tu empresa.
-    </p>
+    <p class="mt-2 text-sm text-[#6B645C]">Oculta el nombre y el logo de tu empresa. La oferta sigue visible en las búsquedas.</p>
+    <details class="ien-form-help">
+      <summary>Qué información se muestra</summary>
+      <p>No se muestra el enlace a tu empresa y la oferta no aparece en su perfil público. El título, la descripción y los requisitos siguen visibles: evitá incluir datos que identifiquen a la empresa. Si desactivás esta opción, se muestra su nombre.</p>
+    </details>
   </div>
+  <p class="text-sm text-[#6B645C]">La oferta se publica cuando el IEN la aprueba.</p>
   <div class="ien-offer-actions">
     <button type="submit" class="btn-ien">{{ submit_text|default:'Publicar oferta' }}</button>
     <a href="{% url 'dashboard_empresa' %}" class="btn-ghost">Cancelar</a>
