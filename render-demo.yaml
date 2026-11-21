@@ -1,9 +1,10 @@
-# Create a separate Render Blueprint using this file and codex/demo-diseno.
+# Create a separate Render Blueprint using this file and codex/demo-diseno-front.
 services:
   - type: web
     name: ien-demo-diseno
     runtime: python
-    branch: codex/demo-diseno
+    plan: free
+    branch: codex/demo-diseno-front
     buildCommand: pip install -r requirements.txt
     startCommand: daphne -b 0.0.0.0 -p $PORT ientrabajo.design_demo.asgi:application
     healthCheckPath: /health/
