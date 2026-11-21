@@ -92,7 +92,7 @@ COMPANY_PREVIEWS = {
 @require_GET
 def company_preview(request, screen_id):
     """Render real templates with unsaved fixtures; never bypass real view guards."""
-    if not settings.DEBUG or screen_id not in COMPANY_PREVIEWS:
+    if not (settings.DEBUG or getattr(settings, 'FRONTEND_DEMO', False)) or screen_id not in COMPANY_PREVIEWS:
         raise Http404
     from django.utils import timezone
     from ofertas.forms import OfertaForm
@@ -125,6 +125,11 @@ def company_preview(request, screen_id):
         'form_perfil': OferenteForm(instance=company), 'experiencia_choices': Oferta.EXPERIENCIA_CHOICES,
         'ui_review_screen': screen, 'ui_review_preview': True,
     }
+    if getattr(settings, 'FRONTEND_DEMO', False):
+        for form_name in ('form', 'form_perfil'):
+            if 'categoria' in context[form_name].fields:
+                context[form_name].fields['categoria'].choices = [('', 'Seleccionar categoría'), ('0', 'Tecnología')]
+        context['design_demo'] = True
     response = render(preview_request, COMPANY_PREVIEWS[screen_id], context)
     html = response.content.decode(response.charset)
     # Keep the company navigation inside the preview, including the sample offer.

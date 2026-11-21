@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="{% static_v 'css/style.css' %}" />
   {% if cv_notification_token %}<link rel="stylesheet" href="{% static_v 'css/ui/cv-analysis.css' %}" />{% endif %}
   <link rel="stylesheet" href="{% static_v 'css/ui/application.css' %}" />
+  {% if design_demo %}<link rel="stylesheet" href="{% static_v 'css/ui/cv-analysis.css' %}" />{% endif %}
   {% block extra_head %}{% endblock %}
 </head>
 <body class="{% block body_class %}ien-app-page{% endblock %} antialiased">
@@ -37,6 +38,12 @@
         <strong>{{ ui_review_screen.id }} — {{ ui_review_screen.title }}</strong>
         <span>Datos ficticios. Podés completar campos; los cambios no se guardan.</span>
         <a href="{% url 'ui_review' %}#{{ ui_review_screen.id }}">Elegir otra pantalla</a>
+        {% if design_demo and ui_review_screen.id == 'POS-01' %}
+          <nav aria-label="Estados de ejemplo del CV">
+            <a href="?estado=sin-cv">Sin CV</a> / <a href="?estado=pendiente">En análisis</a> /
+            <a href="?estado=error">Error</a> / <a href="?estado=completado">Completado</a>
+          </nav>
+        {% endif %}
         <p id="ien-preview-feedback" role="status" hidden>Esta es una vista de prueba. Los cambios no se envían.</p>
       </aside>
       <script src="{% static_v 'js/ui/review-preview.js' %}"></script>
@@ -79,6 +86,7 @@
   {% endif %}
   {% include "nueva_ui/partials/_logout_modal.html" %}
   {% block extra_js %}{% endblock %}
+  {% if design_demo %}<script src="{% static_v 'js/ui/design-demo.js' %}"></script>{% endif %}
   {% if ui_review_screen %}
     <a href="{% url 'ui_review' %}#{{ ui_review_screen.id }}" class="ien-screen-marker" aria-label="Pantalla {{ ui_review_screen.id }}: {{ ui_review_screen.title }}. Abrir índice de revisión">
       <strong>{{ ui_review_screen.id }}</strong><span>Ver pantallas</span>

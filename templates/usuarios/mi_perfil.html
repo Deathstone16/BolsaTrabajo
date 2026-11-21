@@ -132,7 +132,7 @@
           </details>
         {% endif %}
 
-        {% with historial=postulante.versiones_cv.all %}
+        {% with historial=historial_cv %}
           {% if historial|length > 1 or historial and not version_cv_actual %}
             <details class="panel ien-cv-card ien-cv-optional mt-5">
               <summary id="cv-history-title">Historial privado de CV</summary>

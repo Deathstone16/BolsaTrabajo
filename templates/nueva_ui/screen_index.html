@@ -2,16 +2,20 @@
 {% block title %}Mapa de pantallas · IEN Trabajo{% endblock %}
 {% block content %}
 <div class="ien-home-container ien-home-section ien-review-index">
-  <h1>Mapa de pantallas</h1>
+  <h1>{% if design_demo %}Demo de diseño{% else %}Mapa de pantallas{% endif %}</h1>
   <p class="ien-home-intro">{{ screen_count }} pantallas para revisar el front. Sesión actual: <strong>{{ review_role }}</strong>.</p>
   <div class="panel ien-review-help">
     <h2>Cómo recorrer la app</h2>
+    {% if design_demo %}
+    <p>Recorré las pantallas sin registrarte, subir un CV ni esperar aprobaciones. El perfil, los análisis, las ofertas y los cursos usan datos ficticios. Los formularios no guardan cambios ni envían correos.</p>
+    {% else %}
     <p>Seguí el orden de cada sección. Primero revisá Público y Acceso; después iniciá sesión como postulante, empresa o admin y volvé a este índice. Los enlaces usan datos existentes y respetan los permisos de tu cuenta.</p>
     <p>Cada pantalla tiene su ID abajo a la izquierda. Para pedir una corrección: <strong>“ADM-01 · Mobile · el botón queda cortado”</strong>. Indicá también el estado o enviá una captura.</p>
     <p>En cada recorrido probá escritorio y mobile, campos incompletos, listas vacías y menús abiertos. Las confirmaciones se pueden abrir para revisar; los botones finales conservan sus acciones reales.</p>
     <p>Este mapa y las etiquetas aparecen únicamente con DEBUG activado.</p>
     <p>Las vistas de prueba de empresa se pueden abrir sin sesión ni aprobación, con datos ficticios. Permiten revisar el diseño y completar campos, pero no guardar, publicar ni eliminar.</p>
     <a class="btn-ghost" href="{% url 'login' %}">Iniciar sesión</a>
+    {% endif %}
   </div>
   <nav class="ien-review-sections" aria-label="Secciones del recorrido">
     {% for group in screen_groups %}<a href="#grupo-{{ forloop.counter }}">{{ group.title }}</a>{% endfor %}

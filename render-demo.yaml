@@ -1,0 +1,18 @@
+# Create a separate Render Blueprint using this file and codex/demo-diseno.
+services:
+  - type: web
+    name: ien-demo-diseno
+    runtime: python
+    branch: codex/demo-diseno
+    buildCommand: pip install -r requirements.txt
+    startCommand: daphne -b 0.0.0.0 -p $PORT ientrabajo.design_demo.asgi:application
+    healthCheckPath: /health/
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: ientrabajo.settings.design_demo
+      - key: DEBUG
+        value: "false"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_DOTENV_DISABLED
+        value: "1"
