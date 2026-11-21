@@ -22,3 +22,8 @@ urlpatterns = [
     path('moderacion/', include('moderacion.urls')),
     re_path(r'^static/(?P<path>.*)$', partial(serve, insecure=True)),
 ]
+
+handler400 = 'ientrabajo.error_pages.bad_request'
+handler403 = 'ientrabajo.error_pages.permission_denied'
+handler404 = 'ientrabajo.error_pages.not_found'
+handler500 = 'ientrabajo.error_pages.server_error'

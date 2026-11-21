@@ -6,7 +6,7 @@
 }
 .ien-cv-analysis-status[data-analysis-state="pendiente"] .ien-cv-analysis-content {
   gap: 0.8rem;
-  padding: 0.875rem 1rem;
+  padding: 1.25rem;
 }
 .ien-cv-analysis-status[data-analysis-state="pendiente"] [data-analisis-icono] {
   display: none;

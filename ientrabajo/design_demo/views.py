@@ -14,7 +14,10 @@ from ientrabajo.ui_review import SCREENS, COMPANY_PREVIEWS, company_preview
 from .data import fixtures, SUMMARY
 from .admin_views import ADMIN_TEMPLATES, admin_screen
 
+ERROR_SCREENS = {'ERR-01': 400, 'ERR-02': 403, 'ERR-03': 404, 'ERR-04': 500, 'ERR-05': 503, 'ERR-06': 504, 'ERR-07': 'offline'}
+
 TEMPLATES = {
+    **{name: 'errors/page.html' for name in ERROR_SCREENS},
     **ADMIN_TEMPLATES,
     'PUB-01': 'nueva_ui/home.html', 'PUB-02': 'nueva_ui/buscar_empleo.html',
     'PUB-03': 'nueva_ui/detalle_oferta.html', 'PUB-04': 'cursos/listado.html', 'PUB-05': 'cursos/detalle.html',
@@ -44,13 +47,16 @@ class CourseFilters(forms.Form):
 def index(request):
     request.user = AnonymousUser()
     groups = []
-    for group in ('Público', 'Acceso', 'Postulante', 'Empresa', 'Administración'):
+    for group in ('Público', 'Acceso', 'Postulante', 'Empresa', 'Administración', 'Errores'):
         items = [{'screen': item, 'url': '', 'preview_url': reverse('design_demo_screen', args=[item.id]), 'reason': ''} for item in SCREENS if item.group == group and (item.id in TEMPLATES or item.id in COMPANY_PREVIEWS)]
         groups.append({'title': group, 'items': items})
     return render(request, 'nueva_ui/screen_index.html', {'screen_groups': groups, 'screen_count': sum(len(g['items']) for g in groups), 'review_role': 'Demo de diseño', 'design_demo': True})
 
 
 def screen(request, screen_id):
+    if screen_id in ERROR_SCREENS:
+        from ientrabajo.error_pages import render_error
+        return render_error(request, ERROR_SCREENS[screen_id], preview_id=screen_id)
     if screen_id in ADMIN_TEMPLATES:
         return admin_screen(request, screen_id)
     if screen_id in COMPANY_PREVIEWS:

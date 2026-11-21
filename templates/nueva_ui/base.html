@@ -72,6 +72,7 @@
     {% include 'nueva_ui/partials/_footer.html' %}
   {% endblock %}
 
+  <script src="{% static_v 'js/ui/http.js' %}"></script>
   <script src="{% static_v 'js/ui/ien-ui.js' %}"></script>
   {% if user.is_authenticated and user.is_staff %}
     <script src="{% static_v 'js/admin-notifications.js' %}"></script>

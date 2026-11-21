@@ -2,7 +2,9 @@
 {% if not user.is_staff %}
 <nav class="ien-account-options" aria-label="Opciones de mi cuenta">
   {% if user.oferente %}
+    {% if user.oferente.estado_validacion != 'pendiente' %}
     <a class="ien-header-account-link" href="{% url 'perfil_oferente' user.oferente.pk %}"{% if route == 'perfil_oferente' %} aria-current="page"{% endif %}><span data-icon="building" class="h-4 w-4" aria-hidden="true"></span> Ver mi perfil de empresa</a>
+    {% endif %}
   {% elif user.postulante %}
     <a class="ien-header-account-link" href="{% url 'ia:perfil_profesional' %}"{% if route == 'perfil_profesional' and namespace == 'ia' %} aria-current="page"{% endif %}><span data-icon="briefcase" class="h-4 w-4" aria-hidden="true"></span> Perfil profesional</a>
     <a class="ien-header-account-link" href="{% url 'mi_perfil' %}#cv-analysis"><span data-icon="file-text" class="h-4 w-4" aria-hidden="true"></span> Mi CV y análisis</a>

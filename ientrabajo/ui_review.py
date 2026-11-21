@@ -25,6 +25,13 @@ class Screen:
 
 
 SCREENS = (
+    Screen('ERR-01', 'Errores', 'Solicitud inválida', 'design_demo_screen'),
+    Screen('ERR-02', 'Errores', 'Acceso restringido', 'design_demo_screen'),
+    Screen('ERR-03', 'Errores', 'Página no encontrada', 'design_demo_screen'),
+    Screen('ERR-04', 'Errores', 'Error del servidor', 'design_demo_screen'),
+    Screen('ERR-05', 'Errores', 'Servicio no disponible', 'design_demo_screen'),
+    Screen('ERR-06', 'Errores', 'Tiempo de espera', 'design_demo_screen'),
+    Screen('ERR-07', 'Errores', 'Sin conexión', 'design_demo_screen'),
     Screen('PUB-01', 'Público', 'Landing', 'home', note='Revisar menú mobile, ofertas, cursos, filtros y footer.'),
     Screen('PUB-02', 'Público', 'Buscar empleo', 'buscar_empleo', note='Buscar por título, empresa, habilidad y localidad; probar sin resultados.'),
     Screen('PUB-03', 'Público', 'Detalle de oferta', 'detalle_oferta', 'oferta_publica', 'Revisar también con sesión de postulante: favoritos y compatibilidad.'),

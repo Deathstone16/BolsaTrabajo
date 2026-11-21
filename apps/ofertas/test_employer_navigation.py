@@ -116,11 +116,16 @@ class NavegacionOferenteTests(TestCase):
         empresa = Oferente.objects.create(usuario=otro, nombre_empresa='Otra empresa', cuit='30-12345678-1')
         self.assertRedirects(self.client.get(reverse('perfil_oferente', args=[empresa.pk])), reverse('home'))
 
-    def test_empresa_pendiente_puede_editar_perfil_pero_no_publicar(self):
-        html = self.render_nav(self.crear_oferente('pendiente'), reverse('validacion_pendiente'))
+    def test_empresa_pendiente_tiene_header_reducido_y_puede_corregir_desde_su_estado(self):
+        user = self.crear_oferente('pendiente')
+        html = self.render_nav(user, reverse('validacion_pendiente'))
         self.assertIn('Estado de mi cuenta', html)
-        self.assertIn('href="' + reverse('editar_perfil_empresa') + '"', html)
+        self.assertIn(reverse('logout'), html)
+        self.assertNotIn('href="' + reverse('editar_perfil_empresa') + '"', html)
         self.assertNotIn('href="' + reverse('crear_oferta') + '"', html)
+        self.assertNotIn('href="' + reverse('perfil_oferente', args=[user.oferente.pk]) + '"', html)
+        self.client.force_login(user)
+        self.assertContains(self.client.get(reverse('validacion_pendiente')), reverse('editar_perfil_empresa'))
 
     def test_dashboard_alterna_entre_primera_oferta_y_nueva_oferta(self):
         user = self.crear_oferente()

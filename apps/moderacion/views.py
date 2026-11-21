@@ -29,7 +29,7 @@ from . import services
 from .models import SolicitudEmpresa
 
 
-@staff_member_required
+@staff_member_required(login_url='login')
 @require_GET
 def notificaciones_empresas(request):
     solicitudes = SolicitudEmpresa.objects.select_related('empresa')
@@ -47,7 +47,7 @@ def notificaciones_empresas(request):
     return response
 
 
-@staff_member_required
+@staff_member_required(login_url='login')
 def solicitudes_empresas(request):
     solicitudes = SolicitudEmpresa.objects.select_related('empresa')
     estado = request.GET.get('estado', '')
@@ -67,7 +67,7 @@ def solicitudes_empresas(request):
 logger = logging.getLogger(__name__)
 
 
-@staff_member_required
+@staff_member_required(login_url='login')
 @require_GET
 def notificaciones_admin(request):
     from .notifications import review_notifications
@@ -217,14 +217,14 @@ def dar_de_baja_categoria(request, categoria_id):
 # EMPRESAS
 # ============================================================
 
-@staff_member_required
+@staff_member_required(login_url='login')
 def listar_empresas(request):
     """Muestra las empresas y sus estados de validación."""
     return render(request, 'moderacion/listar_empresas.html',
                   services.listar_empresas_contexto())
 
 
-@staff_member_required
+@staff_member_required(login_url='login')
 def detalle_empresa(request, pk):
     """Presenta la información de una empresa para su revisión."""
     empresa = services.obtener_empresa(pk)
@@ -233,7 +233,7 @@ def detalle_empresa(request, pk):
     })
 
 
-@staff_member_required
+@staff_member_required(login_url='login')
 def aprobar_empresa(request, pk):
     """Aprueba por POST el perfil de una empresa."""
     if request.method == 'POST':
@@ -257,7 +257,7 @@ def aprobar_empresa(request, pk):
     return redirect('mod_listar_empresas')
 
 
-@staff_member_required
+@staff_member_required(login_url='login')
 def rechazar_empresa(request, pk):
     """Rechaza una empresa y registra el motivo ingresado."""
     empresa = services.obtener_empresa(pk)
