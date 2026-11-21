@@ -1,4 +1,3 @@
-{% if curso.imagen or not detalle %}
   <div class="ien-course-cover{% if detalle %} ien-course-cover--detail{% endif %}" data-course-cover>
     <span class="ien-course-cover-fallback" aria-hidden="true">
       <span data-icon="graduation-cap" class="ien-course-cover-icon"></span>
@@ -7,4 +6,3 @@
       <img src="{{ curso.imagen.url }}" alt=""{% if not detalle %} loading="lazy"{% endif %} decoding="async">
     {% endif %}
   </div>
-{% endif %}

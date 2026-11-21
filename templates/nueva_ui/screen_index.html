@@ -1,0 +1,36 @@
+{% extends 'nueva_ui/base.html' %}
+{% block title %}Mapa de pantallas · IEN Trabajo{% endblock %}
+{% block content %}
+<div class="ien-home-container ien-home-section ien-review-index">
+  <h1>Mapa de pantallas</h1>
+  <p class="ien-home-intro">{{ screen_count }} pantallas para revisar el front. Sesión actual: <strong>{{ review_role }}</strong>.</p>
+  <div class="panel ien-review-help">
+    <h2>Cómo recorrer la app</h2>
+    <p>Seguí el orden de cada sección. Primero revisá Público y Acceso; después iniciá sesión como postulante, empresa o admin y volvé a este índice. Los enlaces usan datos existentes y respetan los permisos de tu cuenta.</p>
+    <p>Cada pantalla tiene su ID abajo a la izquierda. Para pedir una corrección: <strong>“ADM-01 · Mobile · el botón queda cortado”</strong>. Indicá también el estado o enviá una captura.</p>
+    <p>En cada recorrido probá escritorio y mobile, campos incompletos, listas vacías y menús abiertos. Las confirmaciones se pueden abrir para revisar; los botones finales conservan sus acciones reales.</p>
+    <p>Este mapa y las etiquetas aparecen únicamente con DEBUG activado.</p>
+    <p>Las vistas de prueba de empresa se pueden abrir sin sesión ni aprobación, con datos ficticios. Permiten revisar el diseño y completar campos, pero no guardar, publicar ni eliminar.</p>
+    <a class="btn-ghost" href="{% url 'login' %}">Iniciar sesión</a>
+  </div>
+  <nav class="ien-review-sections" aria-label="Secciones del recorrido">
+    {% for group in screen_groups %}<a href="#grupo-{{ forloop.counter }}">{{ group.title }}</a>{% endfor %}
+  </nav>
+  {% for group in screen_groups %}
+    <section class="ien-review-group" aria-labelledby="grupo-{{ forloop.counter }}">
+      <h2 id="grupo-{{ forloop.counter }}">{{ group.title }}</h2>
+      <ol class="ien-review-list">
+        {% for item in group.items %}
+          <li class="panel" id="{{ item.screen.id }}">
+            <div><span class="ien-review-id">{{ item.screen.id }}</span><h3>{{ item.screen.title }}</h3></div>
+            {% if item.screen.note %}<p>{{ item.screen.note }}</p>{% endif %}
+            {% if item.preview_url %}<a class="ien-table-action" href="{{ item.preview_url }}">Vista de prueba</a>{% endif %}
+            {% if item.url %}<a class="ien-table-action" href="{{ item.url }}">{% if item.preview_url %}Abrir con mi cuenta{% else %}Abrir pantalla{% endif %} <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+            {% else %}<p class="ien-review-reason">{{ item.reason }}</p>{% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+    </section>
+  {% endfor %}
+</div>
+{% endblock %}

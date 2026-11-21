@@ -1,10 +1,10 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Empresas pendientes · IEN Empleo</title></head>
-<body style="margin:0;background:#F8F3F0;font-family:Arial,sans-serif;color:#26222E;padding:32px 16px;">
-<table role="presentation" style="width:100%;max-width:580px;margin:auto;background:#FEFCF9;border:1px solid #e8ded4;border-radius:16px;"><tr><td style="padding:32px;">
-{% include 'emails/_logo.html' only %}
-<h1 style="font-size:24px;">Empresas pendientes de revisión</h1>
-<p style="line-height:1.7;">Hay {{ cantidad }} solicitud{{ cantidad|pluralize:'es' }} pendientes desde hace al menos {{ horas }} horas. Podés revisarlas cuando retomes la gestión.</p>
-<ul style="padding-left:20px;line-height:1.8;">{% for solicitud in solicitudes %}<li><strong>{{ solicitud.empresa.nombre_empresa }}</strong> · {{ solicitud.creada_en|date:'d/m/Y H:i' }}</li>{% endfor %}</ul>
-<p style="margin:28px 0;"><a href="{{ review_url }}" style="display:inline-block;padding:14px 20px;background:#512DA8;border-radius:10px;color:white;text-decoration:none;">Revisar solicitudes</a></p>
-<p style="font-size:12px;color:#6B645C;line-height:1.7;">Resumen agrupado. Las empresas ya resueltas no se incluyen. Cada solicitud genera un único recordatorio.</p>
-</td></tr></table></body></html>
+{% extends 'emails/_base.html' %}
+{% block title %}Empresas pendientes | IEN Trabajo{% endblock %}
+{% block preheader %}Tenés solicitudes de empresas pendientes de revisión.{% endblock %}
+{% block heading %}Empresas pendientes de revisión{% endblock %}
+{% block content %}
+<p style="margin:0 0 20px;">Hay {{ cantidad }} solicitud{{ cantidad|pluralize:'es' }} pendientes desde hace al menos {{ horas }} horas. Podés revisarlas cuando retomes la gestión.</p>
+{% for solicitud in solicitudes %}<div style="padding:14px 0;border-bottom:1px solid #d2c7df;"><strong style="color:#251a43;">{{ solicitud.empresa.nombre_empresa }}</strong><br><span style="font-size:13px;">Recibida el {{ solicitud.creada_en|date:'d/m/Y H:i' }}</span></div>{% endfor %}
+{% include 'emails/_button.html' with url=review_url label='Revisar solicitudes' only %}
+<p style="margin:24px 0 0;font-size:12px;">Este resumen agrupa las solicitudes que siguen pendientes. Cada solicitud genera un único recordatorio.</p>
+{% endblock %}

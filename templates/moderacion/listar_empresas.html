@@ -5,22 +5,22 @@
 
   <div class="mb-8">
     <h1 class="text-3xl font-bold tracking-tight text-[#26222E] mb-2">Validación de empresas</h1>
-        {% include "nueva_ui/partials/_breadcrumbs.html" with current="Empresas" only %}
     <p class="text-muted-foreground">Revisá el estado de las empresas registradas en la plataforma.</p>
   </div>
 
   <!-- Buscador -->
   <div class="panel p-6 mb-6">
     <div class="relative">
+      <label for="empresa-search" class="sr-only">Buscar empresas por nombre o CUIT</label>
       <span data-icon="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground"></span>
-      <input type="text" id="empresa-search" placeholder="Buscar por nombre o CUIT..."
+      <input type="search" id="empresa-search" placeholder="Buscar por nombre o CUIT..." aria-controls="empresas-tabla"
              class="w-full pl-10 pr-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
     </div>
   </div>
 
   <!-- Tabla -->
-  <div class="ien-table-scroll panel overflow-hidden mb-8">
-    <table class="w-full">
+  <div class="ien-company-review-list panel overflow-hidden mb-8">
+    <table class="w-full" role="table" aria-label="Empresas registradas">
       <thead>
         <tr class="border-b border-border text-sm text-muted-foreground">
           <th class="text-left px-6 py-4 font-medium">Empresa</th>
@@ -34,8 +34,8 @@
       <tbody id="empresas-tabla">
         {% for empresa in empresas %}
         <tr class="border-b border-border last:border-0 hover:bg-muted/40 transition-colors"
-            data-nombre="{{ empresa.nombre_empresa|lower }}">
-          <td class="px-6 py-4">
+            data-nombre="{{ empresa.nombre_empresa|lower }}" data-cuit="{{ empresa.cuit }}">
+          <td class="ien-company-review-name px-6 py-4">
             <div class="flex items-center gap-3">
               {% if empresa.logo %}
                 <img src="{{ empresa.logo.url }}" class="w-9 h-9 rounded-lg object-cover">
@@ -47,34 +47,22 @@
               <span class="font-medium text-sm">{{ empresa.nombre_empresa }}</span>
             </div>
           </td>
-          <td class="px-6 py-4 text-sm text-muted-foreground">{{ empresa.cuit }}</td>
-          <td class="px-6 py-4 text-sm text-muted-foreground">{{ empresa.usuario.email }}</td>
-          <td class="px-6 py-4 text-sm text-muted-foreground">{{ empresa.industria|default:"—" }}</td>
-          <td class="px-6 py-4">
-            {% if empresa.estado_validacion == 'pendiente' %}
-  <span class="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
-    Pendiente
-  </span>
-{% elif empresa.estado_validacion == 'aprobado' %}
-  <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-    Aprobada
-  </span>
-{% else %}
-  <span class="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-    Rechazada
-  </span>
-{% endif %}
+          <td data-label="CUIT" class="px-6 py-4 text-sm text-muted-foreground">{{ empresa.cuit }}</td>
+          <td data-label="Email" class="px-6 py-4 text-sm text-muted-foreground"><span>{{ empresa.usuario.email }}</span></td>
+          <td data-label="Industria" class="px-6 py-4 text-sm text-muted-foreground">{{ empresa.industria|default:"—" }}</td>
+          <td data-label="Estado" class="px-6 py-4">
+            {% include 'moderacion/_company_status.html' with estado=empresa.estado_validacion only %}
           </td>
-          <td class="px-6 py-4">
+          <td class="ien-company-review-actions px-6 py-4">
             <a href="{% url 'mod_detalle_empresa' empresa.pk %}"
-               class="flex items-center gap-1.5 text-sm text-primary hover:underline">
+               class="ien-table-action">
               <span data-icon="eye" class="h-4 w-4"></span> Ver detalle
             </a>
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="6" class="px-6 py-12 text-center text-sm text-muted-foreground">
+          <td colspan="6" class="ien-company-review-empty px-6 py-12 text-center text-sm text-muted-foreground">
             No hay empresas registradas.
           </td>
         </tr>
@@ -96,9 +84,10 @@
 <script>
   const searchInput = document.getElementById('empresa-search');
   searchInput.addEventListener('input', () => {
-    const q = searchInput.value.toLowerCase();
+    const q = searchInput.value.toLowerCase().trim();
+    const cuit = q.replace(/[^0-9]/g, "");
     document.querySelectorAll('#empresas-tabla tr[data-nombre]').forEach(row => {
-      row.style.display = row.dataset.nombre.includes(q) ? '' : 'none';
+      row.hidden = !(row.dataset.nombre.includes(q) || (cuit && /^[0-9\s-]+$/.test(q) && row.dataset.cuit.replace(/[^0-9]/g, '').includes(cuit)));
     });
   });
 </script>

@@ -14,7 +14,7 @@
   background: var(--background);
   color: var(--foreground);
 }
-.ien-app-page #global-nav { background: #eaf0f9f5; border-bottom-color: #251a431a; }
+.ien-app-page #global-nav { background: #eaf0f9; border-bottom-color: #251a431a; }
 .ien-app-page .ien-page-content { min-height: 65dvh; }
 .ien-app-page .ien-page-content [class~="bg-[#F8F3F0]"] { background-color: var(--background); }
 .ien-app-page .ien-page-content h1 {
@@ -95,6 +95,80 @@
 .ien-app-page .ien-table-scroll th { font-weight: 600; }
 .ien-app-page .ien-table-scroll tbody tr:hover { background: #f1edf7; }
 .ien-app-page .ien-table-scroll td { vertical-align: middle; }
+.ien-app-page .ien-page-content .ien-catalog-add { min-height: 2.75rem; padding: .625rem 1.25rem; font-size: .875rem; white-space: nowrap; }
+.ien-table-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.ien-table-actions form { display: flex; margin: 0; }
+.ien-table-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: .5rem 1rem;
+  border: 1px solid #83749c;
+  border-radius: 999px;
+  background: #fffdf8;
+  color: #512da8;
+  font: 500 .8125rem/1.4 "Poppins", sans-serif;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease;
+}
+.ien-table-action:hover { background: #eee8f5; border-color: #512da8; }
+.ien-table-action-danger { background: #fff4f3; border-color: #d9a3ad; color: #a53548; }
+.ien-table-action-danger:hover { background: #f9e5e6; border-color: #a53548; }
+.ien-catalog-table th:first-child { width: 30%; }
+.ien-catalog-table th:nth-child(2) { width: 15%; }
+.ien-catalog-actions-heading { width: 55%; }
+.ien-catalog-table .ien-table-actions { justify-content: flex-end; }
+.ien-catalog-table .ien-catalog-actions-heading { text-align: right; }
+.ien-category-actions { display: grid; grid-template-columns: minmax(11rem, 1fr) 6rem 6rem; gap: .625rem; max-width: 29rem; margin-left: auto; }
+.ien-category-actions > *, .ien-category-actions button { width: 100%; }
+.ien-table-action-primary { background: #eee8f5; border-color: #b5a3cc; }
+.ien-table-action-primary:hover { background: #e7ddf6; }
+.ien-company-status {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: .45rem;
+  padding: .3rem .7rem;
+  border: 1px solid #d6cba9;
+  border-radius: .5rem;
+  background: #f7efdf;
+  color: #66532d;
+  font-size: .75rem;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.ien-company-status::before { content: ""; flex: 0 0 .35rem; width: .35rem; height: .35rem; border-radius: 50%; background: currentColor; }
+.ien-company-status.is-aprobado { border-color: #c4d4bd; background: #e9f1e6; color: #346444; }
+.ien-company-status.is-rechazado { border-color: #dfb9bf; background: #f9e5e6; color: #92394a; }
+.ien-company-review-list table { table-layout: fixed; }
+.ien-company-review-list thead { background: #e7ddf6; }
+.ien-company-review-list th:first-child { width: 24%; }
+.ien-company-review-list th:nth-child(3) { width: 23%; }
+.ien-company-review-list :is(th, td) { padding: 1rem; overflow-wrap: anywhere; }
+.ien-company-review-list .ien-company-review-name img { flex-shrink: 0; }
+.ien-company-review-name > div > :first-child { flex-shrink: 0; }
+.ien-company-review-actions .ien-table-action { gap: .4rem; padding-inline: .75rem; }
+.ien-company-review-list tr[hidden] { display: none; }
+@media (max-width: 1199px) {
+  .ien-app-page .ien-page-content .ien-company-review-list { background: transparent; border: 0; box-shadow: none; overflow: visible; }
+  .ien-company-review-list table, .ien-company-review-list tbody { display: block; width: 100%; }
+  .ien-company-review-list table { min-width: 0; }
+  .ien-company-review-list thead { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .ien-company-review-list tbody { display: grid; gap: 1.25rem; }
+  .ien-company-review-list tr { display: grid; padding: 1.25rem; border: 1px solid #83749c; border-radius: 1.15rem; background: #fffdf8; box-shadow: var(--page-shadow); }
+  .ien-company-review-list tr:hover { background: #fffdf8; }
+  .ien-company-review-list td { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); align-items: baseline; gap: .75rem; padding: .625rem 0; border: 0; min-width: 0; text-align: left; }
+  .ien-company-review-list td[data-label]::before { content: attr(data-label); color: #595367; font-size: .75rem; font-weight: 500; }
+  .ien-company-review-list .ien-company-review-name { display: block; padding: 0 0 1rem; margin-bottom: .5rem; border-bottom: 1px solid #e0d8e8; color: #251a43; }
+  .ien-company-review-list .ien-company-review-name span { font-size: 1rem; font-weight: 600; }
+  .ien-company-review-list .ien-company-review-actions { display: block; padding: 1rem 0 0; margin-top: .5rem; border-top: 1px solid #e0d8e8; }
+  .ien-company-review-actions .ien-table-action { width: 100%; }
+  .ien-company-review-list .ien-company-review-empty { display: block; padding: 1rem 0; text-align: center; }
+}
 
 @media (hover: hover) and (pointer: fine) {
   .ien-app-page .ien-page-content :is(.ien-job-card, .ien-course-card-glass):hover {
@@ -115,3 +189,47 @@
 @media (max-width: 639px) {
   .ien-app-page .ien-page-content .grid.grid-cols-1 > .col-span-2 { grid-column: 1 / -1; }
 }
+
+/* Development-only screen map and reference badge. */
+.ien-screen-marker { position: fixed; z-index: 65; left: .75rem; bottom: .75rem; display: flex; align-items: center; gap: .6rem; padding: .5rem .75rem; border: 1px solid #83749c; border-radius: .75rem; background: #fffdf8f5; color: #251a43; box-shadow: 0 2px 0 #251a4326; font: 500 .75rem/1.4 "Poppins", sans-serif; }
+.ien-screen-marker strong, .ien-review-id { font-family: "JetBrains Mono", monospace; font-size: .75rem; color: #512da8; }
+.ien-screen-marker:hover { background: #eee8f5; }
+.ien-screen-marker:focus-visible { outline: 2px solid #512da8; outline-offset: 3px; }
+.ien-review-help { margin-top: 1.5rem; padding: 1.5rem; }
+.ien-review-help h2 { font-size: 1.15rem; font-weight: 600; }
+.ien-review-help p { margin-top: .75rem; max-width: 85ch; font-size: .875rem; color: #595367; line-height: 1.8; }
+.ien-review-help .btn-ghost { margin-top: 1rem; font-size: .875rem; }
+.ien-review-sections { display: flex; flex-wrap: wrap; gap: .625rem; margin-block: 2rem; }
+.ien-review-sections a { padding: .6rem 1rem; border: 1px solid #83749c; border-radius: 999px; background: #e7ddf6; color: #251a43; font-size: .875rem; }
+.ien-review-group { margin-top: 2.5rem; }
+.ien-review-group > h2 { font-size: 1.5rem; font-weight: 700; scroll-margin-top: 6rem; }
+.ien-review-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 1.25rem; margin-top: 1rem; padding: 0; list-style: none; }
+.ien-review-list > li { display: flex; flex-direction: column; align-items: flex-start; gap: .875rem; padding: 1.25rem; scroll-margin-top: 6rem; }
+.ien-review-list h3 { margin-top: .4rem; font-weight: 600; }
+.ien-review-list p { color: #595367; font-size: .8rem; line-height: 1.7; }
+.ien-review-list .ien-table-action { margin-top: auto; gap: .5rem; }
+.ien-review-list .ien-review-reason { margin-top: auto; padding-top: .5rem; font-style: italic; }
+@media (max-width: 600px) { body:has(.ien-screen-marker) { padding-bottom: 3.5rem; } }
+@media print { .ien-screen-marker { display: none; } }
+
+.ien-review-index { padding-inline: clamp(1rem, 3vw, 2rem); }
+.ien-course-detail-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin-top: 1.5rem; }
+.ien-app-page .ien-page-content .ien-course-detail-actions .btn-ien:disabled { background: #eee8f5; color: #6c627b; border-color: #c6bbd3; cursor: not-allowed; }
+@media (max-width: 600px) { .ien-course-detail-actions > * { width: 100%; } }
+
+.ien-review-preview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem 1rem;
+  margin: 1rem auto;
+  padding: .85rem 1.2rem;
+  width: min(72rem, calc(100% - 2rem));
+  border: 1px solid #ded3ee;
+  border-radius: 1rem;
+  background: #f1ebfa;
+  color: #37235c;
+  font-size: .8rem;
+}
+.ien-review-preview a { color: #512da8; text-decoration: underline; }
+.ien-review-preview p { flex-basis: 100%; }

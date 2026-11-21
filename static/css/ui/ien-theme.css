@@ -139,6 +139,9 @@ body {
 }
 
 .ien-company-avatar { display: flex; flex: 0 0 auto; flex-direction: column; align-items: start; gap: 0.75rem; }
+.ien-company-portrait { display: grid; place-items: center; flex: 0 0 auto; width: 8rem; height: 8rem; overflow: hidden; border: 4px solid #fff; border-radius: 1.5rem; background: #eee8f5; color: var(--primary); box-shadow: 0 8px 18px -10px #251a4354; font-size: 2rem; font-weight: 700; }
+.ien-company-portrait img { display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; border: 0; border-radius: 0; padding: 0; object-fit: cover; }
+.ien-company-portrait--small { width: 6rem; height: 6rem; font-size: 1.5rem; }
 .ien-company-website { padding: 0.6rem 1rem; border-radius: 0.75rem; border-color: rgba(81, 45, 168, 0.22); background: rgba(81, 45, 168, 0.05); color: var(--primary); font-size: 0.8125rem; }
 .ien-company-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem 1.5rem; }
 .ien-company-heading h1 { flex: 1 1 16rem; overflow-wrap: anywhere; }
@@ -156,7 +159,7 @@ body {
 .ien-company-contact-value.ien-text-link { display: inline-block; }
 .ien-company-photo { display: grid; align-content: start; gap: 0.75rem; scroll-margin-top: 7rem; }
 .ien-company-photo-preview { display: grid; place-items: center; width: 7rem; height: 7rem; overflow: hidden; border-radius: 1rem; background: var(--muted); color: var(--primary); font-size: 1.75rem; font-weight: 600; }
-.ien-company-photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+.ien-company-photo-preview img { display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; border-radius: inherit; object-fit: cover; }
 .ien-company-photo-preview [hidden] { display: none; }
 .ien-company-photo .input-ien { width: 100%; }
 .ien-photo-upload-control { display: grid; gap: 0.4rem; }
@@ -399,8 +402,6 @@ main select:not([multiple], [size]:not([size="1"])):enabled { cursor: pointer; }
   color: var(--primary);
   font-weight: 700;
 }
-.ien-header-register { color: #554b62; font-size: .875rem; font-weight: 500; }
-.ien-header-register:hover { color: var(--primary-600); }
 .ien-header-login { min-height: 2.75rem; padding: .625rem 1rem; font-size: .875rem; }
 .ien-header-user-name { max-width: 8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #global-nav .ien-postulante-account > summary {
@@ -447,7 +448,7 @@ main select:not([multiple], [size]:not([size="1"])):enabled { cursor: pointer; }
   text-align: start;
   cursor: pointer;
 }
-#global-nav :is(.ien-header-brand, .ien-header-link, .ien-header-register, .ien-header-account-link, .nav-burger):focus-visible {
+#global-nav :is(.ien-header-brand, .ien-header-link, .ien-header-account-link, .nav-burger):focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
@@ -486,7 +487,6 @@ main select:not([multiple], [size]:not([size="1"])):enabled { cursor: pointer; }
     border-inline-start: 0;
     border-top: 1px solid #ded2ec;
   }
-  .nav-mobile .ien-header-register { display: flex; align-items: center; min-height: 2.75rem; padding: .625rem .875rem; }
   .nav-mobile .ien-postulante-account .ien-account-chevron { margin-inline-start: auto; }
   .nav-mobile .ien-postulante-account .ien-account-dropdown { position: static; width: 100%; max-width: none; margin-top: .5rem; box-shadow: none; }
 }
@@ -503,7 +503,7 @@ main select:not([multiple], [size]:not([size="1"])):enabled { cursor: pointer; }
 .ien-employer-account > summary:hover, .ien-employer-account[open] > summary { background: var(--muted); color: var(--primary); }
 .ien-employer-account summary:focus-visible, .ien-employer-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
 .ien-account-avatar { display: grid; place-items: center; flex-shrink: 0; width: 2rem; height: 2rem; overflow: hidden; border-radius: 50%; background: rgba(81, 45, 168, 0.1); color: var(--primary); font-weight: 600; }
-.ien-account-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.ien-account-avatar img { display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; border-radius: inherit; object-fit: cover; }
 .ien-account-chevron { display: grid; place-items: center; flex: 0 0 1.25rem; width: 1.25rem; height: 1.25rem; font-size: 0; }
 .ien-account-chevron::before { content: ""; width: 0.42rem; height: 0.42rem; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: translateY(-1px) rotate(45deg); transition: transform 0.18s ease; }
 .ien-employer-account[open] > summary .ien-account-chevron::before { transform: translateY(1px) rotate(225deg); }
@@ -956,7 +956,8 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 .ien-course-filter-fields { display: grid; grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr)); gap: 1rem; }
 .ien-course-filter-fields > div { min-width: 0; }
 .ien-course-filter-fields label { display: block; margin-bottom: 0.5rem; font-size: 0.875rem; }
-.ien-course-filter-fields .input-ien { width: 100%; min-height: 3rem; }
+.ien-course-filter-fields .input-ien { width: 100%; height: 3rem; min-height: 3rem; }
+.ien-course-filter-fields select { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ien-course-filter-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.25rem; }
 .ien-course-filter-error { margin-top: 0.5rem; color: var(--destructive, #b91c1c); font-size: 0.875rem; }
 .ien-course-results { margin-top: 1.5rem; color: var(--muted-foreground); font-size: 0.875rem; }
@@ -1056,7 +1057,7 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
   font-weight: 700;
 }
 .ien-offer-avatar--logo { background: var(--card); }
-.ien-offer-avatar img { width: 100%; height: 100%; padding: 0.35rem; object-fit: contain; }
+.ien-offer-avatar img { display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; padding: 0; border-radius: inherit; object-fit: cover; }
 .ien-home-offer h3 { font-size: 1.0625rem; overflow-wrap: anywhere; }
 .ien-home-offer p { margin-top: 0.35rem; color: var(--muted-foreground); font-size: 0.875rem; }
 .ien-home-offer .ien-card-meta { font-size: 0.75rem; }
@@ -1073,12 +1074,6 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
   outline-offset: 4px;
 }
 .ien-home-empty { grid-column: 1 / -1; padding: 2rem; color: var(--muted-foreground); }
-.ien-breadcrumbs { margin-top: 0.875rem; font-size: 0.8125rem; color: var(--muted-foreground); }
-.ien-breadcrumbs ol { display: flex; flex-wrap: wrap; gap: 0.5rem; list-style: none; padding: 0; }
-.ien-breadcrumbs li { display: inline-flex; align-items: baseline; gap: 0.5rem; }
-.ien-breadcrumbs a { color: var(--primary); }
-.ien-breadcrumbs a:hover { text-decoration: underline; }
-.ien-breadcrumbs [aria-current] { overflow-wrap: anywhere; }
 @media (max-width: 1023px) {
   .ien-course-filter-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ien-home-hero { gap: 1.5rem; }
@@ -1152,6 +1147,8 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 .ien-cv-replace { border-top: 1px solid var(--border); padding-top: .875rem; }
 .ien-avatar-form { display: grid; justify-items: center; gap: .5rem; width: 100%; }
 .ien-avatar-picture { position: relative; display: block; width: 4rem; height: 4rem; }
+.ien-avatar-picture > img { display: block; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.ien-company-avatar > img { display: block; flex-shrink: 0; object-fit: cover; }
 .ien-avatar-picker {
   display: grid;
   justify-items: center;
@@ -1297,8 +1294,6 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
   height: 100%;
   object-fit: cover;
   object-position: center;
-  filter: blur(3px);
-  transform: scale(1.035);
   pointer-events: none;
   user-select: none;
 }
@@ -1325,13 +1320,6 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
   border: 1px solid rgba(255, 255, 255, .3);
   box-shadow: 0 16px 40px -20px rgba(13, 6, 27, .5);
   color: #fff;
-}
-@supports ((backdrop-filter: blur(14px)) or (-webkit-backdrop-filter: blur(14px))) {
-  .ien-home-hero-section .ien-home-search {
-    background: rgba(37, 20, 65, .72);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
-  }
 }
 .ien-home-hero-section .ien-home-search h2,
 .ien-home-hero-section .ien-home-search label { color: #fff; }
@@ -1430,7 +1418,7 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
   line-height: 1.5;
 }
 .ien-course-card-tags > span { display: inline-flex; align-items: center; gap: .35rem; }
-.ien-course-card-tags > span + span::before { content: "·"; margin-right: .05rem; }
+.ien-course-card-tags > span + span { padding-inline-start: .5rem; border-inline-start: 1px solid #c6bbd3; }
 .ien-course-card-body {
   position: relative;
   display: flex;
@@ -1444,13 +1432,6 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
   border-radius: 1.25rem 1.25rem 0 0;
   background: #fffdfd;
   color: #26222e;
-}
-@supports ((backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px))) {
-  .ien-course-card-body {
-    background: linear-gradient(135deg, rgba(255, 255, 255, .95), rgba(255, 253, 255, .87));
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
-  }
 }
 .ien-course-card-glass .ien-course-card-body h2,
 .ien-course-card-glass .ien-course-card-body h3 { margin: 0; font-size: 1.0625rem; line-height: 1.4; overflow-wrap: anywhere; }

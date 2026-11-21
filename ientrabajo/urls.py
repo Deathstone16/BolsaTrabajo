@@ -27,9 +27,12 @@ def deny_private_media(request, path=''):
     return HttpResponseNotFound()
 from . import views
 from usuarios.views import mi_perfil
+from .ui_review import screen_index, company_preview
 
 
 urlpatterns = [
+    path('revision-ui/', screen_index, name='ui_review'),
+    path('revision-ui/empresa/<str:screen_id>/', company_preview, name='ui_review_company'),
     re_path(r'^media/(?:postulantes/cv|ia/extraction_snapshots)/.*$', deny_private_media),
     path('admin/', admin.site.urls),
     path('',views.home,name='home'),

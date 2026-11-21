@@ -71,16 +71,29 @@ class NavegacionOferenteTests(TestCase):
         self.assertNotIn(reverse('favoritos'), html)
         self.assertNotIn(reverse('mod_listar_empresas'), html)
 
-    def test_dropdown_admin_incluye_toda_la_gestion(self):
+    def test_dropdown_admin_no_repite_gestion_del_header(self):
         user = Usuario.objects.create_user(email='admin-menu@example.com', is_staff=True)
         request = RequestFactory().get('/')
         request.user = user
         html = render_to_string('nueva_ui/partials/_account_options.html', request=request)
+        self.assertIn(reverse('logout'), html)
         for name in ('mod_listar_empresas', 'mod_listar_ofertas', 'mod_listar_cursos',
-                     'mod_listar_categorias', 'mod_solicitudes_empresas', 'logout'):
-            self.assertIn(reverse(name), html)
+                     'mod_listar_categorias', 'mod_solicitudes_empresas', 'admin:index', 'mi_perfil'):
+            self.assertNotIn(reverse(name), html)
+        self.assertNotIn('<nav', html)
+        header = self.render_nav(user)
+        for name in ('mod_listar_empresas', 'mod_listar_ofertas', 'mod_listar_cursos',
+                     'mod_listar_categorias', 'mod_solicitudes_empresas'):
+            self.assertEqual(header.count('href="' + reverse(name) + '"'), 2)
+
+    def test_menu_del_instituto_no_incluye_acceso_a_superadmin(self):
+        user = Usuario.objects.create_user(email='superadmin-menu@example.com', is_staff=True, is_superuser=True)
+        request = RequestFactory().get('/')
+        request.user = user
+        html = render_to_string('nueva_ui/partials/_account_options.html', request=request)
         self.assertNotIn(reverse('admin:index'), html)
-        self.assertNotIn(reverse('mi_perfil'), html)
+        self.assertIn(reverse('logout'), html)
+        self.assertNotIn(reverse('mod_listar_empresas'), html)
 
     def test_dropdown_postulante_incluye_sus_secciones(self):
         user = Usuario.objects.create_user(email='dropdown-postulante@example.com')

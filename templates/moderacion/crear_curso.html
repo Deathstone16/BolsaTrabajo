@@ -5,7 +5,6 @@
 
   <div class="mb-8">
     <h1 class="text-3xl font-bold tracking-tight text-[#26222E] mb-2">Crear Curso</h1>
-        {% include "nueva_ui/partials/_breadcrumbs.html" with current="Crear curso" parent_url="mod_listar_cursos" parent_label="Cursos" only %}
     <p class="text-muted-foreground">Completa los datos del nuevo curso</p>
   </div>
 
@@ -48,7 +47,7 @@
       {% else %}
       {{ field }}
       {% if field.name == 'categoria' %}{% include 'cursos/_category_help.html' %}{% endif %}
-      {% if field.name == 'habilidades' and field.help_text %}<p class="text-xs text-muted-foreground">{{ field.help_text }}</p>{% endif %}
+      {% if field.help_text %}<p class="text-xs text-muted-foreground">{{ field.help_text }}</p>{% endif %}
       {% if field.errors %}
           <!-- 🔧 FIX 3: Errores de campo como lista individual -->
           <div class="text-destructive text-xs mt-1 space-y-1">

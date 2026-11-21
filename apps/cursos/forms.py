@@ -20,7 +20,7 @@ class CursoFiltroForm(forms.Form):
     )
     modalidad = forms.ChoiceField(
         label='Modalidad', required=False,
-        choices=[('', 'Todas las modalidades'), *Curso.TIPO_CHOICES],
+        choices=[('', 'Todas'), *Curso.TIPO_CHOICES],
     )
     duracion = forms.ChoiceField(label='Duración', required=False)
 
@@ -55,9 +55,10 @@ class CursoForm(forms.ModelForm):
             'horario': 'Horario',
             'tipo': 'Tipo',
             'habilidades': 'Habilidades que desarrolla',
-            'url_externa': 'URL externa',
+            'url_externa': 'Enlace del curso en el sitio del IEN',
         }
         help_texts = {
+            'url_externa': 'Opcional. Pegá la URL de la página específica de este curso en el sitio del IEN. Se usa en el botón «Ver curso en el IEN».',
             'habilidades': 'Seleccioná competencias que el curso desarrolla. Esto ayuda a recomendar opciones generales sin asumir contenidos no declarados.',
         }
         widgets = {

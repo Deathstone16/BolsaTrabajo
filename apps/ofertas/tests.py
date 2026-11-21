@@ -208,7 +208,7 @@ class OfertaFormTests(TestCase):
         url = reverse("detalle_oferta", args=[oferta.pk])
         response = self.client.get(url)
         self.assertContains(response, 'id="habilidades-blandas"')
-        self.assertContains(response, 'bg-emerald-50')
+        self.assertContains(response, 'ien-offer-skill-soft')
         self.assertContains(response, 'Comunicación')
         self.assertNotContains(response, 'No especificadas')
 

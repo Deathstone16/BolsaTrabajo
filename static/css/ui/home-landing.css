@@ -7,7 +7,7 @@
 }
 
 body:has(.ien-home) #global-nav {
-  background-color: #eaf0f9f5;
+  background-color: #eaf0f9;
   border-bottom-color: #251a431a;
 }
 
@@ -43,8 +43,8 @@ body:has(.ien-home) #global-nav {
   .ien-title-underline path { animation: ien-title-underline-draw .5s cubic-bezier(.4, 0, .2, 1) .6s both; }
 }
 @keyframes ien-title-blur-fade {
-  from { opacity: 0; filter: blur(5px); transform: translateY(6px); }
-  to { opacity: 1; filter: blur(0); transform: translateY(0); }
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @keyframes ien-title-underline-draw {
   from { stroke-dashoffset: 1; }

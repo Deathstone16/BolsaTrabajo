@@ -1,6 +1,6 @@
 {% load static %}
 {# Nav del rediseno, con la logica de sesion y roles que ya traia templates/base.html #}
-<header id="global-nav" {% if not home_only and user.is_authenticated and user.is_staff %}data-admin-header{% endif %} {% if not home_only and user.is_authenticated and user.oferente and not user.is_staff %}data-employer-header{% endif %} class="sticky top-0 z-50 border-b border-[rgba(110,85,55,0.16)] bg-[#F8F3F0]/85 backdrop-blur-xl">
+<header id="global-nav" {% if not home_only and user.is_authenticated and user.is_staff %}data-admin-header{% endif %} {% if not home_only and user.is_authenticated and user.oferente and not user.is_staff %}data-employer-header{% endif %} class="sticky top-0 z-50 border-b border-[rgba(110,85,55,0.16)] bg-[#F8F3F0]">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="ien-header-row flex items-center justify-between">
       {% if home_only %}<div class="ien-header-brand">{% else %}<a href="{% url 'home' %}" class="ien-header-brand">{% endif %}
@@ -31,7 +31,6 @@
           {% if user.is_authenticated %}
             {% include 'nueva_ui/partials/_nav_session.html' %}
           {% else %}
-            <a href="{% url 'registro' %}" class="ien-header-register">Crear cuenta</a>
             <a href="{% url 'login' %}" class="btn-ien ien-header-login">Ingresar <span data-icon="arrow-up-right" class="h-4 w-4" aria-hidden="true"></span></a>
           {% endif %}
         </div>
@@ -62,7 +61,6 @@
           {% if user.is_authenticated %}
             {% include 'nueva_ui/partials/_nav_session.html' %}
           {% else %}
-            <a href="{% url 'registro' %}" class="ien-header-register">Crear cuenta</a>
             <a href="{% url 'login' %}" class="btn-ien ien-header-login">Ingresar <span data-icon="arrow-up-right" class="h-4 w-4" aria-hidden="true"></span></a>
           {% endif %}
         </div>

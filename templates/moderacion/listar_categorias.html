@@ -6,23 +6,22 @@
   <div class="mb-8 flex flex-wrap gap-4 justify-between items-center">
     <div>
       <h1 class="text-3xl font-bold tracking-tight text-[#26222E] mb-2">Categorías y habilidades</h1>
-        {% include "nueva_ui/partials/_breadcrumbs.html" with current="Categorías" only %}
       <p class="text-muted-foreground">Administrá las categorías de cursos y ofertas, y las habilidades de cada una.</p>
     </div>
     <a href="{% url 'mod_crear_categoria' %}"
-       class="btn-ien !py-2.5 text-sm">
+       class="btn-ien ien-catalog-add">
       <span data-icon="plus" class="h-5 w-5"></span>
       Añadir categoría
     </a>
   </div>
 
   <div class="ien-table-scroll panel p-6">
-    <table class="w-full text-sm">
+    <table class="ien-catalog-table w-full text-sm">
       <thead>
         <tr class="border-b border-border">
           <th class="text-left py-3 px-4 font-medium text-muted-foreground">Nombre</th>
           <th class="text-left py-3 px-4 font-medium text-muted-foreground">Habilidades</th>
-          <th class="text-left py-3 px-4 font-medium text-muted-foreground">Acciones</th>
+          <th class="ien-catalog-actions-heading text-left py-3 px-4 font-medium text-muted-foreground">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -30,22 +29,24 @@
         <tr class="border-b border-border hover:bg-muted/50 transition-colors">
           <td class="py-3 px-4">{{ categoria.nombre }}</td>
           <td class="py-3 px-4">{{ categoria.total_habilidades }}</td>
-          <td class="py-3 px-4 flex flex-wrap gap-2">
+          <td class="py-3 px-4">
+            <div class="ien-table-actions ien-category-actions">
             <a href="{% url 'mod_listar_habilidades' categoria.id %}"
-               class="btn-ghost !py-2 text-xs" aria-label="Gestionar habilidades de {{ categoria.nombre }}">
+               class="ien-table-action ien-table-action-primary" aria-label="Gestionar habilidades de {{ categoria.nombre }}">
               Gestionar habilidades
             </a>
             <a href="{% url 'mod_modificar_categoria' categoria.id %}"
-               class="px-3 py-1 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-xs">
-              Editar categoría
+               class="ien-table-action">
+              Editar
             </a>
             <form method="POST" action="{% url 'mod_dar_de_baja_categoria' categoria.id %}">
               {% csrf_token %}
               <button type="submit"
-                    class="px-3 py-1 bg-destructive/10 text-destructive rounded-lg hover:bg-destructive/20 transition-colors text-xs">
+                    class="ien-table-action ien-table-action-danger">
                 Eliminar
               </button>
             </form>
+            </div>
           </td>
         </tr>
         {% empty %}

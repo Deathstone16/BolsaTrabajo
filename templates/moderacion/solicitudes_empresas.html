@@ -20,7 +20,7 @@
           {% if solicitud.resuelta_en %}<p>Resuelta el {{ solicitud.resuelta_en|date:'d/m/Y H:i' }}</p>{% endif %}
           {% if solicitud.recordatorio_enviado_en %}<p>Recordatorio enviado el {{ solicitud.recordatorio_enviado_en|date:'d/m/Y H:i' }}</p>{% endif %}
         </div>
-        <span class="chip">{{ solicitud.get_estado_display }}</span>
+        {% include 'moderacion/_company_status.html' with estado=solicitud.estado only %}
         <a href="{% url 'mod_detalle_empresa' solicitud.empresa_id %}" class="btn-ghost">{% if solicitud.estado == 'pendiente' %}Revisar empresa{% else %}Ver empresa{% endif %}</a>
       </article>
     {% empty %}

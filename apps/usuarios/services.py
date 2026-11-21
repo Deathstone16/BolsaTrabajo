@@ -9,7 +9,7 @@ y carga de CV.
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.conf import settings
-from django.core.mail import send_mail
+from ientrabajo.mail import send_mail
 from django.core.validators import validate_email
 from django.db import transaction
 from django.template.loader import render_to_string
@@ -136,7 +136,7 @@ def enviar_email_aprobacion(oferente, dashboard_url):
         'contact_email': getattr(settings, 'IEN_CONTACT_EMAIL', ''),
     }
     send_mail(
-        subject='Tu empresa fue aprobada - IEN Empleo',
+        subject='Tu empresa fue aprobada - IEN Trabajo',
         message=render_to_string('emails/perfil_aprobado.txt', contexto),
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[oferente.usuario.email],
@@ -210,7 +210,7 @@ def enviar_email_recuperacion(usuario, request):
     }
 
     send_mail(
-        subject="Recuperación de contraseña - IEN Empleo",
+        subject="Recuperación de contraseña - IEN Trabajo",
         message=render_to_string("emails/reset_email.txt", contexto),
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[usuario.email],
