@@ -1,0 +1,60 @@
+.match-page { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+.match-page h2 { font-size: 1.25rem; line-height: 1.45; font-weight: 700; }
+.match-back { display: inline-flex; align-items: center; gap: .5rem; margin-bottom: 1rem; font-size: .875rem; font-weight: 500; color: #512da8; }
+.match-back:hover { text-decoration: underline; text-underline-offset: .2rem; }
+.match-overview { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.35fr); gap: 1.25rem; margin-top: 1.5rem; }
+.match-page .panel { min-width: 0; overflow-wrap: anywhere; }
+.ien-app-page .ien-page-content .match-score { background: #e9f1e6; }
+.match-score, .match-summary { padding: 1.75rem; }
+.match-number { margin: 1rem 0 .25rem; color: #512da8; font-size: clamp(3.25rem, 7vw, 4.5rem); font-weight: 800; line-height: 1.1; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
+.match-score p, .match-summary p { color: #595367; font-size: .875rem; line-height: 1.8; }
+.match-score p:last-child { margin-top: 1rem; font-size: .8125rem; }
+.match-summary > p { margin-top: .875rem; }
+.match-coverage { display: flex; align-items: flex-start; gap: 1rem; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid #ded5e8; }
+.match-coverage strong { flex: 0 0 auto; white-space: nowrap; color: #512da8; font-size: 1.75rem; line-height: 1.4; font-weight: 700; }
+.match-coverage p { font-size: .8125rem; }
+.match-section { margin-top: 2rem; }
+.match-section > p { margin: .5rem 0 1rem; color: #595367; font-size: .875rem; line-height: 1.7; }
+.match-dimensions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+.match-dimension { padding: 1.25rem; }
+.match-dimension h3 { min-height: 2.8em; color: #251a43; font-size: .875rem; line-height: 1.4; font-weight: 600; }
+.match-dimension strong { display: block; margin: .75rem 0; color: #512da8; font-size: 1.75rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.match-track { height: .375rem; overflow: hidden; margin-bottom: .75rem; border-radius: 1rem; background: #ece5f4; }
+.match-track span { display: block; height: 100%; border-radius: inherit; background: #7856bd; }
+.match-weight, .match-empty { color: #756a84; font-size: .75rem; line-height: 1.7; }
+.match-unused { margin-top: 1rem; padding: 1rem 1.25rem; }
+.match-unused summary { color: #645276; font-size: .8125rem; cursor: pointer; }
+.match-unused ul { display: grid; gap: .75rem; margin-top: 1rem; }
+.match-unused li { display: flex; flex-wrap: wrap; align-items: baseline; gap: .35rem 1rem; color: #756a84; font-size: .8125rem; }
+.match-unused li strong { color: #514761; font-weight: 500; }
+.match-requirements, .match-courses { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1rem; }
+.match-requirement, .course-recommendation { padding: 1.5rem; }
+.match-requirement header { display: flex; flex-direction: column; align-items: flex-start; gap: .5rem; }
+.match-requirement h3, .course-recommendation h3 { color: #251a43; font-size: 1rem; font-weight: 600; line-height: 1.5; }
+.match-requirement p { margin-top: .875rem; color: #595367; font-size: .875rem; line-height: 1.8; }
+.match-requirement p strong { color: #756a84; font-size: .8125rem; font-weight: 500; }
+.match-status { padding-left: .6rem; border-left: 2px solid currentColor; font-size: .75rem; line-height: 1.5; color: #756a84; }
+.match-status.met { color: #35714c; }
+.match-status.partial { color: #946d19; }
+.match-status.not_met { color: #a54255; }
+.match-status.unknown { color: #756a84; }
+.course-recommendation { display: flex; flex-direction: column; align-items: flex-start; gap: 1rem; }
+.match-course-context { color: #756a84; font-size: .75rem; }
+.course-recommendation p, .course-recommendation li { color: #595367; font-size: .8125rem; line-height: 1.7; }
+.course-recommendation ul { width: 100%; display: grid; gap: .75rem; }
+.course-recommendation li { display: grid; gap: .2rem; padding-left: .75rem; border-left: 2px solid #ded2ec; }
+.course-recommendation li strong { color: #514761; font-weight: 500; }
+.match-course-facts { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; padding-top: 1rem; border-top: 1px solid #e5ddec; width: 100%; }
+.match-course-facts dt { margin-bottom: .25rem; color: #756a84; font-size: .75rem; }
+.match-course-facts dd { color: #514761; font-size: .8125rem; font-weight: 500; }
+.course-recommendation .btn-ien { margin-top: auto; font-size: .875rem; }
+.match-footnote { margin-top: 2rem; padding: 1.25rem 1.5rem; color: #756a84; font-size: .8125rem; line-height: 1.8; }
+.match-footnote strong { display: inline-block; margin-bottom: .3rem; color: #514761; font-weight: 600; }
+.match-page > [role="status"] { margin-top: 1.5rem; }
+@media (max-width: 959px) { .match-dimensions { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 767px) {
+  .match-page { padding: 1.5rem 1rem 3rem; }
+  .match-overview, .match-requirements, .match-courses { grid-template-columns: minmax(0, 1fr); }
+  .match-score, .match-summary, .match-requirement, .course-recommendation { padding: 1.25rem; }
+}
+@media (max-width: 399px) { .match-dimensions { grid-template-columns: minmax(0, 1fr); } }

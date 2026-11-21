@@ -57,6 +57,40 @@
     </div>
   </section>
 
+  <section class="ien-home-section ien-home-section-alt ien-landing-offers" aria-labelledby="ofertas-titulo">
+    <div class="ien-home-container">
+      <div class="ien-section-heading">
+        <div>
+          <h2 id="ofertas-titulo" class="ien-section-title">Últimas ofertas laborales</h2>
+        </div>
+        <a href="{% url 'buscar_empleo' %}" class="btn-ghost">Ver todas las ofertas <span data-icon="arrow-right" class="h-4 w-4"></span></a>
+      </div>
+      <div class="ien-home-offers">
+        {% for oferta in ofertas_destacadas %}
+          <article class="panel ien-home-offer">
+            <div class="ien-home-offer-heading">
+              {% include 'nueva_ui/partials/_oferta_avatar.html' with oferta=oferta only %}
+              <div>
+                <h3>{{ oferta.titulo }}</h3>
+                <p>{% if oferta.es_confidencial %}Empresa confidencial{% elif oferta.empresa.oferente %}{{ oferta.empresa.oferente.nombre_empresa }}{% else %}Empresa{% endif %}</p>
+                <p class="ien-card-meta">Publicada el {{ oferta.fecha_publicacion|date:"d/m/Y" }}</p>
+              </div>
+            </div>
+            <div class="ien-offer-meta">
+              {% if oferta.ubicacion %}<span>{{ oferta.ubicacion }}</span>{% endif %}
+              <span class="chip">{{ oferta.get_modalidad_display }}</span>
+            </div>
+            <a href="{% url 'detalle_oferta' oferta.pk %}" class="btn-ien ien-home-offer-action" aria-label="Ver oferta: {{ oferta.titulo }}">
+              <span>Ver oferta</span> <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span>
+            </a>
+          </article>
+        {% empty %}
+          <p class="panel ien-home-empty">Todavía no hay ofertas publicadas.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
   <section class="ien-home-section ien-home-section-alt ien-home-courses-section" aria-labelledby="cursos-titulo">
     <div class="ien-home-container">
       <div class="ien-course-section-heading">
@@ -162,38 +196,6 @@
     </div>
   </section>
 
-  <section class="ien-home-section ien-home-section-alt ien-landing-offers" aria-labelledby="ofertas-titulo">
-    <div class="ien-home-container">
-      <div class="ien-section-heading">
-        <div>
-          <h2 id="ofertas-titulo" class="ien-section-title">Últimas ofertas laborales</h2>
-        </div>
-        <a href="{% url 'buscar_empleo' %}" class="btn-ghost">Ver todas las ofertas <span data-icon="arrow-right" class="h-4 w-4"></span></a>
-      </div>
-      <div class="ien-home-offers">
-        {% for oferta in ofertas_destacadas %}
-          <article class="panel ien-home-offer">
-            <div class="ien-home-offer-heading">
-              {% include 'nueva_ui/partials/_oferta_avatar.html' with oferta=oferta only %}
-              <div>
-                <h3>{{ oferta.titulo }}</h3>
-                <p>{% if oferta.es_confidencial %}Empresa confidencial{% elif oferta.empresa.oferente %}{{ oferta.empresa.oferente.nombre_empresa }}{% else %}Empresa{% endif %}</p>
-                <p class="ien-card-meta">Publicada el {{ oferta.fecha_publicacion|date:"d/m/Y" }}</p>
-              </div>
-            </div>
-            <div class="ien-offer-meta">
-              {% if oferta.ubicacion %}<span>{{ oferta.ubicacion }}</span>{% endif %}
-              <span class="chip">{{ oferta.get_modalidad_display }}</span>
-            </div>
-            <a href="{% url 'detalle_oferta' oferta.pk %}" class="btn-ghost ien-step-link" aria-label="Ver oferta: {{ oferta.titulo }}">
-              <span class="ien-step-link-label">Ver oferta</span> <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span>
-            </a>
-          </article>
-        {% empty %}
-          <p class="panel ien-home-empty">Todavía no hay ofertas publicadas.</p>
-        {% endfor %}
-      </div>
-    </div>
-  </section>
+
 </div>
 {% endblock %}

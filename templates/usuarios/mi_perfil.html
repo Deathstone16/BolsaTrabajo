@@ -73,6 +73,9 @@
               <a id="boton-ver-perfil" href="{% url 'ia:perfil_profesional' %}" class="btn-ien !py-2 text-sm">
                 Ver mi perfil profesional
               </a>
+              {% if ultimo_analisis.estado == 'completado' %}
+                <a href="{% url 'ia:ver_resultado' ultimo_analisis.id %}" class="btn-ghost !py-2 text-sm">Ver resultado del análisis</a>
+              {% endif %}
             </div>
             <div id="analisis-estado"
                  class="ien-cv-analysis-status mt-4 overflow-hidden {% if ultimo_analisis.estado != 'pendiente' and ultimo_analisis.estado != 'error' %}hidden{% endif %}"

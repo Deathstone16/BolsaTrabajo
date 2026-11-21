@@ -1,11 +1,13 @@
 {# Navegación compartida de las pantallas del postulante. #}
 <aside class="ien-postulante-sidebar{% if seccion == 'cv' %} ien-cv-sidebar{% endif %}">
-  <div class="panel ien-postulante-sidebar-panel sticky top-28 p-6">
+  <details class="panel ien-postulante-sidebar-panel ien-responsive-disclosure" open data-responsive-disclosure data-disclosure-breakpoint="1024">
+    <summary class="ien-disclosure-summary"><span data-icon="user" aria-hidden="true"></span><span>Mi perfil</span><span class="ien-disclosure-chevron" aria-hidden="true"></span></summary>
+    <div class="ien-disclosure-content">
     <div class="ien-postulante-sidebar-identity">
       {% with foto_perfil=request.user.postulante.foto %}
         <form method="post" enctype="multipart/form-data" action="{% url 'mi_perfil' %}" class="ien-avatar-form" data-sidebar-avatar>
           {% csrf_token %}
-          <button type="button" class="ien-avatar-picker" data-avatar-picker disabled aria-describedby="cv-photo-help">
+          <button type="button" class="ien-avatar-picker" data-avatar-picker disabled>
             <span class="ien-avatar-picture">
               {% if foto_perfil %}
                 <img src="{{ foto_perfil.url }}" alt="" width="64" height="64" class="h-16 w-16 rounded-full object-cover">
@@ -18,10 +20,9 @@
           </button>
           <div class="ien-avatar-fields" data-avatar-fields>
             <label for="cv-profile-photo" class="sr-only">Seleccionar foto de perfil</label>
-            <input id="cv-profile-photo" type="file" name="foto" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required aria-describedby="cv-photo-help">
+            <input id="cv-profile-photo" type="file" name="foto" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required>
             <button class="btn-ghost !py-2 text-sm" type="submit">Guardar foto</button>
           </div>
-          <p id="cv-photo-help" class="text-center text-xs text-[#6B645C]">JPG, PNG o WebP, hasta 2 MiB. Se guarda sin metadatos.</p>
           <p data-sidebar-avatar-feedback class="ien-sidebar-avatar-feedback" role="status" hidden></p>
         </form>
       {% endwith %}
@@ -31,24 +32,20 @@
 
     <nav class="ien-postulante-sidebar-nav" aria-label="Mi perfil">
       <a href="{% url 'ia:perfil_profesional' %}" class="ien-postulante-nav-link{% if seccion == 'perfil' %} is-active{% endif %}"{% if seccion == 'perfil' %} aria-current="page"{% endif %}>
-        <span data-icon="user" class="h-4 w-4" aria-hidden="true"></span><span>Perfil profesional</span>
+        <span class="ien-sidebar-nav-icon" aria-hidden="true"><span data-icon="user"></span></span><span>Perfil profesional</span>
         <span id="cv-analysis-badge" class="ml-auto hidden rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">CV listo</span>
       </a>
       <a href="{% url 'mi_perfil' %}#cv-analysis" class="ien-postulante-nav-link{% if seccion == 'cv' %} is-active{% endif %}"{% if seccion == 'cv' %} aria-current="page"{% endif %}>
-        <span data-icon="file-text" class="h-4 w-4" aria-hidden="true"></span><span>Mi CV y análisis</span>
+        <span class="ien-sidebar-nav-icon" aria-hidden="true"><span data-icon="file-text"></span></span><span>Mi CV y análisis</span>
       </a>
       <a href="{% url 'datos_personales' %}" class="ien-postulante-nav-link{% if seccion == 'datos' %} is-active{% endif %}"{% if seccion == 'datos' %} aria-current="page"{% endif %}>
-        <span data-icon="sliders" class="h-4 w-4" aria-hidden="true"></span><span>Mis datos personales</span>
+        <span class="ien-sidebar-nav-icon" aria-hidden="true"><span data-icon="sliders"></span></span><span>Mis datos personales</span>
       </a>
       <a href="{% url 'favoritos' %}" class="ien-postulante-nav-link{% if seccion == 'favoritos' %} is-active{% endif %}"{% if seccion == 'favoritos' %} aria-current="page"{% endif %}>
-        <span data-icon="bookmark" class="h-4 w-4" aria-hidden="true"></span><span>Favoritos</span>
-        <span class="ien-postulante-nav-note">Guardados</span>
+        <span class="ien-sidebar-nav-icon" aria-hidden="true"><span data-icon="bookmark"></span></span><span>Favoritos</span>
       </a>
-      <span class="ien-postulante-nav-link is-disabled" aria-disabled="true">
-        <span data-icon="trending-up" class="h-4 w-4" aria-hidden="true"></span><span>Brecha de habilidades</span>
-        <span class="ien-postulante-nav-note">Pronto</span>
-      </span>
     </nav>
-  </div>
+    </div>
+  </details>
 </aside>
 <script src="{% static_v 'js/sidebar-avatar.js' %}" defer></script>

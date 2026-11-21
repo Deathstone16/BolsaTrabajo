@@ -54,24 +54,23 @@
       </div>
     </div>
 
-    <div class="panel p-8">
+    <div class="panel p-8 ien-employer-management">
 
-      <nav class="mb-8 flex gap-6 border-b border-[rgba(110,85,55,0.16)]">
+      <nav class="ien-employer-tabs">
         <a href="#ofertas" class="tab-link border-b-2 px-1 py-3 text-sm font-medium transition-colors"
            data-tab="ofertas" onclick="cambiarTab('ofertas'); return false;">
           Ofertas laborales
         </a>
         <a href="#empresa" class="tab-link border-b-2 px-1 py-3 text-sm font-medium transition-colors"
            data-tab="empresa" onclick="cambiarTab('empresa'); return false;">
-          Información de la empresa
+          Mi empresa
         </a>
       </nav>
 
       <div id="tab-ofertas" class="tab-content">
         <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p class="kicker">Tus publicaciones</p>
-            <h2 class="mt-2 text-2xl font-bold tracking-tight text-[#26222E]">Mis ofertas publicadas</h2>
+            <h2 class="text-2xl font-bold tracking-tight text-[#26222E]">Mis ofertas</h2>
           </div>
           {% if ofertas and oferente.puede_publicar %}
             <a href="{% url 'crear_oferta' %}" class="btn-ien !py-2.5 text-sm">
@@ -86,8 +85,7 @@
       </div>
 
       <div id="tab-empresa" class="tab-content hidden">
-        <p class="kicker">Tu empresa</p>
-        <h2 class="mt-2 text-2xl font-bold tracking-tight text-[#26222E]">Información de la empresa</h2>
+        <h2 class="text-2xl font-bold tracking-tight text-[#26222E]">Información de la empresa</h2>
 
         <form method="post" action="{% url 'editar_perfil_empresa' %}" enctype="multipart/form-data" class="mt-8" data-company-validation>
           {% csrf_token %}

@@ -1,5 +1,11 @@
 {% load static %}
 {# Contactos oficiales: ien.edu.ar/quienes-somos/, /geastion-alumnos/ y /preinscripcion/. #}
+{% if user.is_staff %}
+<footer class="ien-admin-footer" aria-label="Pie de administración">
+  <span>IEN Trabajo</span>
+  <p>© {% now 'Y' %} <a href="https://www.neadev.com" target="_blank" rel="noopener noreferrer">NEADEV<span class="sr-only"> (abre en otra pestaña)</span></a></p>
+</footer>
+{% else %}
 <footer class="ien-footer" aria-label="Información y contacto">
   <div class="ien-home-container">
     <div class="ien-footer-grid">
@@ -11,6 +17,9 @@
           <a href="https://www.facebook.com/ien.edu.ar/" target="_blank" rel="noopener noreferrer" aria-label="Facebook del IEN (abre en otra pestaña)"><span data-icon="facebook" aria-hidden="true"></span> Facebook</a>
         </div>
       </div>
+      <details class="ien-footer-more ien-responsive-disclosure" open data-responsive-disclosure data-disclosure-breakpoint="768">
+        <summary class="ien-disclosure-summary"><span>Contacto y enlaces</span><span class="ien-disclosure-chevron" aria-hidden="true"></span></summary>
+        <div class="ien-footer-details-grid">
       <nav class="ien-footer-links" aria-label="Enlaces de la plataforma">
         <h2>Explorá</h2>
         <a href="{% url 'buscar_empleo' %}">Ofertas laborales</a>
@@ -24,9 +33,13 @@
         <p><span data-icon="map-pin" aria-hidden="true"></span> Mitre 280 · Resistencia, Chaco</p>
         <a class="ien-footer-whatsapp" href="https://wa.me/543624251749" target="_blank" rel="noopener noreferrer">Escribinos por WhatsApp <span data-icon="arrow-up-right" aria-hidden="true"></span><span class="sr-only">(abre en otra pestaña)</span></a>
       </section>
+        </div>
+      </details>
     </div>
     <div class="ien-footer-bottom">
       <p>© {% now 'Y' %} <a href="https://www.neadev.com" target="_blank" rel="noopener noreferrer">NEADEV<span class="sr-only"> (abre en otra pestaña)</span></a>. Todos los derechos reservados.</p>
     </div>
   </div>
 </footer>
+
+{% endif %}

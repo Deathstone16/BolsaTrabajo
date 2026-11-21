@@ -1,12 +1,12 @@
 {% extends 'nueva_ui/base.html' %}
 
 {% block content %}
-<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+<div class="ien-admin-catalog mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
 
-  <div class="mb-8 flex flex-wrap gap-4 justify-between items-center">
+  <div class="ien-admin-catalog-heading">
     <div>
-      <h1 class="text-3xl font-bold tracking-tight text-[#26222E] mb-2">Habilidades — {{ categoria.nombre }}</h1>
-      <p class="text-muted-foreground">Administra las habilidades asociadas a esta categoría</p>
+      <h1 class="text-3xl font-bold tracking-tight text-[#26222E] mb-2">Habilidades</h1>
+      <p class="text-muted-foreground">Administrá las habilidades de {{ categoria.nombre }}.</p>
     </div>
     <a href="{% url 'mod_crear_habilidad' categoria.id %}"
        class="btn-ien ien-catalog-add">
@@ -15,8 +15,9 @@
     </a>
   </div>
 
-  <div class="ien-table-scroll panel p-6">
-    <table class="ien-catalog-table w-full text-sm">
+  {% if habilidades %}
+  <div class="ien-table-scroll panel ien-admin-catalog-panel ien-admin-desktop-list">
+    <table class="ien-catalog-table ien-admin-catalog-table w-full text-sm">
       <thead>
         <tr class="border-b border-border">
           <th class="text-left py-3 px-4 font-medium text-muted-foreground">Nombre</th>
@@ -27,21 +28,15 @@
       <tbody>
         {% for habilidad in habilidades %}
         <tr class="border-b border-border hover:bg-muted/50 transition-colors">
-          <td class="py-3 px-4">{{ habilidad.nombre }}</td>
-          <td class="py-3 px-4">{% if habilidad.tipo_habilidad == 'B' %}Habilidad blanda{% else %}Habilidad técnica{% endif %}</td>
-          <td class="py-3 px-4">
+          <td data-label="Habilidad" class="py-3 px-4">{{ habilidad.nombre }}</td>
+          <td data-label="Tipo" class="py-3 px-4">{% if habilidad.tipo_habilidad == 'B' %}Habilidad blanda{% else %}Habilidad técnica{% endif %}</td>
+          <td data-label="Acciones" class="py-3 px-4">
             <div class="ien-table-actions">
             <a href="{% url 'mod_modificar_habilidad' habilidad.id %}"
                class="ien-table-action">
               Editar
             </a>
-            <form method="POST" action="{% url 'mod_eliminar_habilidad' habilidad.id %}">
-              {% csrf_token %}
-              <button type="submit"
-                    class="ien-table-action ien-table-action-danger">
-                Eliminar
-              </button>
-            </form>
+            <a href="{% url 'mod_eliminar_habilidad' habilidad.id %}" class="ien-table-action ien-table-action-danger">Eliminar</a>
             </div>
           </td>
         </tr>
@@ -53,6 +48,12 @@
       </tbody>
     </table>
   </div>
+
+  {% include 'moderacion/_catalog_mobile.html' with items=habilidades kind='skill' %}
+
+  {% else %}
+  <section class="panel ien-admin-empty-list"><h2>Todavía no hay habilidades</h2><p>Usá «Añadir habilidad» para cargar la primera de esta categoría.</p></section>
+  {% endif %}
 
 </div>
 {% endblock %}

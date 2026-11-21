@@ -1,61 +1,14 @@
 {% extends 'nueva_ui/base.html' %}
-
+{% block title %}Editar curso | IEN Trabajo{% endblock %}
 {% block content %}
-<div class="max-w-2xl mx-auto px-4 py-8">
-
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold tracking-tight text-[#26222E] mb-2">Modificar Curso</h1>
-    <p class="text-muted-foreground">Actualizá la información del curso</p>
-  </div>
-
-  <div class="panel p-6">
-    <form method="POST" enctype="multipart/form-data" class="space-y-4">
+<section class="ien-admin-form-page ien-admin-course-page">
+  <header class="ien-admin-page-heading"><h1>Editar curso</h1><p>Actualizá la información del curso.</p></header>
+  <div class="panel ien-admin-form-card">
+    <form method="post" enctype="multipart/form-data" data-required-validation>
       {% csrf_token %}
-
-      {% for field in form %}
-<div class="space-y-1">
-  <label class="text-sm font-medium" for="{{ field.id_for_label }}">{{ field.label }}</label>
-  {% if field.name == 'imagen' %}
-    <div class="flex items-center gap-3">
-      <label for="imagen-input"
-          class="cursor-pointer px-4 py-2 bg-muted text-foreground rounded-lg border border-border hover:bg-muted/80 transition-colors text-sm">
-          Elegir imagen
-      </label>
-      <span id="imagen-nombre" class="text-sm text-muted-foreground">Ninguna imagen seleccionada</span>
-    </div>
-    {{ field }}
-    {% if field.errors %}
-      <p class="text-destructive text-xs mt-1">La imagen es obligatoria.</p>
-    {% endif %}
-  {% else %}
-    {{ field }}
-      {% if field.name == 'categoria' %}{% include 'cursos/_category_help.html' %}{% endif %}
-      {% if field.help_text %}<p class="text-xs text-muted-foreground">{{ field.help_text }}</p>{% endif %}
-    {% if field.errors %}
-      <p class="text-destructive text-xs">{{ field.errors }}</p>
-    {% endif %}
-  {% endif %}
-</div>
-<script>
-  document.getElementById('imagen-input').addEventListener('change', function() {
-    const nombre = this.files[0] ? this.files[0].name : 'Ninguna imagen seleccionada';
-    document.getElementById('imagen-nombre').textContent = nombre;
-  });
-</script>
-{% endfor %}
-
-      <div class="flex gap-3 pt-4 border-t border-border">
-        <button type="submit"
-                class="btn-ien flex-1 !py-3">
-          Guardar cambios
-        </button>
-        <a href="{% url 'mod_listar_cursos' %}"
-           class="btn-ghost !py-2.5 text-sm">
-          Cancelar
-        </a>
-      </div>
+      {% include 'moderacion/_course_form.html' with submit_text="Guardar cambios" %}
     </form>
   </div>
-
-</div>
+</section>
 {% endblock %}
+{% block extra_js %}<script src="{% static_v 'js/company-validation.js' %}"></script>{% endblock %}

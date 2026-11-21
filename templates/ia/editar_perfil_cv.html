@@ -7,7 +7,7 @@
   <a href="{% url 'mi_perfil' %}" class="text-sm text-[#512DA8]">← Volver a mi perfil</a>
   <h1 class="mt-4 text-3xl font-bold text-[#26222E]">Editar perfil profesional</h1>
   <p class="mt-2 text-[#6B645C]">Estos datos estructurados se usan al calcular compatibilidad con una oferta.</p>
-  <form method="post" class="panel mt-8 space-y-5 p-6">
+  <form method="post" class="panel mt-8 space-y-5 p-6"{% if design_demo %} data-demo-result-url="{% url 'design_demo_screen' 'POS-04' %}"{% endif %}>
     {% csrf_token %}
     {{ form.version }}
     {% if form.non_field_errors %}<div class="text-sm text-[#d4183d]">{{ form.non_field_errors }}</div>{% endif %}
@@ -35,7 +35,8 @@
         {% for error in field.errors %}<p class="mt-1 text-sm text-[#d4183d]">{{ error }}</p>{% endfor %}
       </div>
     {% endif %}{% endfor %}
-    <button class="btn-ien" type="submit">Guardar perfil</button>
+    {% if design_demo %}<p class="text-sm text-[#6B645C]">El resultado de ejemplo ya está preparado. Los datos que completes acá no se guardan ni se envían a la IA.</p>{% endif %}
+    <button class="btn-ien" type="submit">{% if design_demo %}Ver resultado de ejemplo{% else %}Guardar perfil{% endif %}</button>
   </form>
 </main>
 {% endblock %}

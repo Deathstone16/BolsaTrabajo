@@ -30,8 +30,8 @@ class Oferta(models.Model):
     ]
 
     ESTADO_CHOICES = [
-        ('pendiente', 'Pendiente de Aprobación'),
-        ('activa', 'Activa'),
+        ('pendiente', 'Pendiente de aprobación'),
+        ('activa', 'Publicada'),
         ('rechazada', 'Rechazada'),
         ('finalizada', 'Finalizada'),
         

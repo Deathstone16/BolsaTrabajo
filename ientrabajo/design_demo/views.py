@@ -12,8 +12,10 @@ from django.urls import reverse
 
 from ientrabajo.ui_review import SCREENS, COMPANY_PREVIEWS, company_preview
 from .data import fixtures, SUMMARY
+from .admin_views import ADMIN_TEMPLATES, admin_screen
 
 TEMPLATES = {
+    **ADMIN_TEMPLATES,
     'PUB-01': 'nueva_ui/home.html', 'PUB-02': 'nueva_ui/buscar_empleo.html',
     'PUB-03': 'nueva_ui/detalle_oferta.html', 'PUB-04': 'cursos/listado.html', 'PUB-05': 'cursos/detalle.html',
     'POS-01': 'usuarios/mi_perfil.html', 'POS-02': 'ia/perfil_profesional.html',
@@ -42,13 +44,15 @@ class CourseFilters(forms.Form):
 def index(request):
     request.user = AnonymousUser()
     groups = []
-    for group in ('Público', 'Acceso', 'Postulante', 'Empresa'):
+    for group in ('Público', 'Acceso', 'Postulante', 'Empresa', 'Administración'):
         items = [{'screen': item, 'url': '', 'preview_url': reverse('design_demo_screen', args=[item.id]), 'reason': ''} for item in SCREENS if item.group == group and (item.id in TEMPLATES or item.id in COMPANY_PREVIEWS)]
         groups.append({'title': group, 'items': items})
     return render(request, 'nueva_ui/screen_index.html', {'screen_groups': groups, 'screen_count': sum(len(g['items']) for g in groups), 'review_role': 'Demo de diseño', 'design_demo': True})
 
 
 def screen(request, screen_id):
+    if screen_id in ADMIN_TEMPLATES:
+        return admin_screen(request, screen_id)
     if screen_id in COMPANY_PREVIEWS:
         request.user = AnonymousUser()
         return company_preview(request, screen_id)
@@ -87,6 +91,7 @@ def screen(request, screen_id):
         'resumen_profesional': SUMMARY, 'es_version_actual': True, 'cv_formatos': ['pdf', 'docx'],
         'ui_review_screen': item, 'ui_review_preview': True, 'design_demo': True,
         'form': CargaCVForm(), 'niveles_habilidad': ['Básico', 'Intermedio', 'Avanzado'],
+        'mostrar_menu_postulante': screen_id == 'POS-07',
         'titulo': 'Datos guardados', 'mensaje': 'Tus datos personales se actualizaron correctamente.',
         'link_url': reverse('design_demo_screen', args=['POS-06']), 'link_texto': 'Volver a mis datos',
         'perfil_oferta': NS(estado='ready', schema_version='job-offer.v2'),
@@ -137,6 +142,7 @@ def match_context(data):
     return {
         'result': {'summary': 'Tu perfil tiene una buena base para esta oportunidad. Python y Excel coinciden con lo solicitado; SQL es un área para seguir fortaleciendo.'},
         'mandatory_label': 'Se cumplen los requisitos obligatorios',
+        'unused_dimensions': [],
         'groups': [{'title': 'Requisitos obligatorios', 'items': assessments[:2]}, {'title': 'Requisitos deseables', 'items': assessments[2:]}],
         'breakdown': [{'label': label, 'percentage': pct, 'weight': weight, 'applicable': True} for label, pct, weight in [('Competencias técnicas', 80, 60), ('Habilidades blandas', 80, 15), ('Experiencia', 80, 15), ('Educación', 100, 10)]],
         'course_recommendations': {'has_gaps': True, 'courses': [{'course': data['cursos'][3], 'match_type': 'related', 'reason': 'Opción de ejemplo para profundizar herramientas de análisis.', 'gaps': [assessments[2]]}]},

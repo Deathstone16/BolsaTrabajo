@@ -115,7 +115,7 @@ class RecordatoriosEmpresasTests(TestCase):
         url = reverse('mod_solicitudes_empresas')
         response = self.client.get(url)
         self.assertContains(response, 'Empresa para revisar')
-        self.assertContains(response, 'Solicitudes de empresas: 1 pendiente')
+        self.assertContains(response, 'Notificaciones de revisión: 1 pendiente')
         self.assertContains(response, 'Catálogo')
         self.assertNotContains(response, '>Inicio</a>')
         self.assertNotContains(response, '>Gestionar cursos</a>')

@@ -1,0 +1,143 @@
+.ien-admin-form-page { max-width: 48rem; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+.ien-admin-page-heading { margin-bottom: 1.25rem; }
+.ien-admin-page-heading > p { margin-top: .75rem; font-size: .875rem; line-height: 1.75; color: #595367; }
+.ien-admin-page-heading strong { color: #514761; font-weight: 600; }
+.ien-admin-form-card { padding: 1.75rem; }
+.ien-admin-field { min-width: 0; display: grid; gap: .5rem; }
+.ien-admin-field > label { color: #514761; font-size: .875rem; font-weight: 500; }
+.ien-admin-field > label span { color: #756a84; font-size: .75rem; font-weight: 400; }
+.ien-admin-field .input-ien { width: 100%; min-width: 0; max-width: 100%; font-size: .875rem; }
+.ien-admin-field-help { color: #756a84; font-size: .75rem; line-height: 1.65; }
+.ien-admin-field textarea { resize: none; min-height: 8rem; line-height: 1.75; }
+.ien-admin-rejection-reason { padding: 1rem; }
+.ien-admin-form-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: .75rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid #e5ddec; }
+.ien-admin-form-actions > * { font-size: .875rem; min-height: 2.875rem; }
+.ien-admin-form-actions .ien-admin-danger-button { background: #a53548; border-color: #a53548; color: #fff; box-shadow: 0 2px 0 #70243533; }
+.ien-admin-form-actions .ien-admin-danger-button:hover { background: #8c2d3e; }
+.ien-admin-form-section { display: grid; gap: 1rem; }
+.ien-admin-form-section + .ien-admin-form-section { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5ddec; }
+.ien-admin-form-section h2 { font-size: 1.0625rem; line-height: 1.5; font-weight: 600; }
+.ien-admin-field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.ien-course-image-control { display: grid; gap: .75rem; min-width: 0; }
+.ien-admin-course-image { display: block; width: 100%; max-width: 22rem; aspect-ratio: 16/9; object-fit: cover; border: 1px solid #ded2ec; border-radius: .875rem; }
+.ien-course-image-control input[type=file] { padding: .5rem; font-size: .8125rem; overflow: hidden; }
+.ien-course-image-control input::file-selector-button { padding: .5rem .75rem; margin-right: .75rem; border: 1px solid #c6bbd3; border-radius: .625rem; background: #eee6f8; color: #43218f; cursor: pointer; font: inherit; }
+.ien-admin-image-clear { display: flex; align-items: center; gap: .5rem; font-size: .8125rem; color: #756a84; }
+.ien-admin-field select[multiple] { min-height: 8.5rem; padding: .5rem; background-image: none; }
+.ien-admin-field select[multiple] option { padding: .4rem .5rem; border-radius: .4rem; }
+.ien-admin-catalog-heading { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1rem 1.5rem; margin-bottom: 1.5rem; }
+.ien-admin-catalog-heading p { margin-top: .75rem; color: #595367; font-size: .875rem; line-height: 1.7; }
+.ien-admin-catalog-heading .btn-ien { font-size: .875rem; }
+.ien-admin-catalog-panel { padding: 1rem; }
+.ien-admin-catalog .ien-admin-catalog-table thead { background: #f2edf8; }
+.ien-admin-catalog .ien-admin-catalog-table th { padding-block: 1rem; font-size: .8125rem; font-weight: 500; }
+.ien-admin-catalog .ien-admin-catalog-table td { padding-block: 1rem; vertical-align: middle; }
+.ien-admin-catalog .ien-category-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; }
+.ien-admin-catalog .ien-table-action { min-height: 2.5rem; padding: .5rem .875rem; font-size: .8125rem; }
+
+/* A compact mobile footer keeps all contact details available on demand. */
+.ien-footer-grid { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.9fr); }
+.ien-footer-more { min-width: 0; }
+.ien-footer-more > .ien-disclosure-summary { display: none; }
+.ien-footer-details-grid { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.1fr); gap: clamp(2rem, 5vw, 5rem); }
+@media (max-width: 767px) {
+  .ien-admin-form-page { padding: 1.5rem 1rem 2rem; }
+  .ien-admin-form-card { padding: 1.25rem; }
+  .ien-admin-field-grid { grid-template-columns: minmax(0, 1fr); }
+  .ien-admin-form-actions { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .ien-admin-form-actions > * { width: 100%; text-align: center; }
+  .ien-admin-form-actions button { grid-row: 1; }
+  .ien-admin-catalog { padding-block: 1.5rem 2rem; }
+  .ien-admin-catalog-panel { padding: .75rem; overflow: visible; }
+  .ien-admin-catalog .ien-admin-catalog-table, .ien-admin-catalog .ien-admin-catalog-table tbody { display: block; width: 100%; min-width: 0; }
+  .ien-admin-catalog-table thead { display: none; }
+  .ien-admin-catalog-table tbody tr { display: grid; gap: .875rem; padding: 1rem .5rem; }
+  .ien-admin-catalog .ien-admin-catalog-table td { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: 1rem; min-width: 0; padding: 0; overflow-wrap: anywhere; text-align: right; }
+  .ien-admin-catalog-table td[data-label]::before { content: attr(data-label); color: #756a84; font-size: .75rem; flex-shrink: 0; text-align: left; }
+  .ien-admin-catalog-table td[data-label=Acciones] { grid-template-columns: minmax(0, 1fr); }
+  .ien-admin-catalog-table td[data-label=Acciones]::before { display: none; }
+  .ien-admin-catalog .ien-table-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; width: 100%; }
+  .ien-admin-catalog .ien-table-action { width: 100%; }
+  .ien-admin-catalog .ien-table-action-primary { grid-column: 1 / -1; }
+  .ien-footer .ien-footer-grid { grid-template-columns: minmax(0, 1fr); gap: 1rem; padding-block: 1.25rem; }
+  .ien-footer-intro > p { display: none; }
+  .ien-footer-brand img { width: 2rem; height: 2rem; }
+  .ien-footer-social { margin-top: .75rem; }
+  .ien-footer-more > .ien-disclosure-summary { display: flex; min-height: 2.75rem; padding: .625rem 0; color: #f7f1ff; font-size: .8125rem; }
+  .ien-footer-details-grid { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; padding-top: .75rem; }
+  .ien-footer .ien-footer-bottom { padding-block: .875rem; font-size: .6875rem; }
+}
+
+/* Administration uses a quiet footer rather than the public landing footer. */
+.ien-admin-page { min-height: 100dvh; display: flex; flex-direction: column; }
+.ien-admin-page > .ien-page-content { flex: 1; min-height: 0; }
+.ien-admin-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem max(1rem, calc((100% - 76rem) / 2)); border-top: 1px solid #ded6e8; color: #756a84; font-size: .75rem; background: #f3f0f8; }
+.ien-admin-footer > span { font-weight: 600; color: #514761; }
+.ien-admin-footer a { color: #512da8; }
+.ien-admin-short-form { max-width: 40rem; }
+.ien-admin-related { margin-top: 1.5rem; padding: 1.25rem 0; border-top: 1px solid #ded6e8; display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: center; }
+.ien-admin-related h2 { font-size: .9375rem; font-weight: 600; }
+.ien-admin-related p { margin-top: .375rem; font-size: .8125rem; color: #756a84; }
+.ien-admin-related .btn-ghost { font-size: .8125rem; }
+.ien-admin-mobile-list { display: none; }
+.ien-app-page .ien-admin-catalog .ien-admin-catalog-panel { padding: 0; overflow: hidden; }
+.ien-admin-catalog .ien-admin-catalog-table { table-layout: auto; border-collapse: collapse; }
+.ien-app-page .ien-admin-catalog .ien-admin-catalog-table :is(th, td) { padding: 1rem 1.25rem; }
+.ien-app-page .ien-admin-catalog .ien-admin-catalog-table th:last-child { width: 1%; text-align: right; }
+.ien-app-page .ien-admin-catalog .ien-admin-catalog-table tbody tr:last-child { border-bottom: 0; }
+.ien-app-page .ien-admin-catalog .ien-admin-catalog-table .ien-table-actions { display: flex; flex-flow: row nowrap; gap: .5rem; width: auto; justify-content: flex-end; }
+.ien-app-page .ien-admin-catalog .ien-admin-catalog-table .ien-table-action { flex: 0 0 auto; width: auto; border-radius: 999px; }
+.ien-admin-offer-status { display: inline-flex; align-items: center; gap: .5rem; color: #756a84; font-size: .8125rem; line-height: 1.5; }
+.ien-admin-offer-status::before { content: ''; width: .4rem; height: .4rem; border-radius: 50%; background: currentColor; flex: none; }
+.ien-admin-offer-status[data-state=pendiente] { color: #8d6919; }
+.ien-admin-offer-status[data-state=activa] { color: #39734c; }
+.ien-admin-offer-status[data-state=rechazada] { color: #a53548; }
+.ien-admin-offer-filters > * { min-width: 0; }
+.ien-admin-offer-filters select { max-width: 100%; }
+@media (max-width: 767px) {
+  .ien-admin-page .ien-page-content h1 { font-size: 1.625rem; line-height: 1.25; letter-spacing: -.04em; }
+  .ien-admin-form-page, .ien-admin-catalog, .ien-admin-offers { padding: 1.25rem 1rem 2rem; }
+  .ien-admin-form-card { padding: 1.125rem; }
+  .ien-admin-page-heading > p, .ien-admin-catalog-heading p { margin-top: .5rem; font-size: .8125rem; line-height: 1.65; }
+  .ien-admin-form-actions { gap: .625rem; margin-top: 1.25rem; padding-top: 1rem; }
+  .ien-admin-related { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .ien-admin-related .btn-ghost { width: 100%; }
+  .ien-admin-footer { padding: .875rem 1rem; font-size: .6875rem; }
+  .ien-app-page .ien-admin-catalog .ien-admin-desktop-list { display: none; }
+  .ien-admin-mobile-list { display: grid; gap: .875rem; }
+  .ien-admin-mobile-card { min-width: 0; padding: 1.125rem; }
+  .ien-admin-mobile-card-heading h2 { font-size: 1rem; line-height: 1.5; font-weight: 600; overflow-wrap: anywhere; }
+  .ien-admin-mobile-card-heading p { margin-top: .375rem; color: #756a84; font-size: .8125rem; }
+  .ien-admin-mobile-card-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .625rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5ddec; }
+  .ien-admin-mobile-card-actions .ien-table-action { min-width: 0; min-height: 2.75rem; padding: .625rem .5rem; white-space: normal; border-radius: 999px; text-align: center; }
+  .ien-admin-mobile-card-actions .ien-table-action-primary { grid-column: 1 / -1; }
+  .ien-admin-catalog-heading { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-bottom: 1.125rem; }
+  .ien-admin-page .ien-catalog-add { width: 100%; }
+  .ien-admin-page .ien-delete-page { padding-block: 1.25rem 2rem; width: 100%; }
+  .ien-admin-page .ien-delete-card { padding: 1.5rem 1.125rem; }
+  .ien-admin-page .ien-delete-actions { grid-template-columns: minmax(0, 1fr); gap: .625rem; }
+  .ien-admin-page .ien-delete-actions form { grid-row: 1; }
+  .ien-admin-page .ien-delete-actions :is(a, button) { min-height: 2.75rem; }
+  .ien-admin-offer-filters select { width: 100%; }
+  .ien-admin-page .ien-admin-offer-list { border: 0; background: transparent; box-shadow: none; overflow: visible; }
+  .ien-admin-offer-list table, .ien-admin-offer-list tbody { display: block; width: 100%; min-width: 0; }
+  .ien-admin-offer-list thead { display: none; }
+  .ien-admin-offer-list .fila-oferta { display: flex; flex-direction: column; gap: .75rem; padding: 1.125rem; margin-bottom: .875rem; border: 1px solid #c6bbd3; border-radius: 1.125rem; background: #fffdf8; }
+  .ien-admin-offer-list .fila-oferta td { min-width: 0; padding: 0; overflow-wrap: anywhere; }
+  .ien-admin-offer-list td[data-label=Puesto] { order: -2; font-weight: 600; font-size: 1rem; }
+  .ien-admin-offer-list td[data-label=Empresa] { order: -1; }
+  .ien-admin-offer-list td[data-label=Fecha] { color: #756a84; font-size: .75rem; }
+  .ien-admin-offer-list td[data-label=Fecha]::before { content: 'Publicada el '; }
+  .ien-admin-offer-list td[data-label=Acciones] { padding-top: .875rem; border-top: 1px solid #e5ddec; }
+  .ien-admin-offer-list .ien-table-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .625rem; }
+  .ien-admin-offer-list .ien-table-actions > a:first-child { grid-column: 1 / -1; }
+  .ien-admin-offer-list .ien-table-actions :is(a, button, form) { width: 100%; min-width: 0; white-space: normal; text-align: center; }
+  .ien-admin-offer-stats { gap: .625rem; }
+  .ien-admin-offer-stats > .panel { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .875rem 1rem; }
+  .ien-admin-offer-stats > .panel p { margin: 0; font-size: .8125rem; }
+  .ien-admin-offer-stats > .panel p:last-child { font-size: 1.25rem; }
+}
+
+.ien-admin-empty-list { padding: 2rem 1.25rem; text-align: center; }
+.ien-admin-empty-list h2 { font-size: 1rem; font-weight: 600; }
+.ien-admin-empty-list p { max-width: 45ch; margin: .5rem auto 0; font-size: .8125rem; line-height: 1.7; color: #756a84; }

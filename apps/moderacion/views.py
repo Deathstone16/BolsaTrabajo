@@ -67,6 +67,15 @@ def solicitudes_empresas(request):
 logger = logging.getLogger(__name__)
 
 
+@staff_member_required
+@require_GET
+def notificaciones_admin(request):
+    from .notifications import review_notifications
+    response = JsonResponse(review_notifications())
+    response['Cache-Control'] = 'no-store'
+    return response
+
+
 
 def es_staff(user):
     """Indica si el usuario autenticado pertenece al personal autorizado."""

@@ -151,11 +151,24 @@ body {
 .ien-company-contact-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 1rem; margin-top: 1rem; }
 .ien-company-contact-fields label { display: block; font-size: 0.875rem; margin-bottom: 0.5rem; }
 .ien-company-contact-fields input { width: 100%; }
-.ien-company-contact { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 1rem clamp(1rem, 4vw, 3rem); margin-top: 1.5rem; padding: 1rem 1.25rem; border-radius: 0.85rem; background: var(--muted); }
-.ien-company-contact-item { display: flex; align-items: flex-start; gap: 0.65rem; min-width: 0; overflow-wrap: anywhere; }
-.ien-company-contact-icon { flex: 0 0 1.15rem; width: 1.15rem; height: 1.15rem; color: var(--primary); }
-.ien-company-contact-label { font-size: 0.75rem; font-weight: 500; color: var(--muted-foreground); }
-.ien-company-contact-value { margin-top: 0.2rem; font-size: 0.9375rem; font-weight: 600; }
+.ien-company-profile-info { min-width: 0; }
+.ien-company-profile-facts { display: flex; flex-wrap: wrap; gap: 1rem 2rem; margin-top: 1.25rem; color: var(--muted-foreground); font-size: .875rem; }
+.ien-company-profile-fact { display: inline-flex; align-items: flex-start; gap: .6rem; min-width: 0; line-height: 1.6; }
+.ien-company-profile-fact > [data-icon], .ien-company-profile-fact > svg { width: 1.1rem; height: 1.1rem; flex-shrink: 0; margin-top: .15rem; }
+.ien-company-profile-description { max-width: 65ch; margin-top: 1.5rem; line-height: 1.85; color: var(--muted-foreground); overflow-wrap: anywhere; white-space: pre-line; }
+.ien-company-contact { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; margin-top: 2.5rem; padding: 1.75rem; border-radius: 1rem; background: var(--muted); }
+.ien-company-contact-item { display: flex; align-items: flex-start; gap: .85rem; min-width: 0; overflow-wrap: anywhere; }
+.ien-company-contact-item > div { min-width: 0; }
+.ien-company-contact-item + .ien-company-contact-item { border-left: 1px solid rgba(81,45,168,.14); padding-left: 1.5rem; }
+.ien-company-contact-icon { flex: 0 0 1.15rem; width: 1.15rem; height: 1.15rem; margin-top: .2rem; color: var(--primary); }
+.ien-company-contact-label { font-size: .75rem; line-height: 1.6; font-weight: 500; color: var(--muted-foreground); }
+.ien-company-contact-value { margin-top: .6rem; font-size: .9375rem; line-height: 1.65; font-weight: 600; }
+@media (max-width: 767px) {
+  .ien-company-profile-facts { flex-direction: column; gap: .85rem; }
+  .ien-company-profile-info { margin-top: 0; }
+  .ien-company-contact { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; padding: 1.5rem; margin-top: 2rem; }
+  .ien-company-contact-item + .ien-company-contact-item { border-left: 0; border-top: 1px solid rgba(81,45,168,.14); padding-left: 0; padding-top: 1.25rem; }
+}
 .ien-company-contact-value.ien-text-link { display: inline-block; }
 .ien-company-photo { display: grid; align-content: start; gap: 0.75rem; scroll-margin-top: 7rem; }
 .ien-company-photo-preview { display: grid; place-items: center; width: 7rem; height: 7rem; overflow: hidden; border-radius: 1rem; background: var(--muted); color: var(--primary); font-size: 1.75rem; font-weight: 600; }

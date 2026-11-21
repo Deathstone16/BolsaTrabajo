@@ -1,77 +1,14 @@
 {% extends 'nueva_ui/base.html' %}
-
+{% block title %}Crear curso | IEN Trabajo{% endblock %}
 {% block content %}
-<div class="max-w-2xl mx-auto px-4 py-8">
-
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold tracking-tight text-[#26222E] mb-2">Crear Curso</h1>
-    <p class="text-muted-foreground">Completa los datos del nuevo curso</p>
-  </div>
-
-  <div class="panel p-6">
-    <form method="POST" enctype="multipart/form-data" class="space-y-4">
+<section class="ien-admin-form-page ien-admin-course-page">
+  <header class="ien-admin-page-heading"><h1>Crear curso</h1><p>Completá la información del curso.</p></header>
+  <div class="panel ien-admin-form-card">
+    <form method="post" enctype="multipart/form-data" data-required-validation>
       {% csrf_token %}
-      
-      <!-- 🔧 FIX 1: Agregar non_field_errors (ERROR GLOBALES) -->
-      {% if form.non_field_errors %}
-      <div class="mb-4 p-3 bg-red-100 border border-red-200 rounded-lg text-red-700 text-sm">
-        {% for error in form.non_field_errors %}
-          {{ error }}
-        {% endfor %}
-      </div>
-      {% endif %}
-      
-      {% for field in form %}
-      <div class="space-y-1">
-          <label class="text-sm font-medium" for="{{ field.id_for_label }}">{{ field.label }}</label>
-          {% if field.name == 'imagen' %}
-      <!-- 🔧 FIX 2: Renderizar widget completo nativo (sin 'hidden') + JS para nombre archivo -->
-      <div class="flex items-center gap-3">
-        {{ field }}
-        <span id="imagen-nombre" class="text-sm text-muted-foreground">Ninguna imagen seleccionada</span>
-      </div>
-      <script>
-        document.querySelector('input[type="file"][name="imagen"]').addEventListener('change', function() {
-          const nombre = this.files[0] ? this.files[0].name : 'Ninguna imagen seleccionada';
-          document.getElementById('imagen-nombre').textContent = nombre;
-        });
-      </script>
-      {% if field.errors %}
-          <!-- 🔧 FIX 3: Errores de campo como lista individual -->
-          <div class="text-destructive text-xs mt-1 space-y-1">
-            {% for error in field.errors %}
-              <p>{{ error }}</p>
-            {% endfor %}
-          </div>
-      {% endif %}
-      {% else %}
-      {{ field }}
-      {% if field.name == 'categoria' %}{% include 'cursos/_category_help.html' %}{% endif %}
-      {% if field.help_text %}<p class="text-xs text-muted-foreground">{{ field.help_text }}</p>{% endif %}
-      {% if field.errors %}
-          <!-- 🔧 FIX 3: Errores de campo como lista individual -->
-          <div class="text-destructive text-xs mt-1 space-y-1">
-            {% for error in field.errors %}
-              <p>{{ error }}</p>
-            {% endfor %}
-          </div>
-      {% endif %}
-      {% endif %}
-      </div>
-      {% endfor %}
-       
-      <div class="flex gap-3 pt-4 border-t border-border">
-        <button type="submit"
-                class="btn-ien flex-1 !py-3">
-            Crear curso
-        </button>
-        <a href="{% url 'mod_listar_cursos' %}"
-          class="btn-ghost !py-2.5 text-sm">
-          Cancelar
-        </a>
-      </div>
+      {% include 'moderacion/_course_form.html' with submit_text="Crear curso" %}
     </form>
   </div>
-
-</div>
+</section>
 {% endblock %}
+{% block extra_js %}<script src="{% static_v 'js/company-validation.js' %}"></script>{% endblock %}

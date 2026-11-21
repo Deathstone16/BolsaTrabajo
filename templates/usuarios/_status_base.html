@@ -16,8 +16,9 @@
       <span class="ien-auth-back"><span data-icon="arrow-left" aria-hidden="true"></span> Volver al inicio</span>
     </a>
   </header>
+  {% block status_navigation %}{% endblock %}
   <div class="ien-status-layout">
-    <section class="ien-auth-card ien-status-card" aria-labelledby="status-title">
+    <section class="ien-auth-card ien-status-card {% block status_card_class %}{% endblock %}" aria-labelledby="status-title">
       {% block status_content %}{% endblock %}
     </section>
   </div>

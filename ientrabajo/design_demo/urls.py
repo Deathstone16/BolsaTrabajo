@@ -19,5 +19,6 @@ urlpatterns = [
     path('cursos/', include('cursos.urls')),
     path('ia/', include('ia.urls')),
     path('matching/', include('matching.urls')),
+    path('moderacion/', include('moderacion.urls')),
     re_path(r'^static/(?P<path>.*)$', partial(serve, insecure=True)),
 ]

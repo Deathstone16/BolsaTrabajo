@@ -1,0 +1,20 @@
+<div class="ien-admin-mobile-list">
+  {% for item in items %}
+  <article class="panel ien-admin-mobile-card">
+    <div class="ien-admin-mobile-card-heading">
+      <h2>{{ item.nombre }}</h2>
+      <p>{% if kind == 'category' %}{{ item.total_habilidades }} habilidad{{ item.total_habilidades|pluralize:"es" }}{% elif item.tipo_habilidad == 'B' %}Habilidad blanda{% else %}Habilidad técnica{% endif %}</p>
+    </div>
+    <div class="ien-admin-mobile-card-actions">
+      {% if kind == 'category' %}
+      <a href="{% url 'mod_listar_habilidades' item.id %}" class="ien-table-action ien-table-action-primary">Gestionar habilidades</a>
+      <a href="{% url 'mod_modificar_categoria' item.id %}" class="ien-table-action">Editar</a>
+      <a href="{% url 'mod_dar_de_baja_categoria' item.id %}" class="ien-table-action ien-table-action-danger">Eliminar</a>
+      {% else %}
+      <a href="{% url 'mod_modificar_habilidad' item.id %}" class="ien-table-action">Editar</a>
+      <a href="{% url 'mod_eliminar_habilidad' item.id %}" class="ien-table-action ien-table-action-danger">Eliminar</a>
+      {% endif %}
+    </div>
+  </article>
+  {% empty %}<p class="panel ien-admin-mobile-card">Todavía no hay elementos cargados.</p>{% endfor %}
+</div>

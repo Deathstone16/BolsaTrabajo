@@ -43,6 +43,22 @@ class DesignDemoTests(SimpleTestCase):
         for state in ('sin-cv', 'pendiente', 'error', 'completado'):
             self.assertContains(self.client.get('/demo/POS-01/', {'estado': state}), f'data-cv-state="{state}"')
 
+    def test_analysis_is_accessible_without_editing_or_running_ai(self):
+        self.assertContains(self.client.get('/demo/POS-02/'), 'Ver resultado de IA')
+        self.assertContains(self.client.get('/demo/POS-01/'), 'Ver resultado del análisis')
+        self.assertContains(self.client.get('/demo/POS-03/'), 'data-demo-result-url="/demo/POS-04/"')
+        for path in ('/demo/POS-03/', '/ia/perfil-cv/editar/'):
+            response = self.client.post(path, {'headline': 'Texto de prueba'}, follow=True)
+            self.assertRedirects(response, '/demo/POS-04/')
+            self.assertContains(response, 'Resultado del análisis de CV')
+            self.assertContains(response, 'Python')
+
+    def test_sidebar_has_no_placeholder_or_redundant_badge(self):
+        for screen in ('POS-01', 'POS-02', 'POS-08'):
+            response = self.client.get('/demo/' + screen + '/')
+            self.assertNotContains(response, 'Brecha de habilidades')
+            self.assertNotContains(response, '>Guardados<')
+
     def test_writes_integrations_and_admin_are_unavailable(self):
         for url in ('/usuarios/registro/', '/usuarios/login/', '/ofertas/crear/', '/ofertas/editar-perfil/', '/ofertas/eliminar/1/', '/ia/solicitar-analisis/', '/demo/POS-06/'):
             self.assertEqual(self.client.post(url, {'email': 'test@example.com'}).status_code, 405)

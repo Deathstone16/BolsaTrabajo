@@ -1,17 +1,17 @@
 <section class="ien-requirement-section" data-requirement-list="{{ kind }}">
   <h4>{{ field.label }}{% if not field.field.required %} <span>(opcional)</span>{% endif %}</h4>
-  <p class="text-sm text-[#6B645C]">{{ field.help_text }}</p>
+  <p class="ien-requirement-caption">{% if kind == 'mandatory' %}Indispensables para el puesto.{% else %}Suman valor, pero no son excluyentes.{% endif %}</p>
   <div data-requirement-source>
-    <label for="{{ field.id_for_label }}" class="block text-sm">Lista de {{ field.label|lower }}</label>
+    <label for="{{ field.id_for_label }}" class="sr-only">Lista de {{ field.label|lower }}</label>
     {{ field }}
   </div>
   <div class="ien-requirement-enhanced" data-requirement-enhanced hidden>
-    <label for="requirement-entry-{{ kind }}" class="block text-sm">Agregar a {{ field.label|lower }}</label>
+    <label for="requirement-entry-{{ kind }}" class="sr-only">Agregar a {{ field.label|lower }}</label>
     <div class="ien-requirement-entry">
-      <input id="requirement-entry-{{ kind }}" type="text" class="input-ien" placeholder="Ej. Python, HTML" autocomplete="off" data-requirement-entry aria-describedby="requirement-help-{{ kind }}" {% if field.field.required %}required{% endif %}>
+      <input id="requirement-entry-{{ kind }}" type="text" class="input-ien" placeholder="Escribí un requisito" autocomplete="off" data-requirement-entry aria-describedby="requirement-help-{{ kind }}" {% if field.field.required %}required{% endif %}>
       <button type="button" class="btn-ghost" data-requirement-add>Agregar</button>
     </div>
-    <p id="requirement-help-{{ kind }}" class="text-xs text-[#6B645C]">Usá Enter, coma o punto y coma para separar elementos. Los nombres con espacios, como «Trabajo en equipo», quedan juntos.</p>
+    <p id="requirement-help-{{ kind }}" class="text-xs text-[#6B645C]">Enter o coma para separar.</p>
     <div data-requirement-suggestion class="ien-requirement-suggestion" hidden></div>
     <p data-requirement-error class="ien-required-message" role="alert" hidden></p>
     <ul data-requirement-items class="ien-requirement-items" aria-label="{{ field.label }} agregados"></ul>

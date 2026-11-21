@@ -2,21 +2,21 @@
 
 {% block title %}Estado de tu empresa · IEN Trabajo{% endblock %}
 
+{% block status_card_class %}{% if oferente.estado_validacion == 'rechazado' %}ien-status-card--rejected{% endif %}{% endblock %}
+
 {% block status_content %}
   {% include 'usuarios/_status_icon.html' with estado=oferente.estado_validacion only %}
   {% if oferente.estado_validacion == 'rechazado' %}
-    <p class="ien-status-label is-rejected">Revisión no aprobada</p>
     <h1 id="status-title">Tu registro fue rechazado</h1>
-    <p class="ien-status-description">El equipo del IEN revisó tu empresa y encontró datos que necesitan una corrección.</p>
+    <p class="ien-status-description">El IEN encontró datos que necesitan una corrección. Revisá el motivo y actualizá tu empresa para volver a enviarla.</p>
     {% if oferente.motivo_rechazo %}
       <div class="ien-status-detail is-rejected">
         <h2>Motivo del rechazo</h2>
         <p>{{ oferente.motivo_rechazo }}</p>
       </div>
     {% endif %}
-    <p class="ien-status-note">Corregí los datos de tu empresa para enviarlos a una nueva revisión.</p>
     <div class="ien-status-actions">
-      <a href="{% url 'editar_perfil_empresa' %}" class="btn-ien">Corregir datos y reenviar <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+      <a href="{% url 'editar_perfil_empresa' %}" class="btn-ien">Corregir datos <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
     </div>
   {% elif oferente.estado_validacion == 'aprobado' %}
     <p class="ien-status-label is-success">Empresa aprobada</p>
@@ -39,10 +39,12 @@
     </div>
   {% endif %}
   {% if oferente.estado_validacion != 'aprobado' %}
+    <footer class="ien-status-contact-footer">
     {% if email_contacto_url %}
       <a href="{{ email_contacto_url }}" class="ien-status-secondary ien-status-contact"><span data-icon="mail" class="h-4 w-4" aria-hidden="true"></span> Contactar al IEN</a>
     {% else %}
       <p class="ien-status-note">Si tenés consultas sobre la revisión, comunicate con el equipo del IEN por los canales de la institución.</p>
     {% endif %}
+    </footer>
   {% endif %}
 {% endblock %}

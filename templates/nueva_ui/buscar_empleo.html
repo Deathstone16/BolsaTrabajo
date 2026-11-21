@@ -27,11 +27,14 @@
     </div>
   </div>
 
-  <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-    <div class="grid gap-8 lg:grid-cols-4">
+  <div class="ien-jobs-results mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <div class="ien-jobs-results-layout grid gap-8 lg:grid-cols-4">
 
       <aside class="lg:col-span-1">
-        <form method="get" action="{% url 'buscar_empleo' %}" id="filtros-form" class="panel sticky top-28 p-6">
+        <details class="panel ien-job-filter-panel ien-responsive-disclosure" open data-responsive-disclosure data-disclosure-breakpoint="1024">
+          <summary class="ien-disclosure-summary"><span data-icon="sliders" aria-hidden="true"></span><span>Filtrar ofertas</span><span class="ien-disclosure-chevron" aria-hidden="true"></span></summary>
+          <div class="ien-disclosure-content">
+        <form method="get" action="{% url 'buscar_empleo' %}" id="filtros-form" class="p-6">
           <input type="hidden" name="q" value="{{ busqueda }}" />
           <div class="flex items-center gap-2">
             <span data-icon="sliders" class="h-4 w-4 text-[#512DA8]"></span>
@@ -71,6 +74,8 @@
           </div>
           <button type="submit" class="btn-ien ien-jobs-apply">Aplicar filtros</button>
         </form>
+          </div>
+        </details>
       </aside>
 
       <div class="lg:col-span-3">

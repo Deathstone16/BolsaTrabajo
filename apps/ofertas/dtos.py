@@ -64,6 +64,6 @@ class OfertaDTO:
             fecha_cierre=oferta.fecha_cierre.strftime("%Y-%m-%d")
             if oferta.fecha_cierre
             else "",
-            empresa_nombre=oferente.nombre_empresa if oferente else "",
-            empresa_perfil_url="#",
+            empresa_nombre="Empresa confidencial" if oferta.es_confidencial else oferente.nombre_empresa if oferente else "",
+            empresa_perfil_url="" if oferta.es_confidencial else "#",
         )

@@ -17,7 +17,10 @@ from categorias.models import Habilidad
 
 @transaction.atomic
 def activar_y_programar_analisis(oferta):
-    """Único punto de transición a activa y de creación del outbox IA."""
+    """Activa una oferta aprobada de una empresa habilitada y prepara su análisis IA."""
+    oferente = getattr(oferta.empresa, 'oferente', None)
+    if not oferente or not oferente.puede_publicar:
+        raise ValidationError('La empresa debe estar aprobada y tener los datos de contacto completos para publicar ofertas.')
     oferta.estado = 'activa'
     oferta.save()
     from ia.workflow import request_offer_extraction
@@ -42,7 +45,9 @@ def crear_oferta_laboral(usuario_empresa, form_oferta):
         raise ValidationError('Completá el responsable de la empresa antes de publicar una oferta.')
     oferta = form_oferta.save(commit=False)
     oferta.empresa = usuario_empresa
-    return activar_y_programar_analisis(oferta)
+    oferta.estado = 'pendiente'
+    oferta.save()
+    return oferta
 
 
 def obtener_ofertas_por_empresa(usuario_empresa):

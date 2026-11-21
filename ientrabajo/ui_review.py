@@ -62,7 +62,7 @@ SCREENS = (
     Screen('ADM-03', 'Administración', 'Rechazar empresa', 'mod_rechazar_empresa', 'empresa_pendiente'),
     Screen('ADM-04', 'Administración', 'Historial de solicitudes', 'mod_solicitudes_empresas', note='Revisar filtros por estado y campana del header.'),
     Screen('ADM-05', 'Administración', 'Gestión de ofertas', 'mod_listar_ofertas'),
-    Screen('ADM-06', 'Administración', 'Detalle de oferta para moderación', 'mod_detalle_oferta', 'oferta_admin'),
+    Screen('ADM-06', 'Administración', 'Detalle de oferta', 'mod_detalle_oferta', 'oferta_admin'),
     Screen('ADM-07', 'Administración', 'Rechazar oferta', 'mod_rechazar_oferta', 'oferta_pendiente'),
     Screen('ADM-08', 'Administración', 'Gestión de cursos', 'mod_listar_cursos'),
     Screen('ADM-09', 'Administración', 'Crear curso', 'mod_crear_curso'),
@@ -115,7 +115,9 @@ def company_preview(request, screen_id):
         pk=0, empresa=preview_request.user, titulo='Analista de datos', nombre_puesto='Analista de datos',
         ubicacion='Resistencia, Chaco', modalidad='hibrido', estado='pendiente',
         descripcion='Buscamos una persona para analizar información y preparar reportes junto al equipo.',
-        requisitos_obligatorios='Python\nExcel', requisitos_deseables='Trabajo en equipo',
+        requisitos_obligatorios='' if screen_id == 'EMP-09' else 'Python\nExcel',
+        requisitos_deseables='' if screen_id == 'EMP-09' else 'Trabajo en equipo',
+        requiere_revision_requisitos=False if screen_id == 'EMP-09' else True,
         nivel_educativo='terciario', fecha_cierre=timezone.now() + timedelta(days=30),
     )
     screen = next(screen for screen in SCREENS if screen.id == screen_id)

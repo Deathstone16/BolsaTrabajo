@@ -233,3 +233,26 @@
 }
 .ien-review-preview a { color: #512da8; text-decoration: underline; }
 .ien-review-preview p { flex-basis: 100%; }
+
+/* Analysis metadata and skill levels are informational, without button shapes. */
+.ien-analysis-date { display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem .65rem; margin-top: 1rem; color: #6b6576; font-size: .8125rem; line-height: 1.7; }
+.ien-analysis-date time { color: #514761; font-weight: 500; }
+.ien-skill-level { flex-shrink: 0; padding-top: .2rem; font-size: .75rem; font-weight: 500; line-height: 1.6; color: #756a84; }
+.ien-study-status { display: block; margin-top: .75rem; color: #756a84; font-size: .75rem; line-height: 1.6; }
+.ien-app-page .ien-analysis-result .chip { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: #756a84; }
+
+.ien-profile-header-description { margin-top: .5rem; color: var(--muted-foreground); font-size: .875rem; line-height: 1.65; }
+.ien-profile-header-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem; margin-top: .75rem; }
+.ien-profile-header-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.ien-favorites-heading { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: .75rem 1rem; }
+.ien-favorites-count { margin-top: .5rem; color: var(--muted-foreground); font-size: .875rem; line-height: 1.65; }
+.ien-favorites-results { margin-top: 1rem; }
+
+/* The analysis and candidate navigation use the landing's outlined icon style. */
+.ien-section-icon { display: inline-grid; place-items: center; flex: 0 0 auto; width: 2.75rem; height: 2.75rem; border: 1px solid #b9a9ce; border-radius: .875rem; background: #eee6f8; color: #512da8; box-shadow: 0 2px 0 #251a431a; }
+.ien-section-icon--sun { background: #fff0ad; border-color: #c9b96f; }
+.ien-section-icon > [data-icon] { width: 1.25rem; height: 1.25rem; stroke-width: 1.75; }
+.ien-sidebar-nav-icon { display: inline-grid; place-items: center; flex: 0 0 auto; width: 1.875rem; height: 1.875rem; border: 1px solid #c8bdd5; border-radius: .625rem; background: #f6f1fb; color: #645276; }
+.ien-sidebar-nav-icon > [data-icon] { width: 1.05rem; height: 1.05rem; stroke-width: 1.75; }
+.ien-postulante-nav-link.is-active .ien-sidebar-nav-icon { color: #512da8; background: #e9dff6; border-color: #b6a1cf; }
+.ien-postulante-sidebar .ien-avatar-badge { background: #ffedaa; color: #43218f; border-color: #fffdf8; box-shadow: 0 1px 0 #83749c; }

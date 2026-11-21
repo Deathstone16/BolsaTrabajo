@@ -5,13 +5,13 @@
 {% endcomment %}
 {% for field in form %}
 <div class="space-y-1.5 {% if field.html_name == 'email' or field.html_name == 'direccion' or field.html_name == 'nombre_empresa' or field.html_name == 'cuit' or field.html_name == 'contacto_nombre' or field.html_name == 'contacto_cargo' or field.html_name == 'correo_publico' %}col-span-2{% endif %}">
-  <label class="block text-sm" for="{{ field.id_for_label }}">{{ field.label }}</label>
+  <label class="block text-sm" for="{{ field.id_for_label }}">{% if field.html_name == 'password2' %}Confirmar contraseña{% else %}{{ field.label }}{% endif %}</label>
   {% if field.field.widget.input_type == 'password' %}<div class="password-field">{% endif %}
   <input type="{{ field.field.widget.input_type }}"
          id="{{ field.id_for_label }}"
          name="{{ field.html_name }}"
          class="input-ien text-sm{% if field.field.widget.input_type == 'password' %} password-input{% endif %}"
-         placeholder="{% if field.html_name == 'cuit' %}XX-XXXXXXXX-X{% else %}{{ field.label }}{% endif %}"
+         placeholder="{% if field.html_name == 'cuit' %}XX-XXXXXXXX-X{% elif field.html_name == 'password1' %}Creá una contraseña{% elif field.html_name == 'password2' %}Repetí tu contraseña{% else %}{{ field.label }}{% endif %}"
          {% if field.html_name == 'cuit' %}data-cuit-input inputmode="numeric" pattern="[0-9]{11}|[0-9]{2}-[0-9]{8}-[0-9]" maxlength="13" aria-describedby="{{ field.id_for_label }}_help{% if field.errors %} {{ field.id_for_label }}_error{% endif %}"{% if field.field.required %} required{% endif %}{% if field.errors %} aria-invalid="true"{% endif %}{% endif %}
          {% if field.field.required and field.html_name != 'cuit' %}required{% endif %}
          {% if field.field.widget.input_type == 'password' %}autocomplete="new-password"{% endif %}

@@ -143,6 +143,7 @@ def perfil_oferente(request, pk):
 def datos_personales_exitoso(request):
     """Confirma la actualización de los datos personales."""
     return render(request, 'usuarios/exito.html', {
+        'mostrar_menu_postulante': True,
         'titulo': '¡Datos guardados!',
         'mensaje': 'Tu información personal fue actualizada correctamente.',
         'link_url': reverse('datos_personales'),

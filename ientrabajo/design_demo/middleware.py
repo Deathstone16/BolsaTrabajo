@@ -1,4 +1,5 @@
 from django.http import HttpResponseNotAllowed, HttpResponseNotFound
+from django.shortcuts import redirect
 from ientrabajo.ui_review import SCREENS, COMPANY_PREVIEWS
 from . import views
 
@@ -15,11 +16,22 @@ class DesignDemoMiddleware:
         return response
 
     def process_view(self, request, view, args, kwargs):
+        # A no-JavaScript fallback for the demo profile's "view example" button.
+        # Do not read POST values or invoke the real profile/analysis services.
+        if request.method == 'POST' and (
+            request.resolver_match.view_name == 'ia:editar_perfil_cv'
+            or request.resolver_match.view_name == 'design_demo_screen' and kwargs.get('screen_id') == 'POS-03'
+        ):
+            return redirect('design_demo_screen', screen_id='POS-04')
         if request.method not in ('GET', 'HEAD'):
             return HttpResponseNotAllowed(['GET', 'HEAD'])
         if request.path.startswith('/static/') or view in (views.health, views.cv):
             return None
         name = request.resolver_match.view_name
+        if name == 'mod_notificaciones_admin':
+            from django.http import JsonResponse
+            from .admin_views import admin_fixtures
+            return JsonResponse(admin_fixtures()[-1])
         if name == 'ui_review':
             return views.index(request)
         if name in ('ui_review_company', 'design_demo_screen'):

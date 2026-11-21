@@ -9,17 +9,19 @@
     <div class="grid gap-8 lg:grid-cols-[16rem_1fr]">
       {% include 'usuarios/_sidebar_postulante.html' with seccion='perfil' %}
       <main class="min-w-0" id="cv-profile-view">
-        <p class="kicker">Tu perfil vigente</p>
-        <h1 class="mt-3 text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">Mi perfil profesional</h1>
+        <h1 class="text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl">Mi perfil profesional</h1>
 
         {% if contenido %}
-          <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
-            <p class="text-sm text-[#6B645C]">Esta es la versión guardada que se usa para calcular tu compatibilidad con las ofertas.</p>
-            <a href="{% url 'ia:editar_perfil_cv' %}" class="btn-ghost !py-2 text-sm">Editar información</a>
+          <p class="ien-profile-header-description">Esta es la versión guardada que se usa para calcular tu compatibilidad con las ofertas.</p>
+          <div class="ien-profile-header-toolbar">
+            <p class="text-xs text-[#6B645C]">Versión {{ perfil.version }} · actualizada {{ perfil.actualizado_en|date:'d/m/Y H:i' }}</p>
+            <div class="ien-profile-header-actions">
+              <a href="{% url 'ia:editar_perfil_cv' %}" class="btn-ghost !py-2 text-sm">Editar información</a>
+              {% if design_demo %}<a href="{% url 'design_demo_screen' 'POS-04' %}" class="btn-ien !py-2 text-sm">Ver resultado de IA</a>{% endif %}
+            </div>
           </div>
-          <p class="mt-2 font-mono text-xs text-[#6B645C]">Versión {{ perfil.version }} · actualizada {{ perfil.actualizado_en|date:'d/m/Y H:i' }}</p>
 
-          <section class="panel mt-6 p-6 sm:p-8" aria-labelledby="resumen-perfil-titulo">
+          <section class="panel mt-5 p-6 sm:p-8" aria-labelledby="resumen-perfil-titulo">
             <h2 id="resumen-perfil-titulo" class="text-xl font-bold text-[#26222E]">Resumen profesional</h2>
             {% if contenido.headline %}<p class="mt-4 font-semibold text-[#512DA8]">{{ contenido.headline|human_text }}</p>{% endif %}
             <p class="mt-3 whitespace-pre-line leading-relaxed text-[#6B645C]">{{ resumen_profesional|human_text }}</p>

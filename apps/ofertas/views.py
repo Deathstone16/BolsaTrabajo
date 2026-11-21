@@ -78,8 +78,11 @@ def editar_oferta(request, pk):
         form = OfertaForm(request.POST, instance=oferta)
         if form.is_valid():
             oferta = form.save(commit=False)
-            oferta.estado = 'pendiente'
-            oferta.save()
+            if oferta.estado == 'finalizada':
+                oferta.save()
+            else:
+                oferta.estado = 'pendiente'
+                oferta.save()
             if es_ajax:
                 return JsonResponse({'success': True})
             return redirect('dashboard_empresa')
