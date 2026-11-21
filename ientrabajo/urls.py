@@ -25,13 +25,20 @@ from django.urls import re_path
 
 def deny_private_media(request, path=''):
     return HttpResponseNotFound()
-from . import views
+from . import views, error_pages
 from usuarios.views import mi_perfil
 
 
+handler400 = 'ientrabajo.error_pages.bad_request'
+handler403 = 'ientrabajo.error_pages.permission_denied'
+handler404 = 'ientrabajo.error_pages.not_found'
+handler500 = 'ientrabajo.error_pages.server_error'
+
 urlpatterns = [
+    path('estado/servicio-no-disponible/', error_pages.unavailable, name='error_unavailable'),
+    path('estado/tiempo-de-espera/', error_pages.timeout, name='error_timeout'),
     re_path(r'^media/(?:postulantes/cv|ia/extraction_snapshots)/.*$', deny_private_media),
-    path('admin/', admin.site.urls),
+    path(settings.DJANGO_ADMIN_PATH, admin.site.urls),
     path('',views.home,name='home'),
     path('usuarios/', include('usuarios.urls')),
     path('perfil/', mi_perfil, name='perfil_cv'),

@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os,sys
+import re
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -51,9 +53,14 @@ if env_bool('TRUST_PROXY_HEADERS', not DEBUG):
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
 
+# La ruta no reemplaza los permisos: el panel técnico exige superusuario.
+DJANGO_ADMIN_PATH = os.environ.get('DJANGO_ADMIN_PATH', 'gestion-tecnica').strip().strip('/') + '/'
+if not re.fullmatch(r'[A-Za-z0-9_-]+/', DJANGO_ADMIN_PATH):
+    raise ImproperlyConfigured('DJANGO_ADMIN_PATH debe ser un nombre de ruta, sin dominio ni parámetros.')
+
 INSTALLED_APPS = [
     'daphne',
-    'django.contrib.admin',
+    'ientrabajo.admin_config.TechnicalAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -72,6 +79,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'ientrabajo.error_pages.ServerErrorPageMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -262,3 +270,5 @@ IEN_COMPANY_REMINDER_HOURS = max(1, int(os.environ.get('IEN_COMPANY_REMINDER_HOU
 IEN_PUBLIC_URL = os.environ.get('IEN_PUBLIC_URL', 'http://127.0.0.1:8000' if DEBUG else '').rstrip('/')
 # Optional public HTTPS asset for email providers without inline MIME images.
 IEN_EMAIL_LOGO_URL = os.environ.get('IEN_EMAIL_LOGO_URL', '').strip()
+
+CSRF_FAILURE_VIEW = 'ientrabajo.error_pages.csrf_failure'

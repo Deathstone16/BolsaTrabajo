@@ -24,6 +24,22 @@
     handle {
         reverse_proxy 127.0.0.1:8000 {
             header_up X-Forwarded-Proto https
+            transport http {
+                dial_timeout 5s
+                response_header_timeout 60s
+            }
         }
+    }
+
+    # These pages remain available when Django cannot respond.
+    handle_errors 502 503 {
+        root * /srv/ien/BolsaTrabajo/staticfiles/errors
+        rewrite * /503.html
+        file_server
+    }
+    handle_errors 504 {
+        root * /srv/ien/BolsaTrabajo/staticfiles/errors
+        rewrite * /504.html
+        file_server
     }
 }

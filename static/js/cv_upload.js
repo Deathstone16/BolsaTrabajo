@@ -89,14 +89,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // Modal del sitio (IenUI.confirmar) en vez del confirm() del navegador.
             pedirConfirmacionEliminar().then(function(ok) {
                 if (!ok) return;
-                fetch(formEliminar.action, {
+                window.IenHTTP.json(formEliminar.action, {
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': formEliminar.querySelector('[name=csrfmiddlewaretoken]').value,
                         'X-Requested-With': 'XMLHttpRequest',
                     },
                 })
-                .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         if (window.IenUI) window.IenUI.avisoTrasRecarga('exito', data.mensaje || 'CV eliminado.');
@@ -105,8 +104,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         mostrarFeedback('error', data.mensaje || 'Error al eliminar el CV.');
                     }
                 })
-                .catch(() => {
-                    mostrarFeedback('error', 'Error de conexión.');
+                .catch((error) => {
+                    mostrarFeedback('error', window.IenHTTP.message(error));
                 });
             });
         });
@@ -141,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
             boton.innerHTML = '<svg class="w-4 h-4 inline-block mr-2 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Enviando...';
             mostrarEstadoAnalisis('pendiente', 'Enviando tu CV al servicio de análisis…');
 
-            fetch(formAnalizar.action, {
+            window.IenHTTP.json(formAnalizar.action, {
                 method: 'POST',
                 keepalive: true,
                 headers: {
@@ -149,7 +148,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     'X-Requested-With': 'XMLHttpRequest',
                 },
             })
-            .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     marcarBotonAnalisisPendiente(boton);
@@ -161,8 +159,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     restaurarBotonAnalizar(boton, textoOriginal);
                 }
             })
-            .catch(() => {
-                mostrarEstadoAnalisis('error', 'Error de conexión. Intentá nuevamente.');
+            .catch((error) => {
+                mostrarEstadoAnalisis('error', window.IenHTTP.message(error));
                 restaurarBotonAnalizar(boton, textoOriginal);
             });
         });
@@ -227,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         mostrarFeedback('loading', 'Cargando CV...');
 
-        fetch(formUpload.action, {
+        window.IenHTTP.json(formUpload.action, {
             method: 'POST',
             body: formData,
             headers: {
@@ -235,7 +233,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 'X-CSRFToken': formUpload.querySelector('[name=csrfmiddlewaretoken]').value,
             },
         })
-        .then(response => response.json())
         .then(data => {
             if (data.success) {
                 versionCvActualId = Number(data.version_cv_id) || 0;
@@ -246,8 +243,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 cvInput.value = '';
             }
         })
-        .catch(() => {
-            mostrarFeedback('error', 'Error de conexión. Intentá nuevamente.');
+        .catch((error) => {
+            mostrarFeedback('error', window.IenHTTP.message(error));
             cvInput.value = '';
         });
     }
@@ -258,7 +255,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         mostrarFeedback('loading', 'Reemplazando CV...');
 
-        fetch(window.location.href, {
+        window.IenHTTP.json(window.location.href, {
             method: 'POST',
             body: formData,
             headers: {
@@ -266,7 +263,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 'X-CSRFToken': getCsrfToken(),
             },
         })
-        .then(response => response.json())
         .then(data => {
             if (data.success) {
                 versionCvActualId = Number(data.version_cv_id) || 0;
@@ -277,8 +273,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 cvInput.value = '';
             }
         })
-        .catch(() => {
-            mostrarFeedback('error', 'Error de conexión. Intentá nuevamente.');
+        .catch((error) => {
+            mostrarFeedback('error', window.IenHTTP.message(error));
             cvInput.value = '';
         });
     }
