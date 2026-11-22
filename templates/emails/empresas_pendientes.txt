@@ -1,9 +1,9 @@
-Hay {{ cantidad }} solicitud{{ cantidad|pluralize:'es' }} de empresa pendientes de revisión desde hace al menos {{ horas }} horas.
+Recibimos {{ cantidad }} solicitud{{ cantidad|pluralize:'es' }} de validación de empresa. Ya podés revisar sus datos en la plataforma.
 
 {% for solicitud in solicitudes %}- {{ solicitud.empresa.nombre_empresa }}
   Recibida: {{ solicitud.creada_en|date:'d/m/Y H:i' }}
 {% endfor %}
 Revisar solicitudes: {{ review_url }}
 
-Este es un resumen agrupado. Las empresas ya aprobadas o rechazadas no se incluyen. Cada solicitud genera un único recordatorio.
-IEN Empleo
+El aviso se envía al recibir la solicitud. Las empresas ya aprobadas o rechazadas no se incluyen. No repetimos los avisos enviados correctamente.
+IEN Trabajo

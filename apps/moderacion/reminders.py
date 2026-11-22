@@ -1,4 +1,4 @@
-"""Un resumen diferido, sin enviar correo en el registro ni en las visitas web."""
+"""Avisos al confirmar una solicitud y reintentos de correos no enviados."""
 import logging
 from datetime import timedelta
 from uuid import uuid4
@@ -30,23 +30,30 @@ def destinatarios_recordatorio():
     return result
 
 
-def enviar_recordatorios_empresas():
+def enviar_recordatorios_empresas(*, solicitud_id=None):
     now = timezone.now()
     # Una actualización condicional reclama el lease incluso con SQLite.
     ControlRecordatorios.objects.get_or_create(clave='empresas')
     token = uuid4()
-    claimed = ControlRecordatorios.objects.filter(clave='empresas').filter(
+    control = ControlRecordatorios.objects.filter(clave='empresas').filter(
         Q(reservado_hasta__isnull=True) | Q(reservado_hasta__lte=now),
-    ).filter(Q(proximo_envio_en__isnull=True) | Q(proximo_envio_en__lte=now)).update(
+    )
+    # Una nueva solicitud no espera por el fallo de un aviso anterior.
+    if solicitud_id is None:
+        control = control.filter(Q(proximo_envio_en__isnull=True) | Q(proximo_envio_en__lte=now))
+    claimed = control.update(
         reservado_hasta=now + timedelta(minutes=5), token=token,
     )
     if not claimed:
         return 0
     try:
-        solicitudes = list(SolicitudEmpresa.objects.select_related('empresa').filter(
+        pendientes = SolicitudEmpresa.objects.select_related('empresa').filter(
             resuelta_en__isnull=True, empresa__estado_validacion='pendiente',
             recordatorio_enviado_en__isnull=True, recordar_desde__lte=now,
-        ).order_by('creada_en'))
+        )
+        if solicitud_id is not None:
+            pendientes = pendientes.filter(pk=solicitud_id)
+        solicitudes = list(pendientes.order_by('creada_en'))
         if not solicitudes:
             return 0
         recipients = destinatarios_recordatorio()
@@ -64,10 +71,9 @@ def enviar_recordatorios_empresas():
         context = {
             'solicitudes': solicitudes, 'cantidad': len(solicitudes),
             'review_url': public_url + reverse('mod_solicitudes_empresas') + '?estado=pendiente',
-            'horas': settings.IEN_COMPANY_REMINDER_HOURS,
         }
         sent = send_mail(
-            subject=f'IEN Empleo: {len(solicitudes)} empresa(s) pendiente(s) de revisión',
+            subject=f'IEN Trabajo: {len(solicitudes)} solicitud(es) de validación de empresa',
             message=render_to_string('emails/empresas_pendientes.txt', context),
             html_message=render_to_string('emails/empresas_pendientes.html', context),
             from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=recipients,
@@ -79,15 +85,15 @@ def enviar_recordatorios_empresas():
         SolicitudEmpresa.objects.filter(pk__in=[item.pk for item in solicitudes]).update(recordatorio_enviado_en=sent_at)
         ControlRecordatorios.objects.filter(clave='empresas', token=token).update(
             ultimo_envio_en=sent_at,
-            proximo_envio_en=sent_at + timedelta(hours=settings.IEN_COMPANY_REMINDER_HOURS),
+            proximo_envio_en=None,
         )
         return len(solicitudes)
     except Exception:
         # Conservar las solicitudes para reintentar luego, sin perderlas ni bloquear el alta.
         ControlRecordatorios.objects.filter(clave='empresas', token=token).update(
-            proximo_envio_en=timezone.now() + timedelta(hours=1),
+            proximo_envio_en=timezone.now() + timedelta(minutes=1),
         )
-        logger.exception('No se pudo enviar el resumen de solicitudes de empresas.')
+        logger.exception('No se pudo enviar el aviso de solicitudes de empresas.')
         return 0
     finally:
         ControlRecordatorios.objects.filter(clave='empresas', token=token).update(reservado_hasta=None, token=None)
