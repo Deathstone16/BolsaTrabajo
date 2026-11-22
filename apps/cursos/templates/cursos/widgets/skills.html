@@ -1,0 +1,12 @@
+<div class="ien-course-skills" data-course-skills>
+  <div data-skills-source>{% include 'django/forms/widgets/select.html' %}</div>
+  <div data-skills-controls hidden>
+    <div class="ien-course-skill-add">
+      <select class="input-ien" data-skill-choice aria-label="Elegir habilidad"><option value="">Elegir habilidad</option></select>
+      <button type="button" class="btn-ghost" data-skill-add><span aria-hidden="true">+</span> Agregar</button>
+    </div>
+    <ul class="ien-course-selected-skills" data-skills-selected aria-label="Habilidades seleccionadas"></ul>
+    <p class="ien-admin-field-help" data-skills-empty>Todavía no agregaste habilidades.</p>
+    <span class="sr-only" aria-live="polite" data-skills-status></span>
+  </div>
+</div>

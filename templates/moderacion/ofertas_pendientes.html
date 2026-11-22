@@ -9,24 +9,16 @@
     <p class="text-muted-foreground mt-1">Consultá las ofertas laborales y sus detalles. Revisá las ofertas pendientes para aprobarlas o indicar qué debe corregir la empresa.</p>
 </div>
 
-<!-- Búsqueda y filtro -->
-<div class="panel p-4 mb-6 flex flex-col sm:flex-row gap-3 ien-admin-offer-filters">
-    <div class="relative flex-1">
-      <span data-icon="search" class="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"></span>
-      <input type="text" id="buscar" placeholder="Buscar por puesto o empresa..."
-            class="w-full pl-9 pr-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
-    </div>
-    <div class="relative">
-    <span data-icon="filter" class="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"></span>
-    <select id="filtro-estado" onchange="window.location.href=this.value"
-            class="pl-9 pr-8 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none">
-        <option value="{% url 'mod_listar_ofertas' %}" {% if not filtro_actual %}selected{% endif %}>Todos los estados</option>
-        <option value="{% url 'mod_listar_ofertas' %}?estado=pendiente" {% if filtro_actual == 'pendiente' %}selected{% endif %}>Pendiente de aprobación</option>
-        <option value="{% url 'mod_listar_ofertas' %}?estado=activa" {% if filtro_actual == 'activa' %}selected{% endif %}>Publicada</option>
-        <option value="{% url 'mod_listar_ofertas' %}?estado=rechazada" {% if filtro_actual == 'rechazada' %}selected{% endif %}>Rechazada</option>
-    </select>
-    </div>
-</div>
+<form method="get" class="panel ien-admin-list-search">
+  <input type="search" name="q" value="{{ q }}" class="input-ien" aria-label="Buscar por puesto o empresa" placeholder="Buscar por puesto o empresa…">
+  <select name="estado" class="input-ien" aria-label="Estado de la oferta">
+    <option value="">Todos los estados</option>
+    <option value="pendiente" {% if filtro_actual == 'pendiente' %}selected{% endif %}>Pendiente de aprobación</option>
+    <option value="activa" {% if filtro_actual == 'activa' %}selected{% endif %}>Publicada</option>
+    <option value="rechazada" {% if filtro_actual == 'rechazada' %}selected{% endif %}>Rechazada</option>
+  </select>
+  <button type="submit" class="btn-ien">Buscar</button>
+</form>
 
 <!-- Tabla -->
   <div class="ien-table-scroll panel overflow-hidden mb-6 ien-admin-offer-list">
@@ -71,6 +63,8 @@
     </table>
   </div>
 
+  {% include 'moderacion/_pagination.html' %}
+
   <!-- Stats -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 ien-admin-offer-stats">
     <div class="panel p-6">
@@ -88,21 +82,4 @@
   </div>
 
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-  (function() {
-    var input = document.getElementById('buscar');
-    if (!input) return;
-    input.addEventListener('input', function() {
-      var texto = this.value.toLowerCase().trim();
-      document.querySelectorAll('.fila-oferta').forEach(function(fila) {
-        var puesto = fila.children[1].textContent.toLowerCase();
-        var empresa = fila.children[2].textContent.toLowerCase();
-        fila.style.display = puesto.indexOf(texto) >= 0 || empresa.indexOf(texto) >= 0 ? '' : 'none';
-      });
-    });
-  })();
-</script>
 {% endblock %}

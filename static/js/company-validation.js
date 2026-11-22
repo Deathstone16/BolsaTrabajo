@@ -1,4 +1,11 @@
 document.querySelectorAll('[data-company-validation], [data-required-validation]').forEach((form) => {
+  form.noValidate = true;
+  form.addEventListener('submit', (event) => {
+    if (!form.checkValidity()) {
+      event.preventDefault();
+      form.querySelector(':invalid')?.focus();
+    }
+  });
   form.querySelectorAll('input:not([type="hidden"]):not([type="checkbox"]):not([type="file"]), select, textarea').forEach((input) => {
     if (!input.id) input.id = `validation-${input.name}`;
     const label = input.labels[0];
@@ -27,8 +34,8 @@ document.querySelectorAll('[data-company-validation], [data-required-validation]
       const invalid = missing || serverInvalid || (touched && !input.validity.valid);
       input.classList.toggle('ien-field-invalid', invalid);
       input.setAttribute('aria-invalid', String(invalid));
-      message.textContent = missing ? 'Completá este campo obligatorio.' : '';
-      message.hidden = !missing;
+      message.textContent = missing ? 'Completá este campo obligatorio.' : (invalid ? 'Revisá el valor de este campo.' : '');
+      message.hidden = !invalid;
     }
 
     input.addEventListener('input', () => {

@@ -1,7 +1,12 @@
-<div class="ien-course-image-control">
-  {% if widget.is_initial %}
-    <img class="ien-admin-course-image" src="{{ widget.value.url }}" alt="Imagen actual del curso" loading="lazy">
-    {% if not widget.required %}<label class="ien-admin-image-clear"><input type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}"{% if widget.attrs.disabled %} disabled{% endif %}> Quitar imagen actual</label>{% endif %}
-  {% endif %}
-  <input type="{{ widget.type }}" name="{{ widget.name }}"{% include 'django/forms/widgets/attrs.html' %}>
+{% load static %}
+{% static 'img/course-default.svg' as default_cover %}
+<div class="ien-course-image-control" data-course-image data-default-image="{{ default_cover }}">
+  <img class="ien-course-image-preview" data-image-preview src="{% if widget.is_initial %}{{ widget.value.url }}{% else %}{{ default_cover }}{% endif %}" alt="Vista previa de la portada del curso">
+  <div class="ien-course-image-actions">
+    <p data-image-name>Portada del curso</p>
+    <p class="ien-admin-field-help">Si no elegís una imagen, se usa la portada predeterminada.</p>
+    <label class="btn-ghost ien-course-image-picker" for="{{ widget.attrs.id }}">{% if widget.is_initial %}Cambiar imagen{% else %}Elegir imagen{% endif %}</label>
+    <input type="{{ widget.type }}" name="{{ widget.name }}"{% include 'django/forms/widgets/attrs.html' %}>
+    {% if widget.is_initial and not widget.required %}<label class="ien-admin-image-clear"><input type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}"{% if widget.attrs.disabled %} disabled{% endif %}> Usar portada predeterminada</label>{% endif %}
+  </div>
 </div>
