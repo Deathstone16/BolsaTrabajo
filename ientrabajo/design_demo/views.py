@@ -102,6 +102,10 @@ def screen(request, screen_id):
         'link_url': reverse('design_demo_screen', args=['POS-06']), 'link_texto': 'Volver a mis datos',
         'perfil_oferta': NS(estado='ready', schema_version='job-offer.v2'),
     }
+    if request.GET.get('aviso') in ('exito', 'error', 'info', 'cv-listo', 'confirmar'):
+        context['demo_feedback'] = request.GET['aviso']
+    if request.GET.get('analisis') == 'pendiente':
+        context.update(cv_demo_pending=True, cv_pending_analysis_id=31)
     if screen_id == 'POS-01':
         state = request.GET.get('estado', 'completado')
         if state == 'sin-cv':

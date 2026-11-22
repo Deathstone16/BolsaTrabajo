@@ -92,9 +92,9 @@
             </div>
           {% else %}
             <div class="ien-cv-dropzone">
-              <span data-icon="upload" class="ien-cv-dropzone-icon" aria-hidden="true"></span>
+              <span class="ien-cv-dropzone-symbol" aria-hidden="true"><span data-icon="upload" class="ien-cv-dropzone-icon"></span></span>
               <h2 id="siguiente-paso-titulo" class="text-lg font-semibold">Empezá por cargar tu CV</h2>
-              <p class="text-sm text-[#6B645C]">Arrastrá el archivo acá o elegilo desde tu dispositivo.</p>
+              <p class="text-sm text-[#6B645C]">Elegí el archivo desde tu dispositivo.<span class="ien-cv-upload-desktop-hint"> También podés arrastrarlo acá.</span></p>
               {% include "usuarios/_cv_upload_form.html" %}
             </div>
           {% endif %}
