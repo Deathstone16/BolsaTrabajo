@@ -20,10 +20,13 @@
 </style>
 {% endblock %}
 
+{% block back_navigation %}{% endblock %}
+
 {% block content %}
 <section class="ien-offer-detail pb-16">
   <header class="ien-offer-detail-header">
     <div class="ien-offer-detail-container">
+      {% app_back_link %}
       <div class="ien-offer-detail-heading">
         <div>
           <h1>{{ oferta.titulo }}</h1>
