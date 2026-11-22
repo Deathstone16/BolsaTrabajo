@@ -35,10 +35,10 @@ class RecuperacionCorreoTests(TestCase):
         self.assertIsNotNone(enlace)
         html = mensaje.alternatives[0].content
         self.assertIn('href="' + enlace.group() + '"', html)
-        self.assertIn('#F8F3F0', html)
+        self.assertIn('#eaf0f9', html)
         self.assertIn('#512DA8', html)
-        self.assertIn('#FFDE59', html)
-        self.assertIn('Bolsa de trabajo &middot; Chaco', html)
+        self.assertIn('IEN Trabajo', html)
+        self.assertIn('Instituto Económico Nacional', html)
         self.assertNotIn('#2563eb', html)
 
         respuesta = self.client.post(urlsplit(enlace.group()).path, {

@@ -7,6 +7,7 @@ con su manager y patrón de estados de validación.
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.core.exceptions import ValidationError
 from .estado_oferente import ESTADOS, Pendiente
 from .validators import validar_cuit
 
@@ -106,9 +107,35 @@ class Oferente(models.Model):
     anio_fundacion = models.IntegerField(null=True, blank=True)
     sitio_web = models.URLField(max_length=300, null=True, blank=True)
     telefono = models.CharField(max_length=50, null=True, blank=True)
+    contacto_nombre = models.CharField('Nombre del responsable', max_length=150)
+    contacto_cargo = models.CharField('Cargo o área', max_length=100, blank=True)
+    contacto_email = models.EmailField('Email de contacto', blank=True)
+    correo_publico = models.EmailField('Correo de contacto público', blank=True)
+    contacto_telefono = models.CharField('Teléfono de contacto', max_length=50, blank=True)
+
+    @property
+    def contacto_telefono_enlace(self):
+        numero = ''.join(caracter for caracter in self.contacto_telefono if caracter.isdigit())
+        return ('+' if self.contacto_telefono.startswith('+') else '') + numero
+
+    @property
+    def tiene_responsable(self):
+        """Indica si la empresa identificó a una persona responsable."""
+        return bool((self.contacto_nombre or '').strip())
+
+    @property
+    def responsable_completo(self):
+        return self.tiene_responsable and bool(self.contacto_cargo.strip() and self.correo_publico.strip())
+
+    @property
+    def puede_publicar(self):
+        """Exige aprobación institucional y los datos completos del responsable."""
+        return self.estado_obj.puede_publicar() and self.responsable_completo
 
     def aprobar(self):
         """Aprueba la empresa cambiando estado a aprobado."""
+        if not self.responsable_completo:
+            raise ValidationError('Completá el nombre, el cargo y el correo de contacto del responsable.')
         self.estado_validacion = self.EstadoValidacion.APROBADO
         self.save(update_fields=['estado_validacion'])
 

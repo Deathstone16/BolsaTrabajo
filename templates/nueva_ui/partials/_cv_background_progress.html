@@ -1,0 +1,13 @@
+{% if cv_notification_token or cv_demo_pending %}
+  <div id="cv-analysis-global" class="ien-cv-progress" data-user-id="{{ user.pk }}" data-analysis-id="{{ cv_pending_analysis_id }}" {% if not cv_pending_analysis_id %}hidden{% endif %}>
+    <div class="ien-cv-progress-card">
+      {% include 'nueva_ui/partials/_cv_thinking_mark.html' only %}
+      <div class="ien-cv-progress-copy" role="status" aria-live="polite">
+        <p class="ien-cv-progress-title">Tu CV se está analizando</p>
+        <p class="ien-cv-progress-description">Podés seguir navegando. Te avisamos cuando esté listo.</p>
+      </div>
+      <a class="ien-cv-progress-link" href="{% url 'mi_perfil' %}#cv-analysis">Ver progreso <span aria-hidden="true">→</span></a>
+      <button type="button" class="ien-cv-progress-close" data-cv-progress-dismiss aria-label="Cerrar aviso de análisis en segundo plano"><span data-icon="x" aria-hidden="true"></span></button>
+    </div>
+  </div>
+{% endif %}

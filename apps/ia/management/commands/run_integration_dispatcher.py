@@ -11,15 +11,20 @@ class Command(BaseCommand):
     help = 'Entrega continuamente trabajos de extracción o compatibilidad.'
 
     def add_arguments(self, parser):
-        parser.add_argument('--kind', choices=['extraction', 'match'], required=True)
+        parser.add_argument('--kind', choices=['extraction', 'match', 'company-reminders'], required=True)
         parser.add_argument('--interval', type=float, default=2)
 
     def handle(self, *args, **options):
-        command = 'dispatch_match_jobs' if options['kind'] == 'match' else 'dispatch_integration_outbox'
+        command = {
+            'match': 'dispatch_match_jobs',
+            'extraction': 'dispatch_integration_outbox',
+            'company-reminders': 'dispatch_company_reminders',
+        }[options['kind']]
         try:
             while True:
                 close_old_connections()
-                call_command(command, limit=20, stdout=self.stdout, stderr=self.stderr)
+                kwargs = {} if options['kind'] == 'company-reminders' else {'limit': 20}
+                call_command(command, stdout=self.stdout, stderr=self.stderr, **kwargs)
                 time.sleep(max(0.1, options['interval']))
         except KeyboardInterrupt:
             self.stdout.write('Despachador detenido.')

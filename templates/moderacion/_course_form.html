@@ -1,0 +1,28 @@
+{% if form.non_field_errors %}<div class="ien-offer-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+<section class="ien-admin-form-section">
+  <h2>Información del curso</h2>
+  {% include 'moderacion/_admin_field.html' with field=form.nombre %}
+  {% include 'moderacion/_admin_field.html' with field=form.categoria %}
+  {% include 'moderacion/_admin_field.html' with field=form.descripcion %}
+</section>
+<section class="ien-admin-form-section">
+  <h2>Cursada</h2>
+  <div class="ien-admin-field-grid">
+    {% include 'moderacion/_admin_field.html' with field=form.duracion %}
+    {% include 'moderacion/_admin_field.html' with field=form.tipo %}
+  </div>
+  {% include 'moderacion/_admin_field.html' with field=form.horario %}
+</section>
+<section class="ien-admin-form-section">
+  <h2>Imagen y enlace oficial</h2>
+  {% include 'moderacion/_admin_field.html' with field=form.imagen %}
+  {% include 'moderacion/_admin_field.html' with field=form.url_externa %}
+</section>
+<section class="ien-admin-form-section">
+  <h2>Habilidades que desarrolla</h2>
+  {% include 'moderacion/_admin_field.html' with field=form.habilidades hide_label=True %}
+</section>
+<div class="ien-admin-form-actions">
+  <a href="{% url 'mod_listar_cursos' %}" class="btn-ghost">Cancelar</a>
+  <button type="submit" class="btn-ien">{{ submit_text }}</button>
+</div>

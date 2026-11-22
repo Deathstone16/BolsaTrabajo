@@ -6,6 +6,8 @@ y funciones de utilidad para el dominio de ofertas.
 """
 
 from django.db import transaction
+from django.db.models import Q
+from django.core.exceptions import ValidationError
 from .models import Oferta, OfertaFavorita
 
 from django.shortcuts import get_object_or_404
@@ -15,7 +17,10 @@ from categorias.models import Habilidad
 
 @transaction.atomic
 def activar_y_programar_analisis(oferta):
-    """Único punto de transición a activa y de creación del outbox IA."""
+    """Activa una oferta aprobada de una empresa habilitada y prepara su análisis IA."""
+    oferente = getattr(oferta.empresa, 'oferente', None)
+    if not oferente or not oferente.puede_publicar:
+        raise ValidationError('La empresa debe estar aprobada y tener los datos de contacto completos para publicar ofertas.')
     oferta.estado = 'activa'
     oferta.save()
     from ia.workflow import request_offer_extraction
@@ -35,9 +40,14 @@ def crear_oferta_laboral(usuario_empresa, form_oferta):
         Oferta: Instancia de la oferta creada.
     """
     
+    oferente = getattr(usuario_empresa, 'oferente', None)
+    if not oferente or not oferente.puede_publicar:
+        raise ValidationError('Completá el responsable de la empresa antes de publicar una oferta.')
     oferta = form_oferta.save(commit=False)
     oferta.empresa = usuario_empresa
-    return activar_y_programar_analisis(oferta)
+    oferta.estado = 'pendiente'
+    oferta.save()
+    return oferta
 
 
 def obtener_ofertas_por_empresa(usuario_empresa):
@@ -70,13 +80,16 @@ def eliminar_oferta_por_id(oferta_id):
     return False
 
 
-def obtener_ofertas_activas(busqueda='', modalidad='', experiencia=''):
+def obtener_ofertas_activas(
+    busqueda='', modalidad='', experiencia='', *, ubicacion=''
+):
     """Busca ofertas activas con filtros opcionales.
 
     Args:
-        busqueda (str): Filtro por título o nombre de puesto.
+        busqueda (str): Palabras del título, empresa, descripción o requisitos.
         modalidad (str): Filtro exacto por modalidad.
         experiencia (str): Filtro exacto por experiencia requerida.
+        ubicacion (str): Coincidencia parcial en la ubicación publicada.
 
     Returns:
         QuerySet de ofertas activas filtradas.
@@ -84,12 +97,24 @@ def obtener_ofertas_activas(busqueda='', modalidad='', experiencia=''):
     ofertas = Oferta.objects.filter(
         estado='activa',
     ).select_related('empresa__oferente', 'categoria').order_by('-fecha_publicacion')
-    if busqueda:
-        ofertas = ofertas.filter(titulo__icontains=busqueda) | ofertas.filter(nombre_puesto__icontains=busqueda)
+    for palabra in busqueda.split():
+        coincidencias = Q(
+            es_confidencial=False,
+            empresa__oferente__nombre_empresa__icontains=palabra,
+        )
+        for campo in (
+            'titulo', 'nombre_puesto', 'descripcion', 'categoria__nombre',
+            'habilidades_duras', 'habilidades_blandas', 'habilidades_requeridas',
+            'requisitos_obligatorios', 'requisitos_deseables',
+        ):
+            coincidencias |= Q(**{f'{campo}__icontains': palabra})
+        ofertas = ofertas.filter(coincidencias)
     if modalidad:
         ofertas = ofertas.filter(modalidad=modalidad)
     if experiencia:
         ofertas = ofertas.filter(experiencia_requerida=experiencia)
+    if ubicacion.strip():
+        ofertas = ofertas.filter(ubicacion__icontains=ubicacion.strip())
     return ofertas
 
 
@@ -113,7 +138,7 @@ def actualizar_estado_oferta(oferta_id, nuevo_estado):
 #
 def listar_habilidades_por_tipo(tipo_id):
     """Devuelve las habilidades asociadas a una categoría."""
-    return Habilidad.objects.filter(categoria_id=tipo_id)
+    return Habilidad.objects.filter(categoria_id=tipo_id).order_by('nombre')
 #
 def crear_habilidad(form):
     """Persiste una habilidad a partir de un formulario validado."""

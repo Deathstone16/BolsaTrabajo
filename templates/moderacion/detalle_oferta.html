@@ -1,6 +1,6 @@
 {% extends 'nueva_ui/base.html' %}
 
-{% block title %}Moderar oferta · {{ oferta.nombre_puesto }} · IEN Empleo{% endblock %}
+{% block title %}Detalle de oferta | {{ oferta.nombre_puesto }} · IEN Empleo{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto px-4 lg:px-8 py-8">
@@ -9,7 +9,6 @@
     <div class="flex flex-wrap items-start justify-between gap-4">
       <div>
         <h1 class="text-2xl font-bold tracking-tight text-[#26222E]">{{ oferta.nombre_puesto }}</h1>
-        {% include "nueva_ui/partials/_breadcrumbs.html" with current=oferta.nombre_puesto parent_url="mod_listar_ofertas" parent_label="Ofertas" only %}
         <p class="text-muted-foreground mt-1">{{ oferta.titulo }}</p>
       </div>
       <span class="px-3 py-1 rounded-full text-xs font-medium
@@ -90,12 +89,12 @@
   <div class="flex gap-4">
     <form method="post" action="{% url 'mod_aprobar_oferta' oferta.pk %}" class="flex-1">
       {% csrf_token %}
-      <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 font-medium text-white transition-colors hover:bg-primary/90">
+      <button type="submit" class="btn-ien w-full">
         <span data-icon="check" class="h-5 w-5"></span> Aprobar oferta
       </button>
     </form>
     <form method="get" action="{% url 'mod_rechazar_oferta' oferta.pk %}" class="flex-1">
-      <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-lg bg-destructive px-6 py-3 font-medium text-white transition-colors hover:bg-destructive/90">
+      <button type="submit" class="btn-ghost ien-table-action-danger w-full">
         <span data-icon="x" class="h-5 w-5"></span> Rechazar oferta
       </button>
     </form>

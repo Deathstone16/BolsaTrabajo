@@ -1,55 +1,59 @@
 {% extends 'nueva_ui/base.html' %}
 
 {% block content %}
-<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+<div class="ien-admin-catalog mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
 
-  <div class="mb-8 flex justify-between items-center">
+  <div class="ien-admin-catalog-heading">
     <div>
-      <h1 class="text-3xl font-bold tracking-tight text-[#26222E] mb-2">Habilidades — {{ categoria.nombre }}</h1>
-        {% include "nueva_ui/partials/_breadcrumbs.html" with current=categoria.nombre parent_url="mod_listar_categorias" parent_label="Categorías" only %}
-      <p class="text-muted-foreground">Administra las habilidades asociadas a esta categoría</p>
+      <h1 class="text-3xl font-bold tracking-tight text-[#26222E] mb-2">Habilidades</h1>
+      <p class="text-muted-foreground">Administrá las habilidades de {{ categoria.nombre }}.</p>
     </div>
     <a href="{% url 'mod_crear_habilidad' categoria.id %}"
-       class="btn-ien !py-2.5 text-sm">
+       class="btn-ien ien-catalog-add">
       <span data-icon="plus" class="h-5 w-5"></span>
       Añadir habilidad
     </a>
   </div>
 
-  <div class="panel p-6">
-    <table class="w-full text-sm">
+  {% if habilidades %}
+  <div class="ien-table-scroll panel ien-admin-catalog-panel ien-admin-desktop-list">
+    <table class="ien-catalog-table ien-admin-catalog-table w-full text-sm">
       <thead>
         <tr class="border-b border-border">
           <th class="text-left py-3 px-4 font-medium text-muted-foreground">Nombre</th>
-          <th class="text-left py-3 px-4 font-medium text-muted-foreground">Acciones</th>
+          <th class="text-left py-3 px-4 font-medium text-muted-foreground">Tipo</th>
+          <th class="ien-catalog-actions-heading text-left py-3 px-4 font-medium text-muted-foreground">Acciones</th>
         </tr>
       </thead>
       <tbody>
         {% for habilidad in habilidades %}
         <tr class="border-b border-border hover:bg-muted/50 transition-colors">
-          <td class="py-3 px-4">{{ habilidad.nombre }}</td>
-          <td class="py-3 px-4 flex gap-2">
+          <td data-label="Habilidad" class="py-3 px-4">{{ habilidad.nombre }}</td>
+          <td data-label="Tipo" class="py-3 px-4">{% if habilidad.tipo_habilidad == 'B' %}Habilidad blanda{% else %}Habilidad técnica{% endif %}</td>
+          <td data-label="Acciones" class="py-3 px-4">
+            <div class="ien-table-actions">
             <a href="{% url 'mod_modificar_habilidad' habilidad.id %}"
-               class="px-3 py-1 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-xs">
+               class="ien-table-action">
               Editar
             </a>
-            <form method="POST" action="{% url 'mod_eliminar_habilidad' habilidad.id %}">
-              {% csrf_token %}
-              <button type="submit"
-                    class="px-3 py-1 bg-destructive/10 text-destructive rounded-lg hover:bg-destructive/20 transition-colors text-xs">
-                Eliminar
-              </button>
-            </form>
+            <a href="{% url 'mod_eliminar_habilidad' habilidad.id %}" class="ien-table-action ien-table-action-danger">Eliminar</a>
+            </div>
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="2" class="py-8 text-center text-muted-foreground">No hay habilidades cargadas para esta categoría.</td>
+          <td colspan="3" class="py-8 text-center text-muted-foreground">Esta categoría todavía no tiene habilidades. Usá «Añadir habilidad» para crear la primera.</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+
+  {% include 'moderacion/_catalog_mobile.html' with items=habilidades kind='skill' %}
+
+  {% else %}
+  <section class="panel ien-admin-empty-list"><h2>Todavía no hay habilidades</h2><p>Usá «Añadir habilidad» para cargar la primera de esta categoría.</p></section>
+  {% endif %}
 
 </div>
 {% endblock %}

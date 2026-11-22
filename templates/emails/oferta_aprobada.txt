@@ -1,14 +1,10 @@
-Hola {{ offerente.nombre_empresa }},
+Hola {{ offerente.nombre_empresa|default:'equipo' }},
 
-¡Felicidades! Tu oferta "{{ oferta.titulo }}" ha sido aprobada y ya está activa en la plataforma.
+La oferta "{{ oferta.titulo }}" fue aprobada y ya está visible en IEN Trabajo.
 
-Ya puedes comenzar a recibir postulantes. Accede a tu panel para ver todos los detalles.
+{% if offer_url %}Ver oferta: {{ offer_url }}
+{% endif %}
+La publicación estará disponible mientras esté activa y no haya pasado su fecha de cierre.
 
-Ver oferta: {{ protocol }}://{{ domain }}/ofertas/{{ oferta.id }}/
-
-Este enlace estará vigente mientras la oferta esté activa.
-
-Si tenés alguna duda, contactá al equipo de BolsaTrabajo IEN.
-
-—
-BolsaTrabajo IEN 2026
+IEN Trabajo
+Instituto Económico Nacional

@@ -5,9 +5,13 @@ import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.views.decorators.http import require_GET
+from django.conf import settings
 from django.urls import reverse
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 
 from cursos.models import Curso
 from categorias.models import Categoria, Habilidad
@@ -22,9 +26,54 @@ from ofertas.forms import HabilidadForm
 from ofertas import services as ofertas_services
 from .forms import RechazarEmpresaForm
 from . import services
+from .models import SolicitudEmpresa
+
+
+@staff_member_required(login_url='login')
+@require_GET
+def notificaciones_empresas(request):
+    solicitudes = SolicitudEmpresa.objects.select_related('empresa')
+    pending = solicitudes.filter(resuelta_en__isnull=True, empresa__estado_validacion='pendiente').count()
+    response = JsonResponse({
+        'pendientes': pending,
+        'recientes': [{
+            'empresa': item.empresa.nombre_empresa,
+            'estado': item.get_estado_display(),
+            'fecha': item.creada_en.isoformat(),
+            'url': reverse('mod_detalle_empresa', args=[item.empresa_id]),
+        } for item in solicitudes[:5]],
+    })
+    response['Cache-Control'] = 'no-store'
+    return response
+
+
+@staff_member_required(login_url='login')
+def solicitudes_empresas(request):
+    solicitudes = SolicitudEmpresa.objects.select_related('empresa')
+    estado = request.GET.get('estado', '')
+    if estado in ('pendiente', 'aprobado', 'rechazado'):
+        solicitudes = solicitudes.filter(estado=estado)
+        if estado == 'pendiente':
+            solicitudes = solicitudes.filter(empresa__estado_validacion='pendiente')
+    else:
+        estado = ''
+    return render(request, 'moderacion/solicitudes_empresas.html', {
+        'pagina': Paginator(solicitudes, 25).get_page(request.GET.get('page')),
+        'estado': estado,
+        'reminder_hours': settings.IEN_COMPANY_REMINDER_HOURS,
+    })
 
 
 logger = logging.getLogger(__name__)
+
+
+@staff_member_required(login_url='login')
+@require_GET
+def notificaciones_admin(request):
+    from .notifications import review_notifications
+    response = JsonResponse(review_notifications())
+    response['Cache-Control'] = 'no-store'
+    return response
 
 
 
@@ -168,14 +217,14 @@ def dar_de_baja_categoria(request, categoria_id):
 # EMPRESAS
 # ============================================================
 
-@staff_member_required
+@staff_member_required(login_url='login')
 def listar_empresas(request):
     """Muestra las empresas y sus estados de validación."""
     return render(request, 'moderacion/listar_empresas.html',
                   services.listar_empresas_contexto())
 
 
-@staff_member_required
+@staff_member_required(login_url='login')
 def detalle_empresa(request, pk):
     """Presenta la información de una empresa para su revisión."""
     empresa = services.obtener_empresa(pk)
@@ -184,12 +233,17 @@ def detalle_empresa(request, pk):
     })
 
 
-@staff_member_required
+@staff_member_required(login_url='login')
 def aprobar_empresa(request, pk):
     """Aprueba por POST el perfil de una empresa."""
     if request.method == 'POST':
         empresa = services.obtener_empresa(pk)
-        if usuarios_service.aprobar_empresa(empresa):
+        try:
+            aprobada = usuarios_service.aprobar_empresa(empresa)
+        except ValidationError:
+            messages.error(request, 'No se puede aprobar la empresa hasta que informe el nombre, el cargo y el correo de contacto del responsable.')
+            aprobada = False
+        if aprobada:
             dashboard_url = request.build_absolute_uri(reverse('dashboard_empresa'))
             try:
                 usuarios_service.enviar_email_aprobacion(empresa, dashboard_url)
@@ -198,12 +252,12 @@ def aprobar_empresa(request, pk):
                 messages.warning(request, 'Empresa aprobada, pero no se pudo enviar el correo de aviso.')
             else:
                 messages.success(request, 'Empresa aprobada y notificada por correo.')
-        else:
+        elif empresa.estado_validacion == Oferente.EstadoValidacion.APROBADO:
             messages.info(request, 'La empresa ya estaba aprobada; no se envió otro correo.')
     return redirect('mod_listar_empresas')
 
 
-@staff_member_required
+@staff_member_required(login_url='login')
 def rechazar_empresa(request, pk):
     """Rechaza una empresa y registra el motivo ingresado."""
     empresa = services.obtener_empresa(pk)
@@ -251,8 +305,8 @@ def aprobar_oferta(request, pk):
         try:
             services.aprobar_oferta(pk)
             messages.success(request, 'Oferta aprobada correctamente.')
-        except ValueError as e:
-            messages.error(request, str(e))
+        except (ValueError, ValidationError) as e:
+            messages.error(request, e.messages[0] if isinstance(e, ValidationError) else str(e))
     return redirect('mod_detalle_oferta', pk=pk)
 
 @staff_required
@@ -309,7 +363,7 @@ def crear_habilidad(request, categoria_id):
             return redirect('mod_listar_habilidades', categoria_id=categoria.id)
         messages.error(request, 'Corregí los errores del formulario')
     else:
-        form = HabilidadForm()
+        form = HabilidadForm(instance=Habilidad(categoria=categoria))
     return render(request, 'moderacion/crear_habilidad.html', {
         'form': form, 'categoria': categoria,
     })

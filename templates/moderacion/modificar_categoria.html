@@ -1,40 +1,23 @@
 {% extends 'nueva_ui/base.html' %}
-
 {% block content %}
-<div class="max-w-2xl mx-auto px-4 py-8">
-
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold tracking-tight text-[#26222E] mb-2">Modificar Categoria</h1>
-        {% include "nueva_ui/partials/_breadcrumbs.html" with current="Modificar categoría" parent_url="mod_listar_categorias" parent_label="Categorías" only %}
-    <p class="text-muted-foreground">Actualizá el nombre de la categoria</p>
-  </div>
-
-  <div class="panel p-6">
-    <form method="POST" class="space-y-4">
+<section class="ien-admin-form-page ien-admin-short-form">
+  <header class="ien-admin-page-heading"><h1>Editar categoría</h1><p>Actualizá el nombre de la categoría.</p></header>
+  <div class="panel ien-admin-form-card">
+    <form method="post">
       {% csrf_token %}
-
-      {% for field in form %}
-      <div class="space-y-1">
-        <label class="text-sm font-medium">{{ field.label }}</label>
-        {{ field }}
-        {% if field.errors %}
-          <p class="text-destructive text-xs">{{ field.errors }}</p>
-        {% endif %}
+      {% if form.non_field_errors %}<div class="text-destructive text-sm" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="ien-admin-form-section">
+      {% for field in form %}{% include 'moderacion/_admin_field.html' with field=field %}{% endfor %}
       </div>
-      {% endfor %}
-
-      <div class="flex gap-3 pt-4 border-t border-border">
-        <button type="submit"
-                class="btn-ien flex-1 !py-3">
-        Guardar cambios
-        </button>
-        <a href="{% url 'mod_listar_categorias' %}"
-        class="btn-ghost !py-2.5 text-sm">
-        Cancelar
-        </a>
-    </div>
+      <div class="ien-admin-form-actions">
+        <a href="{% url 'mod_listar_categorias' %}" class="btn-ghost">Cancelar</a>
+        <button type="submit" class="btn-ien">Guardar cambios</button>
+      </div>
     </form>
-</div>
-
-</div>
+  </div>
+  <section class="ien-admin-related" aria-labelledby="category-skills-title">
+    <div><h2 id="category-skills-title">Habilidades de la categoría</h2><p>Administrá las habilidades de {{ categoria.nombre }}.</p></div>
+    <a href="{% url 'mod_listar_habilidades' categoria.id %}" class="btn-ghost">Gestionar habilidades</a>
+  </section>
+</section>
 {% endblock %}

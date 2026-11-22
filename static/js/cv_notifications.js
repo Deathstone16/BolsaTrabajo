@@ -24,8 +24,12 @@
   } catch (_) {}
 
   function showProgress() {
-    const indicator = document.getElementById('cv-analysis-global');
-    if (indicator) indicator.hidden = !analysisId;
+    if (window.IenCVProgress) {
+      window.IenCVProgress.setPending(analysisId);
+    } else {
+      const indicator = document.getElementById('cv-analysis-global');
+      if (indicator) indicator.hidden = !analysisId;
+    }
   }
   function rememberPending() {
     if (analysisId) {
@@ -52,17 +56,22 @@
   }
 
   function showToast(resultUrl) {
+    if (window.IenUI && typeof window.IenUI.aviso === 'function') {
+      window.IenUI.aviso('exito', 'Tu CV ya está analizado.', 10000, {accion: {url: resultUrl || profileUrl, texto: 'Ver mi perfil profesional'}});
+      return;
+    }
     const box = document.createElement('div');
-    box.className = 'fixed bottom-5 right-5 z-[100] max-w-sm rounded-2xl border border-emerald-200 bg-white p-4 shadow-xl';
+    box.className = 'ien-aviso es-exito abierto ien-cv-ready-fallback';
     box.setAttribute('role', 'status');
-    box.textContent = 'Tu CV ya está analizado ✓ ';
+    box.textContent = 'Tu CV ya está analizado. ';
     const link = document.createElement('a');
     link.href = resultUrl || profileUrl;
-    link.className = 'font-semibold text-[#512DA8] underline';
+    link.className = 'ien-aviso-enlace';
     link.textContent = 'Ver mi perfil profesional';
     box.appendChild(link);
     const dismiss = document.createElement('button');
     dismiss.type = 'button';
+    dismiss.className = 'ien-aviso-cerrar';
     dismiss.textContent = ' ×';
     dismiss.setAttribute('aria-label', 'Cerrar aviso');
     dismiss.addEventListener('click', () => box.remove());

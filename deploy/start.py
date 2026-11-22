@@ -32,6 +32,7 @@ def run():
              '--proxy-headers', 'ientrabajo.asgi:application'],
             [sys.executable, 'manage.py', 'run_integration_dispatcher', '--kind', 'extraction', '--interval', '5'],
             [sys.executable, 'manage.py', 'run_integration_dispatcher', '--kind', 'match', '--interval', '5'],
+            [sys.executable, 'manage.py', 'run_integration_dispatcher', '--kind', 'company-reminders', '--interval', '60'],
         ]
         for command in commands:
             children.append(subprocess.Popen(command))

@@ -2,15 +2,67 @@
 {% block title %}Cursos y formación del IEN · IEN Empleo{% endblock %}
 {% block description %}Conocé los cursos activos del IEN: contenidos, duración, horarios y modalidad para seguir desarrollando tus habilidades.{% endblock %}
 {% block content %}
-<section class="ien-home-section" aria-labelledby="cursos-listado-titulo">
+<section class="ien-home-section ien-course-list-page" aria-labelledby="cursos-listado-titulo">
   <div class="ien-home-container">
-    <p class="kicker">Formación para tu próximo paso</p>
-    <h1 id="cursos-listado-titulo" class="ien-section-title"><span data-icon="graduation-cap" class="inline h-7 w-7" aria-hidden="true"></span> Cursos del IEN</h1>
-    {% include 'nueva_ui/partials/_breadcrumbs.html' with current='Cursos' only %}
+    <h1 id="cursos-listado-titulo" class="ien-section-title">Cursos del IEN</h1>
     <p class="ien-home-intro">Explorá las capacitaciones disponibles y consultá qué podés aprender, cuánto duran y cómo se cursan.</p>
-    <div class="ien-course-grid">
-      {% for curso in cursos %}{% include 'cursos/_card.html' with course_heading_level=2 %}{% empty %}<p class="panel ien-home-empty">Todavía no hay cursos disponibles. Volvé a consultar próximamente.</p>{% endfor %}
+    <form method="get" action="{% url 'cursos:listado' %}" class="panel ien-course-filters" aria-label="Filtrar cursos">
+      <div class="ien-course-search-row">
+        <div class="ien-course-search-input">
+          <label class="sr-only" for="{{ filtros.q.id_for_label }}">{{ filtros.q.label }}</label>
+          {{ filtros.q }}
+          {% for error in filtros.q.errors %}<p class="ien-course-filter-error" role="alert">{{ error }}</p>{% endfor %}
+        </div>
+        <button type="submit" class="btn-ien"><span data-icon="search" class="h-4 w-4" aria-hidden="true"></span> Buscar</button>
+      </div>
+      <details class="ien-course-advanced ien-responsive-disclosure" open data-responsive-disclosure data-disclosure-breakpoint="1024">
+        <summary class="ien-disclosure-summary"><span data-icon="sliders" aria-hidden="true"></span><span>Filtrar cursos</span><span class="ien-disclosure-chevron" aria-hidden="true"></span></summary>
+        <div class="ien-disclosure-content">
+          <div class="ien-course-filter-fields">
+            {% for field in filtros %}{% if field.name != 'q' %}
+              <div><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<p class="ien-course-filter-error" role="alert">{{ error }}</p>{% endfor %}</div>
+            {% endif %}{% endfor %}
+          </div>
+          <div class="ien-course-filter-actions">
+            <button type="submit" class="btn-ghost">Aplicar filtros</button>
+            {% if hay_filtros %}<a href="{% url 'cursos:listado' %}" class="ien-text-link">Limpiar filtros</a>{% endif %}
+          </div>
+        </div>
+      </details>
+    </form>
+    <p id="cursos-resultados" class="ien-course-results" role="status">{{ total_resultados }} curso{{ total_resultados|pluralize }} encontrado{{ total_resultados|pluralize }}{% if pagina.has_other_pages %}<span> · Mostrando {{ pagina.start_index }}–{{ pagina.end_index }}</span>{% endif %}</p>
+    <div class="ien-course-grid ien-course-grid-glass">
+      {% for curso in cursos %}
+        {% include 'cursos/_card.html' with course_heading_level=2 %}
+      {% empty %}
+        <p class="panel ien-home-empty">{% if filtros.errors %}Revisá los filtros para realizar la búsqueda.{% elif hay_filtros %}No encontramos cursos con esos filtros. Probá con otro título o limpiá los filtros para ver todas las opciones.{% else %}Todavía no hay cursos disponibles. Volvé a consultar próximamente.{% endif %}</p>
+      {% endfor %}
     </div>
+    {% if pagina.has_other_pages %}
+      <nav class="ien-course-pagination" aria-label="Páginas de cursos">
+        {% if pagina.has_previous %}
+          <a class="ien-course-page-step" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ pagina.previous_page_number }}#cursos-resultados" rel="prev">Anterior</a>
+        {% else %}
+          <span class="ien-course-page-step" aria-disabled="true">Anterior</span>
+        {% endif %}
+        <div class="ien-course-page-numbers">
+          {% for numero in paginas %}
+            {% if numero == pagina.number %}
+              <span class="ien-course-page-current" aria-current="page" aria-label="Página {{ numero }}">{{ numero }}</span>
+            {% elif numero == pagina.paginator.ELLIPSIS %}
+              <span class="ien-course-page-ellipsis">{{ numero }}</span>
+            {% else %}
+              <a href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ numero }}#cursos-resultados" aria-label="Página {{ numero }}">{{ numero }}</a>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% if pagina.has_next %}
+          <a class="ien-course-page-step" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ pagina.next_page_number }}#cursos-resultados" rel="next">Siguiente</a>
+        {% else %}
+          <span class="ien-course-page-step" aria-disabled="true">Siguiente</span>
+        {% endif %}
+      </nav>
+    {% endif %}
   </div>
 </section>
 {% endblock %}

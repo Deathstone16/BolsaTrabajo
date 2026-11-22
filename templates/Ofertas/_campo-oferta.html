@@ -1,0 +1,13 @@
+<div class="space-y-2">
+  <label for="{{ field.id_for_label }}" class="block text-sm">{{ field.label }}{% if not field.field.required %} <span class="text-xs text-[#6B645C]">(opcional)</span>{% endif %}</label>
+  {% if field.name == 'ubicacion' %}
+    <div class="relative">
+      {{ field }}
+      <ul id="sugerencias-ubicacion" class="hidden absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-2xl border border-border bg-white text-sm shadow-lg"></ul>
+    </div>
+  {% else %}
+    {{ field }}
+  {% endif %}
+  {% if help %}<p class="text-xs text-[#6B645C]">{{ help }}</p>{% endif %}
+  {% for error in field.errors %}<p class="text-sm text-[#b91c1c]" role="alert">{{ error }}</p>{% endfor %}
+</div>

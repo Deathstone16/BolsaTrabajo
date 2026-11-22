@@ -1,0 +1,223 @@
+.ien-cv-thinking-mark,
+.ien-cv-thinking-blocks { display: none; }
+
+.ien-cv-analysis-status[data-analysis-state="pendiente"] {
+  background: #faf8fc;
+}
+.ien-cv-analysis-status[data-analysis-state="pendiente"] .ien-cv-analysis-content {
+  gap: 0.8rem;
+  padding: 1.25rem;
+}
+.ien-cv-analysis-status[data-analysis-state="pendiente"] [data-analisis-icono] {
+  display: none;
+}
+.ien-cv-analysis-status[data-analysis-state="pendiente"] .ien-cv-thinking-blocks {
+  display: block;
+  flex: 0 0 auto;
+  box-sizing: content-box;
+  padding: 3px;
+  border-radius: 0.3rem;
+  background: #171717;
+  image-rendering: pixelated;
+}
+.ien-cv-analysis-status[data-analysis-state="pendiente"] .ien-cv-thinking-mark,
+#cv-analysis-global .ien-cv-thinking-mark {
+  position: relative;
+  display: block;
+  flex: 0 0 2.5rem;
+  height: 2.5rem;
+  margin-top: 0.1rem;
+}
+.ien-cv-thinking-mark::before,
+.ien-cv-thinking-mark::after {
+  content: "";
+  position: absolute;
+}
+.ien-cv-thinking-mark--bloom::before {
+  inset: 0.38rem 0.48rem 0.42rem 0.32rem;
+  border-radius: 62% 38% 56% 44% / 39% 51% 49% 61%;
+  background: radial-gradient(circle at 27% 22%, #a38ad3, var(--primary) 76%);
+  transform: rotate(-18deg);
+}
+.ien-cv-thinking-mark--bloom::after {
+  inset: 0.28rem 0.28rem auto auto;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: #d6a442;
+  opacity: 0;
+}
+.ien-cv-thinking-mark--dither::before,
+.ien-cv-thinking-mark--dither::after {
+  inset: 0.17rem;
+  border-radius: 50%;
+  background-size: 3px 3px;
+  mask-repeat: no-repeat;
+}
+.ien-cv-thinking-mark--dither::before {
+  background-image: radial-gradient(circle, var(--primary) 0 0.8px, transparent 1px);
+  mask-image: radial-gradient(ellipse at 42% 42%, #000 38%, #000c 63%, transparent 75%);
+}
+.ien-cv-thinking-mark--dither::after {
+  background-image: radial-gradient(circle, #9564cf 0 0.8px, transparent 1px);
+  background-position: 1.5px 1.5px;
+  mask-image: radial-gradient(ellipse at 38% 34%, #000 12%, #000c 24%, transparent 54%);
+  mask-size: 155% 155%;
+  mask-position: 70% 54%;
+}
+.ien-cv-analysis-status[data-analysis-state="pendiente"] [data-analisis-titulo],
+.ien-cv-thinking-label {
+  width: fit-content;
+  color: #514365;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+@supports (background-clip: text) {
+  @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+    .ien-cv-analysis-status[data-analysis-state="pendiente"] [data-analisis-titulo],
+    .ien-cv-thinking-label {
+      background: linear-gradient(105deg, #514365 32%, #7963a4 50%, #514365 68%) 100% 0 / 230% 100%;
+      background-clip: text;
+      color: transparent;
+      animation: ien-cv-thinking-sheen 3.2s ease-in-out infinite;
+    }
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ien-cv-thinking-mark--bloom::before { animation: ien-cv-thinking-bloom 2.2s ease-in-out infinite; }
+  .ien-cv-thinking-mark--bloom::after { animation: ien-cv-thinking-spark 2.2s ease-out infinite; }
+  .ien-cv-thinking-mark--dither { animation: ien-cv-thinking-sphere 2.4s ease-in-out infinite; }
+  .ien-cv-thinking-mark--dither::before { animation: ien-cv-thinking-sphere-spin 3.6s linear infinite; }
+  .ien-cv-thinking-mark--dither::after { animation: ien-cv-thinking-sphere-light 2.4s ease-in-out infinite; }
+}
+@keyframes ien-cv-thinking-sheen {
+  65%, 100% { background-position: 0 0; }
+}
+@keyframes ien-cv-thinking-bloom {
+  0%, 100% { transform: rotate(-18deg) scale(0.84); }
+  42% {
+    transform: rotate(13deg) scale(1.08);
+    border-radius: 44% 56% 40% 60% / 59% 43% 57% 41%;
+  }
+  67% { transform: rotate(-4deg) scale(0.96); }
+}
+@keyframes ien-cv-thinking-spark {
+  0%, 22% { transform: translate(-0.45rem, 0.4rem) scale(0.45); opacity: 0; }
+  42% { transform: translate(0, 0) scale(1); opacity: 1; }
+  74%, 100% { transform: translate(0.15rem, -0.12rem) scale(0.55); opacity: 0; }
+}
+@keyframes ien-cv-thinking-sphere {
+  0%, 100% { transform: translateY(1px) scale(0.9); }
+  45% { transform: translateY(-3px) scale(1.09); }
+}
+@keyframes ien-cv-thinking-sphere-spin {
+  to { transform: rotate(1turn); }
+}
+@keyframes ien-cv-thinking-sphere-light {
+  0%, 100% { mask-position: 100% 90%; opacity: 0.48; }
+  45% { mask-position: 0 25%; opacity: 1; }
+}
+
+.ien-cv-content [data-cv-status],
+.ien-cv-content [data-cv-retry-label],
+.ien-cv-content #form-analizar-cv,
+.ien-cv-content #boton-ver-perfil,
+.ien-cv-content .ien-cv-result,
+.ien-cv-content[data-cv-state="pendiente"] .ien-cv-primary,
+.ien-cv-content #analisis-estado[data-analysis-state="completado"] { display: none; }
+
+.ien-cv-content[data-cv-state="sin-analisis"] [data-cv-status="sin-analisis"],
+.ien-cv-content[data-cv-state="pendiente"] [data-cv-status="pendiente"],
+.ien-cv-content[data-cv-state="completado"] [data-cv-status="completado"],
+.ien-cv-content[data-cv-state="error"] :is([data-cv-status="error"], [data-cv-retry-label]) { display: inline; }
+.ien-cv-content[data-cv-state="error"] [data-cv-analyze-label] { display: none; }
+.ien-cv-content:is([data-cv-state="sin-analisis"], [data-cv-state="error"]) #form-analizar-cv,
+.ien-cv-content[data-cv-state="completado"] .ien-cv-result { display: block; }
+.ien-cv-content[data-cv-state="completado"] #boton-ver-perfil { display: inline-flex; }
+
+.ien-cv-file-row,
+.ien-cv-file-info,
+.ien-cv-file-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.ien-cv-file-row { flex-wrap: wrap; justify-content: space-between; }
+.ien-cv-file-info { flex: 1 1 13rem; min-width: 0; }
+.ien-cv-file-actions { margin-inline-start: auto; }
+.ien-cv-state-chip { white-space: nowrap; }
+.ien-cv-content[data-cv-state="completado"] .ien-cv-state-chip { background: #eaf6ed; color: #24603b; }
+.ien-cv-content[data-cv-state="error"] .ien-cv-state-chip { background: #fff0ee; color: #922536; }
+.ien-cv-file-menu { position: relative; }
+.ien-cv-file-menu > summary {
+  display: grid;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--card);
+  color: var(--primary);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  list-style: none;
+}
+.ien-cv-file-menu > summary::marker { content: ""; }
+.ien-cv-file-menu > summary::-webkit-details-marker { display: none; }
+.ien-cv-file-menu > summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.ien-cv-file-menu-content {
+  position: absolute;
+  z-index: 10;
+  inset-inline-end: 0;
+  top: calc(100% + 0.4rem);
+  width: 13rem;
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--card);
+  box-shadow: 0 8px 24px #2618471a;
+}
+.ien-cv-menu-action {
+  display: block;
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.4rem;
+  text-align: start;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+.ien-cv-menu-action:hover { background: var(--muted); }
+.ien-cv-menu-delete { color: var(--destructive, #b91c1c); }
+.ien-cv-file-formats { margin-top: 0.5rem; color: var(--muted-foreground); font-size: 0.75rem; }
+.ien-cv-file-menu .ien-cv-file-formats { margin: 0 0 0.35rem; padding-inline: 0.65rem; }
+.ien-cv-dropzone {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  padding: clamp(1.25rem, 5vw, 2.5rem) 1rem;
+  border: 1px dashed var(--primary);
+  border-radius: 0.9rem;
+  background: var(--card);
+  text-align: center;
+}
+.ien-cv-dropzone.is-dragging { background: var(--muted); outline: 2px solid var(--primary); outline-offset: -2px; }
+.ien-cv-dropzone-icon { width: 1.5rem; height: 1.5rem; color: var(--primary); }
+.ien-cv-dropzone :is(form, #cv-upload-area) { min-width: 0; max-width: 100%; }
+.ien-cv-dropzone .ien-cv-file-formats { margin-top: 0; }
+.ien-cv-result-counts { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; margin-bottom: 0.75rem; }
+.ien-cv-result-counts > div { display: flex; gap: 0.4rem; align-items: baseline; font-size: 0.875rem; }
+.ien-cv-result-counts dd { font-weight: 600; }
+.ien-cv-optional > summary {
+  display: list-item;
+  cursor: pointer;
+  color: var(--foreground);
+  font-weight: 600;
+}
+.ien-cv-optional > summary::marker { color: var(--primary); }
+.ien-cv-optional > summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
+
+@media (max-width: 63.99rem) {
+  .ien-cv-layout--manage { grid-template-areas: "sidebar" "cv"; gap: 1rem; }
+}

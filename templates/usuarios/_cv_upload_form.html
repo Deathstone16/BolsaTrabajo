@@ -1,0 +1,20 @@
+<form method="post" enctype="multipart/form-data" action="{% url 'mi_perfil' %}" id="form-cv-upload">
+  {% csrf_token %}
+  <div id="cv-upload-area">
+    <div data-cv-native-upload>
+      <label class="sr-only" for="cv-input">Archivo de CV</label>
+      <input type="file" id="cv-input" name="cv" class="ien-cv-native-input" aria-describedby="cv-file-formats"
+             accept="{% for formato in cv_formatos %}.{{ formato }}{% if not forloop.last %},{% endif %}{% endfor %}" required>
+      <button type="submit" class="{% if version_cv_actual %}ien-cv-menu-action{% else %}btn-ien ien-cv-upload-button mt-3{% endif %}">
+        {% if version_cv_actual %}Actualizar CV{% else %}Cargar CV{% endif %}
+      </button>
+    </div>
+    <button type="button" data-cv-file-picker hidden aria-describedby="cv-file-formats"
+            class="{% if version_cv_actual %}ien-cv-menu-action{% else %}btn-ien ien-cv-upload-button{% endif %}">
+      {% if version_cv_actual %}Actualizar CV{% else %}Cargar CV{% endif %}
+    </button>
+  </div>
+</form>
+<p id="cv-file-formats" class="ien-cv-file-formats">
+  {% for formato in cv_formatos %}{{ formato|upper }}{% if not forloop.last %}, {% endif %}{% endfor %}. Hasta 5 MB.
+</p>

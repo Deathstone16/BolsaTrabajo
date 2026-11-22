@@ -1,0 +1,7 @@
+<div class="ien-course-image-control">
+  {% if widget.is_initial %}
+    <img class="ien-admin-course-image" src="{{ widget.value.url }}" alt="Imagen actual del curso" loading="lazy">
+    {% if not widget.required %}<label class="ien-admin-image-clear"><input type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}"{% if widget.attrs.disabled %} disabled{% endif %}> Quitar imagen actual</label>{% endif %}
+  {% endif %}
+  <input type="{{ widget.type }}" name="{{ widget.name }}"{% include 'django/forms/widgets/attrs.html' %}>
+</div>

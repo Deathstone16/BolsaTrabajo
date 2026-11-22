@@ -25,6 +25,8 @@ class OfertaFormTests(TestCase):
             estado_validacion=Oferente.EstadoValidacion.APROBADO,
             nombre_empresa="Empresa de prueba",
             cuit="30-12345678-9",
+            contacto_nombre="Responsable Demo",
+            contacto_cargo='RRHH', correo_publico='rrhh@example.com',
         )
         self.data = {
             "titulo": "Desarrollador backend",
@@ -37,9 +39,9 @@ class OfertaFormTests(TestCase):
             "habilidades_blandas": "Comunicación, Trabajo en equipo",
             "experiencia_requerida": "1-2",
             "nivel_educativo": "universitario",
-            "requisitos_obligatorios": "Python developer",
-            "requisitos_deseables": "Django",
-            "categorias_requisitos": '{"mandatory":["technical_skills"]}',
+            "requisitos_obligatorios": "Python",
+            "requisitos_deseables": "Django\nComunicación\nTrabajo en equipo",
+            "categorias_requisitos": '{"mandatory":["technical_skills"],"desirable":["technical_skills","soft_skills","soft_skills"]}',
             "experiencia_clasificacion": "obligatorio",
             "educacion_clasificacion": "deseable",
             "fecha_cierre": (timezone.localdate() + timedelta(days=7)).isoformat(),
@@ -49,18 +51,55 @@ class OfertaFormTests(TestCase):
         form = OfertaForm(self.data)
         self.assertTrue(form.is_valid(), form.errors.as_json())
 
-    def test_exige_al_menos_una_habilidad_dura(self):
-        form = OfertaForm({**self.data, "habilidades_duras": ""})
+    def test_normaliza_separadores_y_conserva_tipos_al_editar(self):
+        from ia.workflow import offer_snapshot
+        from ien_contracts import JobOffer
+        form = OfertaForm({
+            **self.data, 'requisitos_obligatorios': ' Python, HTML; Excel ',
+            'requisitos_deseables': 'Trabajo en equipo',
+            'categorias_requisitos': '{"mandatory":["technical_skills","technical_skills","technical_skills"],"desirable":["soft_skills"]}',
+        })
+        self.assertTrue(form.is_valid(), form.errors)
+        oferta = form.save(commit=False)
+        oferta.empresa = self.usuario
+        oferta.save()
+        self.assertEqual(oferta.requisitos_obligatorios, 'Python\nHTML\nExcel')
+        self.assertEqual(oferta.habilidades_duras, 'Python, HTML, Excel')
+        self.assertEqual(oferta.habilidades_blandas, 'Trabajo en equipo')
+        self.assertFalse(oferta.requisitos_estructurados[3]['mandatory'])
+        self.assertEqual(oferta.requisitos_estructurados[3]['category'], 'desirables')
+        edited = OfertaForm(instance=oferta)
+        import json
+        self.assertEqual(json.loads(edited.initial['categorias_requisitos'])['desirable'], ['soft_skills'])
+        # La metadata visual no cambia el contrato ni la ponderación del matching.
+        JobOffer.model_validate(offer_snapshot(oferta))
+
+    def test_clasificaciones_invalidas_y_formacion_sin_nivel_no_se_publican(self):
+        for raw in ('[]', '{"mandatory":[{}]}', '{"mandatory":["inventada"]}'):
+            with self.subTest(raw=raw):
+                form = OfertaForm({**self.data, 'categorias_requisitos': raw})
+                self.assertFalse(form.is_valid())
+                self.assertIn('categorias_requisitos', form.errors)
+        form = OfertaForm({**self.data, 'nivel_educativo': ''})
         self.assertFalse(form.is_valid())
-        self.assertIn("habilidades_duras", form.errors)
+        self.assertIn('nivel_educativo', form.errors)
 
-    def test_rechaza_repeticiones_en_y_entre_secciones(self):
-        repetida = OfertaForm({**self.data, "habilidades_duras": "Python, python"})
-        cruzada = OfertaForm({**self.data, "habilidades_blandas": "PYTHON"})
-        self.assertIn("habilidades_duras", repetida.errors)
-        self.assertIn("habilidades_blandas", cruzada.errors)
+    def test_no_solicitar_formacion_permite_dejar_nivel_vacio(self):
+        form = OfertaForm({**self.data, 'nivel_educativo': '', 'educacion_clasificacion': 'no_solicitado'})
+        self.assertTrue(form.is_valid(), form.errors)
 
-    def test_paginas_de_formulario_muestran_ambas_secciones_de_habilidades(self):
+    def test_exige_al_menos_un_requisito_obligatorio(self):
+        form = OfertaForm({**self.data, 'requisitos_obligatorios': ''})
+        self.assertFalse(form.is_valid())
+        self.assertIn('requisitos_obligatorios', form.errors)
+
+    def test_rechaza_repeticiones_en_y_entre_listas(self):
+        repetida = OfertaForm({**self.data, 'requisitos_obligatorios': 'Python, python'})
+        cruzada = OfertaForm({**self.data, 'requisitos_deseables': 'PYTHON'})
+        self.assertIn('requisitos_obligatorios', repetida.errors)
+        self.assertIn('requisitos_deseables', cruzada.errors)
+
+    def test_paginas_de_formulario_muestran_listas_unificadas(self):
         self.client.force_login(self.usuario)
         oferta = Oferta.objects.create(
             empresa=self.usuario,
@@ -78,9 +117,11 @@ class OfertaFormTests(TestCase):
         editar = self.client.get(reverse("editar_oferta", args=[oferta.pk]))
         for response in (crear, editar):
             self.assertEqual(response.status_code, 200)
-            self.assertContains(response, 'id="tags-input-duras"')
-            self.assertContains(response, 'id="tags-input-blandas"')
-    def test_crear_y_editar_oferta_con_habilidades_separadas(self):
+            self.assertContains(response, 'data-requirement-list="mandatory"')
+            self.assertContains(response, 'data-requirement-list="desirable"')
+            self.assertNotContains(response, 'tags-input-duras')
+            self.assertContains(response, 'data-required-validation')
+    def test_crear_y_editar_deriva_habilidades_de_las_listas(self):
         self.client.force_login(self.usuario)
         response = self.client.post(
             reverse("crear_oferta"),
@@ -91,6 +132,7 @@ class OfertaFormTests(TestCase):
         self.assertTrue(response.json()["success"], response.json())
 
         oferta = Oferta.objects.get(empresa=self.usuario)
+        self.assertEqual(oferta.estado, "pendiente")
         self.assertEqual(oferta.habilidades_duras, "Python, Django")
         self.assertEqual(oferta.habilidades_blandas, "Comunicación, Trabajo en equipo")
         self.assertEqual(
@@ -100,8 +142,10 @@ class OfertaFormTests(TestCase):
 
         editados = {
             **self.data,
-            "habilidades_duras": "SQL",
-            "habilidades_blandas": "Liderazgo",
+            'requisitos_obligatorios': 'SQL',
+            'requisitos_deseables': 'Liderazgo',
+            'categorias_requisitos': '{"mandatory":["technical_skills"],"desirable":["soft_skills"]}',
+
         }
         response = self.client.post(
             reverse("editar_oferta", args=[oferta.pk]),
@@ -111,11 +155,15 @@ class OfertaFormTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()["success"], response.json())
         oferta.refresh_from_db()
+        self.assertEqual(oferta.estado, "pendiente")
+        self.assertEqual(self.client.get(reverse('detalle_oferta', args=[oferta.pk])).status_code, 404)
+        from ia.models import TrabajoExtraccion
+        self.assertEqual(TrabajoExtraccion.objects.filter(oferta=oferta).count(), 0)
         self.assertEqual(oferta.habilidades_duras, "SQL")
         self.assertEqual(oferta.habilidades_blandas, "Liderazgo")
         self.assertEqual(oferta.habilidades_requeridas, "SQL, Liderazgo")
 
-    def test_oferente_puede_revisar_una_oferta_activa_legacy_y_reenvia_a_moderacion(self):
+    def test_oferente_puede_actualizar_requisitos_legacy_y_enviarlos_a_revision(self):
         oferta = Oferta.objects.create(
             empresa=self.usuario, categoria=self.categoria, titulo='Oferta histórica',
             nombre_puesto='Backend Developer', ubicacion='Córdoba', modalidad='remoto',
@@ -137,6 +185,19 @@ class OfertaFormTests(TestCase):
         self.assertEqual(oferta.estado, 'pendiente')
         self.assertFalse(oferta.requiere_revision_requisitos)
 
+    def test_editar_una_oferta_finalizada_no_la_republica(self):
+        form = OfertaForm(self.data)
+        self.assertTrue(form.is_valid(), form.errors)
+        oferta = form.save(commit=False)
+        oferta.empresa = self.usuario
+        oferta.estado = 'finalizada'
+        oferta.save()
+        self.client.force_login(self.usuario)
+        response = self.client.post(reverse('editar_oferta', args=[oferta.pk]), self.data)
+        self.assertEqual(response.status_code, 302)
+        oferta.refresh_from_db()
+        self.assertEqual(oferta.estado, 'finalizada')
+
     def test_otro_oferente_no_puede_revisar_oferta_legacy(self):
         oferta = Oferta.objects.create(
             empresa=self.usuario, categoria=self.categoria, titulo='Oferta histórica',
@@ -148,7 +209,7 @@ class OfertaFormTests(TestCase):
         )
         other = Usuario.objects.create_user(email='otra-empresa@example.com', password='test-password')
         Oferente.objects.create(usuario=other, estado_validacion=Oferente.EstadoValidacion.APROBADO,
-                                nombre_empresa='Otra', cuit='20-12345678-6')
+                                nombre_empresa='Otra', cuit='20-12345678-6', contacto_nombre='Responsable Demo', contacto_cargo='RRHH', correo_publico='rrhh@example.com')
         self.client.force_login(other)
         response = self.client.get(reverse('editar_oferta', args=[oferta.pk]))
         self.assertRedirects(response, reverse('dashboard_empresa'))
@@ -165,7 +226,7 @@ class OfertaFormTests(TestCase):
         url = reverse("detalle_oferta", args=[oferta.pk])
         response = self.client.get(url)
         self.assertContains(response, 'id="habilidades-blandas"')
-        self.assertContains(response, 'bg-emerald-50')
+        self.assertContains(response, 'ien-offer-skill-soft')
         self.assertContains(response, 'Comunicación')
         self.assertNotContains(response, 'No especificadas')
 
@@ -173,7 +234,7 @@ class OfertaFormTests(TestCase):
         oferta.save(update_fields=["habilidades_blandas"])
         self.assertContains(self.client.get(url), 'No especificadas')
 
-    def test_edicion_precarga_valor_para_chips_blandos(self):
+    def test_edicion_preserva_habilidades_anteriores_en_lista_deseable(self):
         self.client.force_login(self.usuario)
         oferta = Oferta.objects.create(
             empresa=self.usuario, categoria=self.categoria,
@@ -184,9 +245,9 @@ class OfertaFormTests(TestCase):
             fecha_cierre=timezone.now() + timedelta(days=7),
         )
         response = self.client.get(reverse("editar_oferta", args=[oferta.pk]))
-        self.assertContains(response, 'id="id_habilidades_blandas"')
-        self.assertContains(response, 'value="Comunicación, Liderazgo"')
-        self.assertContains(response, 'id="tags-container-blandas"')
+        self.assertIn('Comunicación', response.context['form'].initial['requisitos_deseables'])
+        self.assertIn('Liderazgo', response.context['form'].initial['requisitos_deseables'])
+        self.assertNotContains(response, 'id_habilidades_blandas')
 
 
 class EmpleosGuardadosTests(TestCase):
@@ -219,6 +280,30 @@ class EmpleosGuardadosTests(TestCase):
         Postulante.objects.create(usuario=other)
         self.client.force_login(other)
         self.assertNotContains(self.client.get(reverse('favoritos')), self.offer.titulo)
+
+    def test_oferente_no_ve_favoritos_ni_puede_guardar_por_url(self):
+        Oferente.objects.create(
+            usuario=self.offer.empresa, nombre_empresa='Empresa de prueba', cuit='30-12345678-1',
+            estado_validacion=Oferente.EstadoValidacion.APROBADO,
+            contacto_nombre='Responsable Demo',
+            contacto_cargo='RRHH', correo_publico='rrhh@example.com',
+        )
+        self.client.force_login(self.offer.empresa)
+        for url in (reverse('buscar_empleo'), reverse('detalle_oferta', args=[self.offer.pk])):
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+            self.assertNotContains(response, 'data-save=')
+            self.assertNotContains(response, 'href="' + reverse('favoritos') + '"')
+        self.assertRedirects(self.client.post(self.toggle), reverse('home'))
+        self.assertRedirects(self.client.get(reverse('favoritos')), reverse('home'))
+        self.assertFalse(OfertaFavorita.objects.exists())
+
+    def test_guardar_solo_se_muestra_a_postulantes_autenticados(self):
+        for url in (reverse('buscar_empleo'), reverse('detalle_oferta', args=[self.offer.pk])):
+            self.assertContains(self.client.get(url), 'data-save=')
+        self.client.logout()
+        for url in (reverse('buscar_empleo'), reverse('detalle_oferta', args=[self.offer.pk])):
+            self.assertNotContains(self.client.get(url), 'data-save=')
 
     def test_guardar_requiere_post_y_sesion(self):
         self.assertEqual(self.client.get(self.toggle).status_code, 405)

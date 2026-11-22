@@ -1,0 +1,11 @@
+<div class="ien-offer-avatar{% if not oferta.es_confidencial and oferta.empresa.oferente.logo %} ien-offer-avatar--logo{% endif %}" aria-hidden="true">
+  {% if oferta.es_confidencial %}
+    <span data-icon="lock" class="h-5 w-5"></span>
+  {% elif oferta.empresa.oferente.logo %}
+    <img src="{{ oferta.empresa.oferente.logo.url }}" alt="" width="56" height="56" loading="lazy" decoding="async">
+  {% elif oferta.empresa.oferente %}
+    {{ oferta.empresa.oferente.nombre_empresa|slice:":2"|upper }}
+  {% else %}
+    IEN
+  {% endif %}
+</div>

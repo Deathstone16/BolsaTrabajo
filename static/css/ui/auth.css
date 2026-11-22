@@ -1,0 +1,80 @@
+.ien-auth {
+  --auth-ink: #251a43;
+  --auth-outline: #83749c;
+  min-height: 100dvh;
+  background: #eaf0f9;
+  color: var(--auth-ink);
+  padding: 0 clamp(1.25rem, 4vw, 4rem) 3rem;
+}
+.ien-auth-header {
+  max-width: 80rem;
+  margin-inline: auto;
+  min-height: 6rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid #251a431a;
+}
+.ien-auth-header img { display: block; width: 8.6rem; height: auto; }
+.ien-auth-back { display: inline-flex; align-items: center; gap: .5rem; font-size: .875rem; font-weight: 500; }
+.ien-auth-back [data-icon] { width: 1rem; height: 1rem; }
+.ien-auth-back:hover { text-decoration: underline; text-underline-offset: .25rem; }
+.ien-auth-layout {
+  max-width: 74rem;
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  gap: clamp(2rem, 6vw, 6rem);
+  padding-top: clamp(2.5rem, 5vw, 5rem);
+}
+.ien-auth-story { position: sticky; top: 3rem; padding-block: 1rem; }
+.ien-auth-story h1 { max-width: 11ch; font-size: clamp(2.6rem, 4.5vw, 4.25rem); font-weight: 800; line-height: 1.08; letter-spacing: -.045em; }
+.ien-auth-story h1 > span { text-decoration: underline; text-decoration-color: #ffde59; text-decoration-thickness: .18em; text-underline-offset: -.08em; text-decoration-skip-ink: none; }
+.ien-auth-story > p { max-width: 38ch; margin-top: 1.75rem; font-size: 1rem; line-height: 1.8; color: #595367; }
+.ien-auth-benefits { display: grid; gap: 1rem; margin-top: 2.5rem; padding: 0; list-style: none; }
+.ien-auth-benefits li { display: flex; align-items: center; gap: 1rem; }
+.ien-auth-benefits li > [data-icon] { flex: 0 0 2.75rem; width: 2.75rem; height: 2.75rem; padding: .7rem; border: 1px solid var(--auth-outline); border-radius: .8rem; background: #e7ddf6; box-shadow: 0 2px 0 #251a4326; }
+.ien-auth-benefits li:nth-child(2) > [data-icon] { background: #ffde59; }
+.ien-auth-benefits li:nth-child(3) > [data-icon] { background: #e9f1e6; }
+.ien-auth-benefits strong, .ien-auth-benefits div > span { display: block; }
+.ien-auth-benefits strong { font-size: .9rem; font-weight: 600; }
+.ien-auth-benefits div > span { margin-top: .2rem; font-size: .8rem; line-height: 1.6; color: #595367; }
+.ien-auth-card { padding: clamp(1.5rem, 3vw, 2.5rem); border: 1px solid var(--auth-outline); border-radius: 1.25rem; background: #fffdf8; box-shadow: 0 4px 0 #251a4326, 0 14px 32px -18px #251a4354; }
+.ien-auth-card h2 { font-size: clamp(1.65rem, 3vw, 2rem); font-weight: 700; letter-spacing: -.035em; }
+.ien-auth-form-intro { margin-top: .65rem; font-size: .875rem; line-height: 1.7; color: #595367; }
+.ien-auth-card .input-ien { background: #fffefa; border-color: #a89bb9; border-radius: .75rem; }
+.ien-auth-card .input-ien:focus { border-color: #512da8; box-shadow: 0 0 0 3px #512da81a; }
+.ien-auth-card .btn-ien { border: 1px solid #43218f; box-shadow: 0 3px 0 #251a4333; }
+.ien-auth-roles { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: 1.5rem; padding: .375rem; border: 1px solid #c6bad9; border-radius: 1rem; background: #eee8f5; }
+.ien-auth-role { display: flex; align-items: center; justify-content: center; gap: .5rem; min-height: 2.875rem; border: 1px solid transparent; border-radius: .75rem; font-size: .875rem; color: #595367; transition: background .2s, box-shadow .2s; }
+.ien-auth-role.is-active { border-color: var(--auth-outline); background: #fffdf8; color: var(--auth-ink); font-weight: 600; box-shadow: 0 2px 0 #251a4326; }
+.ien-auth-role:hover { background: #fffdf8; }
+.ien-auth-role [data-icon] { width: 1rem; height: 1rem; }
+.ien-auth .ien-company-guide { border: 1px solid #d6cba9; border-radius: .875rem; background: #f7efdf; box-shadow: none; }
+.ien-auth a:focus-visible, .ien-auth button:focus-visible { outline: 3px solid #512da8; outline-offset: 4px; }
+@media (max-width: 900px) {
+  .ien-auth-layout { grid-template-columns: 1fr; max-width: 36rem; gap: 2rem; }
+  .ien-auth-story { position: static; padding: 0; }
+  .ien-auth-story h1 { max-width: 18ch; font-size: clamp(2.25rem, 7vw, 3.5rem); }
+  .ien-auth-story > p { max-width: 48ch; margin-top: 1rem; }
+  .ien-auth-benefits { display: none; }
+  .ien-auth-header { min-height: 5rem; }
+}
+@media (max-width: 400px) {
+  .ien-auth-header img { width: 7rem; }
+  .ien-auth-back { font-size: .75rem; }
+  .ien-auth-card { padding: 1.25rem; }
+  .ien-auth-card form > .grid > div { grid-column: 1 / -1; }
+}
+.ien-auth-errors { padding: 1rem; border: 1px solid #dfafb8; border-radius: .75rem; background: #fff0ef; color: #a53548; font-size: .875rem; line-height: 1.7; }
+
+.ien-auth-card .password-field, .ien-auth-card form > .grid > div { min-width: 0; }
+.ien-auth-card .password-input { width: 100%; min-width: 0; max-width: 100%; padding-right: 3rem; }
+@media (max-width: 639px) {
+  .ien-auth-card form > .grid { grid-template-columns: minmax(0, 1fr); }
+  .ien-auth-card form > .grid > div { grid-column: 1 / -1; }
+  .ien-auth-card .password-input { font-size: 1rem; min-height: 3rem; }
+  .ien-auth-card .password-field > [data-icon] { pointer-events: none; }
+}

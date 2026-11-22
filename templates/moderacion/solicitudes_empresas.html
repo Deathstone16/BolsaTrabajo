@@ -1,0 +1,37 @@
+{% extends 'nueva_ui/base.html' %}
+{% block title %}Solicitudes de empresas · IEN Empleo{% endblock %}
+{% block content %}
+<div class="ien-home-container ien-home-section">
+  <h1 class="ien-section-title">Solicitudes de empresas</h1>
+  <p class="ien-home-intro">Historial de empresas que solicitaron aprobación. Las solicitudes que sigan pendientes después de {{ reminder_hours }} horas se agrupan en un recordatorio por correo.</p>
+  <nav class="ien-admin-history-filters" aria-label="Filtrar solicitudes">
+    <a href="{% url 'mod_solicitudes_empresas' %}" {% if not estado %}aria-current="page"{% endif %}>Todas</a>
+    <a href="?estado=pendiente" {% if estado == 'pendiente' %}aria-current="page"{% endif %}>Pendientes</a>
+    <a href="?estado=aprobado" {% if estado == 'aprobado' %}aria-current="page"{% endif %}>Aprobadas</a>
+    <a href="?estado=rechazado" {% if estado == 'rechazado' %}aria-current="page"{% endif %}>Rechazadas</a>
+  </nav>
+  <div class="ien-admin-history">
+    {% for solicitud in pagina %}
+      <article class="panel ien-admin-history-item">
+        <div>
+          <h2>{{ solicitud.empresa.nombre_empresa }}</h2>
+          <p>Solicitud recibida el {{ solicitud.creada_en|date:'d/m/Y H:i' }}</p>
+          {% if solicitud.resuelta_en %}<p>Resuelta el {{ solicitud.resuelta_en|date:'d/m/Y H:i' }}</p>{% endif %}
+          {% if solicitud.recordatorio_enviado_en %}<p>Recordatorio enviado el {{ solicitud.recordatorio_enviado_en|date:'d/m/Y H:i' }}</p>{% endif %}
+        </div>
+        {% include 'moderacion/_company_status.html' with estado=solicitud.estado only %}
+        <a href="{% url 'mod_detalle_empresa' solicitud.empresa_id %}" class="btn-ghost">{% if solicitud.estado == 'pendiente' %}Revisar empresa{% else %}Ver empresa{% endif %}</a>
+      </article>
+    {% empty %}
+      <p class="panel ien-home-empty">No hay solicitudes{% if estado %} con este estado{% endif %}.</p>
+    {% endfor %}
+  </div>
+  {% if pagina.has_other_pages %}
+    <nav class="ien-admin-history-filters" aria-label="Páginas del historial">
+      {% if pagina.has_previous %}<a href="?estado={{ estado }}&amp;page={{ pagina.previous_page_number }}">Anterior</a>{% endif %}
+      <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+      {% if pagina.has_next %}<a href="?estado={{ estado }}&amp;page={{ pagina.next_page_number }}">Siguiente</a>{% endif %}
+    </nav>
+  {% endif %}
+</div>
+{% endblock %}

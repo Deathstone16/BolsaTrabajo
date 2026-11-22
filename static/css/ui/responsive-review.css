@@ -1,0 +1,140 @@
+/* Compact mobile controls keep the page's primary content within reach. */
+.ien-disclosure-summary { display: none; }
+.ien-disclosure-summary::-webkit-details-marker { display: none; }
+.ien-disclosure-summary::marker { content: ''; }
+.ien-disclosure-chevron { width: .5rem; height: .5rem; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); margin-left: auto; flex: 0 0 auto; transition: transform .18s ease; }
+[open] > .ien-disclosure-summary .ien-disclosure-chevron { transform: rotate(225deg); }
+.ien-postulante-sidebar-panel, .ien-job-filter-panel { position: sticky; top: calc(7rem + var(--ien-cv-progress-height, 0px)); }
+.ien-postulante-sidebar-panel { padding: 1.5rem; }
+.ien-course-search-row { display: flex; gap: .75rem; align-items: center; }
+.ien-course-search-input { flex: 1; min-width: 0; }
+.ien-course-search-input .input-ien { width: 100%; }
+.ien-course-advanced .ien-course-filter-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 1rem; }
+.ien-course-advanced .ien-course-filter-actions { margin-top: 1rem; }
+.ien-course-list-page .ien-course-filters { margin-top: 1.25rem; }
+.ien-status-profile-nav { display: none; }
+
+/* Employer cards keep titles, status and actions in separate rows. */
+.ien-employer-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid #ded5e8; }
+.ien-employer-tabs .tab-link { min-width: 0; text-align: center; line-height: 1.5; }
+.ien-employer-offer { padding: 1.25rem; margin-bottom: 1rem; border: 1px solid #d9cfe4; border-radius: 1rem; background: #fffdf8; }
+.ien-employer-offer-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 1rem; }
+.ien-employer-offer-heading > div { min-width: 0; }
+.ien-employer-offer h3 { font-size: 1.0625rem; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+.ien-employer-offer-heading p { margin-top: .35rem; color: #595367; font-size: .875rem; }
+.ien-employer-offer-actions { display: flex; gap: .5rem; }
+.ien-offer-icon-action { display: inline-grid; place-items: center; width: 2.5rem; height: 2.5rem; border: 1px solid #c6bbd3; border-radius: .75rem; color: #645276; background: #f5f0fa; }
+.ien-offer-icon-action [data-icon] { width: 1rem; height: 1rem; }
+.ien-offer-icon-action:hover { background: #e9dff6; color: #512da8; }
+.ien-offer-icon-action.is-danger:hover { color: #a53548; background: #fff0ef; }
+.ien-employer-offer-facts { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; margin-top: .75rem; color: #595367; font-size: .8125rem; }
+.ien-employer-offer-status-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .75rem; margin-top: 1rem; }
+.ien-offer-publication-status { padding-left: .6rem; border-left: 2px solid currentColor; font-size: .75rem; color: #756a84; line-height: 1.6; }
+.ien-offer-publication-status.is-pendiente { color: #8a6400; }
+.ien-offer-publication-status.is-activa { color: #35714c; }
+.ien-offer-publication-status.is-rechazada { color: #a53548; }
+.ien-employer-offer-dates { display: flex; flex-wrap: wrap; gap: .75rem 2rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5ddec; font-size: .75rem; }
+.ien-employer-offer-dates > div { display: flex; flex-wrap: wrap; gap: .5rem; }
+.ien-employer-offer-dates dt { color: #756a84; }
+.ien-employer-offer-dates dd { color: #514761; font-weight: 500; }
+.ien-employer-editor { padding-block: 2rem 3rem; }
+.ien-employer-editor-heading { margin-bottom: 1.25rem; }
+.ien-editor-title-row { display: flex; align-items: center; gap: .875rem; }
+.ien-editor-title-row h1 { min-width: 0; }
+.ien-employer-editor-heading > p { margin-top: .875rem; color: #595367; font-size: .875rem; line-height: 1.75; }
+.ien-editor-legacy-note { margin-bottom: 1.25rem; padding: 1rem 1.25rem; border: 1px solid #dfd0a2; border-radius: .875rem; background: #fff8dc; color: #6c592e; font-size: .8125rem; line-height: 1.75; }
+
+/* Rejection is a single reading flow, from the outcome to the next action. */
+body .ien-status-card--rejected { max-width: 34rem; text-align: left; }
+body .ien-status-card--rejected .ien-status-icon { margin-inline: 0; width: 4rem; height: 4rem; }
+body .ien-status-card--rejected h1 { margin-top: 1rem; font-size: clamp(1.5rem, 4vw, 1.9rem); text-wrap: initial; }
+body .ien-status-card--rejected .ien-status-description { margin-top: .75rem; }
+body .ien-status-card--rejected .ien-status-detail { margin-top: 1rem; }
+body .ien-status-card--rejected .ien-status-actions { margin-top: 1.25rem; }
+.ien-status-contact-footer { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #e5ddec; }
+body .ien-status-contact-footer .ien-status-note, body .ien-status-contact-footer .ien-status-contact { margin-top: 0; }
+
+/* A small, one-shot trash animation for the deletion confirmation. */
+.ien-delete-page { max-width: 30rem; margin: 0 auto; padding: 2rem 1rem 3rem; }
+.ien-delete-card { padding: clamp(1.25rem, 4vw, 2rem); text-align: center; }
+.ien-delete-icon { display: grid; place-items: center; width: 4rem; height: 4rem; margin: 0 auto 1.25rem; border: 1px solid #deb7bf; border-radius: 1rem; background: #fae9ec; color: #a53548; }
+.ien-delete-icon svg { width: 2.5rem; height: 2.5rem; overflow: visible; }
+.ien-app-page .ien-page-content .ien-delete-card h1 { margin: 0; font-size: clamp(1.4rem, 4vw, 1.75rem); line-height: 1.3; }
+.ien-delete-description { margin-top: 1rem; color: #595367; font-size: .875rem; line-height: 1.7; }
+.ien-delete-offer-name { margin-top: .5rem; color: #251a43; font-size: .9375rem; font-weight: 600; line-height: 1.6; overflow-wrap: anywhere; }
+.ien-delete-note { margin-top: .75rem; color: #756a84; font-size: .8125rem; line-height: 1.7; }
+.ien-delete-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin-top: 1.5rem; }
+.ien-delete-actions .btn-ien, .ien-delete-actions .btn-ghost { width: 100%; min-height: 2.875rem; padding: .65rem .75rem; font-size: .8125rem; }
+.ien-delete-actions .ien-delete-confirm { border-color: #a53548; background: #a53548; color: #fff; box-shadow: 0 2px 0 #70243533; }
+.ien-delete-confirm:hover { background: #8c2d3e; }
+@media (prefers-reduced-motion: no-preference) {
+  .ien-delete-icon { animation: ien-trash-enter .35s ease-out both; }
+  .ien-trash-lid { transform-origin: 12px 14px; animation: ien-trash-lid .85s ease-in-out .2s 1 both; }
+  .ien-trash-bin { transform-origin: 24px 40px; animation: ien-trash-bin .85s ease-in-out .2s 1 both; }
+}
+@keyframes ien-trash-enter { from { opacity: 0; transform: translateY(5px) scale(.9); } to { opacity: 1; transform: none; } }
+@keyframes ien-trash-lid { 0%, 100% { transform: rotate(0); } 35%, 55% { transform: translateY(-2px) rotate(-18deg); } }
+@keyframes ien-trash-bin { 0%, 100% { transform: rotate(0); } 35% { transform: rotate(3deg); } 55% { transform: rotate(-2deg); } }
+@media (max-width: 1023px) {
+  .ien-disclosure-summary { display: flex; align-items: center; gap: .6rem; min-height: 3rem; padding: .85rem 1rem; list-style: none; cursor: pointer; font-size: .875rem; font-weight: 600; color: #43218f; }
+  .ien-disclosure-summary > [data-icon] { width: 1.1rem; height: 1.1rem; }
+  .ien-disclosure-summary:focus-visible { outline: 2px solid #512da8; outline-offset: 2px; border-radius: .875rem; }
+  .ien-postulante-sidebar .ien-postulante-sidebar-panel { position: static; padding: 0; }
+  .ien-postulante-sidebar .ien-disclosure-content { padding: .5rem 1rem 1rem; }
+  .ien-postulante-sidebar .ien-postulante-sidebar-identity { flex-flow: column nowrap; align-items: center; padding-bottom: 1rem; }
+  .ien-postulante-sidebar .ien-postulante-sidebar-nav { flex-direction: column; gap: .375rem; margin-top: 1rem; }
+  .ien-postulante-sidebar .ien-postulante-nav-link { padding: .625rem .75rem; min-height: 2.75rem; gap: .75rem; font-size: .875rem; }
+  .ien-postulante-sidebar .ien-avatar-picker { display: grid; justify-items: center; }
+  .ien-cv-layout { grid-template-areas: "sidebar" "cv"; }
+  .ien-job-filter-panel { position: static; }
+  .ien-jobs-results { padding-block: 1rem 2rem; }
+  .ien-jobs-results-layout { gap: 1rem; }
+  .ien-design-jobs .ien-jobs-heading { padding-block: 1.25rem; }
+  .ien-design-jobs .ien-job-search { margin-top: 1rem; display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+  .ien-job-search-field { min-width: 0; padding: .65rem; gap: .5rem; }
+  .ien-job-search .btn-ien { padding-inline: .875rem; }
+  .ien-job-search .btn-ien > [data-icon] { display: none; }
+  .ien-course-list-page { padding-block: 1.5rem 2rem; }
+  .ien-course-list-page .ien-home-intro { margin-top: .75rem; font-size: .875rem; line-height: 1.6; }
+  .ien-course-list-page .ien-course-filters { margin-top: 1rem; padding: .75rem; }
+  .ien-course-search-row { gap: .5rem; }
+  .ien-course-search-row .btn-ien { padding-inline: .875rem; font-size: .875rem; min-height: 3rem; }
+  .ien-course-search-row .btn-ien [data-icon] { display: none; }
+  .ien-course-advanced { margin-top: .5rem; }
+  .ien-course-advanced .ien-disclosure-summary { padding-inline: .5rem; }
+  .ien-course-advanced .ien-course-filter-fields { grid-template-columns: minmax(0, 1fr); gap: .875rem; margin-top: .5rem; }
+  .ien-course-list-page .ien-course-results { margin-block: 1rem; }
+  .ien-status-profile-nav { display: block; width: min(32rem, calc(100% - 2rem)); margin-inline: auto; }
+}
+@media (max-width: 639px) {
+  .ien-employer-management { padding: 1rem; }
+  .ien-employer-tabs { gap: .5rem; }
+  .ien-employer-tabs .tab-link { padding-inline: .25rem; font-size: .8125rem; }
+  .ien-employer-offer { padding: 1rem; }
+  .ien-employer-offer-heading { gap: .625rem; }
+  .ien-employer-offer h3 { font-size: 1rem; }
+  .ien-employer-offer-actions { gap: .375rem; }
+  .ien-employer-editor { padding-top: 1.5rem; }
+  .ien-employer-editor-form { padding: 1.25rem; }
+  .ien-editor-title-row .ien-section-icon { width: 2.25rem; height: 2.25rem; }
+}
+@media (prefers-reduced-motion: reduce) { .ien-disclosure-chevron { transition: none; } }
+
+.ien-form-help { color: #756a84; font-size: .8125rem; line-height: 1.7; }
+.ien-form-help summary { display: list-item; cursor: pointer; color: #645276; font-weight: 500; }
+.ien-form-help p { margin-top: .5rem; max-width: 65ch; }
+.ien-form-help summary:focus-visible { outline: 2px solid #512da8; outline-offset: 3px; border-radius: .25rem; }
+.ien-requirement-caption { margin-top: -.25rem; color: #756a84; font-size: .8125rem; line-height: 1.6; }
+
+.ien-company-editor { padding-block: 2rem 3rem; }
+.ien-company-editor-heading { margin-bottom: 1.25rem; }
+.ien-company-editor-heading > p { margin-top: .75rem; color: #595367; font-size: .875rem; line-height: 1.7; }
+.ien-company-editor-section-title { color: #251a43; font-size: 1.0625rem; font-weight: 600; }
+.ien-company-editor-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
+.ien-company-photo .ien-photo-picker-status:empty { display: none; }
+@media (max-width: 639px) {
+  .ien-company-editor { padding-top: 1.5rem; }
+  .ien-company-editor-card { padding: 1.25rem; }
+  .ien-company-editor-actions { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .ien-company-editor-actions > * { width: 100%; text-align: center; }
+}

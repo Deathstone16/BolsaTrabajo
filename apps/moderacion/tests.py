@@ -28,6 +28,8 @@ class ModeracionOfertasTests(TestCase):
             nombre_empresa='Empresa de prueba',
             cuit='30-12345678-9',
             estado_validacion=Oferente.EstadoValidacion.APROBADO,
+            contacto_nombre='Responsable Demo',
+            contacto_cargo='RRHH', correo_publico='rrhh@example.com',
         )
         categoria = Categoria.objects.create(nombre='Tecnología')
         self.oferta = Oferta.objects.create(
@@ -112,21 +114,26 @@ class ModeracionOfertasTests(TestCase):
 
         self.assertEqual(contexto['total'], 1)
 
-    def test_empresa_aprobada_ve_estado_validado_en_su_panel(self):
+    def test_empresa_aprobada_accede_al_panel_sin_aviso_de_validacion(self):
         empresa = Oferente.objects.get(nombre_empresa='Empresa de prueba')
         self.client.force_login(empresa.usuario)
 
         response = self.client.get(reverse('dashboard_empresa'))
 
-        self.assertContains(response, 'Empresa Validada')
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'Empresa Validada')
+        self.assertContains(response, reverse('crear_oferta'))
 
-    def test_empresa_aprobada_no_ve_pantalla_pendiente(self):
+    def test_empresa_aprobada_ve_confirmacion_y_acceso_a_publicar(self):
         empresa = Oferente.objects.get(nombre_empresa='Empresa de prueba')
         self.client.force_login(empresa.usuario)
 
         response = self.client.get(reverse('validacion_pendiente'))
 
-        self.assertRedirects(response, reverse('dashboard_empresa'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Tu empresa ya puede publicar')
+        self.assertContains(response, reverse('crear_oferta'))
+        self.assertNotContains(response, 'Pendiente de verificación')
 
     @override_settings(
         EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
@@ -136,7 +143,8 @@ class ModeracionOfertasTests(TestCase):
     def test_aprobar_empresa_envia_un_solo_correo_con_enlace_real(self):
         usuario = Usuario.objects.create_user(email='pendiente@example.com', password='clave-segura')
         empresa = Oferente.objects.create(
-            usuario=usuario, nombre_empresa='Empresa pendiente', cuit='30-12345678-9',
+            usuario=usuario, nombre_empresa='Empresa pendiente', cuit='30-12345678-9', contacto_nombre='Responsable Demo',
+            contacto_cargo='RRHH', correo_publico='rrhh@example.com',
         )
         self.client.force_login(self.staff)
         url = reverse('mod_aprobar_empresa', args=[empresa.pk])
@@ -150,10 +158,10 @@ class ModeracionOfertasTests(TestCase):
         self.assertIn('http://testserver' + reverse('dashboard_empresa'), mensaje.body)
         html = mensaje.alternatives[0].content
         self.assertIn('http://testserver' + reverse('dashboard_empresa'), html)
-        self.assertIn('#F8F3F0', html)
+        self.assertIn('#eaf0f9', html)
         self.assertIn('#512DA8', html)
-        self.assertIn('#FFDE59', html)
-        self.assertIn('Bolsa de trabajo &middot; Chaco', html)
+        self.assertIn('IEN Trabajo', html)
+        self.assertIn('Instituto Económico Nacional', html)
         self.assertNotIn('tusitio.com', html)
         self.assertNotIn('✅', html)
         self.assertNotIn('🎯', html)
@@ -161,11 +169,25 @@ class ModeracionOfertasTests(TestCase):
         self.client.post(url)
         self.assertEqual(len(mail.outbox), 1)
 
+    def test_no_aprueba_empresa_sin_responsable(self):
+        usuario = Usuario.objects.create_user(email='sin-responsable@example.com', password='clave-segura')
+        empresa = Oferente.objects.create(
+            usuario=usuario, nombre_empresa='Empresa incompleta', cuit='30-12345678-9',
+        )
+        self.client.force_login(self.staff)
+
+        response = self.client.post(reverse('mod_aprobar_empresa', args=[empresa.pk]), follow=True)
+
+        empresa.refresh_from_db()
+        self.assertEqual(empresa.estado_validacion, Oferente.EstadoValidacion.PENDIENTE)
+        self.assertContains(response, 'No se puede aprobar la empresa')
+
     @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
     def test_fallo_smtp_no_revierte_aprobacion_ni_reenvia_en_reintento(self):
         usuario = Usuario.objects.create_user(email='sin-smtp@example.com', password='clave-segura')
         empresa = Oferente.objects.create(
-            usuario=usuario, nombre_empresa='Empresa sin SMTP', cuit='30-12345678-9',
+            usuario=usuario, nombre_empresa='Empresa sin SMTP', cuit='30-12345678-9', contacto_nombre='Responsable Demo',
+            contacto_cargo='RRHH', correo_publico='rrhh@example.com',
         )
         self.client.force_login(self.staff)
         url = reverse('mod_aprobar_empresa', args=[empresa.pk])
@@ -187,7 +209,8 @@ class ModeracionOfertasTests(TestCase):
     def test_aprobacion_desde_admin_notifica_solo_al_cambiar_de_estado(self):
         usuario = Usuario.objects.create_user(email='admin-empresa@example.com', password='clave-segura')
         empresa = Oferente.objects.create(
-            usuario=usuario, nombre_empresa='Empresa administrada', cuit='30-12345678-9',
+            usuario=usuario, nombre_empresa='Empresa administrada', cuit='30-12345678-9', contacto_nombre='Responsable Demo',
+            contacto_cargo='RRHH', correo_publico='rrhh@example.com',
         )
         request = RequestFactory().post('/admin/usuarios/oferente/')
         request.user = self.staff

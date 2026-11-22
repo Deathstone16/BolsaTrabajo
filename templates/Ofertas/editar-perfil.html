@@ -2,20 +2,13 @@
 {% load static %}
 
 {% block content %}
-<div class="flex-1 py-12 px-4 bg-muted min-h-screen">
-  <div class="max-w-3xl mx-auto">
-    <div class="panel p-8">
-
-      <div class="mb-8">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="w-12 h-12 bg-secondary/20 rounded-xl flex items-center justify-center">
-            <span data-icon="building" class="h-6 w-6 text-secondary-foreground"></span>
-          </div>
-          <h1 class="text-3xl font-bold tracking-tight text-[#26222E]">Editar perfil de empresa</h1>
-        </div>
-        {% include "nueva_ui/partials/_breadcrumbs.html" with current="Editar perfil de empresa" parent_url="dashboard_empresa" parent_label="Mi panel" only %}
-        <p class="text-muted-foreground">Actualizá los datos de tu empresa. Esta información es la que ven los postulantes.</p>
-      </div>
+<div class="ien-company-editor min-h-screen">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header class="ien-company-editor-heading">
+      <h1>Editar mi empresa</h1>
+      <p>Actualizá la información que se muestra en tu perfil público.</p>
+    </header>
+    <div class="panel p-8 ien-company-editor-card">
 
       {% if oferente.estado_validacion == 'rechazado' %}
       <div class="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-lg mb-6">
@@ -42,18 +35,16 @@
       </div>
       {% endif %}
 
-      <form method="post" action="{% url 'editar_perfil_empresa' %}" enctype="multipart/form-data">
+      <form method="post" action="{% url 'editar_perfil_empresa' %}" enctype="multipart/form-data" data-company-validation>
         {% csrf_token %}
 
         <div class="space-y-4">
-          <h3 class="font-medium flex items-center gap-2">
-            <span data-icon="building" class="h-5 w-5 text-primary"></span>Datos de la empresa
-          </h3>
+          <h2 class="ien-company-editor-section-title">Datos de la empresa</h2>
 
           <div class="space-y-2">
-            <label class="block text-sm font-medium">Nombre de la empresa</label>
-            <input type="text" name="nombre_empresa" value="{{ form.nombre_empresa.value|default:'' }}"
-                   placeholder="Ej. Acme SA" maxlength="200"
+            <label for="id_empresa_nombre" class="block text-sm font-medium">Nombre de la empresa</label>
+            <input id="id_empresa_nombre" type="text" name="nombre_empresa" value="{{ form.nombre_empresa.value|default:'' }}"
+                   placeholder="Nombre de la empresa" maxlength="200"
                    class="input-ien focus:outline-none focus:ring-2 focus:ring-ring" required>
             {% if form.nombre_empresa.errors %}<p class="text-sm text-red-500">{{ form.nombre_empresa.errors.0 }}</p>{% endif %}
           </div>
@@ -64,7 +55,7 @@
                    placeholder="XX-XXXXXXXX-X" maxlength="13" inputmode="numeric" pattern="[0-9]{11}|[0-9]{2}-[0-9]{8}-[0-9]"
                    aria-describedby="id_empresa_cuit_help{% if form.cuit.errors %} id_empresa_cuit_error{% endif %}"{% if form.cuit.errors %} aria-invalid="true"{% endif %}
                    class="input-ien focus:outline-none focus:ring-2 focus:ring-ring" required>
-            <p id="id_empresa_cuit_help" class="text-xs leading-relaxed text-[#6B645C]">{{ form.cuit.help_text }}</p>
+            <p id="id_empresa_cuit_help" class="text-xs leading-relaxed text-[#6B645C]">Ingresá los 11 números del CUIT.</p>
             {% if form.cuit.errors %}<p id="id_empresa_cuit_error" class="text-sm text-red-500">{{ form.cuit.errors.0 }}</p>{% endif %}
           </div>
 
@@ -77,16 +68,16 @@
 
           <div class="grid md:grid-cols-2 gap-4">
             <div class="space-y-2">
-              <label class="block text-sm font-medium">Industria</label>
-              <input type="text" name="industria" value="{{ form.industria.value|default:'' }}"
-                     placeholder="Ej. Tecnología" maxlength="100"
+              <label for="id_empresa_industria" class="block text-sm font-medium">Industria</label>
+              <input type="text" id="id_empresa_industria" name="industria" value="{{ form.industria.value|default:'' }}"
+                     placeholder="Industria o actividad" maxlength="100"
                      class="input-ien focus:outline-none focus:ring-2 focus:ring-ring">
               {% if form.industria.errors %}<p class="text-sm text-red-500">{{ form.industria.errors.0 }}</p>{% endif %}
             </div>
 
             <div class="space-y-2">
-              <label class="block text-sm font-medium">Tamaño de la empresa</label>
-              <select name="tamano_empresa"
+              <label for="id_empresa_tamano_empresa" class="block text-sm font-medium">Tamaño de la empresa</label>
+              <select id="id_empresa_tamano_empresa" name="tamano_empresa"
                       class="input-ien focus:outline-none focus:ring-2 focus:ring-ring">
                 <option value="">Seleccionar...</option>
                 {% for valor, etiqueta in form.fields.tamano_empresa.choices %}
@@ -101,17 +92,17 @@
 
           <div class="grid md:grid-cols-2 gap-4">
             <div class="space-y-2">
-              <label class="block text-sm font-medium">Ubicación</label>
-              <input type="text" name="ubicacion" value="{{ form.ubicacion.value|default:'' }}"
-                     placeholder="Ej. La Plata, Buenos Aires" maxlength="200"
+              <label for="id_empresa_ubicacion" class="block text-sm font-medium">Ubicación</label>
+              <input type="text" id="id_empresa_ubicacion" name="ubicacion" value="{{ form.ubicacion.value|default:'' }}"
+                     placeholder="Ciudad y provincia" maxlength="200"
                      class="input-ien focus:outline-none focus:ring-2 focus:ring-ring">
               {% if form.ubicacion.errors %}<p class="text-sm text-red-500">{{ form.ubicacion.errors.0 }}</p>{% endif %}
             </div>
 
             <div class="space-y-2">
-              <label class="block text-sm font-medium">Año de fundación</label>
-              <input type="number" name="anio_fundacion" value="{{ form.anio_fundacion.value|default:'' }}"
-                     placeholder="Ej. 2015"
+              <label for="id_empresa_anio_fundacion" class="block text-sm font-medium">Año de fundación</label>
+              <input type="number" id="id_empresa_anio_fundacion" name="anio_fundacion" value="{{ form.anio_fundacion.value|default:'' }}"
+                     placeholder="Año"
                      class="input-ien focus:outline-none focus:ring-2 focus:ring-ring">
               {% if form.anio_fundacion.errors %}<p class="text-sm text-red-500">{{ form.anio_fundacion.errors.0 }}</p>{% endif %}
             </div>
@@ -119,58 +110,43 @@
 
           <div class="grid md:grid-cols-2 gap-4">
             <div class="space-y-2">
-              <label class="block text-sm font-medium">Sitio web</label>
-              <input type="url" name="sitio_web" value="{{ form.sitio_web.value|default:'' }}"
-                     placeholder="https://www.ejemplo.com" maxlength="300"
+              <label for="id_empresa_sitio_web" class="block text-sm font-medium">Página de la empresa (opcional)</label>
+              <input id="id_empresa_sitio_web" type="url" name="sitio_web" value="{{ form.sitio_web.value|default:'' }}" aria-describedby="sitio-web-ayuda"
+                     placeholder="https://" maxlength="300"
                      class="input-ien focus:outline-none focus:ring-2 focus:ring-ring">
               {% if form.sitio_web.errors %}<p class="text-sm text-red-500">{{ form.sitio_web.errors.0 }}</p>{% endif %}
+              <p id="sitio-web-ayuda" class="text-xs text-[#6B645C]">Ingresá el enlace completo con https://.</p>
             </div>
 
             <div class="space-y-2">
-              <label class="block text-sm font-medium">Teléfono</label>
-              <input type="text" name="telefono" value="{{ form.telefono.value|default:'' }}"
-                     placeholder="Ej. 2215551234" maxlength="50"
+              <label for="id_empresa_telefono" class="block text-sm font-medium">Teléfono</label>
+              <input type="text" id="id_empresa_telefono" name="telefono" value="{{ form.telefono.value|default:'' }}"
+                     placeholder="Número de contacto" maxlength="50"
                      class="input-ien focus:outline-none focus:ring-2 focus:ring-ring">
               {% if form.telefono.errors %}<p class="text-sm text-red-500">{{ form.telefono.errors.0 }}</p>{% endif %}
             </div>
           </div>
         </div>
 
+        {% include 'Ofertas/_contacto-form.html' with contact_form=form %}
+
         <div class="space-y-4 mt-8">
-          <h3 class="font-medium flex items-center gap-2">
-            <span data-icon="image" class="h-5 w-5 text-primary"></span>Imágenes
-          </h3>
+          <h2 class="ien-company-editor-section-title">Imágenes</h2>
 
           <div class="grid md:grid-cols-2 gap-4">
-            <div class="space-y-2">
-              <label class="block text-sm font-medium">Logo</label>
-              {% if oferente.logo %}
-                <img src="{{ oferente.logo.url }}" alt="Logo actual" class="w-20 h-20 object-cover rounded-lg border border-border">
-              {% endif %}
-              <input type="file" name="logo" accept="image/*"
-                     class="input-ien focus:outline-none focus:ring-2 focus:ring-ring">
-              {% if form.logo.errors %}<p class="text-sm text-red-500">{{ form.logo.errors.0 }}</p>{% endif %}
-            </div>
+            {% include 'Ofertas/_foto-perfil.html' with photo_field=form.logo %}
 
-            <div class="space-y-2">
-              <label class="block text-sm font-medium">Banner</label>
-              {% if oferente.banner %}
-                <img src="{{ oferente.banner.url }}" alt="Banner actual" class="w-full h-20 object-cover rounded-lg border border-border">
-              {% endif %}
-              <input type="file" name="banner" accept="image/*"
-                     class="input-ien focus:outline-none focus:ring-2 focus:ring-ring">
-              {% if form.banner.errors %}<p class="text-sm text-red-500">{{ form.banner.errors.0 }}</p>{% endif %}
-            </div>
+            {% include 'Ofertas/_portada.html' %}
           </div>
         </div>
 
-        <div class="flex items-center gap-3 mt-8">
+        <div class="ien-company-editor-actions">
           <button type="submit"
-                  class="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                  class="btn-ien">
             Guardar cambios
           </button>
           <a href="{% url 'dashboard_empresa' %}"
-             class="px-6 py-2.5 bg-muted text-foreground rounded-lg hover:bg-muted/80 transition-colors">
+             class="btn-ghost">
             Cancelar
           </a>
         </div>
@@ -182,5 +158,7 @@
 {% endblock %}
 
 {% block extra_js %}
+  <script src="{% static_v 'js/profile-photo.js' %}"></script>
   <script src="{% static_v 'js/cuit-input.js' %}"></script>
+  <script src="{% static_v 'js/company-validation.js' %}"></script>
 {% endblock %}

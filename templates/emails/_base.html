@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{% block title %}IEN Trabajo{% endblock %}</title></head>
+<body style="margin:0;padding:0;background-color:#eaf0f9;color:#251a43;font-family:Poppins,'Segoe UI',Arial,sans-serif;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">{% block preheader %}{% endblock %}</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#eaf0f9"><tr><td align="center" style="padding:32px 16px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#fffdf8" style="width:100%;max-width:600px;border:1px solid #83749c;border-radius:20px;background-color:#fffdf8;box-shadow:0 4px 0 #d4cfe0;">
+      <tr><td style="padding:28px 28px 24px;background-color:#ebe5f7;border-radius:20px 20px 0 0;border-bottom:1px solid #d2c7df;">{% include 'emails/_logo.html' only %}</td></tr>
+      <tr><td style="padding:28px;">
+        <h1 style="margin:0 0 22px;font-size:27px;line-height:1.2;letter-spacing:-0.7px;font-weight:800;color:#251a43;">{% block heading %}{% endblock %}</h1>
+        <div style="font-size:15px;line-height:1.8;color:#595367;">{% block content %}{% endblock %}</div>
+      </td></tr>
+      <tr><td style="padding:18px 28px;background-color:#e9f1e6;border-top:1px solid #cbd8c6;border-radius:0 0 20px 20px;color:#595367;font-size:12px;line-height:1.7;">IEN Trabajo<br>Instituto Económico Nacional</td></tr>
+    </table>
+  </td></tr></table>
+</body></html>
