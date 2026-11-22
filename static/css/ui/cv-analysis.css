@@ -220,18 +220,4 @@
 
 @media (max-width: 63.99rem) {
   .ien-cv-layout--manage { grid-template-areas: "sidebar" "cv"; gap: 1rem; }
-  .ien-cv-sidebar > .panel { position: static; padding: 0.75rem; }
-  .ien-cv-sidebar .ien-postulante-sidebar-identity {
-    flex-flow: row wrap;
-    padding-bottom: 0.5rem;
-    text-align: start;
-  }
-  .ien-cv-sidebar .ien-avatar-form { justify-items: start; }
-  .ien-cv-sidebar .ien-avatar-picker { display: flex; align-items: center; }
-  .ien-cv-sidebar .ien-avatar-picture,
-  .ien-cv-sidebar .ien-avatar-picture > *:first-child { width: 2rem; height: 2rem; font-size: 0.875rem; }
-  .ien-cv-sidebar #cv-photo-help { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); }
-  .ien-cv-sidebar .ien-postulante-sidebar-nav { flex-flow: row wrap; gap: 0.25rem; margin-top: 0.5rem; }
-  .ien-cv-sidebar .ien-postulante-nav-link { min-height: 0; gap: 0.35rem; padding: 0.45rem 0.55rem; font-size: 0.75rem; }
-  .ien-cv-sidebar .ien-postulante-nav-link.is-disabled { display: none; }
 }

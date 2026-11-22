@@ -19,15 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!cvInput) return;
 
-    const botonArchivo = formUpload?.querySelector('[data-cv-file-picker]');
-    const selectorNativo = formUpload?.querySelector('[data-cv-native-upload]');
-    if (botonArchivo && selectorNativo) {
-        botonArchivo.addEventListener('click', () => cvInput.click());
-        cvInput.required = false;
-        selectorNativo.hidden = true;
-        botonArchivo.hidden = false;
-    }
-
     cvInput.addEventListener('change', () => procesarArchivo(cvInput.files[0]));
 
     const zonaCarga = formUpload?.closest('.ien-cv-dropzone');

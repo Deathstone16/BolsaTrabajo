@@ -1,0 +1,32 @@
+/* Shared feedback: the same paper surface, muted accents and compact type. */
+#ien-avisos { top: auto; right: max(1rem, env(safe-area-inset-right)); bottom: calc(1rem + env(safe-area-inset-bottom)); left: auto; width: min(24rem, calc(100% - 2rem)); gap: .625rem; }
+.ien-aviso { display: grid; grid-template-columns: 2rem minmax(0, 1fr) 2.75rem; align-items: center; gap: .75rem; max-width: none; padding: .75rem; border: 1px solid #d5c9e7; border-radius: 1rem; background: #fffdf8; box-shadow: 0 6px 24px #251a4314; color: #514761; font-size: .8125rem; line-height: 1.6; transform: translateY(8px); }
+.ien-aviso.es-exito { border-color: #ceddcd; }.ien-aviso.es-error { border-color: #e4c9d0; }.ien-aviso.es-info { border-color: #d5c9e7; }
+.ien-aviso-icono { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: .75rem; background: #eee8f5; color: #512da8; }
+.ien-aviso-icono .ic { width: 1rem; height: 1rem; }
+.es-exito .ien-aviso-icono { background: #e9f1e6; color: #46734e; }.es-error .ien-aviso-icono { background: #f8e9ed; color: #a53548; }
+.ien-aviso-contenido { min-width: 0; overflow-wrap: anywhere; }
+.ien-aviso-contenido p { margin: 0; }
+.ien-aviso-enlace { display: inline-flex; align-items: center; min-height: 2rem; margin-top: .125rem; color: #512da8; font-size: .75rem; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.ien-aviso-cerrar { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; padding: 0; border-radius: 50%; color: #756a84; }
+.ien-aviso-cerrar .ic { width: 1rem; height: 1rem; }
+.ien-aviso-cerrar:hover { background: #eee8f5; color: #43218f; }
+.ien-aviso :is(a, button):focus-visible { outline: 2px solid #512da8; outline-offset: 2px; }
+.ien-cv-ready-fallback { position: fixed; right: 1rem; bottom: 1rem; z-index: 310; width: min(24rem, calc(100% - 2rem)); display: flex; flex-wrap: wrap; }
+.ien-overlay { padding: 1rem; background: #251a4359; backdrop-filter: none; }
+.ien-modal.panel { width: min(100%, 25rem); padding: 1.75rem 1.5rem 1.5rem; border: 1px solid #c6bbd3; border-radius: 1.25rem; background: #fffdf8; box-shadow: 0 16px 48px #251a4329; }
+.ien-modal-icono { width: 3rem; height: 3rem; margin-bottom: 1rem; border: 1px solid #d5c7e8; border-radius: 1rem; }
+.ien-modal-icono.es-info { background: #eee8f5; color: #512da8; }.ien-modal-icono.es-peligro { background: #f8e9ed; color: #a53548; border-color: #e4c9d0; }
+.ien-modal-titulo { color: #251a43; font-size: 1.25rem; font-weight: 600; line-height: 1.4; letter-spacing: -.025em; }
+.ien-modal-texto { max-width: 34ch; margin: .625rem auto 0; color: #756a84; font-size: .875rem; line-height: 1.75; }
+.ien-modal-botones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .625rem; margin-top: 1.5rem; }
+.ien-modal-botones > button { min-width: 0; min-height: 2.875rem; padding: .65rem .75rem; border-radius: 999px; font-size: .8125rem; line-height: 1.5; box-shadow: none; }
+.ien-modal-botones .btn-ghost { background: transparent; border: 1px solid #c6bbd3; color: #512da8; }
+.ien-modal-botones .btn-ien { background: #512da8; border: 1px solid #43218f; color: #fff; }
+.ien-modal-botones .btn-peligro { background: #a53548; border-color: #a53548; }.ien-modal-botones .btn-peligro:hover { background: #8c2d3e; }
+@media (max-width: 639px) { .ien-modal.panel { padding: 1.5rem 1.125rem 1.125rem; }.ien-aviso { gap: .625rem; }.ien-modal-titulo { font-size: 1.125rem; }.ien-modal-texto { font-size: .8125rem; } }
+@media (max-width: 359px) { .ien-modal-botones { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .ien-aviso { transform: none; transition: none; } }
+
+.ien-modal button:focus-visible { outline: 2px solid #512da8; outline-offset: 3px; }
+@media (max-width: 639px) { .ien-demo-page #ien-avisos { bottom: calc(4rem + env(safe-area-inset-bottom)); } }

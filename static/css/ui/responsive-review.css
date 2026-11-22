@@ -4,7 +4,7 @@
 .ien-disclosure-summary::marker { content: ''; }
 .ien-disclosure-chevron { width: .5rem; height: .5rem; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); margin-left: auto; flex: 0 0 auto; transition: transform .18s ease; }
 [open] > .ien-disclosure-summary .ien-disclosure-chevron { transform: rotate(225deg); }
-.ien-postulante-sidebar-panel, .ien-job-filter-panel { position: sticky; top: 7rem; }
+.ien-postulante-sidebar-panel, .ien-job-filter-panel { position: sticky; top: calc(7rem + var(--ien-cv-progress-height, 0px)); }
 .ien-postulante-sidebar-panel { padding: 1.5rem; }
 .ien-course-search-row { display: flex; gap: .75rem; align-items: center; }
 .ien-course-search-input { flex: 1; min-width: 0; }
