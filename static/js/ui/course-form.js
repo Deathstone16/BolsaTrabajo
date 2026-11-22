@@ -57,20 +57,39 @@ document.querySelectorAll('[data-course-image]').forEach((root) => {
   const preview = root.querySelector('[data-image-preview]');
   const clear = root.querySelector('input[type="checkbox"]');
   const initial = preview.src;
-  const fallback = root.dataset.defaultImage;
+  let fallback = root.dataset.defaultImage;
+  const hasInitial = root.dataset.hasCustomImage === 'true';
+  const title = input.form.elements.namedItem('nombre');
+  const category = input.form.elements.namedItem('categoria');
+  const covers = Object.fromEntries(Array.from(root.querySelectorAll('[data-cover-theme]'), el => [el.dataset.coverTheme, el.dataset.coverUrl]));
+  const rules = Array.from(root.querySelectorAll('[data-cover-rule]'), el => [el.dataset.ruleTheme, new RegExp(el.dataset.coverRule)]);
+  function updateDefault() {
+    let theme = 'comunicacion';
+    for (const value of [title?.value, category?.selectedOptions[0]?.textContent]) {
+      const text = (value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const rule = rules.find(([, pattern]) => pattern.test(text));
+      if (rule) { theme = rule[0]; break; }
+    }
+    fallback = covers[theme] || fallback;
+    root.dataset.defaultImage = fallback;
+    if (!input.files.length && (!hasInitial || clear?.checked)) preview.src = fallback;
+  }
+  title?.addEventListener('input', updateDefault);
+  category?.addEventListener('change', updateDefault);
+  updateDefault();
   let objectUrl;
   function release() { if (objectUrl) URL.revokeObjectURL(objectUrl); }
   input.addEventListener('change', () => {
     release();
     const file = input.files[0];
-    preview.src = file ? (objectUrl = URL.createObjectURL(file)) : (clear?.checked ? fallback : initial);
+    preview.src = file ? (objectUrl = URL.createObjectURL(file)) : (clear?.checked || !hasInitial ? fallback : initial);
     root.querySelector('[data-image-name]').textContent = file ? file.name : 'Portada del curso';
     if (file && clear) clear.checked = false;
   });
   clear?.addEventListener('change', () => {
     release();
     input.value = '';
-    preview.src = clear.checked ? fallback : initial;
+    preview.src = clear.checked || !hasInitial ? fallback : initial;
     root.querySelector('[data-image-name]').textContent = clear.checked ? 'Portada predeterminada' : 'Portada del curso';
   });
 });

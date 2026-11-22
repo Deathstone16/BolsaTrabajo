@@ -1,6 +1,8 @@
 {% load static %}
-{% static 'img/course-default.svg' as default_cover %}
-<div class="ien-course-image-control" data-course-image data-default-image="{{ default_cover }}">
+{% static widget.cover_path as default_cover %}
+<div class="ien-course-image-control" data-course-image data-default-image="{{ default_cover }}" data-has-custom-image="{{ widget.is_initial|yesno:'true,false' }}">
+  {% for cover in widget.cover_choices %}<span hidden data-cover-theme="{{ cover.theme }}" data-cover-url="{% static cover.path %}"></span>{% endfor %}
+  {% for theme, pattern in widget.cover_rules %}<span hidden data-cover-rule="{{ pattern }}" data-rule-theme="{{ theme }}"></span>{% endfor %}
   <img class="ien-course-image-preview" data-image-preview src="{% if widget.is_initial %}{{ widget.value.url }}{% else %}{{ default_cover }}{% endif %}" alt="Vista previa de la portada del curso">
   <div class="ien-course-image-actions">
     <p data-image-name>Portada del curso</p>
