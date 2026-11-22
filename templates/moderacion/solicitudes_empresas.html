@@ -26,12 +26,6 @@
       <p class="panel ien-home-empty">No hay solicitudes{% if estado %} con este estado{% endif %}.</p>
     {% endfor %}
   </div>
-  {% if pagina.has_other_pages %}
-    <nav class="ien-admin-history-filters" aria-label="Páginas del historial">
-      {% if pagina.has_previous %}<a href="?estado={{ estado }}&amp;page={{ pagina.previous_page_number }}">Anterior</a>{% endif %}
-      <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
-      {% if pagina.has_next %}<a href="?estado={{ estado }}&amp;page={{ pagina.next_page_number }}">Siguiente</a>{% endif %}
-    </nav>
-  {% endif %}
+  {% include 'moderacion/_pagination.html' %}
 </div>
 {% endblock %}

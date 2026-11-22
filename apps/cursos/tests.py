@@ -1,4 +1,6 @@
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
+from django.core.exceptions import ValidationError
+from .forms import CourseScheduleField, CursoForm
 from django.urls import reverse
 
 from .models import Categoria, Curso
@@ -24,3 +26,55 @@ class CourseOfficialLinkTests(TestCase):
         self.assertContains(response, 'disabled aria-describedby="curso-enlace-ayuda"')
         self.assertContains(response, 'El enlace oficial de este curso todavía no fue cargado.')
         self.assertNotContains(response, 'href="https://ien.edu.ar/cursos/')
+
+
+
+class CourseFormControlTests(SimpleTestCase):
+    def test_schedule_orders_days_and_formats_times(self):
+        self.assertEqual(CourseScheduleField().clean([['Viernes', 'Lunes'], '09:00', '11:30']),
+                         'Lunes, Viernes de 09:00 a 11:30')
+
+    def test_schedule_rejects_missing_days_or_times_and_reversed_range(self):
+        for values in (([], '09:00', '10:00'), (['Lunes'], '', '10:00'),
+                       (['Lunes'], '10:00', '09:00'), (['Lunes'], '10:00', '10:00')):
+            with self.subTest(values=values), self.assertRaises(ValidationError):
+                CourseScheduleField().clean(values)
+
+    def test_schedule_round_trips_when_editing(self):
+        field = CourseScheduleField()
+        value = 'Martes, Jueves de 18:00 a 20:00'
+        self.assertEqual(field.clean(field.widget.decompress(value)), value)
+
+    def test_image_is_optional_and_controls_render_without_native_multi_selection(self):
+        form = CursoForm()
+        form.fields['categoria'].choices = [('', 'Elegir categoría')]
+        form.fields['habilidades'].choices = [('1', 'Python'), ('2', 'Excel')]
+        self.assertFalse(form.fields['imagen'].required)
+        self.assertIn('course-default.svg', str(form['imagen']))
+        self.assertIn('data-skill-add', str(form['habilidades']))
+        self.assertIn('name="horario_0"', str(form['horario']))
+        self.assertIn('type="time"', str(form['horario']))
+
+    def test_legacy_schedule_is_explained_without_guessing_times(self):
+        form = CursoForm(initial={'horario': 'Todos los días por la tarde'})
+        self.assertIn('Todos los días por la tarde', form.fields['horario'].help_text)
+        self.assertEqual(form.fields['horario'].widget.decompress(form.initial['horario']), [[], None, None])
+
+
+class StructuredCourseSaveTests(TestCase):
+    def test_course_saves_multiple_skills_and_schedule_without_an_image(self):
+        from categorias.models import Habilidad
+        category = Categoria.objects.create(nombre='Datos')
+        skills = [Habilidad.objects.create(nombre=name, categoria=category) for name in ('Python', 'Excel')]
+        form = CursoForm(data={
+            'nombre': 'Análisis de datos', 'categoria': category.pk, 'descripcion': 'Curso práctico de análisis de datos.',
+            'duracion': '8 semanas', 'tipo': 'Virtual', 'horario_0': ['Martes', 'Jueves'],
+            'horario_1': '18:00', 'horario_2': '20:00', 'habilidades': [skill.pk for skill in skills],
+        })
+        self.assertTrue(form.is_valid(), form.errors)
+        course = form.save()
+        self.assertFalse(course.imagen)
+        self.assertEqual(course.horario, 'Martes, Jueves de 18:00 a 20:00')
+        self.assertEqual(set(course.habilidades.values_list('pk', flat=True)), {skill.pk for skill in skills})
+        edit = CursoForm(instance=course)
+        self.assertEqual(edit.fields['horario'].widget.decompress(edit.initial['horario']), [['Martes', 'Jueves'], '18:00', '20:00'])

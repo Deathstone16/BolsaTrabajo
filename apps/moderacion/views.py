@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.views.decorators.http import require_GET
 from django.conf import settings
 from django.urls import reverse
@@ -27,6 +28,13 @@ from ofertas import services as ofertas_services
 from .forms import RechazarEmpresaForm
 from . import services
 from .models import SolicitudEmpresa
+
+
+def paginate_admin(request, context, key, per_page=10):
+    """Paginate after filtering, keeping summary counts independent of the page."""
+    page = Paginator(context[key], per_page).get_page(request.GET.get('page'))
+    context.update({key: page, 'pagina': page})
+    return context
 
 
 @staff_member_required(login_url='login')
@@ -58,7 +66,7 @@ def solicitudes_empresas(request):
     else:
         estado = ''
     return render(request, 'moderacion/solicitudes_empresas.html', {
-        'pagina': Paginator(solicitudes, 25).get_page(request.GET.get('page')),
+        'pagina': Paginator(solicitudes, 10).get_page(request.GET.get('page')),
         'estado': estado,
         'reminder_hours': settings.IEN_COMPANY_REMINDER_HOURS,
     })
@@ -91,8 +99,16 @@ staff_required = user_passes_test(es_staff, login_url='/usuarios/login/')
 @staff_required
 def listar_cursos(request):
     """Muestra el listado y resumen de cursos administrables."""
-    return render(request, 'moderacion/listar_cursos.html',
-                  services.listar_cursos_contexto())
+    context = services.listar_cursos_contexto()
+    q, tipo = request.GET.get('q', '').strip()[:120], request.GET.get('tipo', '')
+    if q:
+        context['cursos'] = context['cursos'].filter(nombre__icontains=q)
+    if tipo in dict(Curso.TIPO_CHOICES):
+        context['cursos'] = context['cursos'].filter(tipo=tipo)
+    else:
+        tipo = ''
+    context.update(q=q, tipo=tipo)
+    return render(request, 'moderacion/listar_cursos.html', paginate_admin(request, context, 'cursos', 9))
 
 
 @staff_required
@@ -152,7 +168,7 @@ def dar_de_baja_curso(request, curso_id):
 def listar_categorias(request):
     """Muestra las categorías administrables."""
     return render(request, 'moderacion/listar_categorias.html',
-                  services.listar_categorias_contexto())
+                  paginate_admin(request, services.listar_categorias_contexto(), 'categorias'))
 
 
 @staff_required
@@ -220,8 +236,23 @@ def dar_de_baja_categoria(request, categoria_id):
 @staff_member_required(login_url='login')
 def listar_empresas(request):
     """Muestra las empresas y sus estados de validación."""
-    return render(request, 'moderacion/listar_empresas.html',
-                  services.listar_empresas_contexto())
+    context = services.listar_empresas_contexto()
+    q, estado = request.GET.get('q', '').strip()[:120], request.GET.get('estado', '')
+    if q:
+        normalized_cuit = ''.join(c for c in q if c.isdigit())
+        company_filter = Q(nombre_empresa__icontains=q) | Q(cuit__icontains=q)
+        if normalized_cuit and all(c.isdigit() or c in ' -' for c in q):
+            from django.db.models.functions import Replace
+            from django.db.models import Value
+            context['empresas'] = context['empresas'].annotate(search_cuit=Replace(Replace('cuit', Value('-'), Value('')), Value(' '), Value('')))
+            company_filter |= Q(search_cuit__icontains=normalized_cuit)
+        context['empresas'] = context['empresas'].filter(company_filter)
+    if estado in ('pendiente', 'aprobado', 'rechazado'):
+        context['empresas'] = context['empresas'].filter(estado_validacion=estado)
+    else:
+        estado = ''
+    context.update(q=q, estado=estado)
+    return render(request, 'moderacion/listar_empresas.html', paginate_admin(request, context, 'empresas'))
 
 
 @staff_member_required(login_url='login')
@@ -284,8 +315,12 @@ def rechazar_empresa(request, pk):
 def listar_ofertas(request):
     """Lista ofertas moderables con un filtro opcional de estado."""
     estado = request.GET.get('estado', '')
-    return render(request, 'moderacion/ofertas_pendientes.html',
-                  services.listar_ofertas_contexto(estado))
+    context = services.listar_ofertas_contexto(estado)
+    q = request.GET.get('q', '').strip()[:120]
+    if q:
+        context['ofertas'] = context['ofertas'].filter(Q(titulo__icontains=q) | Q(nombre_puesto__icontains=q) | Q(empresa__oferente__nombre_empresa__icontains=q))
+    context['q'] = q
+    return render(request, 'moderacion/ofertas_pendientes.html', paginate_admin(request, context, 'ofertas'))
 
 
 @staff_required
@@ -345,10 +380,10 @@ def listar_habilidades(request, categoria_id):
     """Lista las habilidades asociadas a una categoría."""
     categoria = get_object_or_404(Categoria, id=categoria_id)
     habilidades = ofertas_services.listar_habilidades_por_tipo(categoria_id)
-    return render(request, 'moderacion/listar_habilidades.html', {
+    return render(request, 'moderacion/listar_habilidades.html', paginate_admin(request, {
         'categoria': categoria,
-        'habilidades': habilidades,
-    })
+        'habilidades': habilidades.order_by('nombre', 'pk'),
+    }, 'habilidades'))
 
 
 @staff_required

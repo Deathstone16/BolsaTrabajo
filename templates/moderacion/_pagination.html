@@ -1,0 +1,7 @@
+{% if pagina.has_other_pages %}
+<nav class="ien-admin-pagination" aria-label="Páginas del listado">
+  {% if pagina.has_previous %}<a class="btn-ghost" href="{% querystring page=pagina.previous_page_number %}">Anterior</a>{% endif %}
+  <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}<small>{{ pagina.paginator.count }} resultados</small></span>
+  {% if pagina.has_next %}<a class="btn-ghost" href="{% querystring page=pagina.next_page_number %}">Siguiente</a>{% endif %}
+</nav>
+{% endif %}

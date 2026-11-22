@@ -1,0 +1,10 @@
+<div class="ien-course-schedule" data-course-schedule>
+  <fieldset><legend>Días de cursada <span class="ien-required-marker" aria-hidden="true">*</span></legend>
+    {% include widget.subwidgets.0.template_name with widget=widget.subwidgets.0 %}
+    <p class="ien-required-message" data-schedule-days-error hidden>Elegí al menos un día de cursada.</p>
+  </fieldset>
+  <div class="ien-admin-field-grid">
+    <div><label for="{{ widget.subwidgets.1.attrs.id }}">Desde</label>{% include widget.subwidgets.1.template_name with widget=widget.subwidgets.1 %}</div>
+    <div><label for="{{ widget.subwidgets.2.attrs.id }}">Hasta</label>{% include widget.subwidgets.2.template_name with widget=widget.subwidgets.2 %}</div>
+  </div>
+</div>

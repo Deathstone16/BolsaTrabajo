@@ -6,7 +6,7 @@ para cursos, categorías, empresas y ofertas.
 """
 
 from django.shortcuts import get_object_or_404
-from django.db.models import Count
+from django.db.models import Count, Case, When, Value, IntegerField
 from cursos.models import Curso, Categoria
 from usuarios.models import Oferente
 from ofertas.models import Oferta
@@ -22,7 +22,8 @@ def listar_cursos_contexto():
     """Construye el contexto del listado de cursos y su resumen por tipo."""
     cursos, resumen = cursos_services.listar_cursos_con_resumen()
     return {
-        'cursos': cursos,
+        'cursos': cursos.select_related('categoria').order_by('nombre', 'pk'),
+        'total_cursos': resumen['total'],
         'cursos_presenciales': resumen['presenciales'],
         'cursos_virtuales': resumen['virtuales'],
     }
@@ -39,7 +40,7 @@ def obtener_curso(curso_id):
 
 def listar_categorias_contexto():
     """Construye el contexto con todas las categorías."""
-    return {'categorias': Categoria.objects.annotate(total_habilidades=Count('habilidad')).order_by('nombre')}
+    return {'categorias': Categoria.objects.annotate(total_habilidades=Count('habilidad')).order_by('nombre', 'pk')}
 
 
 # ============================================================
@@ -48,7 +49,9 @@ def listar_categorias_contexto():
 
 def listar_empresas_contexto():
     """Construye el contexto optimizado del listado de empresas."""
-    empresas = Oferente.objects.select_related('usuario').order_by('-usuario__date_joined')
+    empresas = Oferente.objects.select_related('usuario').annotate(
+        review_priority=Case(When(estado_validacion='pendiente', then=Value(0)), default=Value(1), output_field=IntegerField()),
+    ).order_by('review_priority', '-usuario__date_joined', '-pk')
     
     return {
         'empresas': empresas,
@@ -68,7 +71,9 @@ def obtener_empresa(pk):
 def listar_ofertas_contexto(estado=''):
     """Construye listado y estadísticas globales de ofertas para moderación."""
     # Base queryset optimizado
-    base_qs = Oferta.objects.select_related('empresa__oferente', 'categoria').order_by('-fecha_publicacion')
+    base_qs = Oferta.objects.select_related('empresa__oferente', 'categoria').annotate(
+        review_priority=Case(When(estado='pendiente', then=Value(0)), default=Value(1), output_field=IntegerField()),
+    ).order_by('review_priority', '-fecha_publicacion', '-pk')
     
     # Stats globales (SIN filtro) - variables que el template YA usa
     total = Oferta.objects.count()

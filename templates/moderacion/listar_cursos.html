@@ -15,26 +15,16 @@
     </a>
   </div>
 
-  <!-- Buscador y filtro -->
-  <div class="panel p-6 mb-6">
-    <div class="flex flex-col md:flex-row gap-4">
-      <div class="flex-1 relative">
-        <span data-icon="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground"></span>
-        <input type="text" id="course-search" placeholder="Buscar cursos..."
-              class="w-full pl-10 pr-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30" />
-      </div>
-      <div class="relative min-w-[200px]">
-        <span data-icon="filter" class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none"></span>
-        <select id="type-filter"
-                class="w-full pl-10 pr-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 appearance-none">
-          <option value="all">Todos los tipos</option>
-          <option value="Presencial">Presencial</option>
-          <option value="Virtual">Virtual</option>
-          <option value="Hibrido">Hibrido</option>
-        </select>
-      </div>
-    </div>
-  </div>
+  <form method="get" class="panel ien-admin-list-search">
+    <input type="search" name="q" value="{{ q }}" class="input-ien" aria-label="Buscar cursos" placeholder="Buscar cursos…">
+    <select name="tipo" class="input-ien" aria-label="Modalidad">
+      <option value="">Todas las modalidades</option>
+      <option value="Presencial" {% if tipo == 'Presencial' %}selected{% endif %}>Presencial</option>
+      <option value="Virtual" {% if tipo == 'Virtual' %}selected{% endif %}>Virtual</option>
+      <option value="Hibrido" {% if tipo == 'Hibrido' %}selected{% endif %}>Híbrido</option>
+    </select>
+    <button type="submit" class="btn-ien">Buscar</button>
+  </form>
 
   <!-- Grilla de cursos -->
   <div id="courses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -91,11 +81,13 @@
     {% endfor %}
   </div>
 
+  {% include 'moderacion/_pagination.html' %}
+
   <!-- Estadisticas -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
     <div class="panel p-6">
       <p class="text-sm text-muted-foreground mb-1">Total de cursos</p>
-      <p class="text-3xl font-bold tracking-tight text-[#26222E]">{{ cursos|length }}</p>
+      <p class="text-3xl font-bold tracking-tight text-[#26222E]">{{ total_cursos }}</p>
     </div>
     <div class="panel p-6">
       <p class="text-sm text-muted-foreground mb-1">Presenciales</p>
@@ -112,9 +104,4 @@
   </div>
 
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="{% static_v 'js/moderacion.js' %}"></script>
-
 {% endblock %}

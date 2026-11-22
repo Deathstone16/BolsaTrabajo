@@ -1,6 +1,9 @@
 """Formularios administrativos para cursos y categorías."""
 
+import re
+
 from ientrabajo.form_fields import DescripcionField
+
 from django import forms
 from .models import Curso, Categoria
 
@@ -44,14 +47,70 @@ class CourseImageInput(forms.ClearableFileInput):
     template_name = 'cursos/widgets/course_image.html'
 
 
+WEEKDAYS = [(day, day) for day in (
+    'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo',
+)]
+
+
+class CourseScheduleWidget(forms.MultiWidget):
+    template_name = 'cursos/widgets/schedule.html'
+
+    def __init__(self, attrs=None):
+        super().__init__([
+            forms.CheckboxSelectMultiple(choices=WEEKDAYS),
+            forms.TimeInput(format='%H:%M', attrs={'type': 'time', 'aria-label': 'Desde'}),
+            forms.TimeInput(format='%H:%M', attrs={'type': 'time', 'aria-label': 'Hasta'}),
+        ], attrs)
+
+    def decompress(self, value):
+        if value:
+            match = re.fullmatch(r'(.+) de (\d{2}:\d{2}) a (\d{2}:\d{2})', value)
+            if match:
+                days = match[1].split(', ')
+                if all(day in dict(WEEKDAYS) for day in days):
+                    return [days, match[2], match[3]]
+        return [[], None, None]
+
+
+class CourseScheduleField(forms.MultiValueField):
+    widget = CourseScheduleWidget
+
+    def __init__(self, **kwargs):
+        super().__init__(fields=[
+            forms.MultipleChoiceField(choices=WEEKDAYS),
+            forms.TimeField(input_formats=['%H:%M']),
+            forms.TimeField(input_formats=['%H:%M']),
+        ], require_all_fields=True, **kwargs)
+
+    def compress(self, values):
+        if not values:
+            return ''
+        days, start, end = values
+        if end <= start:
+            raise forms.ValidationError('La hora de fin debe ser posterior a la de inicio.')
+        ordered_days = [day for day, _ in WEEKDAYS if day in days]
+        return f"{', '.join(ordered_days)} de {start:%H:%M} a {end:%H:%M}"
+
+
+class CourseSkillsWidget(forms.SelectMultiple):
+    template_name = 'cursos/widgets/skills.html'
+
+
 class CursoForm(forms.ModelForm):
     """Crea o edita los datos y la imagen de un curso."""
+    imagen = forms.ImageField(required=False, label="Imagen", widget=CourseImageInput(attrs={"accept": "image/*", "id": "imagen-input"}))
     descripcion = DescripcionField()
+    horario = CourseScheduleField(label="Horario")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs['class'] = 'input-ien'
+        current = self.initial.get('horario')
+        if current and not self.fields['horario'].widget.decompress(current)[0]:
+            self.fields['horario'].help_text = (
+                f'Horario actual: {current}. Elegí los días y las horas para actualizarlo.'
+            )
 
     class Meta:
         model = Curso
@@ -69,7 +128,7 @@ class CursoForm(forms.ModelForm):
         }
         help_texts = {
             'url_externa': 'Enlace a la página de este curso en el sitio del IEN.',
-            'habilidades': 'Seleccioná las habilidades del curso. Usá Ctrl o Cmd para elegir varias.',
+            'habilidades': 'Agregá las habilidades de a una. Podés quitar cualquiera de la lista.',
         }
         widgets = {
             'nombre': forms.TextInput(attrs={'class': INPUT_CLASS, 'placeholder': 'Nombre del curso'}),
@@ -77,9 +136,9 @@ class CursoForm(forms.ModelForm):
             'imagen': CourseImageInput(attrs={'class': 'w-full px-4 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/30','id':'imagen-input'}),
             'descripcion': forms.Textarea(attrs={'class': INPUT_CLASS, 'rows': 4, 'placeholder': 'Descripcion del curso'}),
             'duracion': forms.TextInput(attrs={'class': INPUT_CLASS, 'placeholder': 'Duración del curso'}),
-            'horario': forms.TextInput(attrs={'class': INPUT_CLASS, 'placeholder': 'Días y horarios'}),
+
             'tipo': forms.Select(attrs={'class': INPUT_CLASS}),
-            'habilidades': forms.SelectMultiple(attrs={'class': INPUT_CLASS, 'size': 4}),
+            'habilidades': CourseSkillsWidget(attrs={'class': INPUT_CLASS}),
             'url_externa': forms.URLInput(attrs={'class': INPUT_CLASS, 'placeholder': 'https://ien.edu.ar/cursos/...'}),
         }
 
