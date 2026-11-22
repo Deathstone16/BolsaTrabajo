@@ -4,7 +4,7 @@
   {% elif oferta.empresa.oferente.logo %}
     <img src="{{ oferta.empresa.oferente.logo.url }}" alt="" width="56" height="56" loading="lazy" decoding="async">
   {% elif oferta.empresa.oferente %}
-    {{ oferta.empresa.oferente.nombre_empresa|slice:":2"|upper }}
+    {{ oferta.empresa.oferente.nombre_empresa|slice:":1"|upper }}
   {% else %}
     IEN
   {% endif %}
