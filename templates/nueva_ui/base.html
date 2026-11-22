@@ -65,7 +65,7 @@
       </noscript>
     {% endif %}
 
-    {% app_back_link %}
+    {% block back_navigation %}{% app_back_link %}{% endblock %}
     {% block content %}{% endblock %}
   </main>
 
