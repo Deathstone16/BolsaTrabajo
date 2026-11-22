@@ -87,6 +87,7 @@ def admin_screen(request, screen_id):
         form.fields['categoria'].choices = [('', 'Seleccionar categoría'), ('0', 'Tecnología')]
         if screen_id == 'ADM-10':
             form.initial['categoria'] = '0'
+            form.initial['habilidades'] = ['0', '1']
         form.fields['habilidades'].choices = [(str(item.pk), item.nombre) for item in skills]
     elif screen_id in ('ADM-13', 'ADM-14'):
         form = CategoriaForm(instance=data['categoria'] if screen_id == 'ADM-14' else None)
@@ -103,4 +104,21 @@ def admin_screen(request, screen_id):
         'habilidades_duras': ['Python', 'Excel'], 'habilidades_blandas': ['Trabajo en equipo'],
         'pagina': Paginator(filtered_applications, 25).get_page(1), 'estado': state, 'reminder_hours': 24,
     }
+    context['total_cursos'] = len(data['cursos'])
+    q = request.GET.get('q', '').strip().casefold()
+    context.update(q=request.GET.get('q', ''), tipo=request.GET.get('tipo', ''))
+    list_keys = {'ADM-01': 'empresas', 'ADM-05': 'ofertas', 'ADM-08': 'cursos', 'ADM-12': 'categorias', 'ADM-16': 'habilidades'}
+    key = list_keys.get(screen_id)
+    if key:
+        items = context[key]
+        if screen_id == 'ADM-01':
+            items = sorted(items, key=lambda company: company.estado_validacion != 'pendiente')
+            context['estado'] = state
+            items = [company for company in items if (not state or company.estado_validacion == state) and (not q or q in company.nombre_empresa.casefold() or q in company.cuit)]
+        elif screen_id == 'ADM-05':
+            items = [offer for offer in items if not q or q in (offer.titulo + offer.empresa.oferente.nombre_empresa).casefold()]
+        elif screen_id == 'ADM-08':
+            items = [course for course in items if (not q or q in course.nombre.casefold()) and (not context['tipo'] or course.tipo == context['tipo'])]
+        page = Paginator(items, 9 if key == 'cursos' else 10).get_page(request.GET.get('page'))
+        context.update({key: page, 'pagina': page})
     return render(request, ADMIN_TEMPLATES[screen_id], context)

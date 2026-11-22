@@ -141,3 +141,46 @@
 .ien-admin-empty-list { padding: 2rem 1.25rem; text-align: center; }
 .ien-admin-empty-list h2 { font-size: 1rem; font-weight: 600; }
 .ien-admin-empty-list p { max-width: 45ch; margin: .5rem auto 0; font-size: .8125rem; line-height: 1.7; color: #756a84; }
+
+/* Course fields keep their labels and controls aligned when errors wrap. */
+.ien-admin-field { align-content: start; }
+.ien-admin-field-grid { align-items: start; }
+.ien-admin-course-page .ien-admin-field > input.input-ien,
+.ien-admin-course-page .ien-admin-field > select.input-ien { height: 3.25rem; padding-block: .65rem; }
+.ien-course-schedule { display: grid; gap: 1rem; }
+.ien-course-schedule legend, .ien-course-schedule .ien-admin-field-grid label { display: block; margin-bottom: .5rem; font-size: .8125rem; color: #514761; }
+.ien-course-schedule fieldset > div { display: flex; flex-wrap: wrap; gap: .5rem 1rem; }
+.ien-course-schedule fieldset > div > div { display: block; }
+.ien-course-schedule fieldset label { display: inline-flex; align-items: center; gap: .4rem; font-size: .875rem; }
+.ien-course-schedule input[type=checkbox] { accent-color: #512da8; width: 1rem; height: 1rem; }
+.ien-course-schedule input[type=time] { height: 3.25rem; }
+.ien-course-skill-add { display: flex; gap: .65rem; align-items: start; }
+.ien-course-skill-add select { flex: 1; }
+.ien-course-skill-add button { flex: none; min-height: 3.25rem; font-size: .875rem; padding: .65rem 1rem; }
+.ien-course-selected-skills { display: flex; flex-wrap: wrap; gap: .5rem; padding: 0; margin: .75rem 0; list-style: none; }
+.ien-course-selected-skills li { display: inline-flex; align-items: center; gap: .5rem; padding: .2rem .3rem .2rem .75rem; background: #eee7f7; border-radius: .65rem; color: #452385; font-size: .875rem; }
+.ien-course-selected-skills button { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: .4rem; font-size: 1.35rem; }
+.ien-course-selected-skills button:hover { background: #ded1ef; }
+.ien-course-image-control { display: grid; grid-template-columns: 10rem minmax(0,1fr); gap: 1.25rem; padding: 1rem; border: 1px solid #ded5e8; border-radius: 1rem; background: #faf8fc; align-items: center; }
+.ien-course-image-preview { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: .65rem; }
+.ien-course-image-actions { min-width: 0; display: grid; justify-items: start; gap: .65rem; }
+.ien-course-image-actions > p:first-child { font-size: .875rem; font-weight: 500; overflow-wrap: anywhere; }
+.ien-course-image-actions input[type=file] { position: absolute; width: 1px; height: 1px; padding: 0; opacity: 0; overflow: hidden; }
+.ien-course-image-picker { min-height: 2.75rem; font-size: .8125rem; padding: .5rem 1rem; cursor: pointer; }
+.ien-course-image-actions:focus-within .ien-course-image-picker { outline: 2px solid #6844ac; outline-offset: 3px; }
+@media (max-width: 480px) { .ien-course-image-control { grid-template-columns: minmax(0,1fr); } .ien-course-image-preview { max-height: 10rem; } }
+
+.ien-course-schedule input[type=checkbox] { padding: 0; border-radius: .2rem; box-shadow: none; }
+
+.ien-admin-list-search { display: flex; align-items: center; gap: .75rem; padding: 1rem; margin-bottom: 1.5rem; }
+.ien-admin-list-search input { flex: 1; min-width: 0; }
+.ien-admin-list-search select { width: auto; max-width: 17rem; }
+.ien-admin-list-search button { flex-shrink: 0; font-size: .875rem; }
+.ien-admin-pending-summary { display: flex; align-items: center; gap: .75rem; padding: 1rem 1.25rem; margin-bottom: 1rem; background: #f0e9fa; color: #452385; border: 1px solid #d8cae9; border-radius: 1rem; font-size: .875rem; }
+.ien-admin-pending-summary strong { font-size: 1.25rem; }
+.ien-admin-pending-summary span:last-child { margin-left: auto; font-size: .8125rem; }
+.ien-admin-pagination { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 1rem; margin: 1.25rem 0; font-size: .8125rem; color: #625670; }
+.ien-admin-pagination > span { text-align: center; }
+.ien-admin-pagination small { display: block; margin-top: .2rem; }
+.ien-admin-pagination .btn-ghost { min-height: 2.75rem; padding: .5rem 1rem; font-size: .8125rem; }
+@media (max-width: 640px) { .ien-admin-list-search { flex-direction: column; align-items: stretch; } .ien-admin-list-search select { width: 100%; max-width: none; } .ien-admin-pending-summary { flex-wrap: wrap; gap: .5rem; } .ien-admin-pending-summary span:last-child { width: 100%; margin: 0; } }

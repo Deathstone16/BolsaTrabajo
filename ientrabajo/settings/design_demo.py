@@ -38,7 +38,7 @@ TEMPLATES = [{
             'django.contrib.messages.context_processors.messages',
             'ientrabajo.context_processors.contacto_ien',
         ],
-        'builtins': ['ientrabajo.templatetags.ien_static'],
+        'builtins': ['ientrabajo.templatetags.ien_static', 'ientrabajo.templatetags.ien_navigation'],
     },
 }]
 LANGUAGE_CODE = 'es-es'

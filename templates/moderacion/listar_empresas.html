@@ -8,15 +8,18 @@
     <p class="text-muted-foreground">Revisá el estado de las empresas registradas en la plataforma.</p>
   </div>
 
-  <!-- Buscador -->
-  <div class="panel p-6 mb-6">
-    <div class="relative">
-      <label for="empresa-search" class="sr-only">Buscar empresas por nombre o CUIT</label>
-      <span data-icon="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground"></span>
-      <input type="search" id="empresa-search" placeholder="Buscar por nombre o CUIT..." aria-controls="empresas-tabla"
-             class="w-full pl-10 pr-4 py-2.5 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
-    </div>
-  </div>
+  <a class="ien-admin-pending-summary" href="?estado=pendiente"><span>Pendientes de validación</span><strong>{{ total }}</strong><span>Revisar pendientes →</span></a>
+  <form method="get" class="panel ien-admin-list-search">
+    <label class="sr-only" for="empresa-search">Buscar empresas por nombre o CUIT</label>
+    <input type="search" class="input-ien" id="empresa-search" name="q" value="{{ q }}" placeholder="Buscar por nombre o CUIT…">
+    <select class="input-ien" name="estado" aria-label="Estado de validación">
+      <option value="">Todos los estados</option>
+      <option value="pendiente" {% if estado == 'pendiente' %}selected{% endif %}>Pendientes</option>
+      <option value="aprobado" {% if estado == 'aprobado' %}selected{% endif %}>Aprobadas</option>
+      <option value="rechazado" {% if estado == 'rechazado' %}selected{% endif %}>Rechazadas</option>
+    </select>
+    <button type="submit" class="btn-ien">Buscar</button>
+  </form>
 
   <!-- Tabla -->
   <div class="ien-company-review-list panel overflow-hidden mb-8">
@@ -71,24 +74,8 @@
     </table>
   </div>
 
-  <!-- Stats -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div class="panel p-6">
-      <p class="text-sm text-muted-foreground mb-1">Pendientes de validación</p>
-      <p class="text-3xl font-bold tracking-tight text-[#26222E]">{{ total }}</p>
-    </div>
-  </div>
 
+  {% include 'moderacion/_pagination.html' %}
 </div>
 
-<script>
-  const searchInput = document.getElementById('empresa-search');
-  searchInput.addEventListener('input', () => {
-    const q = searchInput.value.toLowerCase().trim();
-    const cuit = q.replace(/[^0-9]/g, "");
-    document.querySelectorAll('#empresas-tabla tr[data-nombre]').forEach(row => {
-      row.hidden = !(row.dataset.nombre.includes(q) || (cuit && /^[0-9\s-]+$/.test(q) && row.dataset.cuit.replace(/[^0-9]/g, '').includes(cuit)));
-    });
-  });
-</script>
 {% endblock %}

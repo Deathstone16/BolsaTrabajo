@@ -119,7 +119,7 @@ TEMPLATES = [
             ],
             # {% static_v %} disponible en todas las plantillas: agrega la version
             # del archivo a la URL para que el navegador no use JS/CSS viejo cacheado.
-            'builtins': ['ientrabajo.templatetags.ien_static'],
+            'builtins': ['ientrabajo.templatetags.ien_static', 'ientrabajo.templatetags.ien_navigation'],
         },
     },
 ]

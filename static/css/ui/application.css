@@ -301,3 +301,9 @@
 }
 
 [data-cv-file-picker][hidden], [data-cv-native-upload][hidden] { display: none; }
+
+.ien-page-back { max-width: 80rem; margin: 0 auto; padding: 1rem 2rem 0; }
+.ien-page-back a { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; padding: .4rem .75rem; border: 1px solid #d7cae7; border-radius: 999px; color: #512da8; font-size: .8125rem; font-weight: 500; background: #fffdf9; }
+.ien-page-back a:hover { background: #eee7f7; }
+.ien-page-back [data-icon] { width: 1rem; height: 1rem; }
+@media (max-width: 640px) { .ien-page-back { padding: .75rem 1rem 0; } }
