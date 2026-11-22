@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>{{ title }} | IEN Trabajo</title><style>{% include 'errors/_styles.html' %}</style></head>
+<body><main class="error-page"><div class="error-content">
+{% if preview_id %}<aside class="error-preview"><strong>{{ preview_id }} — {{ title }}</strong><p>Vista de prueba. Datos ficticios; no se provocó un error real.</p><a href="/revision-ui/#{{ preview_id }}">Elegir otra pantalla</a></aside>{% endif %}
+<a class="error-brand" href="/"><span>ien</span> trabajo</a>
+{% include 'errors/_bottle.html' %}
+<p class="error-code">{{ label }}</p><h1>{{ title }}</h1><p class="error-description">{{ description }}</p>
+<div class="error-actions"><a class="error-primary" href="/">Volver al inicio</a>{% if retry_url %}<a href="{{ retry_url }}">Volver a intentar</a>{% endif %}</div>
+</div></main></body></html>

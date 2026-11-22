@@ -5,9 +5,10 @@ Contiene funciones que teñen y envían emails cuando ocurren
 eventos importantes en el ciclo de vida de una oferta.
 """
 
-from django.core.mail import send_mail
+from ientrabajo.mail import send_mail, public_url
 from django.template.loader import render_to_string
 from django.conf import settings
+from django.urls import reverse
 
 
 def notificar_oferta_aprobada(oferta, offerente):
@@ -22,19 +23,19 @@ def notificar_oferta_aprobada(oferta, offerente):
     context = {
         "offerente": offerente,
         "oferta": oferta,
-        "site_name": "BolsaTrabajo IEN",
+        "offer_url": public_url(reverse("detalle_oferta", args=[oferta.pk])),
         "year": 2026,
     }
 
     # 2. Enviar el email usando la configuración ya existente en settings
     send_mail(
-        subject="¡Oferta Aprobada! - BolsaTrabajo IEN",
+        subject="Tu oferta fue aprobada - IEN Trabajo",
         # Versión texto plano (se usa si el HTML no carga)
         message=render_to_string("emails/oferta_aprobada.txt", context),
         # Remitente desde settings DEFAULT_FROM_EMAIL
         from_email=settings.DEFAULT_FROM_EMAIL,
         # A quién va dirigido (email del offerente)
-        recipient_list=[offerente.email],
+        recipient_list=[offerente.usuario.email if hasattr(offerente, "usuario") else offerente.email],
         # Versión HTML (bonito con estilos y links)
         html_message=render_to_string("emails/oferta_aprobada.html", context),
         # Si es False, los errores se silencian (no recomendado en producción)
@@ -56,16 +57,16 @@ def notificar_oferta_rechazada(oferta, offerente, motivo_rechazo=None):
         "offerente": offerente,
         "oferta": oferta,
         "motivo_rechazo": motivo_rechazo or "No especificado",
-        "site_name": "BolsaTrabajo IEN",
+        "offer_url": public_url(reverse("editar_oferta", args=[oferta.pk])),
         "year": 2026,
     }
 
     # 2. Enviar el email
     send_mail(
-        subject="Oferta Rechazada - BolsaTrabajo IEN",
+        subject="Revisión de tu oferta - IEN Trabajo",
         message=render_to_string("emails/oferta_rechazada.txt", context),
         from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[offerente.email],
+        recipient_list=[offerente.usuario.email if hasattr(offerente, "usuario") else offerente.email],
         html_message=render_to_string("emails/oferta_rechazada.html", context),
         fail_silently=False,
     )
@@ -82,12 +83,12 @@ def notificar_perfil_rechazado(oferente, motivo_rechazo=None):
     context = {
         "oferente": oferente,
         "motivo_rechazo": motivo_rechazo or "No especificado",
-        "site_name": "BolsaTrabajo IEN",
+        "edit_url": public_url(reverse("editar_perfil_empresa")),
         "year": 2026,
     }
 
     send_mail(
-        subject="❌ Tu perfil de empresa ha sido rechazado - BolsaTrabajo IEN",
+        subject="Revisión de tu empresa - IEN Trabajo",
         message=render_to_string("emails/perfil_rechazado.txt", context),
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[oferente.usuario.email],

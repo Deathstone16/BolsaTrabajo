@@ -1,10 +1,18 @@
-<article class="panel ien-course-card">
-  <p class="ien-card-meta"><span data-icon="graduation-cap" class="inline h-4 w-4" aria-hidden="true"></span> {{ curso.categoria.nombre }} · {{ curso.get_tipo_display }}</p>
-  {% if course_heading_level == 2 %}<h2>{{ curso.nombre }}</h2>{% else %}<h3>{{ curso.nombre }}</h3>{% endif %}
-  <p class="ien-course-description">{{ curso.descripcion|truncatewords:35 }}</p>
-  <dl class="ien-course-details">
-    <div><dt><span data-icon="clock" class="inline h-4 w-4" aria-hidden="true"></span> Duración</dt><dd>{{ curso.duracion }}</dd></div>
-    <div><dt><span data-icon="calendar" class="inline h-4 w-4" aria-hidden="true"></span> Horario</dt><dd>{{ curso.horario }}</dd></div>
-  </dl>
-  <a href="{% url 'cursos:detalle' curso.pk %}" class="btn-ghost" aria-label="Ver curso: {{ curso.nombre }}">Ver curso <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+<article class="panel ien-course-card ien-course-card-glass">
+  <div class="ien-course-card-media">
+    {% include 'cursos/_cover.html' with curso=curso only %}
+    <p class="ien-course-card-tags">
+      <span><span data-icon="graduation-cap" class="inline h-4 w-4" aria-hidden="true"></span> {{ curso.categoria.nombre }}</span>
+      <span>{{ curso.get_tipo_display }}</span>
+    </p>
+  </div>
+  <div class="ien-course-card-body">
+    {% if course_heading_level == 2 %}<h2>{{ curso.nombre }}</h2>{% else %}<h3>{{ curso.nombre }}</h3>{% endif %}
+    <p class="ien-course-description">{{ curso.descripcion|truncatewords:18 }}</p>
+    <dl class="ien-course-details">
+      <div><dt><span data-icon="clock" class="inline h-4 w-4" aria-hidden="true"></span> Duración</dt><dd>{{ curso.duracion }}</dd></div>
+      <div><dt><span data-icon="calendar" class="inline h-4 w-4" aria-hidden="true"></span> Horario</dt><dd>{{ curso.horario }}</dd></div>
+    </dl>
+    <a href="{% url 'cursos:detalle' curso.pk %}" class="btn-ien ien-course-card-action" aria-label="Ver curso: {{ curso.nombre }}">Ver curso <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+  </div>
 </article>

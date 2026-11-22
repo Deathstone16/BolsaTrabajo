@@ -12,24 +12,11 @@
     </div>
     <div class="px-8 pb-8">
       <div class="flex flex-col md:flex-row gap-6 -mt-12 relative">
-        {% if empresa.logo %}
-          <img src="{{ empresa.logo.url }}" alt="{{ empresa.nombre_empresa }}"
-               class="w-24 h-24 rounded-2xl border-4 border-white shadow-lg object-cover bg-white">
-        {% else %}
-          <div class="w-24 h-24 rounded-2xl border-4 border-white shadow-lg bg-primary/10 flex items-center justify-center text-4xl font-medium text-primary">
-            {{ empresa.nombre_empresa|first }}
-          </div>
-        {% endif %}
+        {% include 'Ofertas/_company_avatar.html' with company=empresa compact=True only %}
         <div class="flex-1 mt-12 md:mt-14">
           <div class="flex items-center gap-3 flex-wrap">
             <h1 class="text-2xl font-bold tracking-tight text-[#26222E]">{{ empresa.nombre_empresa }}</h1>
-        {% include "nueva_ui/partials/_breadcrumbs.html" with current=empresa.nombre_empresa parent_url="mod_listar_empresas" parent_label="Empresas" only %}
-            <span class="px-3 py-1 rounded-full text-xs font-medium
-              {% if empresa.estado_validacion == 'aprobado' %}bg-green-100 text-green-700
-              {% elif empresa.estado_validacion == 'pendiente' %}bg-yellow-100 text-yellow-700
-              {% else %}bg-red-100 text-red-700{% endif %}">
-              {{ empresa.get_estado_validacion_display }}
-            </span>
+            {% include 'moderacion/_company_status.html' with estado=empresa.estado_validacion only %}
           </div>
           <div class="flex flex-wrap gap-3 text-sm text-muted-foreground mt-2">
             {% if empresa.industria %}

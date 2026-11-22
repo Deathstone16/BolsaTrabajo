@@ -36,6 +36,14 @@ class OferenteAdminForm(forms.ModelForm):
         upload = self.cleaned_data.get('banner')
         return normalize_image_upload(upload, max_bytes=5 * 1024 * 1024) if upload and hasattr(upload, 'read') else upload
 
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get('estado_validacion') == Oferente.EstadoValidacion.APROBADO:
+            for campo in ('contacto_nombre', 'contacto_cargo', 'correo_publico'):
+                if campo not in self.errors and not cleaned.get(campo):
+                    self.add_error(campo, 'Completá este dato antes de aprobar la empresa.')
+        return cleaned
+
 @admin.register(Usuario)
 class UsuarioAdmin(UserAdmin):
     ordering = ['email']

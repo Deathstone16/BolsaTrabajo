@@ -1,48 +1,51 @@
-{% comment %}
-  Sidebar de la seccion del postulante. Lo comparten mi_perfil.html y
-  datos_personales.html para que las dos pantallas queden alineadas.
-  Espera `seccion` en el contexto del include: "perfil" o "datos".
-{% endcomment %}
-<aside>
-  <div class="panel sticky top-28 p-6">
-    <div class="flex flex-col items-center gap-2 border-b border-[rgba(110,85,55,0.16)] pb-6">
-      <div class="grid h-16 w-16 place-items-center rounded-full bg-[#512DA8]/10 text-xl font-bold text-[#512DA8]">
-        {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
-      </div>
-      <p class="text-center text-sm font-semibold text-[#26222E]">{{ request.user.get_full_name }}</p>
-      {% if postulante.dni %}
-        <p class="text-center font-mono text-xs text-[#6B645C]">{{ postulante.dni }}</p>
-      {% endif %}
+{# Navegación compartida de las pantallas del postulante. #}
+<aside class="ien-postulante-sidebar{% if seccion == 'cv' %} ien-cv-sidebar{% endif %}">
+  <details class="panel ien-postulante-sidebar-panel ien-responsive-disclosure" open data-responsive-disclosure data-disclosure-breakpoint="1024">
+    <summary class="ien-disclosure-summary"><span data-icon="user" aria-hidden="true"></span><span>Mi perfil</span><span class="ien-disclosure-chevron" aria-hidden="true"></span></summary>
+    <div class="ien-disclosure-content">
+    <div class="ien-postulante-sidebar-identity">
+      {% with foto_perfil=request.user.postulante.foto %}
+        <form method="post" enctype="multipart/form-data" action="{% url 'mi_perfil' %}" class="ien-avatar-form" data-sidebar-avatar>
+          {% csrf_token %}
+          <button type="button" class="ien-avatar-picker" data-avatar-picker disabled>
+            <span class="ien-avatar-picture">
+              {% if foto_perfil %}
+                <img src="{{ foto_perfil.url }}" alt="" width="64" height="64" class="h-16 w-16 rounded-full object-cover">
+              {% else %}
+                <span aria-hidden="true" class="grid h-16 w-16 place-items-center rounded-full bg-[#512DA8]/10 text-xl font-bold text-[#512DA8]">{{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}</span>
+              {% endif %}
+              <span class="ien-avatar-badge" aria-hidden="true"><span data-icon="upload" class="h-3 w-3"></span></span>
+            </span>
+            <span>{% if foto_perfil %}Cambiar foto{% else %}Cargar foto{% endif %}</span>
+          </button>
+          <div class="ien-avatar-fields" data-avatar-fields>
+            <label for="cv-profile-photo" class="sr-only">Seleccionar foto de perfil</label>
+            <input id="cv-profile-photo" type="file" name="foto" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required>
+            <button class="btn-ghost !py-2 text-sm" type="submit">Guardar foto</button>
+          </div>
+          <p data-sidebar-avatar-feedback class="ien-sidebar-avatar-feedback" role="status" hidden></p>
+        </form>
+      {% endwith %}
+      <p class="text-center text-sm font-semibold text-[#26222E]">{{ request.user.get_full_name|default:'Mi perfil' }}</p>
+      {% if request.user.postulante.dni %}<p class="text-center font-mono text-xs text-[#6B645C]">{{ request.user.postulante.dni }}</p>{% endif %}
     </div>
 
-    <nav class="mt-6 flex flex-col gap-1.5">
-      <a href="{% url 'ia:perfil_profesional' %}"
-         class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors {% if seccion == 'perfil' %}bg-[#512DA8] font-semibold text-white shadow-md{% else %}text-[#6B645C] hover:bg-[#F3EDE5] hover:text-[#26222E]{% endif %}">
-        <span data-icon="user" class="h-4 w-4"></span> Perfil profesional
+    <nav class="ien-postulante-sidebar-nav" aria-label="Mi perfil">
+      <a href="{% url 'ia:perfil_profesional' %}" class="ien-postulante-nav-link{% if seccion == 'perfil' %} is-active{% endif %}"{% if seccion == 'perfil' %} aria-current="page"{% endif %}>
+        <span class="ien-sidebar-nav-icon" aria-hidden="true"><span data-icon="user"></span></span><span>Perfil profesional</span>
         <span id="cv-analysis-badge" class="ml-auto hidden rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">CV listo</span>
       </a>
-      <a href="{% url 'mi_perfil' %}#cv-analysis"
-         class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors {% if seccion == 'cv' %}bg-[#512DA8] font-semibold text-white shadow-md{% else %}text-[#6B645C] hover:bg-[#F3EDE5] hover:text-[#26222E]{% endif %}">
-        <span data-icon="file-text" class="h-4 w-4"></span> Mi CV y análisis
+      <a href="{% url 'mi_perfil' %}#cv-analysis" class="ien-postulante-nav-link{% if seccion == 'cv' %} is-active{% endif %}"{% if seccion == 'cv' %} aria-current="page"{% endif %}>
+        <span class="ien-sidebar-nav-icon" aria-hidden="true"><span data-icon="file-text"></span></span><span>Mi CV y análisis</span>
       </a>
-      <a href="{% url 'datos_personales' %}"
-         class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors {% if seccion == 'datos' %}bg-[#512DA8] font-semibold text-white shadow-md{% else %}text-[#6B645C] hover:bg-[#F3EDE5] hover:text-[#26222E]{% endif %}">
-        <span data-icon="sliders" class="h-4 w-4"></span> Mis datos personales
+      <a href="{% url 'datos_personales' %}" class="ien-postulante-nav-link{% if seccion == 'datos' %} is-active{% endif %}"{% if seccion == 'datos' %} aria-current="page"{% endif %}>
+        <span class="ien-sidebar-nav-icon" aria-hidden="true"><span data-icon="sliders"></span></span><span>Mis datos personales</span>
       </a>
-
-      {% comment %}
-        Estas dos venian del mockup con href="#": todavia no tienen vista ni
-        modelo. Se muestran sin enlace para no prometer una pantalla que no esta.
-      {% endcomment %}
-      <a href="{% url 'favoritos' %}"
-        class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors {% if seccion == 'favoritos' %}bg-[#512DA8] font-semibold text-white shadow-md{% else %}text-[#6B645C] hover:bg-[#F3EDE5] hover:text-[#26222E]{% endif %}">
-        <span data-icon="bookmark" class="h-4 w-4"></span> Favoritos
-        <span class="ml-auto font-mono text-[10px] uppercase">guardados</span>
+      <a href="{% url 'favoritos' %}" class="ien-postulante-nav-link{% if seccion == 'favoritos' %} is-active{% endif %}"{% if seccion == 'favoritos' %} aria-current="page"{% endif %}>
+        <span class="ien-sidebar-nav-icon" aria-hidden="true"><span data-icon="bookmark"></span></span><span>Favoritos</span>
       </a>
-      <span class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#6B645C]/60">
-        <span data-icon="trending-up" class="h-4 w-4"></span> Brecha de habilidades
-        <span class="ml-auto font-mono text-[10px] uppercase">pronto</span>
-      </span>
     </nav>
-  </div>
+    </div>
+  </details>
 </aside>
+<script src="{% static_v 'js/sidebar-avatar.js' %}" defer></script>

@@ -38,6 +38,9 @@ def registro(request):
                     password=form.cleaned_data['password1'],
                     nombre_empresa=form.cleaned_data['nombre_empresa'],
                     cuit=form.cleaned_data['cuit'],
+                    contacto_nombre=form.cleaned_data['contacto_nombre'],
+                    contacto_cargo=form.cleaned_data['contacto_cargo'],
+                    correo_publico=form.cleaned_data['correo_publico'],
                 )
             else:
                 services.registrar_postulante(
@@ -125,11 +128,12 @@ def datos_personales(request):
 
 
 @login_required
-@postulante_required
 def perfil_oferente(request, pk):
-    """Muestra el perfil público de una empresa aprobada."""
+    """Permite al postulante consultar empresas y al oferente ver su propio perfil."""
     oferente = get_object_or_404(Oferente, pk=pk)
-    ofertas = oferente.usuario.oferta_set.filter(estado='activa')
+    if not (request.user.is_staff or hasattr(request.user, 'postulante') or oferente.usuario_id == request.user.pk):
+        return redirect('home')
+    ofertas = oferente.usuario.oferta_set.filter(estado='activa', es_confidencial=False)
     return render(request, 'Ofertas/perfil_oferente_publico.html', {
         'oferente': oferente,
         'ofertas': ofertas,
@@ -139,6 +143,7 @@ def perfil_oferente(request, pk):
 def datos_personales_exitoso(request):
     """Confirma la actualización de los datos personales."""
     return render(request, 'usuarios/exito.html', {
+        'mostrar_menu_postulante': True,
         'titulo': '¡Datos guardados!',
         'mensaje': 'Tu información personal fue actualizada correctamente.',
         'link_url': reverse('datos_personales'),

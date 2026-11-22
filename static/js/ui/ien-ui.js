@@ -7,6 +7,8 @@
   "use strict";
 
   var ICONS = {
+    "instagram": '<rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><path d="M17.5 6.5h.01"></path>',
+    "facebook": '<path d="M14 21v-8h3l.5-4H14V7c0-1.2.4-2 2-2h2V1.5A23 23 0 0 0 15 1c-3 0-5 1.8-5 5v3H7v4h3v8"></path>',
     "search": '<circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>',
     "arrow-right": '<path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path>',
     "arrow-up-right": '<path d="M7 17L17 7"></path><path d="M8 7h9v9"></path>',
@@ -114,9 +116,109 @@
     var burger = document.querySelector(".nav-burger");
     var mobile = document.querySelector(".nav-mobile");
     if (!burger || !mobile) return;
-    burger.addEventListener("click", function () { mobile.classList.toggle("hidden"); });
+    var isOpen = !mobile.classList.contains('hidden');
+    var animation = null;
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    mobile.inert = !isOpen;
+    function setOpen(open, immediate) {
+      isOpen = open;
+      burger.setAttribute("aria-expanded", String(open));
+      burger.setAttribute('aria-label', open ? 'Cerrar menú principal' : 'Menú principal');
+      mobile.inert = !open;
+      mobile.setAttribute('aria-hidden', String(!open));
+      var wasHidden = mobile.classList.contains('hidden');
+      var startHeight = wasHidden ? 0 : mobile.getBoundingClientRect().height;
+      var startStyle = window.getComputedStyle(mobile);
+      var start = {
+        height: startHeight + 'px', opacity: wasHidden ? 0 : startStyle.opacity,
+        paddingTop: wasHidden ? '0px' : startStyle.paddingTop,
+        paddingBottom: wasHidden ? '0px' : startStyle.paddingBottom,
+        borderTopWidth: wasHidden ? '0px' : startStyle.borderTopWidth,
+      };
+      if (animation) { animation.cancel(); animation = null; }
+      if (immediate || reducedMotion.matches || !mobile.animate) {
+        mobile.classList.toggle('hidden', !open);
+        mobile.style.removeProperty('overflow');
+        return;
+      }
+      mobile.classList.remove('hidden');
+      var targetStyle = window.getComputedStyle(mobile);
+      var end = {
+        height: open ? mobile.getBoundingClientRect().height + 'px' : '0px',
+        opacity: open ? 1 : 0,
+        paddingTop: open ? targetStyle.paddingTop : '0px',
+        paddingBottom: open ? targetStyle.paddingBottom : '0px',
+        borderTopWidth: open ? targetStyle.borderTopWidth : '0px',
+      };
+      mobile.style.overflow = 'hidden';
+      animation = mobile.animate([start, end], {duration: open ? 260 : 200, easing: 'cubic-bezier(.22, 1, .36, 1)'});
+      animation.onfinish = function () {
+        mobile.classList.toggle('hidden', !isOpen);
+        mobile.style.removeProperty('overflow');
+        animation = null;
+      };
+    }
+    burger.addEventListener("click", function () { setOpen(!isOpen); });
     mobile.addEventListener("click", function (e) {
-      if (e.target.closest("a")) mobile.classList.add("hidden");
+      if (e.target.closest("a")) setOpen(false);
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && isOpen) { setOpen(false); burger.focus(); }
+    });
+    document.addEventListener('click', function (event) {
+      if (isOpen && !mobile.contains(event.target) && !burger.contains(event.target)) setOpen(false);
+    });
+    window.addEventListener('resize', function () {
+      if (isOpen && window.getComputedStyle(burger).display === 'none') setOpen(false, true);
+    });
+  }
+
+  function initCourseFilters() {
+    document.querySelectorAll('[data-course-filters]').forEach(function (details) {
+      var summary = details.querySelector('summary');
+      var panel = details.querySelector('[data-course-filter-panel]');
+      var form = details.closest('form');
+      var isOpen = details.open;
+      var animation = null;
+      var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      panel.inert = !isOpen;
+      summary.setAttribute('aria-expanded', String(isOpen));
+      function setOpen(open) {
+        isOpen = open;
+        panel.inert = !open;
+        summary.setAttribute('aria-expanded', String(open));
+        var style = window.getComputedStyle(panel);
+        var start = animation ? {opacity: style.opacity, transform: style.transform}
+          : {opacity: open ? 0 : 1, transform: open ? 'translateY(-8px)' : 'translateY(0)'};
+        if (animation) { animation.cancel(); animation = null; }
+        if (reducedMotion.matches || !panel.animate) { details.open = open; return; }
+        details.open = true;
+        animation = panel.animate([start, {opacity: open ? 1 : 0, transform: open ? 'translateY(0)' : 'translateY(-8px)'}], {
+          duration: open ? 220 : 160, easing: 'cubic-bezier(.22, 1, .36, 1)',
+        });
+        animation.onfinish = function () { details.open = isOpen; animation = null; };
+      }
+      summary.addEventListener('click', function (event) { event.preventDefault(); setOpen(!isOpen); });
+      document.addEventListener('click', function (event) {
+        if (isOpen && !form.contains(event.target)) setOpen(false);
+      });
+      details.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && isOpen) { setOpen(false); summary.focus(); }
+      });
+    });
+  }
+
+  function initCuentaEmpresa() {
+    document.querySelectorAll('.ien-employer-account').forEach(function (menu) {
+      document.addEventListener('click', function (event) {
+        if (!menu.contains(event.target)) menu.open = false;
+      });
+      menu.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+          menu.open = false;
+          menu.querySelector('summary').focus();
+        }
+      });
     });
   }
 
@@ -365,11 +467,29 @@
     });
   }
 
+  // Si falta un archivo de portada, se conserva la alternativa decorativa.
+  function initCourseCovers() {
+    document.querySelectorAll('[data-course-cover] img').forEach(function (image) {
+      var cover = image.closest('[data-course-cover]');
+      function update() {
+        var loaded = image.naturalWidth > 0;
+        cover.classList.toggle('ien-course-cover--loaded', loaded);
+        cover.classList.toggle('ien-course-cover--unavailable', !loaded);
+      }
+      image.addEventListener('load', update);
+      image.addEventListener('error', update);
+      if (image.complete) update();
+    });
+  }
+
   function init() {
     injectIcons(document);
+    initCourseCovers();
     initReveal(document);
     startCounters(document);
     initBurger();
+    initCourseFilters();
+    initCuentaEmpresa();
     initFavoritos();
     initMensajesDjango();
     initAvisoPendiente();

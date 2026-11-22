@@ -1,0 +1,219 @@
+/* Shared visual language for application pages. Landing and access screens
+   retain their own layouts; colors for errors and validation stay semantic. */
+.ien-app-page {
+  --background: #f1f4fa;
+  --foreground: #251a43;
+  --card: #fffdf8;
+  --muted: #eee8f5;
+  --accent: #e9f1e6;
+  --muted-foreground: #595367;
+  --border: #c6bbd3;
+  --input-background: #fffefa;
+  --page-outline: #83749c;
+  --page-shadow: 0 4px 0 #251a4326, 0 14px 32px -18px #251a4354;
+  background: var(--background);
+  color: var(--foreground);
+}
+.ien-app-page #global-nav { background: #eaf0f9; border-bottom-color: #251a431a; }
+.ien-app-page .ien-page-content { min-height: 65dvh; }
+.ien-app-page .ien-page-content [class~="bg-[#F8F3F0]"] { background-color: var(--background); }
+.ien-app-page .ien-page-content h1 {
+  color: var(--foreground);
+  font-size: clamp(1.85rem, 3.5vw, 2.75rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -.04em;
+  overflow-wrap: anywhere;
+}
+.ien-app-page .ien-page-content :is(h2, h3, h4) { color: var(--foreground); }
+.ien-app-page .ien-page-content :is([class~="text-[#26222E]"], .text-foreground) { color: var(--foreground); }
+.ien-app-page .ien-page-content [class~="text-[#6B645C]"] { color: var(--muted-foreground); }
+.ien-app-page .ien-page-content .panel {
+  border-color: var(--page-outline);
+  border-radius: 1.15rem;
+  background: var(--card);
+  box-shadow: var(--page-shadow);
+}
+.ien-app-page .ien-page-content .panel .panel { border-color: var(--border); box-shadow: none; }
+.ien-app-page .ien-page-content :is(.input-ien, input.bg-input-background, select.bg-input-background, textarea.bg-input-background) {
+  background-color: var(--input-background);
+  border-color: #a89bb9;
+  border-radius: .75rem;
+  color: var(--foreground);
+}
+.ien-app-page .ien-page-content .input-ien:focus { border-color: var(--primary); background: #fffefa; box-shadow: 0 0 0 3px #512da81a; }
+.ien-app-page .ien-page-content :is(input, select, textarea)[aria-invalid="true"] { border-color: #b91c1c; }
+.ien-app-page .ien-page-content .btn-ien { border: 1px solid #43218f; box-shadow: 0 3px 0 #251a4333; }
+.ien-app-page .ien-page-content .btn-ghost { border-color: var(--page-outline); background: var(--card); color: var(--primary); }
+.ien-app-page .ien-page-content .btn-ghost:hover { border-color: var(--primary); background: #eee8f5; }
+.ien-app-page .ien-page-content .btn-sun { border: 1px solid var(--page-outline); box-shadow: 0 3px 0 #251a4326; }
+.ien-app-page .ien-page-content :is(button, input, select, textarea, a):focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+.ien-app-page .ien-page-content button:disabled { transform: none; box-shadow: none; }
+.ien-app-page .ien-page-content .chip { background: #eee8f5; color: #595367; box-shadow: none; }
+
+/* Employment search and saved offers. */
+.ien-app-page .ien-design-jobs .ien-jobs-heading { background: #ebe5f7; border-bottom: 1px solid #c6bbd3; }
+.ien-app-page .ien-job-search { border: 1px solid var(--page-outline); background: var(--card); border-radius: 1.15rem; box-shadow: 0 3px 0 #251a4326; }
+.ien-app-page .ien-job-search-field { background: #f1edf7; }
+.ien-app-page .ien-design-jobs #filtros-form { background: #e9f1e6; border-color: var(--page-outline); }
+.ien-app-page .ien-page-content .ien-job-card {
+  border: 1px solid var(--page-outline);
+  border-radius: 1.15rem;
+  background: var(--card);
+  box-shadow: var(--page-shadow);
+}
+.ien-app-page .ien-design-jobs .ien-job-card:nth-child(even) { background: var(--card); }
+.ien-app-page .ien-job-title { color: var(--foreground); }
+.ien-app-page .ien-job-card > [aria-hidden="true"] { display: none; }
+.ien-app-page .ien-page-content .ien-job-open { border-color: var(--page-outline); background: var(--card); }
+
+/* Courses use the same paper cards and pastel covers as the landing. */
+.ien-app-page .ien-course-grid-glass { grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+.ien-app-page .ien-page-content .ien-course-card { max-width: 26rem; }
+.ien-app-page .ien-page-content .ien-course-card-glass { border-color: var(--page-outline); background: var(--card); box-shadow: var(--page-shadow); border-radius: 1.15rem; }
+.ien-app-page .ien-course-card-media { background: #e7ddf6; }
+.ien-app-page .ien-course-card-body { background: var(--card); backdrop-filter: none; -webkit-backdrop-filter: none; }
+.ien-app-page .ien-page-content .ien-course-filters { background: #ebe5f7; }
+.ien-app-page .ien-course-pagination a { border-color: var(--page-outline); background: var(--card); }
+
+/* Profile and employer forms: quiet secondary surfaces, consistent borders. */
+.ien-app-page .ien-page-content .ien-postulante-sidebar-panel { background: #e9f1e6; }
+.ien-app-page .ien-postulante-nav-link.is-active { background: var(--card); border-color: var(--page-outline); color: var(--primary); box-shadow: 0 2px 0 #251a4326; }
+.ien-app-page .ien-postulante-nav-link:not(.is-active, .is-disabled):hover { background: #fffdf899; }
+.ien-app-page .ien-design-cv .ien-profile-next { background: var(--card); border-color: var(--page-outline); }
+.ien-app-page .ien-cv-dropzone { background: #f4f0fa; border-color: var(--page-outline); }
+.ien-app-page .ien-company-contact { background: #e9f1e6; }
+.ien-app-page .ien-company-cover-header { background: #e7ddf6; }
+.ien-app-page .ien-company-website { border-radius: 999px; }
+.ien-app-page .ien-requirement-section { background: #f7f4fb; border-color: var(--border); }
+.ien-app-page .ien-company-contact-form { background: #f7efdf; }
+
+/* Management tables scroll within their cards instead of widening the page. */
+.ien-app-page .ien-page-content .ien-table-scroll { overflow-x: auto; overscroll-behavior-x: contain; }
+.ien-table-scroll table { min-width: 42rem; }
+.ien-app-page .ien-table-scroll thead { background: #e7ddf6; color: var(--foreground); }
+.ien-app-page .ien-table-scroll th { font-weight: 600; }
+.ien-app-page .ien-table-scroll tbody tr:hover { background: #f1edf7; }
+.ien-app-page .ien-table-scroll td { vertical-align: middle; }
+.ien-app-page .ien-page-content .ien-catalog-add { min-height: 2.75rem; padding: .625rem 1.25rem; font-size: .875rem; white-space: nowrap; }
+.ien-table-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.ien-table-actions form { display: flex; margin: 0; }
+.ien-table-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: .5rem 1rem;
+  border: 1px solid #83749c;
+  border-radius: 999px;
+  background: #fffdf8;
+  color: #512da8;
+  font: 500 .8125rem/1.4 "Poppins", sans-serif;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease;
+}
+.ien-table-action:hover { background: #eee8f5; border-color: #512da8; }
+.ien-table-action-danger { background: #fff4f3; border-color: #d9a3ad; color: #a53548; }
+.ien-table-action-danger:hover { background: #f9e5e6; border-color: #a53548; }
+.ien-catalog-table th:first-child { width: 30%; }
+.ien-catalog-table th:nth-child(2) { width: 15%; }
+.ien-catalog-actions-heading { width: 55%; }
+.ien-catalog-table .ien-table-actions { justify-content: flex-end; }
+.ien-catalog-table .ien-catalog-actions-heading { text-align: right; }
+.ien-category-actions { display: grid; grid-template-columns: minmax(11rem, 1fr) 6rem 6rem; gap: .625rem; max-width: 29rem; margin-left: auto; }
+.ien-category-actions > *, .ien-category-actions button { width: 100%; }
+.ien-table-action-primary { background: #eee8f5; border-color: #b5a3cc; }
+.ien-table-action-primary:hover { background: #e7ddf6; }
+.ien-company-status {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: .45rem;
+  padding: .3rem .7rem;
+  border: 1px solid #d6cba9;
+  border-radius: .5rem;
+  background: #f7efdf;
+  color: #66532d;
+  font-size: .75rem;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.ien-company-status::before { content: ""; flex: 0 0 .35rem; width: .35rem; height: .35rem; border-radius: 50%; background: currentColor; }
+.ien-company-status.is-aprobado { border-color: #c4d4bd; background: #e9f1e6; color: #346444; }
+.ien-company-status.is-rechazado { border-color: #dfb9bf; background: #f9e5e6; color: #92394a; }
+.ien-company-review-list table { table-layout: fixed; }
+.ien-company-review-list thead { background: #e7ddf6; }
+.ien-company-review-list th:first-child { width: 24%; }
+.ien-company-review-list th:nth-child(3) { width: 23%; }
+.ien-company-review-list :is(th, td) { padding: 1rem; overflow-wrap: anywhere; }
+.ien-company-review-list .ien-company-review-name img { flex-shrink: 0; }
+.ien-company-review-name > div > :first-child { flex-shrink: 0; }
+.ien-company-review-actions .ien-table-action { gap: .4rem; padding-inline: .75rem; }
+.ien-company-review-list tr[hidden] { display: none; }
+@media (max-width: 1199px) {
+  .ien-app-page .ien-page-content .ien-company-review-list { background: transparent; border: 0; box-shadow: none; overflow: visible; }
+  .ien-company-review-list table, .ien-company-review-list tbody { display: block; width: 100%; }
+  .ien-company-review-list table { min-width: 0; }
+  .ien-company-review-list thead { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .ien-company-review-list tbody { display: grid; gap: 1.25rem; }
+  .ien-company-review-list tr { display: grid; padding: 1.25rem; border: 1px solid #83749c; border-radius: 1.15rem; background: #fffdf8; box-shadow: var(--page-shadow); }
+  .ien-company-review-list tr:hover { background: #fffdf8; }
+  .ien-company-review-list td { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); align-items: baseline; gap: .75rem; padding: .625rem 0; border: 0; min-width: 0; text-align: left; }
+  .ien-company-review-list td[data-label]::before { content: attr(data-label); color: #595367; font-size: .75rem; font-weight: 500; }
+  .ien-company-review-list .ien-company-review-name { display: block; padding: 0 0 1rem; margin-bottom: .5rem; border-bottom: 1px solid #e0d8e8; color: #251a43; }
+  .ien-company-review-list .ien-company-review-name span { font-size: 1rem; font-weight: 600; }
+  .ien-company-review-list .ien-company-review-actions { display: block; padding: 1rem 0 0; margin-top: .5rem; border-top: 1px solid #e0d8e8; }
+  .ien-company-review-actions .ien-table-action { width: 100%; }
+  .ien-company-review-list .ien-company-review-empty { display: block; padding: 1rem 0; text-align: center; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ien-app-page .ien-page-content :is(.ien-job-card, .ien-course-card-glass):hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 0 #512da82b, 0 18px 32px -18px #43218f66;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ien-app-page .ien-page-content :is(.panel, .ien-job-card, .ien-course-card-glass, .btn-ien) { transition: none; }
+  .ien-app-page .ien-page-content :is(.ien-job-card, .ien-course-card-glass, .btn-ien):hover { transform: none; }
+}
+@media (max-width: 600px) {
+  .ien-app-page .ien-page-content .panel.p-8 { padding: 1.25rem; }
+  .ien-app-page .ien-page-content .ien-job-card { padding: 1.25rem; }
+  .ien-app-page .ien-page-content .ien-job-footer .ien-job-open { width: 100%; margin: .5rem 0 0; justify-content: center; }
+  .ien-app-page .ien-page-content .ien-job-card > div > .flex { gap: .75rem; }
+}
+@media (max-width: 639px) {
+  .ien-app-page .ien-page-content .grid.grid-cols-1 > .col-span-2 { grid-column: 1 / -1; }
+}
+
+.ien-course-detail-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin-top: 1.5rem; }
+.ien-app-page .ien-page-content .ien-course-detail-actions .btn-ien:disabled { background: #eee8f5; color: #6c627b; border-color: #c6bbd3; cursor: not-allowed; }
+@media (max-width: 600px) { .ien-course-detail-actions > * { width: 100%; } }
+
+
+/* Analysis metadata and skill levels are informational, without button shapes. */
+.ien-analysis-date { display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem .65rem; margin-top: 1rem; color: #6b6576; font-size: .8125rem; line-height: 1.7; }
+.ien-analysis-date time { color: #514761; font-weight: 500; }
+.ien-skill-level { flex-shrink: 0; padding-top: .2rem; font-size: .75rem; font-weight: 500; line-height: 1.6; color: #756a84; }
+.ien-study-status { display: block; margin-top: .75rem; color: #756a84; font-size: .75rem; line-height: 1.6; }
+.ien-app-page .ien-analysis-result .chip { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: #756a84; }
+
+.ien-profile-header-description { margin-top: .5rem; color: var(--muted-foreground); font-size: .875rem; line-height: 1.65; }
+.ien-profile-header-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem; margin-top: .75rem; }
+.ien-profile-header-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.ien-favorites-heading { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: .75rem 1rem; }
+.ien-favorites-count { margin-top: .5rem; color: var(--muted-foreground); font-size: .875rem; line-height: 1.65; }
+.ien-favorites-results { margin-top: 1rem; }
+
+/* The analysis and candidate navigation use the landing's outlined icon style. */
+.ien-section-icon { display: inline-grid; place-items: center; flex: 0 0 auto; width: 2.75rem; height: 2.75rem; border: 1px solid #b9a9ce; border-radius: .875rem; background: #eee6f8; color: #512da8; box-shadow: 0 2px 0 #251a431a; }
+.ien-section-icon--sun { background: #fff0ad; border-color: #c9b96f; }
+.ien-section-icon > [data-icon] { width: 1.25rem; height: 1.25rem; stroke-width: 1.75; }
+.ien-sidebar-nav-icon { display: inline-grid; place-items: center; flex: 0 0 auto; width: 1.875rem; height: 1.875rem; border: 1px solid #c8bdd5; border-radius: .625rem; background: #f6f1fb; color: #645276; }
+.ien-sidebar-nav-icon > [data-icon] { width: 1.05rem; height: 1.05rem; stroke-width: 1.75; }
+.ien-postulante-nav-link.is-active .ien-sidebar-nav-icon { color: #512da8; background: #e9dff6; border-color: #b6a1cf; }
+.ien-postulante-sidebar .ien-avatar-badge { background: #ffedaa; color: #43218f; border-color: #fffdf8; box-shadow: 0 1px 0 #83749c; }

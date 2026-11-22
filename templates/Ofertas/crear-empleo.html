@@ -13,14 +13,13 @@
         </div>
         <div>
           <h1 class="text-3xl font-bold tracking-tight text-[#26222E]">Publicar oferta laboral</h1>
-        {% include "nueva_ui/partials/_breadcrumbs.html" with current="Publicar oferta" parent_url="dashboard_empresa" parent_label="Mi panel" only %}
           <p class="mt-1 text-[#6B645C]">Completá el formulario para publicar tu oferta de empleo.</p>
         </div>
       </div>
     </div>
 
     <div class="panel p-8">
-      <form method="post" action="{% url 'crear_oferta' %}">
+      <form data-required-validation method="post" action="{% url 'crear_oferta' %}">
         {% csrf_token %}
         {% include 'Ofertas/_form-oferta.html' with submit_text="Publicar oferta" %}
       </form>
@@ -31,6 +30,7 @@
 
 {% block extra_js %}
   <script src="{% static_v 'js/habilidades.js' %}"></script>
-  <script src="{% static_v 'js/dashboard.js' %}"></script>
+  <script src="{% static_v 'ofertas/requirements.js' %}"></script>
+  <script src="{% static_v 'js/company-validation.js' %}"></script>
   <script src="{% static_v 'js/autocompletar_ubicacion.js' %}"></script>
 {% endblock %}

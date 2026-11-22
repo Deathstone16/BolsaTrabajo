@@ -1,0 +1,15 @@
+<fieldset class="ien-company-contact-form">
+  <legend>Responsable de la empresa</legend>
+  <p class="text-sm text-[#6B645C]">Datos de la persona de contacto. El correo se muestra en el perfil público.</p>
+  <div class="ien-company-contact-fields">
+    {% for field in contact_form %}
+      {% if field.name == 'contacto_nombre' or field.name == 'contacto_cargo' or field.name == 'correo_publico' %}
+        <div>
+          <label for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required %} (opcional){% endif %}</label>
+          {{ field }}
+          {% for error in field.errors %}<p class="text-sm text-red-500" role="alert">{{ error }}</p>{% endfor %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</fieldset>

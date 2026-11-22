@@ -9,7 +9,8 @@ y carga de CV.
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.conf import settings
-from django.core.mail import send_mail
+from ientrabajo.mail import send_mail
+from django.core.validators import validate_email
 from django.db import transaction
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -73,17 +74,23 @@ def registrar_postulante(email, password, first_name, last_name):
     return user
 
 @transaction.atomic
-def registrar_oferente(email, password, nombre_empresa, cuit):
+def registrar_oferente(email, password, nombre_empresa, cuit, contacto_nombre, contacto_cargo, correo_publico):
     """Registra un nuevo usuario y le crea un perfil de Oferente (empresa)."""
+    contacto_nombre = (contacto_nombre or '').strip()
+    contacto_cargo = (contacto_cargo or '').strip()
+    correo_publico = (correo_publico or '').strip()
+    if not contacto_nombre or not contacto_cargo:
+        raise ValidationError('Indicá el nombre y el cargo de la persona responsable.')
+    validate_email(correo_publico)
     user = Usuario.objects.create_user(email=email, password=password)
-    try:
-        Oferente.objects.create(
-            usuario=user,
-            nombre_empresa=nombre_empresa,
-            cuit=cuit
-        )
-    except Exception as a:
-        print()
+    Oferente.objects.create(
+        usuario=user,
+        nombre_empresa=nombre_empresa,
+        cuit=cuit,
+        contacto_nombre=contacto_nombre,
+        contacto_cargo=contacto_cargo,
+        correo_publico=correo_publico,
+    )
     return user
 
 
@@ -129,7 +136,7 @@ def enviar_email_aprobacion(oferente, dashboard_url):
         'contact_email': getattr(settings, 'IEN_CONTACT_EMAIL', ''),
     }
     send_mail(
-        subject='Tu empresa fue aprobada - IEN Empleo',
+        subject='Tu empresa fue aprobada - IEN Trabajo',
         message=render_to_string('emails/perfil_aprobado.txt', contexto),
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[oferente.usuario.email],
@@ -160,7 +167,7 @@ def enviar_a_revision(oferente):
 
 
 def puede_publicar_ofertas(oferente):
-    """Verifica si un oferente puede publicar ofertas (solo empresas aprobadas).
+    """Verifica si un oferente aprobado también informó un responsable.
 
     Args:
         oferente: Instancia del modelo Oferente.
@@ -168,8 +175,7 @@ def puede_publicar_ofertas(oferente):
     Returns:
         bool: True si el estado es aprobado.
     """
-    """Regla de negocio: solo empresas aprobadas pueden publicar."""
-    return oferente.estado_obj.puede_publicar()
+    return oferente.puede_publicar
 
 
 def obtener_url_contacto(email_usuario=None):
@@ -204,7 +210,7 @@ def enviar_email_recuperacion(usuario, request):
     }
 
     send_mail(
-        subject="Recuperación de contraseña - IEN Empleo",
+        subject="Recuperación de contraseña - IEN Trabajo",
         message=render_to_string("emails/reset_email.txt", contexto),
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[usuario.email],

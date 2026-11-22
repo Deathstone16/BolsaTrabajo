@@ -1,0 +1,20 @@
+{% with route=request.resolver_match.url_name namespace=request.resolver_match.namespace %}
+{% if not user.is_staff %}
+<nav class="ien-account-options" aria-label="Opciones de mi cuenta">
+  {% if user.oferente %}
+    {% if user.oferente.estado_validacion != 'pendiente' %}
+    <a class="ien-header-account-link" href="{% url 'perfil_oferente' user.oferente.pk %}"{% if route == 'perfil_oferente' %} aria-current="page"{% endif %}><span data-icon="building" class="h-4 w-4" aria-hidden="true"></span> Ver mi perfil de empresa</a>
+    {% endif %}
+  {% elif user.postulante %}
+    <a class="ien-header-account-link" href="{% url 'ia:perfil_profesional' %}"{% if route == 'perfil_profesional' and namespace == 'ia' %} aria-current="page"{% endif %}><span data-icon="briefcase" class="h-4 w-4" aria-hidden="true"></span> Perfil profesional</a>
+    <a class="ien-header-account-link" href="{% url 'mi_perfil' %}#cv-analysis"><span data-icon="file-text" class="h-4 w-4" aria-hidden="true"></span> Mi CV y análisis</a>
+    <a class="ien-header-account-link" href="{% url 'datos_personales' %}"{% if route == 'datos_personales' %} aria-current="page"{% endif %}><span data-icon="sliders" class="h-4 w-4" aria-hidden="true"></span> Mis datos personales</a>
+    <a class="ien-header-account-link" href="{% url 'favoritos' %}"{% if route == 'favoritos' %} aria-current="page"{% endif %}><span data-icon="bookmark" class="h-4 w-4" aria-hidden="true"></span> Favoritos</a>
+  {% endif %}
+</nav>
+{% endif %}
+<form method="post" action="{% url 'logout' %}" class="form-logout ien-account-options-logout">
+  {% csrf_token %}
+  <button type="submit" class="ien-header-account-link"><span data-icon="log-out" class="h-4 w-4" aria-hidden="true"></span> Cerrar sesión</button>
+</form>
+{% endwith %}

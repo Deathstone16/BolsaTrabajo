@@ -1,59 +1,63 @@
 {% extends 'nueva_ui/base.html' %}
 
 {% block content %}
-<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+<div class="ien-admin-catalog mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
 
-  <div class="mb-8 flex justify-between items-center">
+  <div class="ien-admin-catalog-heading">
     <div>
-      <h1 class="text-3xl font-bold tracking-tight text-[#26222E] mb-2">Gestion de Categorias</h1>
-        {% include "nueva_ui/partials/_breadcrumbs.html" with current="Categorías" only %}
-      <p class="text-muted-foreground">Administra las categorias de los cursos</p>
+      <h1 class="text-3xl font-bold tracking-tight text-[#26222E] mb-2">Categorías y habilidades</h1>
+      <p class="text-muted-foreground">Administrá las categorías de cursos y ofertas, y las habilidades de cada una.</p>
     </div>
     <a href="{% url 'mod_crear_categoria' %}"
-       class="btn-ien !py-2.5 text-sm">
+       class="btn-ien ien-catalog-add">
       <span data-icon="plus" class="h-5 w-5"></span>
-      Añadir categoria
+      Añadir categoría
     </a>
   </div>
 
-  <div class="panel p-6">
-    <table class="w-full text-sm">
+  {% if categorias %}
+  <div class="ien-table-scroll panel ien-admin-catalog-panel ien-admin-desktop-list">
+    <table class="ien-catalog-table ien-admin-catalog-table w-full text-sm">
       <thead>
         <tr class="border-b border-border">
           <th class="text-left py-3 px-4 font-medium text-muted-foreground">Nombre</th>
-          <th class="text-left py-3 px-4 font-medium text-muted-foreground">Acciones</th>
+          <th class="text-left py-3 px-4 font-medium text-muted-foreground">Habilidades</th>
+          <th class="ien-catalog-actions-heading text-left py-3 px-4 font-medium text-muted-foreground">Acciones</th>
         </tr>
       </thead>
       <tbody>
         {% for categoria in categorias %}
         <tr class="border-b border-border hover:bg-muted/50 transition-colors">
-          <td class="py-3 px-4">{{ categoria.nombre }}</td>
-          <td class="py-3 px-4 flex gap-2">
+          <td data-label="Categoría" class="py-3 px-4">{{ categoria.nombre }}</td>
+          <td data-label="Habilidades" class="py-3 px-4">{{ categoria.total_habilidades }}</td>
+          <td data-label="Acciones" class="py-3 px-4">
+            <div class="ien-table-actions ien-category-actions">
             <a href="{% url 'mod_listar_habilidades' categoria.id %}"
-               class="px-3 py-1 bg-secondary/20 text-secondary-foreground rounded-lg hover:bg-secondary/30 transition-colors text-xs">
-              Habilidades
+               class="ien-table-action ien-table-action-primary" aria-label="Gestionar habilidades de {{ categoria.nombre }}">
+              Gestionar habilidades
             </a>
             <a href="{% url 'mod_modificar_categoria' categoria.id %}"
-               class="px-3 py-1 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-xs">
+               class="ien-table-action">
               Editar
             </a>
-            <form method="POST" action="{% url 'mod_dar_de_baja_categoria' categoria.id %}">
-              {% csrf_token %}
-              <button type="submit"
-                    class="px-3 py-1 bg-destructive/10 text-destructive rounded-lg hover:bg-destructive/20 transition-colors text-xs">
-                Eliminar
-              </button>
-            </form>
+            <a href="{% url 'mod_dar_de_baja_categoria' categoria.id %}" class="ien-table-action ien-table-action-danger">Eliminar</a>
+            </div>
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="2" class="py-8 text-center text-muted-foreground">No hay categorias cargadas.</td>
+          <td colspan="3" class="py-8 text-center text-muted-foreground">No hay categorías cargadas.</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+
+  {% include 'moderacion/_catalog_mobile.html' with items=categorias kind='category' %}
+
+  {% else %}
+  <section class="panel ien-admin-empty-list"><h2>Todavía no hay categorías</h2><p>Usá «Añadir categoría» para empezar a organizar cursos y ofertas.</p></section>
+  {% endif %}
 
 </div>
 {% endblock %}

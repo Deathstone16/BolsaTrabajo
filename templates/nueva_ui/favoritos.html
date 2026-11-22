@@ -3,44 +3,38 @@
 {% block title %}Favoritos · IEN Empleo{% endblock %}
 
 {% block content %}
-<section class="bg-[#F8F3F0]">
-  <div class="relative overflow-hidden border-b border-[rgba(110,85,55,0.16)] bg-[#F8F3F0] pb-12 pt-12">
+<div class="min-h-screen bg-[#F8F3F0] py-12">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="ien-postulante-layout">
+      {% include "usuarios/_sidebar_postulante.html" with seccion="favoritos" %}
+      <section class="min-w-0">
+        <header class="ien-favorites-heading">
+          <div>
+            <h1 class="text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl lg:text-5xl">Favoritos</h1>
+            <p data-save-count class="ien-favorites-count">{{ total }} oferta{{ total|pluralize }} guardada{{ total|pluralize }}</p>
+          </div>
+          <a href="{% url 'buscar_empleo' %}" class="btn-ghost">Buscar ofertas <span data-icon="arrow-right" class="h-3 w-3"></span></a>
+        </header>
 
-    <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <p class="kicker">Tus ofertas guardadas</p>
-      <h1 class="mt-3 text-3xl font-bold tracking-tight text-[#26222E] sm:text-4xl lg:text-5xl">Favoritos</h1>
-        {% include "nueva_ui/partials/_breadcrumbs.html" with current="Favoritos" only %}
-    </div>
-  </div>
-
-  <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-    <div class="mb-5 flex items-center justify-between">
-      <p data-save-count class="font-mono text-xs uppercase tracking-widest text-[#6B645C]">
-        {{ total }} oferta{{ total|pluralize }} guardada{{ total|pluralize }}
-      </p>
-      <a href="{% url 'buscar_empleo' %}" class="chip inline-flex items-center gap-1 transition-colors hover:text-[#512DA8]">
-        Buscar ofertas <span data-icon="arrow-right" class="h-3 w-3"></span>
-      </a>
-    </div>
-
+  <div class="ien-favorites-results">
     {% if ofertas %}
       <div id="favoritos-lista" data-save-removes class="space-y-4">
         {% for oferta in ofertas %}
-          <article data-save-card class="group relative overflow-hidden rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#FEFCF9] p-6 transition-all hover:-translate-y-1 hover:border-[#512DA8]/30 hover:shadow-[0_24px_50px_-24px_rgba(81,45,168,0.3)]">
+          <article data-save-card class="ien-job-card group relative overflow-hidden rounded-3xl border border-[rgba(110,85,55,0.16)] bg-[#FEFCF9] p-6 transition-all hover:-translate-y-1 hover:border-[#512DA8]/30 hover:shadow-[0_24px_50px_-24px_rgba(81,45,168,0.3)]">
             <div class="absolute right-0 top-0 h-16 w-16 rounded-bl-[2.5rem] bg-[#512DA8]/5 transition-colors group-hover:bg-[#512DA8]/10" aria-hidden="true"></div>
 
             <div class="relative flex items-start justify-between gap-4">
               <div class="flex items-start gap-4">
-                <div class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#512DA8]/10 text-base font-bold text-[#512DA8]">
-                {% if oferta.empresa.oferente %}{{ oferta.empresa.oferente.nombre_empresa|slice:":2"|upper }}{% else %}IEN{% endif %}
-                </div>
+                {% include 'nueva_ui/partials/_oferta_avatar.html' with oferta=oferta only %}
                 <div>
                     <h3 class="text-lg font-semibold text-[#26222E] transition-colors hover:text-[#512DA8]">
                     {% if oferta.estado == 'activa' %}<a href="{% url 'detalle_oferta' oferta.pk %}">{{ oferta.titulo }}</a>{% else %}{{ oferta.titulo }}{% endif %}
                   </h3>
-                  {% if oferta.empresa.oferente %}
+                  {% if oferta.es_confidencial %}
+                    <p class="mt-0.5 text-sm text-[#6B645C]">Empresa confidencial</p>
+                  {% elif oferta.empresa.oferente %}
                     <p class="mt-0.5 text-sm text-[#6B645C]">{{ oferta.empresa.oferente.nombre_empresa }}</p>
-                {% endif %}
+                  {% endif %}
                 {% if oferta.descripcion %}
                     <p class="mt-1 line-clamp-2 text-sm text-[#6B645C]">{{ oferta.descripcion }}</p>
                 {% endif %}
@@ -83,5 +77,8 @@
       <a href="{% url 'buscar_empleo' %}" class="btn-ien mt-6 !py-3">Buscar empleo</a>
     </div>
   </div>
-</section>
+      </section>
+    </div>
+  </div>
+</div>
 {% endblock %}

@@ -15,9 +15,10 @@ class RechazarEmpresaForm(forms.Form):
     """
     motivo_rechazo = forms.CharField(
         widget=forms.Textarea(attrs={
-            'rows': 4,
-            'placeholder': 'Ej: El CUIT no se corresponde con la empresa declarada...'
+            'rows': 5,
+            'class': 'input-ien ien-admin-rejection-reason',
+            'placeholder': 'Indicá qué datos debe corregir la empresa.'
         }),
         label='Motivo del rechazo',
-        help_text='Explicá al oferente por qué se rechaza su registro.',
+        help_text='La empresa recibirá este motivo para poder corregir sus datos.',
     )

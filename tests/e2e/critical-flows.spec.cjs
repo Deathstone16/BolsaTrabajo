@@ -38,11 +38,18 @@ test('login, edición de requisitos y aislamiento entre empresas', async ({ page
   await expect(page.getByRole('heading', { name: 'Editar oferta', exact: true })).toBeVisible();
   const title = `Oferta E2E ${state.run_id.slice(0, 8)} revisada`;
   await page.locator('input[name="titulo"]').fill(title);
-  await page.getByLabel('Requisitos obligatorios', { exact: true }).fill('Python\nTrabajo en equipo');
-  await page.getByLabel('Requisitos deseables', { exact: true }).fill('Django');
-  await page.getByLabel('Categoría del requisito: Python', { exact: true }).selectOption('technical_skills');
-  await page.getByLabel('Categoría del requisito: Trabajo en equipo', { exact: true }).selectOption('soft_skills');
-  await expect(page.locator('#resumen-requisitos')).toContainText('Python');
+  for (const kind of ['mandatory', 'desirable']) {
+    const list = page.locator(`[data-requirement-list="${kind}"]`);
+    const remove = list.getByRole('button', { name: /^Quitar / });
+    while (await remove.count()) await remove.first().click();
+  }
+  await page.locator('#requirement-entry-mandatory').fill('Python, Trabajo en equipo');
+  await page.locator('#requirement-entry-mandatory').press('Enter');
+  await page.locator('#requirement-entry-desirable').fill('Django');
+  await page.locator('#requirement-entry-desirable').press('Enter');
+  await page.getByLabel('Tipo de requisito: Python', { exact: true }).selectOption('technical_skills');
+  await page.getByLabel('Tipo de requisito: Trabajo en equipo', { exact: true }).selectOption('soft_skills');
+  await expect(page.locator('[data-requirement-list="mandatory"]')).toContainText('Python');
   await snapshot(page, testInfo, 'requisitos-clasificados');
   await page.getByRole('button', { name: 'Guardar cambios', exact: true }).click();
   await expect(page).toHaveURL(/\/ofertas\/dashboard\//);

@@ -71,6 +71,7 @@ def detalle_compatibilidad(request, request_id):
     return render(request, 'matching/detalle.html', {
         'vista_activa': 'buscar', 'match': match, 'result': result,
         'groups': groups, 'breakdown': breakdown,
+        'unused_dimensions': [dimension for dimension in breakdown if not dimension['applicable']],
         'course_recommendations': recommend_courses_for_match(match),
         'mandatory_label': mandatory_labels.get(result.get('mandatory_status'), 'Sin requisitos obligatorios'),
     })

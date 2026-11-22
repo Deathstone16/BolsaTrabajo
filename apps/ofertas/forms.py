@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from uuid import NAMESPACE_URL, uuid5
 import json
+import re
 from .models import Oferta
 from categorias.models import Categoria, Habilidad
 
@@ -16,20 +17,20 @@ class OfertaForm(forms.ModelForm):
     """Valida y persiste los datos utilizados para crear o editar una oferta."""
     descripcion = DescripcionField()
 
-    MAX_POR_SECCION = 10
     categoria = forms.ModelChoiceField(
+        label='Categoría',
         queryset=Categoria.objects.all(),
         required=True,
         empty_label="Seleccionar categoría",
     )
     requisitos_obligatorios = forms.CharField(
         label='Requisitos obligatorios', required=True,
-        help_text='TODO requisito en este campo se considerará obligatorio. Separá cada requisito con un salto de línea. Lo que no sea indispensable va en Requisitos deseables.',
+        help_text='Condiciones indispensables para el puesto. Separá los elementos con Enter, coma o punto y coma.',
         widget=forms.Textarea(attrs={'rows': 5}),
     )
     requisitos_deseables = forms.CharField(
         label='Requisitos deseables', required=False,
-        help_text='Incluí conocimientos o experiencia que suman valor, pero cuya ausencia no implica incumplir un requisito obligatorio.',
+        help_text='Conocimientos que suman valor, pero no son indispensables. Separalos con Enter, coma o punto y coma.',
         widget=forms.Textarea(attrs={'rows': 4}),
     )
     categorias_requisitos = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -41,16 +42,47 @@ class OfertaForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.warnings = []
         if self.instance and self.instance.pk and not self.is_bound:
-            if self.instance.requiere_revision_requisitos and not self.instance.requisitos_deseables:
-                legacy = [item.strip() for item in (self.instance.habilidades_requeridas or '').split(',') if item.strip()]
-                self.initial['requisitos_deseables'] = '\n'.join(legacy)
-            categories = {}
+            sections = {
+                'mandatory': (self.instance.requisitos_obligatorios or '').splitlines(),
+                'desirable': (self.instance.requisitos_deseables or '').splitlines(),
+            }
+            category_by_name = {}
             for item in self.instance.requisitos_estructurados or []:
-                if item.get('source') == 'requisitos_obligatorios':
-                    categories.setdefault('mandatory', []).append(item.get('category', 'technical_skills'))
-            self.initial['categorias_requisitos'] = json.dumps({'mandatory': categories.get('mandatory', [])})
+                if item.get('source') in ('requisitos_obligatorios', 'requisitos_deseables'):
+                    category_by_name[item.get('name', '').casefold()] = item.get('skill_category', item.get('category', 'technical_skills'))
+            seen = {text.strip().casefold() for lines in sections.values() for text in lines if text.strip()}
+            for field, category in (('habilidades_duras', 'technical_skills'), ('habilidades_blandas', 'soft_skills')):
+                for text in (getattr(self.instance, field) or '').split(','):
+                    text = text.strip()
+                    if not text:
+                        continue
+                    if category_by_name.get(text.casefold()) not in self.CATEGORIAS_REQUISITO:
+                        category_by_name[text.casefold()] = category
+                    if text.casefold() not in seen:
+                        sections['desirable'].append(text)
+                        seen.add(text.casefold())
+            if self.instance.requiere_revision_requisitos:
+                for text in (self.instance.habilidades_requeridas or '').split(','):
+                    text = text.strip()
+                    if text and text.casefold() not in seen:
+                        sections['desirable'].append(text)
+                        seen.add(text.casefold())
+            categories = {}
+            for key, field in (('mandatory', 'requisitos_obligatorios'), ('desirable', 'requisitos_deseables')):
+                lines = [text.strip() for text in sections[key] if text.strip()]
+                self.initial[field] = '\n'.join(lines)
+                categories[key] = [category_by_name.get(text.casefold(), 'technical_skills') for text in lines]
+                categories[key] = [value if value in self.CATEGORIAS_REQUISITO else 'technical_skills' for value in categories[key]]
+            self.initial['categorias_requisitos'] = json.dumps(categories)
+        for field in self.fields.values():
+            if not isinstance(field.widget, (forms.HiddenInput, forms.CheckboxInput)):
+                field.widget.attrs['class'] = 'input-ien'
+        for name in ('experiencia_clasificacion', 'educacion_clasificacion'):
+            self.fields[name].label = '¿Es indispensable o deseable?'
+        self.fields['nivel_educativo'].required = False
+        self.fields['ubicacion'].widget.attrs.update({'id': 'input-ubicacion', 'autocomplete': 'off'})
         for field in ('requisitos_obligatorios', 'requisitos_deseables'):
-            self.fields[field].widget.attrs.update({'class': INPUT_CLASS + ' w-full', 'maxlength': 10000})
+            self.fields[field].widget.attrs.update({'class': 'input-ien', 'maxlength': 10000})
 
     class Meta:
         model = Oferta
@@ -61,8 +93,6 @@ class OfertaForm(forms.ModelForm):
             "ubicacion",
             "modalidad",
             "descripcion",
-            "habilidades_duras",
-            "habilidades_blandas",
             "requisitos_obligatorios",
             "requisitos_deseables",
             "categorias_requisitos",
@@ -74,45 +104,36 @@ class OfertaForm(forms.ModelForm):
             "fecha_cierre",
         ]
 
+        labels = {
+            'titulo': 'Título de la oferta', 'nombre_puesto': 'Nombre del puesto',
+            'ubicacion': 'Ubicación', 'categoria': 'Categoría',
+            'descripcion': 'Descripción del puesto', 'fecha_cierre': 'Fecha de cierre',
+            'experiencia_requerida': 'Experiencia', 'nivel_educativo': 'Nivel educativo',
+        }
         widgets = {
-            "fecha_cierre": forms.DateInput(attrs={"type": "date"}),
-            "habilidades_duras": forms.HiddenInput(),
-            "habilidades_blandas": forms.HiddenInput(),
+            "fecha_cierre": forms.DateInput(format='%Y-%m-%d', attrs={"type": "date"}),
             "experiencia_clasificacion": forms.Select(attrs={'class': INPUT_CLASS}),
             "educacion_clasificacion": forms.Select(attrs={'class': INPUT_CLASS}),
         }
 
-    def _validar_tags(self, value, es_duras=False):
-        """Valida las habilidades de una sección y devuelve sus nombres."""
-        tags = [t.strip() for t in value.split(",") if t.strip()]
-        for t in tags:
-            if len(t) < 2 or len(t) > 60:
-                raise forms.ValidationError(f"'{t}' debe tener entre 2 y 60 caracteres.")
-        if len(tags) != len({tag.casefold() for tag in tags}):
-            raise forms.ValidationError("Hay habilidades repetidas en esta sección.")
-        if len(tags) > self.MAX_POR_SECCION:
-            raise forms.ValidationError(f"Máximo {self.MAX_POR_SECCION} habilidades por sección.")
-        if es_duras and len(tags) < 1:
-            raise forms.ValidationError("Agregá al menos 1 habilidad técnica.")
-        return tags
+    def _normalizar_requisitos(self, campo):
+        values = [re.sub(r'\s+', ' ', value).strip() for value in re.split(r'[,;\r\n]+', self.cleaned_data.get(campo, ''))]
+        values = [value for value in values if value]
+        if campo == 'requisitos_obligatorios' and not values:
+            raise forms.ValidationError('Agregá al menos un requisito obligatorio.')
+        if len(values) > 30:
+            raise forms.ValidationError('Podés agregar hasta 30 requisitos por lista.')
+        if any(len(value) < 2 or len(value) > 100 for value in values):
+            raise forms.ValidationError('Cada requisito debe tener entre 2 y 100 caracteres.')
+        if len(values) != len({value.casefold() for value in values}):
+            raise forms.ValidationError('Hay requisitos repetidos. Dejá cada uno una sola vez.')
+        return '\n'.join(values)
 
-    def clean_habilidades_duras(self):
-        value = self.cleaned_data.get("habilidades_duras", "")
-        self._validar_tags(value, es_duras=True)
-        return value
+    def clean_requisitos_obligatorios(self):
+        return self._normalizar_requisitos('requisitos_obligatorios')
 
-    def clean_habilidades_blandas(self):
-        value = self.cleaned_data.get("habilidades_blandas", "")
-        tags_blandas = self._validar_tags(value)
-        duras_value = self.cleaned_data.get("habilidades_duras", "")
-        tags_duras = {t.strip().casefold() for t in duras_value.split(",") if t.strip()}
-        duplicadas = {t.casefold() for t in tags_blandas} & tags_duras
-        if duplicadas:
-            raise forms.ValidationError(
-                "Estas habilidades ya están en la sección técnica: "
-                + ", ".join(sorted(duplicadas))
-            )
-        return value
+    def clean_requisitos_deseables(self):
+        return self._normalizar_requisitos('requisitos_deseables')
 
     def clean_titulo(self):
         """Comprueba que el título tenga una longitud útil para publicación."""
@@ -140,17 +161,22 @@ class OfertaForm(forms.ModelForm):
             raise forms.ValidationError('Revisá la categoría de cada requisito obligatorio.')
         if not isinstance(mapping, dict):
             raise forms.ValidationError('La clasificación de requisitos no es válida.')
-        mandatory = [line.strip() for line in self.cleaned_data.get('requisitos_obligatorios', '').splitlines() if line.strip()]
-        categories = mapping.get('mandatory', [])
-        if not isinstance(categories, list) or len(categories) != len(mandatory) or any(item not in self.CATEGORIAS_REQUISITO for item in categories):
-            raise forms.ValidationError('Elegí una categoría válida para cada requisito obligatorio.')
-        for line in mandatory + [line.strip() for line in self.cleaned_data.get('requisitos_deseables', '').splitlines() if line.strip()]:
-            if len(line) > 100:
-                raise forms.ValidationError('Cada requisito puede tener hasta 100 caracteres. Separá requisitos largos en varias líneas.')
-        return {'mandatory': categories}
+        result = {}
+        for key, field in (('mandatory', 'requisitos_obligatorios'), ('desirable', 'requisitos_deseables')):
+            lines = self.cleaned_data.get(field, '').splitlines()
+            categories = mapping.get(key, ['technical_skills'] * len(lines) if key == 'desirable' else [])
+            if not isinstance(categories, list) or len(categories) != len(lines) or any(not isinstance(item, str) or item not in self.CATEGORIAS_REQUISITO for item in categories):
+                raise forms.ValidationError('Elegí un tipo válido para cada requisito de las dos listas.')
+            result[key] = categories
+        return result
 
     def clean(self):
         cleaned = super().clean()
+        if cleaned.get('educacion_clasificacion') != 'no_solicitado' and not cleaned.get('nivel_educativo'):
+            self.add_error('nivel_educativo', 'Elegí el nivel educativo o marcá la formación como no solicitada.')
+        mandatory_set = {value.casefold() for value in cleaned.get('requisitos_obligatorios', '').splitlines()}
+        if any(value.casefold() in mandatory_set for value in cleaned.get('requisitos_deseables', '').splitlines()):
+            self.add_error('requisitos_deseables', 'Un requisito no puede ser obligatorio y deseable a la vez. Dejalo en una sola lista.')
         description = (cleaned.get('descripcion') or '').casefold()
         mandatory_text = '\n'.join((cleaned.get('requisitos_obligatorios') or '').splitlines()).casefold()
         if any(word in description for word in ('excluyente', 'obligatorio', 'indispensable', 'requisito mínimo')) and not any(word in mandatory_text for word in ('excluyente', 'obligatorio', 'indispensable', 'requisito mínimo')):
@@ -160,9 +186,15 @@ class OfertaForm(forms.ModelForm):
     def save(self, commit=True):
         """Mantiene el campo heredado a partir de las dos secciones nuevas."""
         oferta = super().save(commit=False)
-        oferta.habilidades_requeridas = ", ".join(
-            filter(None, [oferta.habilidades_duras, oferta.habilidades_blandas])
-        )
+        mapping = self.cleaned_data['categorias_requisitos']
+        skills = {'technical_skills': [], 'soft_skills': []}
+        for key, field in (('mandatory', 'requisitos_obligatorios'), ('desirable', 'requisitos_deseables')):
+            for text, category in zip(self.cleaned_data.get(field, '').splitlines(), mapping[key]):
+                if category in skills:
+                    skills[category].append(text)
+        oferta.habilidades_duras = ', '.join(skills['technical_skills'])
+        oferta.habilidades_blandas = ', '.join(skills['soft_skills'])
+        oferta.habilidades_requeridas = ', '.join(filter(None, [oferta.habilidades_duras, oferta.habilidades_blandas]))
         structured = []
         mapping = self.cleaned_data.get('categorias_requisitos', {})
         seen = set()
@@ -181,6 +213,7 @@ class OfertaForm(forms.ModelForm):
                     'category': category,
                     'source': field_name,
                     'name': text[:100],
+                    **({'skill_category': mapping['desirable'][index]} if not mandatory else {}),
                     'mandatory': mandatory,
                     'exclusionary': mandatory and any(word in text.casefold() for word in ('excluyente', 'indispensable', 'obligatorio')),
                 })
@@ -211,17 +244,6 @@ class OfertaForm(forms.ModelForm):
                     'exclusionary': False,
                     **({'minimum_years': years[value]} if value_field == 'experiencia_requerida' else {}),
                 })
-        # Los tags estructurados fuera del textarea obligatorio se clasifican como deseables.
-        for field_name, category in (('habilidades_duras', 'technical_skills'), ('habilidades_blandas', 'soft_skills')):
-            for text in (getattr(oferta, field_name) or '').split(','):
-                text = text.strip()
-                if text and text.casefold() not in seen:
-                    seen.add(text.casefold())
-                    structured.append({
-                        'id': str(uuid5(NAMESPACE_URL, f'ien-offer:desirables:{field_name}:{text.casefold()}')),
-                        'category': 'desirables', 'source': field_name, 'name': text,
-                        'mandatory': False, 'exclusionary': False,
-                    })
         oferta.requisitos_estructurados = structured
         oferta.requiere_revision_requisitos = False
         if commit:
@@ -230,14 +252,20 @@ class OfertaForm(forms.ModelForm):
 
 class HabilidadForm(forms.ModelForm):
     """Formulario administrativo para crear o modificar una habilidad."""
+    tipo_habilidad = forms.ChoiceField(
+        label='Tipo de habilidad',
+        choices=[('D', 'Habilidad técnica'), ('B', 'Habilidad blanda')],
+        widget=forms.Select(attrs={'class': 'input-ien'}),
+    )
     class Meta:
         model = Habilidad
-        fields = ["nombre"]
-        labels = {"nombre": "Nombre"}
+        fields = ["nombre", "tipo_habilidad"]
+        labels = {"nombre": "Nombre de la habilidad", "tipo_habilidad": "Tipo de habilidad"}
         widgets = {
             "nombre": forms.TextInput(
                 attrs={"class": INPUT_CLASS, "placeholder": "Ej. Python"}
             ),
+            "tipo_habilidad": forms.Select(attrs={"class": 'input-ien'}),
         }
 
     def clean_nombre(self):
@@ -245,6 +273,12 @@ class HabilidadForm(forms.ModelForm):
         nombre = self.cleaned_data.get("nombre")
         if nombre and len(nombre) < 2:
             raise forms.ValidationError("El nombre debe tener al menos 2 caracteres.")
+        if nombre:
+            duplicadas = Habilidad.objects.filter(categoria_id=self.instance.categoria_id, nombre__iexact=nombre)
+            if self.instance.pk:
+                duplicadas = duplicadas.exclude(pk=self.instance.pk)
+            if duplicadas.exists():
+                raise forms.ValidationError('Ya existe una habilidad con ese nombre en esta categoría.')
         return nombre
 
     def validate_unique(self):

@@ -6,6 +6,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.mail import EmailMultiAlternatives
 from django.db import DatabaseError
+from django.template.loader import render_to_string
 from django.test import SimpleTestCase, TestCase, override_settings
 from redis import ConnectionError as RedisConnectionError
 
@@ -109,20 +110,42 @@ class HTTPEmailTests(SimpleTestCase):
             BrevoEmailBackend().send_messages([message])
 
 
+class EmailBrandTests(SimpleTestCase):
+    @override_settings(IEN_PUBLIC_URL='https://empleo.example.com')
+    def test_transactional_templates_share_the_public_logo(self):
+        context = {'usuario': {'email': 'persona@example.com'}}
+        for template in (
+            'empresas_pendientes', 'oferta_aprobada', 'oferta_rechazada',
+            'perfil_aprobado', 'perfil_rechazado', 'reset_email',
+        ):
+            with self.subTest(template=template):
+                html = render_to_string(f'emails/{template}.html', context)
+                self.assertIn('src="https://empleo.example.com/static/img/ien-trabajo.png', html)
+                self.assertIn('alt="IEN Trabajo"', html)
+
+    @override_settings(IEN_PUBLIC_URL='')
+    def test_logo_falls_back_to_text_without_a_public_url(self):
+        html = render_to_string('emails/_logo.html')
+        self.assertIn('>IEN Trabajo</span>', html)
+        self.assertNotIn('<img', html)
+
+
 class SupervisorTests(SimpleTestCase):
     @patch('deploy.start.signal.signal')
     @patch('deploy.start.subprocess.run')
     @patch('deploy.start.subprocess.Popen')
     def test_failed_dispatcher_stops_remaining_processes(self, popen, run, signal):
         from deploy.start import run as start
-        children = [Mock(), Mock(), Mock()]
+        children = [Mock(), Mock(), Mock(), Mock()]
         children[0].poll.return_value = None
         children[1].poll.return_value = 1
         children[2].poll.return_value = None
+        children[3].poll.return_value = None
         popen.side_effect = children
         self.assertEqual(start(), 1)
         children[0].terminate.assert_called_once()
         children[2].terminate.assert_called_once()
+        children[3].terminate.assert_called_once()
 
     @patch('deploy.start.signal.signal')
     @patch('deploy.start.subprocess.run')

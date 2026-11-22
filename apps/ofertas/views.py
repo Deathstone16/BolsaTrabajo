@@ -16,10 +16,11 @@ from usuarios.decorators import oferente_required, oferente_validado_required, p
 
 @oferente_required
 def validacion_pendiente(request):
-    """Muestra a la empresa el estado pendiente de validación de su perfil."""
+    """Muestra a la empresa el resultado actual de la revisión de su perfil."""
     oferente = request.user.oferente
-    if oferente.estado_validacion == oferente.EstadoValidacion.APROBADO:
-        return redirect('dashboard_empresa')
+    if oferente.estado_validacion == oferente.EstadoValidacion.APROBADO and not oferente.responsable_completo:
+        messages.warning(request, 'Completá el nombre, el cargo y el correo de contacto del responsable para publicar ofertas.')
+        return redirect('editar_perfil_empresa')
     email_contacto_url = obtener_url_contacto(request.user.email)
     return render(request, 'Ofertas/validacion_pendiente.html', {
         'email_contacto_url': email_contacto_url,
@@ -77,8 +78,11 @@ def editar_oferta(request, pk):
         form = OfertaForm(request.POST, instance=oferta)
         if form.is_valid():
             oferta = form.save(commit=False)
-            oferta.estado = 'pendiente'
-            oferta.save()
+            if oferta.estado == 'finalizada':
+                oferta.save()
+            else:
+                oferta.estado = 'pendiente'
+                oferta.save()
             if es_ajax:
                 return JsonResponse({'success': True})
             return redirect('dashboard_empresa')
@@ -205,8 +209,11 @@ def buscar_empleo(request):
     busqueda = request.GET.get('q', '')
     modalidad = request.GET.get('modalidad', '')
     experiencia = request.GET.get('experiencia', '')
+    ubicacion = request.GET.get('ubicacion', '')
 
-    ofertas = obtener_ofertas_activas(busqueda, modalidad, experiencia)
+    ofertas = obtener_ofertas_activas(
+        busqueda, modalidad, experiencia, ubicacion=ubicacion,
+    )
 
     return render(request, 'nueva_ui/buscar_empleo.html', {
         'vista_activa': 'buscar',
@@ -214,6 +221,7 @@ def buscar_empleo(request):
         'busqueda': busqueda,
         'modalidad': modalidad,
         'experiencia': experiencia,
+        'ubicacion': ubicacion,
         'modalidad_choices': Oferta.MODALIDAD_CHOICES,
         'experiencia_choices': Oferta.EXPERIENCIA_CHOICES,
         'total': ofertas.count(),
