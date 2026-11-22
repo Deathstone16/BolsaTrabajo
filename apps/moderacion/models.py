@@ -1,12 +1,11 @@
 """Historial persistente de solicitudes de aprobación y recordatorios."""
-from datetime import timedelta
-from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
 
 def vencimiento_recordatorio():
-    return timezone.now() + timedelta(hours=settings.IEN_COMPANY_REMINDER_HOURS)
+    # Se conserva el nombre para las migraciones existentes, sin demora de envío.
+    return timezone.now()
 
 
 class SolicitudEmpresa(models.Model):
@@ -23,7 +22,7 @@ class SolicitudEmpresa(models.Model):
 
 
 class ControlRecordatorios(models.Model):
-    """Lease global y frecuencia máxima de resúmenes, también entre procesos."""
+    """Reserva de envío entre procesos y espera breve para reintentos SMTP."""
     clave = models.CharField(max_length=40, primary_key=True, default='empresas')
     reservado_hasta = models.DateTimeField(null=True, blank=True)
     token = models.UUIDField(null=True, blank=True)
