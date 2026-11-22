@@ -1,5 +1,5 @@
 {% extends 'nueva_ui/base.html' %}
-{% load static %}  
+{% load static course_images %}
 {% block content %}
 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
 
@@ -35,9 +35,8 @@
         {% if curso.imagen %}
           <img src="{{ curso.imagen.url }}" alt="{{ curso.nombre }}" class="w-full h-full object-cover"/>
         {% else %}
-          <div class="w-full h-full flex items-center justify-center bg-primary/10">
-            <span data-icon="graduation-cap" class="h-12 w-12 text-primary/40"></span>
-          </div>
+          {% course_default_cover curso as default_cover %}
+          <img src="{{ default_cover }}" alt="" class="w-full h-full object-cover" loading="lazy" decoding="async">
         {% endif %}
       </div>
       <div class="p-6 space-y-4">

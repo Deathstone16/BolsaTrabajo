@@ -1,4 +1,5 @@
-{% load static %}
+{% load course_images %}
+{% course_default_cover curso as default_cover %}
   <div class="ien-course-cover{% if detalle %} ien-course-cover--detail{% endif %}" data-course-cover>
     <span class="ien-course-cover-fallback" aria-hidden="true">
       <span data-icon="graduation-cap" class="ien-course-cover-icon"></span>
@@ -6,6 +7,6 @@
     {% if curso.imagen %}
       <img src="{{ curso.imagen.url }}" alt=""{% if not detalle %} loading="lazy"{% endif %} decoding="async">
     {% else %}
-      <img src="{% static 'img/course-default.svg' %}" alt=""{% if not detalle %} loading="lazy"{% endif %} decoding="async">
+      <img src="{{ default_cover }}" alt=""{% if not detalle %} loading="lazy"{% endif %} decoding="async">
     {% endif %}
   </div>

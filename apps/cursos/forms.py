@@ -6,6 +6,7 @@ from ientrabajo.form_fields import DescripcionField
 
 from django import forms
 from .models import Curso, Categoria
+from .covers import COVER_RULES, COVER_THEMES, course_cover_theme, cached_category_name
 
 INPUT_CLASS = "w-full px-4 py-2 rounded-lg border border-border bg-input-background focus:outline-none focus:ring-2 focus:ring-primary/30"
 
@@ -45,6 +46,17 @@ class CursoFiltroForm(forms.Form):
 
 class CourseImageInput(forms.ClearableFileInput):
     template_name = 'cursos/widgets/course_image.html'
+    cover_theme = 'comunicacion'
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context['widget']['cover_path'] = f'images/cursos/{self.cover_theme}-predeterminada.webp'
+        context['widget']['cover_choices'] = [
+            {'theme': theme, 'path': f'images/cursos/{theme}-predeterminada.webp'}
+            for theme in COVER_THEMES
+        ]
+        context['widget']['cover_rules'] = COVER_RULES
+        return context
 
 
 WEEKDAYS = [(day, day) for day in (
@@ -106,6 +118,9 @@ class CursoForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs['class'] = 'input-ien'
+        self.fields['imagen'].widget.cover_theme = course_cover_theme(
+            self.data.get('nombre', self.initial.get('nombre', '')), cached_category_name(self.instance),
+        )
         current = self.initial.get('horario')
         if current and not self.fields['horario'].widget.decompress(current)[0]:
             self.fields['horario'].help_text = (
