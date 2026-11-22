@@ -19,7 +19,7 @@ Las blandas usan exclusivamente estas diez categorías:
 - Pensamiento crítico
 - Alfabetización en IA
 - Inteligencia emocional
-- Learnability
+- Capacidad de aprendizaje
 - Comunicación
 - Colaboración
 - Adaptabilidad al cambio
@@ -30,7 +30,7 @@ Las blandas usan exclusivamente estas diez categorías:
 No hay un mínimo ni se completan diez por defecto. Las menciones directas conservan
 su origen declarado; las inferencias requieren acciones concretas y citas. Los
 equivalentes inequívocos se agrupan: trabajo en equipo → Colaboración, aprendizaje
-continuo → Learnability, iniciativa → Proactividad. Liderazgo, organización o
+continuo → Capacidad de aprendizaje, iniciativa → Proactividad. Liderazgo, organización o
 atención al detalle no se convierten automáticamente en otro rasgo. El modelo
 debe justificar la correspondencia con una categoría permitida.
 
