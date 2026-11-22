@@ -2,6 +2,6 @@
   {% if company.logo %}
     <img src="{{ company.logo.url }}" alt="{{ company.nombre_empresa }}" width="128" height="128">
   {% else %}
-    <span aria-hidden="true">{{ company.nombre_empresa|slice:':2'|upper }}</span>
+    <span aria-hidden="true">{{ company.nombre_empresa|slice:':1'|upper }}</span>
   {% endif %}
 </div>

@@ -166,7 +166,7 @@
               {% if oferta.empresa.oferente.logo %}
                 <img src="{{ oferta.empresa.oferente.logo.url }}" alt="" class="h-full w-full object-cover" />
               {% else %}
-                {{ oferta.empresa.oferente.nombre_empresa|slice:":2"|upper }}
+                {{ oferta.empresa.oferente.nombre_empresa|slice:":1"|upper }}
               {% endif %}
             </div>
             <div class="min-w-0 flex-1">
