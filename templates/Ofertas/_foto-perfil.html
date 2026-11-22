@@ -3,7 +3,7 @@
   <div class="ien-company-photo-preview">
     <img {% if oferente.logo %}src="{{ oferente.logo.url }}"{% else %}hidden{% endif %}
          alt="Foto de perfil de {{ oferente.nombre_empresa }}" data-photo-preview>
-    <span data-photo-placeholder {% if oferente.logo %}hidden{% endif %}>{{ oferente.nombre_empresa|slice:":2"|upper }}</span>
+    <span data-photo-placeholder {% if oferente.logo %}hidden{% endif %}>{{ oferente.nombre_empresa|slice:":1"|upper }}</span>
   </div>
   <div class="ien-photo-upload-control">
     <input id="id_logo" type="file" name="logo" accept="image/jpeg,image/png,image/webp"

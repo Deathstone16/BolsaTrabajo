@@ -1,5 +1,6 @@
 .ien-offer-detail-container { width: 100%; max-width: 74rem; margin-inline: auto; padding-inline: clamp(1rem, 3vw, 2rem); }
 .ien-offer-detail-header { padding-block: clamp(2rem, 4vw, 3.5rem) 2rem; background: #ebe5f7; border-bottom: 1px solid #d2c7df; }
+.ien-offer-detail-header .ien-page-back { max-width: none; margin: 0 0 1.25rem; padding: 0; }
 .ien-offer-detail-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; }
 .ien-app-page .ien-page-content .ien-offer-detail h1 { max-width: 24ch; font-size: clamp(2rem, 4.5vw, 3.25rem); line-height: 1.1; }
 .ien-offer-confidential-note { margin-top: 1rem; color: #595367; font-size: .875rem; }

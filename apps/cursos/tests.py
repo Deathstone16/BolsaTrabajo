@@ -50,7 +50,7 @@ class CourseFormControlTests(SimpleTestCase):
         form.fields['categoria'].choices = [('', 'Elegir categoría')]
         form.fields['habilidades'].choices = [('1', 'Python'), ('2', 'Excel')]
         self.assertFalse(form.fields['imagen'].required)
-        self.assertIn('course-default.svg', str(form['imagen']))
+        self.assertIn('comunicacion-predeterminada.webp', str(form['imagen']))
         self.assertIn('data-skill-add', str(form['habilidades']))
         self.assertIn('name="horario_0"', str(form['horario']))
         self.assertIn('type="time"', str(form['horario']))
@@ -78,3 +78,30 @@ class StructuredCourseSaveTests(TestCase):
         self.assertEqual(set(course.habilidades.values_list('pk', flat=True)), {skill.pk for skill in skills})
         edit = CursoForm(instance=course)
         self.assertEqual(edit.fields['horario'].widget.decompress(edit.initial['horario']), [['Martes', 'Jueves'], '18:00', '20:00'])
+
+
+class CourseDefaultCoverTests(SimpleTestCase):
+    def test_three_shared_photos_match_course_topics(self):
+        from .covers import course_cover_path
+        for title, category, theme in [
+            ('Python desde cero', '', 'tecnologia'),
+            ('Excel avanzado', 'Tecnología', 'administracion'),
+            ('Redes sociales y marketing', '', 'comunicacion'),
+            ('Curso nuevo', 'Administración', 'administracion'),
+            ('Curso nuevo', '', 'comunicacion'),
+        ]:
+            with self.subTest(title=title):
+                self.assertEqual(course_cover_path(title, category), f'images/cursos/{theme}-predeterminada.webp')
+
+    def test_public_card_uses_default_without_querying_category(self):
+        from django.template.loader import render_to_string
+        course = Curso(nombre='Python inicial', categoria_id=999)
+        html = render_to_string('cursos/_cover.html', {'curso': course})
+        self.assertIn('tecnologia-predeterminada.webp', html)
+
+    def test_uploaded_image_takes_precedence(self):
+        from django.template.loader import render_to_string
+        course = Curso(nombre='Excel', imagen='cursos/propia.webp')
+        html = render_to_string('cursos/_cover.html', {'curso': course})
+        self.assertIn('src="/media/cursos/propia.webp"', html)
+        self.assertNotIn('src="/static/images/cursos/', html)
