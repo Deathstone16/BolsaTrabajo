@@ -13,10 +13,11 @@
   <link rel="stylesheet" href="{% static_v 'css/ui/tailwind-ui.css' %}" />
   <link rel="stylesheet" href="{% static_v 'css/ui/ien-theme.css' %}" />
   <link rel="stylesheet" href="{% static_v 'css/style.css' %}" />
-  {% if cv_notification_token %}<link rel="stylesheet" href="{% static_v 'css/ui/cv-analysis.css' %}" />{% endif %}
+  {% if cv_notification_token or cv_design_assets or design_demo %}<link rel="stylesheet" href="{% static_v 'css/ui/cv-analysis.css' %}" />{% endif %}
   <link rel="stylesheet" href="{% static_v 'css/ui/application.css' %}" />
   <link rel="stylesheet" href="{% static_v 'css/ui/responsive-review.css' %}" />
   <link rel="stylesheet" href="{% static_v 'css/ui/admin-review.css' %}" />
+  <link rel="stylesheet" href="{% static_v 'css/ui/feedback.css' %}" />
   <script src="{% static_v 'js/ui/responsive-disclosures.js' %}" defer></script>
   {% block extra_head %}{% endblock %}
 </head>
@@ -56,6 +57,8 @@
     {% include 'nueva_ui/partials/_footer.html' %}
   {% endblock %}
 
+  <script src="{% static_v 'js/ui/cv-file-picker.js' %}"></script>
+  <script src="{% static_v 'js/ui/cv-progress.js' %}"></script>
   <script src="{% static_v 'js/ui/http.js' %}"></script>
   <script src="{% static_v 'js/ui/ien-ui.js' %}"></script>
   {% if user.is_authenticated and user.is_staff %}

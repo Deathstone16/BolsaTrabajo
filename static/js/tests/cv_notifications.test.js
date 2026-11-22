@@ -90,3 +90,15 @@ test('desconexión activa polling de 10 s y reconexión exponencial', () => {
   state.created[1].onclose({ code: 1006 });
   assert.ok(state.scheduled.some(timer => timer.ms === 2000));
 });
+
+test('el resultado del CV usa el aviso compartido con enlace al perfil', () => {
+  const state = setup();
+  const calls = [];
+  state.context.window.IenUI = {aviso: (...args) => calls.push(args)};
+  state.created[0].onmessage({data: JSON.stringify({type: 'cv.analyzed', payload: {analysis_id: 31, version_cv_id: 1, es_version_actual: true, status: 'completado'}})});
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0][0], 'exito');
+  assert.equal(calls[0][1], 'Tu CV ya está analizado.');
+  assert.equal(calls[0][3].accion.url, '/ia/perfil-profesional/');
+  assert.equal(state.badge.classList.hidden, false);
+});

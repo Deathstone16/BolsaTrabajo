@@ -52,6 +52,7 @@
 .ien-app-page .ien-page-content .chip { background: #eee8f5; color: #595367; box-shadow: none; }
 
 /* Employment search and saved offers. */
+.ien-app-page.ien-jobs-page { background: #ebe5f7; }
 .ien-app-page .ien-design-jobs .ien-jobs-heading { background: #ebe5f7; border-bottom: 1px solid #c6bbd3; }
 .ien-app-page .ien-job-search { border: 1px solid var(--page-outline); background: var(--card); border-radius: 1.15rem; box-shadow: 0 3px 0 #251a4326; }
 .ien-app-page .ien-job-search-field { background: #f1edf7; }
@@ -81,7 +82,7 @@
 .ien-app-page .ien-postulante-nav-link.is-active { background: var(--card); border-color: var(--page-outline); color: var(--primary); box-shadow: 0 2px 0 #251a4326; }
 .ien-app-page .ien-postulante-nav-link:not(.is-active, .is-disabled):hover { background: #fffdf899; }
 .ien-app-page .ien-design-cv .ien-profile-next { background: var(--card); border-color: var(--page-outline); }
-.ien-app-page .ien-cv-dropzone { background: #f4f0fa; border-color: var(--page-outline); }
+.ien-app-page .ien-cv-dropzone { background: transparent; border: 0; }
 .ien-app-page .ien-company-contact { background: #e9f1e6; }
 .ien-app-page .ien-company-cover-header { background: #e7ddf6; }
 .ien-app-page .ien-company-website { border-radius: 999px; }
@@ -217,3 +218,47 @@
 .ien-sidebar-nav-icon > [data-icon] { width: 1.05rem; height: 1.05rem; stroke-width: 1.75; }
 .ien-postulante-nav-link.is-active .ien-sidebar-nav-icon { color: #512da8; background: #e9dff6; border-color: #b6a1cf; }
 .ien-postulante-sidebar .ien-avatar-badge { background: #ffedaa; color: #43218f; border-color: #fffdf8; box-shadow: 0 1px 0 #83749c; }
+
+/* CV progress follows scrolling below the header; dismissal never stops analysis. */
+.ien-cv-progress { position: sticky; top: var(--ien-header-height, 4.5rem); z-index: 45; width: 100%; margin: 0; padding: 1rem max(1rem, calc((100% - 76rem) / 2)); background: transparent; pointer-events: none; }
+.ien-cv-progress[hidden] { display: none; }
+.ien-cv-progress-card { pointer-events: auto; display: grid; grid-template-columns: 2.25rem minmax(0, 1fr) auto 2.75rem; align-items: center; gap: 1rem; padding: 1rem 1.25rem; border: 1px solid #c6bbd3; border-radius: 1.125rem; background: #fffdf8; }
+#cv-analysis-global .ien-cv-thinking-mark { width: 2.25rem; height: 2.25rem; margin: 0; }
+.ien-cv-progress-copy { min-width: 0; }
+.ien-cv-progress-title { margin: 0; color: #514761; font-size: .875rem; font-weight: 600; line-height: 1.6; }
+.ien-cv-progress-description { margin: .125rem 0 0; color: #756a84; font-size: .8125rem; line-height: 1.6; }
+.ien-cv-progress-link { display: inline-flex; align-items: center; gap: .375rem; font-size: .8125rem; font-weight: 600; color: #512da8; white-space: nowrap; }
+.ien-cv-progress-close { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; padding: 0; border: 0; border-radius: 50%; color: #756a84; background: transparent; cursor: pointer; }
+.ien-cv-progress-close [data-icon] { width: 1.125rem; height: 1.125rem; }
+.ien-cv-progress-close:hover { background: #eee8f5; color: #43218f; }
+.ien-cv-progress :is(a, button):focus-visible { outline: 2px solid #512da8; outline-offset: 3px; }
+/* One avatar geometry across every candidate screen, including the mobile CV. */
+.ien-postulante-sidebar .ien-avatar-form { justify-items: center; }
+.ien-postulante-sidebar .ien-avatar-picker { display: grid; justify-items: center; gap: .5rem; }
+.ien-postulante-sidebar .ien-avatar-picture { display: block; flex: none; width: 4.5rem; height: 4.5rem; }
+.ien-postulante-sidebar .ien-avatar-picture > .ien-avatar-image { display: block; width: 100%; height: 100%; padding: 0; border: 3px solid #fffdf8; border-radius: 50%; object-fit: cover; object-position: center; }
+.ien-postulante-sidebar .ien-avatar-picture > .ien-avatar-initials { display: grid; place-items: center; background: #e7ddf6; color: #512da8; font-size: 1.25rem; font-weight: 600; }
+.ien-postulante-sidebar .ien-avatar-badge { right: -.125rem; bottom: -.125rem; }
+.ien-app-page .ien-cv-dropzone { gap: .875rem; padding: 1.75rem 1rem; }
+.ien-cv-dropzone-symbol { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border: 1px solid #d5c7e8; border-radius: 1.125rem; background: #eee8f5; color: #512da8; }
+.ien-cv-dropzone .ien-cv-dropzone-icon { width: 1.5rem; height: 1.5rem; }
+.ien-app-page .ien-cv-dropzone h2 { font-size: 1.125rem; font-weight: 600; }
+.ien-cv-dropzone > p:not(.ien-cv-file-formats) { max-width: 34ch; color: #756a84; font-size: .875rem; line-height: 1.7; }
+.ien-cv-dropzone #form-cv-upload, .ien-cv-dropzone #cv-upload-area { width: min(100%, 20rem); }
+.ien-cv-dropzone .ien-cv-upload-button { width: 100%; min-height: 3rem; padding: .75rem 1.25rem; font-size: .875rem; }
+.ien-cv-native-input { display: block; width: 100%; min-width: 0; padding: .5rem; border: 1px solid #c6bbd3; border-radius: .75rem; color: #756a84; font-size: .8125rem; }
+.ien-cv-native-input::file-selector-button { padding: .5rem .75rem; margin-right: .625rem; border: 0; border-radius: .5rem; background: #eee8f5; color: #512da8; font: inherit; cursor: pointer; }
+.ien-cv-dropzone .ien-cv-file-formats { color: #756a84; font-size: .75rem; line-height: 1.6; }
+@media (max-width: 639px) {
+  .ien-cv-progress-card { grid-template-columns: 2rem minmax(0, 1fr) 2.75rem; gap: .5rem .75rem; padding: .875rem; }
+  #cv-analysis-global .ien-cv-thinking-mark { width: 2rem; height: 2rem; }
+  .ien-cv-progress-title { font-size: .8125rem; }
+  .ien-cv-progress-description { font-size: .75rem; }
+  .ien-cv-progress-close { grid-column: 3; grid-row: 1; align-self: start; }
+  .ien-cv-progress-link { grid-column: 2; grid-row: 2; min-height: 2rem; }
+  .ien-cv-progress-card > .ien-cv-thinking-mark { grid-column: 1; grid-row: 1; align-self: start; }
+  .ien-app-page .ien-cv-dropzone { padding: 1.25rem .25rem; }
+  .ien-cv-upload-desktop-hint { display: none; }
+}
+
+[data-cv-file-picker][hidden], [data-cv-native-upload][hidden] { display: none; }

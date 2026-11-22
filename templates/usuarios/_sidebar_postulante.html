@@ -10,9 +10,9 @@
           <button type="button" class="ien-avatar-picker" data-avatar-picker disabled>
             <span class="ien-avatar-picture">
               {% if foto_perfil %}
-                <img src="{{ foto_perfil.url }}" alt="" width="64" height="64" class="h-16 w-16 rounded-full object-cover">
+                <img src="{{ foto_perfil.url }}" alt="" width="64" height="64" class="ien-avatar-image">
               {% else %}
-                <span aria-hidden="true" class="grid h-16 w-16 place-items-center rounded-full bg-[#512DA8]/10 text-xl font-bold text-[#512DA8]">{{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}</span>
+                <span aria-hidden="true" class="ien-avatar-image ien-avatar-initials">{{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}</span>
               {% endif %}
               <span class="ien-avatar-badge" aria-hidden="true"><span data-icon="upload" class="h-3 w-3"></span></span>
             </span>

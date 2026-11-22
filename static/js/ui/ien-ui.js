@@ -410,16 +410,31 @@
     return c;
   }
 
-  function aviso(tipo, mensaje, duracion) {
+  function aviso(tipo, mensaje, duracion, opciones) {
+    opciones = opciones || {};
     var iconos = { exito: "check-circle", error: "x-circle", info: "info" };
     if (!iconos[tipo]) tipo = "info";
     var el = document.createElement("div");
     el.className = "ien-aviso es-" + tipo;
     el.setAttribute("role", tipo === "error" ? "alert" : "status");
-    el.appendChild(crearIcono(iconos[tipo], "h-5 w-5 shrink-0"));
+    var icono = document.createElement("span");
+    icono.className = "ien-aviso-icono";
+    icono.setAttribute("aria-hidden", "true");
+    icono.appendChild(crearIcono(iconos[tipo], "h-4 w-4"));
+    el.appendChild(icono);
+    var contenido = document.createElement("div");
+    contenido.className = "ien-aviso-contenido";
     var texto = document.createElement("p");
     texto.textContent = mensaje;
-    el.appendChild(texto);
+    contenido.appendChild(texto);
+    if (opciones.accion && /^\/(?!\/)/.test(opciones.accion.url || "")) {
+      var enlace = document.createElement("a");
+      enlace.href = opciones.accion.url;
+      enlace.className = "ien-aviso-enlace";
+      enlace.textContent = opciones.accion.texto || "Ver detalle";
+      contenido.appendChild(enlace);
+    }
+    el.appendChild(contenido);
     var cerrarBtn = document.createElement("button");
     cerrarBtn.type = "button";
     cerrarBtn.className = "ien-aviso-cerrar";
