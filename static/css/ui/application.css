@@ -1,7 +1,7 @@
 /* Shared visual language for application pages. Landing and access screens
    retain their own layouts; colors for errors and validation stay semantic. */
 .ien-app-page {
-  --background: #f1f4fa;
+  --background: #f8f5ed;
   --foreground: #251a43;
   --card: #fffdf8;
   --muted: #eee8f5;
@@ -14,7 +14,7 @@
   background: var(--background);
   color: var(--foreground);
 }
-.ien-app-page #global-nav { background: #eaf0f9; border-bottom-color: #251a431a; }
+.ien-app-page #global-nav { background: #fffdf8; border-bottom-color: #251a431a; }
 .ien-app-page .ien-page-content { min-height: 65dvh; }
 .ien-app-page .ien-page-content [class~="bg-[#F8F3F0]"] { background-color: var(--background); }
 .ien-app-page .ien-page-content h1 {
@@ -52,11 +52,12 @@
 .ien-app-page .ien-page-content .chip { background: #eee8f5; color: #595367; box-shadow: none; }
 
 /* Employment search and saved offers. */
-.ien-app-page.ien-jobs-page { background: #ebe5f7; }
-.ien-app-page .ien-design-jobs .ien-jobs-heading { background: #ebe5f7; border-bottom: 1px solid #c6bbd3; }
+.ien-app-page.ien-jobs-page { background: var(--background); }
+.ien-app-page .ien-design-jobs .ien-jobs-heading { background: var(--background); border-bottom: 1px solid #c6bbd3; }
 .ien-app-page .ien-job-search { border: 1px solid var(--page-outline); background: var(--card); border-radius: 1.15rem; box-shadow: 0 3px 0 #251a4326; }
 .ien-app-page .ien-job-search-field { background: #f1edf7; }
-.ien-app-page .ien-design-jobs #filtros-form { background: #e9f1e6; border-color: var(--page-outline); }
+.ien-app-page .ien-design-jobs .ien-job-filter-panel { overflow: hidden; background: var(--card); }
+.ien-app-page .ien-design-jobs #filtros-form { background: transparent; border-color: var(--page-outline); }
 .ien-app-page .ien-page-content .ien-job-card {
   border: 1px solid var(--page-outline);
   border-radius: 1.15rem;
@@ -267,4 +268,10 @@
 .ien-page-back a { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; padding: .4rem .75rem; border: 1px solid #d7cae7; border-radius: 999px; color: #512da8; font-size: .8125rem; font-weight: 500; background: #fffdf9; }
 .ien-page-back a:hover { background: #eee7f7; }
 .ien-page-back [data-icon] { width: 1rem; height: 1rem; }
-@media (max-width: 640px) { .ien-page-back { padding: .75rem 1rem 0; } }
+/* Keep the return link and the page heading in one compact visual group.
+   Detail pages with their own embedded return link keep their local layout. */
+.ien-app-page main.ien-page-content > .ien-page-back + :is(div, section) { padding-top: .5rem; }
+.ien-app-page main.ien-page-content > .ien-page-back + :is(div, section) h1 { margin-top: 0; }
+.ien-app-page main.ien-page-content > .ien-page-back + .ien-design-jobs > .ien-jobs-heading { padding-top: 0; }
+@media (max-width: 1023px) { .ien-page-back { padding-inline: 1.5rem; } }
+@media (max-width: 639px) { .ien-page-back { padding: 1rem 1rem 0; } }

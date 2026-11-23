@@ -3,7 +3,7 @@
 
 :root {
   --font-size: 16px;
-  --background: #F8F3F0;
+  --background: #f8f5ed;
   --foreground: #26222E;
   --card: #FEFCF9;
   --primary: #512DA8;
@@ -1364,8 +1364,7 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 
 /* Cursos: tarjetas blancas con vidrio suave, inspiradas en Glass Blog Card. */
 .ien-home-courses-section {
-  background: radial-gradient(ellipse at 8% 24%, #eee6fa 0, transparent 48%),
-              radial-gradient(ellipse at 95% 80%, #f1eaf8 0, transparent 46%), #faf7fd;
+  background: var(--background);
 }
 .ien-course-grid.ien-course-grid-glass {
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1602,7 +1601,7 @@ svg.ic { display: inline-block; vertical-align: middle; fill: none; stroke: curr
 .ien-footer { background: #211437; color: #f7f1ff; border-top: 1px solid #ffffff14; }
 .ien-footer-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, .8fr) minmax(0, 1.1fr); gap: clamp(2rem, 5vw, 5rem); padding-block: clamp(2.5rem, 6vw, 4.5rem); }
 .ien-footer-brand { display: inline-flex; align-items: center; gap: .625rem; color: white; font-size: 1.25rem; font-weight: 700; }
-.ien-footer-brand img { width: 44px; height: 44px; object-fit: contain; border-radius: 50%; box-shadow: 0 0 0 1px #ffffff26; }
+.ien-footer-brand img { width: 44px; height: 44px; object-fit: contain; border: 0; border-radius: 50%; background: transparent; filter: grayscale(1) invert(1) brightness(1.3); mix-blend-mode: screen; box-shadow: none; }
 .ien-footer-intro > p { max-width: 32ch; margin-top: 1rem; color: #d6cbe6; font-size: .875rem; line-height: 1.8; }
 .ien-footer h2 { margin-bottom: .5rem; font-size: .8125rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #ffde59; }
 .ien-footer-links, .ien-footer-contact { display: flex; flex-direction: column; align-items: start; gap: .65rem; }
