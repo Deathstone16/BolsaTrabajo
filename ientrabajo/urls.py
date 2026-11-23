@@ -26,6 +26,7 @@ from django.urls import re_path
 def deny_private_media(request, path=''):
     return HttpResponseNotFound()
 from . import views, error_pages
+from .health import health
 from usuarios.views import mi_perfil
 
 
@@ -35,6 +36,7 @@ handler404 = 'ientrabajo.error_pages.not_found'
 handler500 = 'ientrabajo.error_pages.server_error'
 
 urlpatterns = [
+    path('health/', health, name='health'),
     path('estado/servicio-no-disponible/', error_pages.unavailable, name='error_unavailable'),
     path('estado/tiempo-de-espera/', error_pages.timeout, name='error_timeout'),
     re_path(r'^media/(?:postulantes/cv|ia/extraction_snapshots)/.*$', deny_private_media),

@@ -56,7 +56,17 @@ class Command(BaseCommand):
             return event
 
     def _dispatch(self, event):
-        job = TrabajoExtraccion.objects.select_related('analisis_cv__postulante', 'oferta').get(pk=event.payload['job_id'])
+        job_id = event.payload['job_id']
+        try:
+            job = TrabajoExtraccion.objects.select_related('analisis_cv__postulante', 'oferta').get(pk=job_id)
+        except TrabajoExtraccion.DoesNotExist:
+            event.estado = EventoSalida.Estado.ERROR
+            event.error = f'No existe el trabajo de extracción {job_id}.'
+            event.proximo_intento_en = None
+            event.save(update_fields=['estado', 'error', 'proximo_intento_en', 'actualizado_en'])
+            self.stderr.write(f'Evento de extracción {event.pk}: {event.error}')
+            return
+
         try:
             headers = {
                 'Authorization': f'Bearer {settings.IA_API_TOKEN}',

@@ -250,7 +250,7 @@ test('E2E real: analizar CV, mostrar habilidades, calcular match y bloquear el C
   expect(status().soft_count).toBeGreaterThan(0);
   expect(status().cv_profile_schema).toBe('candidate-profile.v2');
   const extracted = status();
-  const allowedSoftSkills = ['Pensamiento crítico', 'Alfabetización en IA', 'Inteligencia emocional', 'Learnability',
+  const allowedSoftSkills = ['Pensamiento crítico', 'Alfabetización en IA', 'Inteligencia emocional', 'Capacidad de aprendizaje',
     'Comunicación', 'Colaboración', 'Adaptabilidad al cambio', 'Creatividad', 'Responsabilidad', 'Proactividad'];
   expect(extracted.soft_names.every(name => allowedSoftSkills.includes(name))).toBe(true);
   expect(extracted.soft_names.length).toBe(new Set(extracted.soft_names).size);
