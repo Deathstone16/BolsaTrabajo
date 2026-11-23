@@ -1,3 +1,5 @@
+.ien-landing-page { --background: #F8F3F0; }
+
 .ien-home {
   --landing-ink: #251a43;
   --landing-paper: #fffdf8;
@@ -55,6 +57,10 @@ body:has(.ien-home) #global-nav {
 .ien-home .ien-landing-companies { background: #f7efdf; border-top: 1px solid #251a431a; }
 .ien-home .ien-landing-companies .ien-step-number { background: #e7ddf6; }
 .ien-home .ien-landing-offers { background: #ebe5f7; }
+.ien-home .ien-home-courses-section {
+  background: radial-gradient(ellipse at 8% 24%, #eee6fa 0, transparent 48%),
+              radial-gradient(ellipse at 95% 80%, #f1eaf8 0, transparent 46%), #faf7fd;
+}
 .ien-home .ien-home-section-alt { border-color: #251a431a; }
 
 .ien-home .ien-section-title {
