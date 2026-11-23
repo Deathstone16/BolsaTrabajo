@@ -68,7 +68,6 @@ def solicitudes_empresas(request):
     return render(request, 'moderacion/solicitudes_empresas.html', {
         'pagina': Paginator(solicitudes, 10).get_page(request.GET.get('page')),
         'estado': estado,
-        'reminder_hours': settings.IEN_COMPANY_REMINDER_HOURS,
     })
 
 
