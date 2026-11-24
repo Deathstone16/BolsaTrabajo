@@ -1,0 +1,13 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+{% block extrahead %}{{ block.super }}<script src="{% static 'js/admin-cv-queue.js' %}" defer></script>{% endblock %}
+{% block content %}
+<div class="module" style="padding:16px;margin-bottom:20px">
+<h2>Seguimiento de análisis de CV</h2>
+<p><strong>{{ queue_pending }}</strong> pendientes de resolución · <strong>{{ queue_completed }}</strong> completados · <strong>{{ queue_failed }}</strong> con error (histórico).</p>
+<p>Los totales corresponden a la plataforma. La columna «Estado en IA» consulta el servicio y se actualiza cada 15 segundos, hasta 20 trabajos por página. Si IA no responde, se indica sin cambiar el trabajo.</p>
+<p>Durante la espera de cuota no hay una posición fija ni un tiempo de finalización garantizado. Las tareas de otros tipos no aparecen aquí.</p>
+<button type="button" id="cv-refresh">Actualizar estados</button> <span id="cv-checked" role="status"></span>
+</div>
+{{ block.super }}
+{% endblock %}
