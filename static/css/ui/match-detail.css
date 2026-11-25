@@ -50,90 +50,61 @@
 @media (max-width: 399px) { .match-dimensions { grid-template-columns: minmax(0, 1fr); } }
 
 /* ==========================================================================
-   Columna de cursos recomendados
-   Escritorio: las tarjetas actuales quedan a la izquierda (más angostas) y los
-   cursos acompañan el scroll a la derecha. Tablet/móvil: los cursos van justo
-   después del porcentaje, antes del detalle por requisito.
-   Colores: violeta profundo del hero IEN + amarillo "sun" del sistema.
+   Cursos recomendados (columna derecha del resultado)
+   Reutiliza la card del catálogo (.ien-course-card-glass, cursos/_cover.html).
+   Acá solo se define la grilla de dos columnas, el contenedor y la variante
+   compacta. Escritorio: columna sticky a la derecha. Tablet/móvil: va después
+   del porcentaje, antes del detalle por requisito.
    ========================================================================== */
-.match-layout { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "overview" "rail" "body"; column-gap: 2rem; }
+.match-layout { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "overview" "rail" "body"; column-gap: 1.5rem; }
 .match-layout:not(.has-course-rail) { grid-template-areas: "overview" "body"; }
 .match-layout > .match-overview { grid-area: overview; }
 .match-layout > .match-body { grid-area: body; min-width: 0; }
-.match-course-rail { grid-area: rail; }
+.match-layout > .match-course-rail { grid-area: rail; }
 
-.match-course-rail {
-  --rail-surface: #251441;
-  --rail-text: #f1eaf8;
-  --rail-muted: #c8b7e3;
-  --rail-line: rgba(241, 234, 248, .14);
+/* Contenedor: mismo panel de la plataforma, con el lila de las cards de curso
+   para separarlo de las tarjetas blancas de requisitos. */
+.ien-app-page .ien-page-content .match-course-rail {
   margin-top: 1.5rem;
-  padding: 1.5rem;
-  border-radius: 1.5rem;
-  background: radial-gradient(120% 60% at 100% 0%, rgba(255, 222, 89, .16), transparent 60%), var(--rail-surface);
-  color: var(--rail-text);
-  box-shadow: 0 24px 48px -28px rgba(37, 20, 65, .65);
+  padding: 1.25rem;
+  border-color: rgba(81, 45, 168, .2);
+  background: #ece3f8;
 }
-#course-recommendations .course-rail-head h2 { color: #fff; font-size: 1.25rem; line-height: 1.35; font-weight: 700; }
-.course-rail-head p { margin-top: .5rem; color: var(--rail-muted); font-size: .875rem; line-height: 1.6; }
+.course-rail-head p { margin-top: .375rem; color: var(--muted-foreground); font-size: .8125rem; line-height: 1.6; }
+.course-rail-list { display: grid; gap: .75rem; margin-top: 1rem; }
+/* En el catálogo la card mide hasta 26rem; acá ocupa el ancho de la columna. */
+.ien-app-page .ien-page-content .match-course-rail .ien-course-card { max-width: none; }
 
-.course-rail-list { display: grid; gap: .75rem; margin-top: 1.25rem; }
-.course-recommendation {
-  display: grid;
-  grid-template-columns: 3.5rem minmax(0, 1fr);
-  gap: .875rem;
-  padding: .875rem;
-  border: 1px solid var(--rail-line);
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, .04);
-}
-.course-rail-media { width: 3.5rem; height: 3.5rem; overflow: hidden; border-radius: .75rem; background: linear-gradient(135deg, #7856bd, #43218f); }
-.course-rail-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.course-rail-body { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: .5rem; }
-#course-recommendations .course-recommendation h3 { color: #fff; font-size: .9375rem; line-height: 1.4; font-weight: 600; overflow-wrap: anywhere; }
-.course-rail-meta { display: flex; flex-wrap: wrap; gap: .375rem; }
-.course-rail-meta span { padding: .125rem .5rem; border-radius: 9999px; background: rgba(241, 234, 248, .12); color: var(--rail-text); font-size: .75rem; line-height: 1.6; }
-.course-rail-gaps { display: grid; gap: .375rem; width: 100%; }
-.course-rail-gaps li { display: grid; gap: .1rem; padding-left: .625rem; border-left: 2px solid rgba(255, 222, 89, .55); font-size: .75rem; line-height: 1.5; }
-.course-rail-gaps li.gap-unknown { border-left-color: rgba(241, 234, 248, .35); }
-.course-rail-gaps strong { color: var(--rail-text); font-weight: 500; }
-.course-rail-gaps span { color: var(--rail-muted); }
-.course-rail-note { color: var(--rail-muted); font-size: .75rem; line-height: 1.5; }
+/* Lista de requisitos que refuerza: reutiliza .match-status para el estado. */
+.course-rail-gaps { width: 100%; margin-top: .75rem; }
+.course-rail-gaps > p { color: var(--muted-foreground); font-size: .75rem; font-weight: 600; }
+.course-rail-gaps ul { display: grid; gap: .5rem; margin-top: .375rem; }
+.course-rail-gaps li { display: grid; gap: .125rem; font-size: .8125rem; line-height: 1.45; }
+.course-rail-gaps strong { color: var(--foreground); font-weight: 500; }
+.course-rail-note { margin-top: .5rem; color: var(--muted-foreground); font-size: .75rem; line-height: 1.5; }
 
-/* El curso más específico: imagen grande y botón amarillo lleno. */
-.course-recommendation.is-featured { grid-template-columns: minmax(0, 1fr); padding: 0; overflow: hidden; border-color: rgba(255, 222, 89, .45); background: rgba(255, 255, 255, .06); }
-.course-recommendation.is-featured .course-rail-media { width: 100%; height: auto; aspect-ratio: 16 / 7; border-radius: 0; }
-.course-recommendation.is-featured .course-rail-body { padding: 0 1rem 1rem; gap: .625rem; }
-#course-recommendations .course-recommendation.is-featured h3 { font-size: 1.0625rem; }
-.course-recommendation.is-featured .btn-sun { width: 100%; margin-top: .25rem; padding: .7rem 1.25rem; font-size: .9375rem; }
+/* Curso destacado: la card del catálogo tal cual, con la acción a todo el ancho. */
+.course-recommendation.is-featured .ien-course-details { margin: .75rem 0; }
+.course-recommendation.is-featured .ien-course-card-action { width: 100%; }
 
-.course-rail-cta {
-  display: inline-flex; align-items: center; justify-content: center;
-  margin-top: .125rem; padding: .4rem 1rem; border: 1.5px solid var(--sun, #FFDE59); border-radius: 9999px;
-  color: var(--sun, #FFDE59); font-size: .8125rem; font-weight: 600; line-height: 1.4;
-  transition: background .2s ease, color .2s ease;
-}
-.course-rail-cta:hover { background: var(--sun, #FFDE59); color: var(--sun-foreground, #26222E); }
-.match-course-rail a:focus-visible { outline: 3px solid var(--sun, #FFDE59); outline-offset: 3px; }
+/* Variante compacta: misma card, con la portada como miniatura a la izquierda. */
+.ien-course-card.ien-course-card-glass.is-compact { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); }
+.is-compact .ien-course-card-media { padding: 0; }
+.is-compact .ien-course-cover { height: 100%; max-height: none; aspect-ratio: auto; }
+.is-compact .ien-course-card-body { margin-top: 0; padding: .875rem; border-top: 0; border-radius: 0; }
+.ien-course-card-glass.is-compact .ien-course-card-body h3 { font-size: .9375rem; }
+.course-rail-tags { margin-top: .25rem; color: #43218f; font-size: .75rem; line-height: 1.5; }
+.course-rail-tags span { margin-inline: .25rem; color: #c6bbd3; }
+.course-rail-action { min-height: 2.75rem; margin-top: .75rem; padding: .5rem 1rem; border-color: var(--primary); color: var(--primary); font-size: .8125rem; }
 
-.course-rail-empty { margin-top: 1rem; color: var(--rail-muted); font-size: .875rem; line-height: 1.6; }
-.course-rail-missing { margin-top: 1rem; color: var(--rail-muted); font-size: .8125rem; }
+.course-rail-empty { margin-top: 1rem; color: var(--muted-foreground); font-size: .875rem; line-height: 1.6; }
+.course-rail-missing { margin-top: 1rem; color: var(--muted-foreground); font-size: .8125rem; }
 .course-rail-missing summary { cursor: pointer; }
 .course-rail-missing ul { display: grid; gap: .25rem; margin-top: .5rem; padding-left: 1rem; list-style: disc; }
-.course-rail-catalog { display: inline-block; margin-top: 1rem; color: var(--rail-text); font-size: .8125rem; font-weight: 500; text-decoration: underline; text-underline-offset: .2rem; }
-.course-rail-catalog:hover { color: var(--sun, #FFDE59); }
-
-/* Una sola aparición al cargar, para que la vista vaya a los cursos. */
-@media (prefers-reduced-motion: no-preference) {
-  .match-course-rail { animation: course-rail-in .5s ease-out .15s both; }
-  @keyframes course-rail-in { from { opacity: 0; transform: translateY(.75rem); } to { opacity: 1; transform: none; } }
-}
+.course-rail-catalog { margin-top: 1rem; }
 
 @media (min-width: 1100px) {
-  .match-layout.has-course-rail {
-    grid-template-columns: minmax(0, 1fr) 21.5rem;
-    grid-template-areas: "overview rail" "body rail";
-  }
+  .match-layout.has-course-rail { grid-template-columns: minmax(0, 1fr) 22rem; grid-template-areas: "overview rail" "body rail"; }
   .match-layout.has-course-rail > .match-course-rail {
     align-self: start;
     position: sticky;
@@ -142,20 +113,18 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-width: thin;
-    scrollbar-color: rgba(241, 234, 248, .3) transparent;
   }
 }
 @media (min-width: 1100px) and (max-width: 1279px) {
   .match-layout.has-course-rail .match-dimensions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-@media (max-width: 767px) {
-  .match-course-rail { padding: 1.25rem; border-radius: 1.25rem; }
-}
 @media (min-width: 640px) and (max-width: 1099px) {
-  /* Ancho completo: dos columnas y el destacado en horizontal. */
   .course-rail-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .course-recommendation.is-featured { grid-column: 1 / -1; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
-  .course-recommendation.is-featured .course-rail-media { aspect-ratio: auto; height: 100%; min-height: 11rem; }
-  .course-recommendation.is-featured .course-rail-body { padding: 1rem 1rem 1rem 0; }
-  .course-recommendation.is-featured .btn-sun { width: auto; }
+  .course-rail-list > li:first-child { grid-column: 1 / -1; }
+  .ien-course-card.ien-course-card-glass.is-featured { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
+  .is-featured .ien-course-card-media { display: flex; flex-direction: column; padding: 0; }
+  .is-featured .ien-course-cover { flex: 1; height: auto; min-height: 10rem; max-height: none; aspect-ratio: auto; }
+  .is-featured .ien-course-card-tags { position: static; padding: .625rem 1rem; }
+  .is-featured .ien-course-card-body { margin-top: 0; border-top: 0; border-radius: 0; }
+  .course-recommendation.is-featured .ien-course-card-action { width: auto; }
 }

@@ -1,48 +1,57 @@
 {% comment %}
-Columna de cursos del resultado del match. En escritorio acompaña el scroll a la
-derecha; en pantallas chicas aparece justo después del porcentaje. El primer
-curso es el más específico (lo ordena course_recommendations) y se destaca.
+Cursos recomendados del resultado del match. Reutiliza la card de curso del
+catálogo (cursos/_card.html: ien-course-card-glass + cursos/_cover.html) para
+mantener el mismo lenguaje visual. El primer curso es el más específico
+(lo ordena course_recommendations) y va completo; los demás, en versión compacta.
 {% endcomment %}
 {% if course_recommendations.has_gaps %}
-<aside id="course-recommendations" class="match-course-rail" aria-labelledby="course-recommendations-title">
-  <div class="course-rail-head">
+<aside id="course-recommendations" class="panel match-course-rail" aria-labelledby="course-recommendations-title">
+  <header class="course-rail-head">
     <h2 id="course-recommendations-title">Cursos para reforzar tu perfil</h2>
     {% with total=course_recommendations.courses|length gaps=course_recommendations.gaps|length %}
-    {% if total %}
-    <p>{{ total }} curso{{ total|pluralize }} del IEN para {{ gaps }} requisito{{ gaps|pluralize }} que podés reforzar en esta oferta.</p>
-    {% endif %}
+    {% if total %}<p>{{ total }} curso{{ total|pluralize }} del IEN para {{ gaps }} requisito{{ gaps|pluralize }} que podés reforzar en esta oferta.</p>{% endif %}
     {% endwith %}
-  </div>
+  </header>
 
   {% if course_recommendations.courses %}
-  <ol class="course-rail-list">
+  <ul class="course-rail-list">
     {% for recommendation in course_recommendations.courses %}
     {% with course=recommendation.course %}
-    <li class="course-recommendation{% if forloop.first %} is-featured{% endif %}" data-course-id="{{ course.pk }}">
-      <div class="course-rail-media" aria-hidden="true">
-        {% if course.imagen %}<img src="{{ course.imagen.url }}" alt="" loading="lazy" decoding="async">{% endif %}
-      </div>
-      <div class="course-rail-body">
-        <h3>{{ course.nombre }}</h3>
-        <p class="course-rail-meta">
-          <span>{{ course.get_tipo_display }}</span>
-          {% if course.duracion %}<span>{{ course.duracion }}</span>{% endif %}
-        </p>
-        <ul class="course-rail-gaps" aria-label="Requisitos que refuerza">
-          {% for gap in recommendation.gaps %}
-          <li class="gap-{{ gap.status }}">
-            <strong>{{ gap.name }}</strong>
-            <span>{% if gap.status == 'unknown' %}Sin información suficiente en el CV{% elif gap.status == 'partial' %}Coincidencia parcial{% else %}Requisito por reforzar{% endif %}</span>
-          </li>
-          {% endfor %}
-        </ul>
-        {% if recommendation.match_type == 'related' %}<p class="course-rail-note">Opción general del área: revisá el temario.</p>{% endif %}
-        <a href="{% url 'cursos:detalle' course.pk %}" class="{% if forloop.first %}btn-sun{% else %}course-rail-cta{% endif %}" aria-label="Ver curso: {{ course.nombre }}">Ver curso</a>
-      </div>
+    <li>
+      <article class="panel ien-course-card ien-course-card-glass course-recommendation {% if forloop.first %}is-featured{% else %}is-compact{% endif %}" data-course-id="{{ course.pk }}">
+        <div class="ien-course-card-media">
+          {% include 'cursos/_cover.html' with curso=course only %}
+          {% if forloop.first %}
+          <p class="ien-course-card-tags">
+            <span><span data-icon="graduation-cap" class="inline h-4 w-4" aria-hidden="true"></span> {{ course.categoria.nombre }}</span>
+            <span>{{ course.get_tipo_display }}</span>
+          </p>
+          {% endif %}
+        </div>
+        <div class="ien-course-card-body">
+          <h3>{{ course.nombre }}</h3>
+          {% if not forloop.first %}<p class="course-rail-tags">{{ course.get_tipo_display }}{% if course.duracion %} <span aria-hidden="true">|</span> {{ course.duracion }}{% endif %}</p>{% endif %}
+          <div class="course-rail-gaps">
+            <p>Refuerza en esta oferta</p>
+            <ul>
+              {% for gap in recommendation.gaps %}
+              <li><strong>{{ gap.name }}</strong><span class="match-status {{ gap.status }}">{% if gap.status == 'unknown' %}Sin información suficiente en el CV{% elif gap.status == 'partial' %}Coincidencia parcial{% else %}Requisito por reforzar{% endif %}</span></li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% if recommendation.match_type == 'related' %}<p class="course-rail-note">Opción general del área: revisá si el temario lo cubre.</p>{% endif %}
+          {% if forloop.first %}
+          {% if course.duracion %}<dl class="ien-course-details"><div><dt><span data-icon="clock" class="inline h-4 w-4" aria-hidden="true"></span> Duración</dt><dd>{{ course.duracion }}</dd></div></dl>{% endif %}
+          <a href="{% url 'cursos:detalle' course.pk %}" class="btn-ien ien-course-card-action" aria-label="Ver curso: {{ course.nombre }}">Ver curso <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+          {% else %}
+          <a href="{% url 'cursos:detalle' course.pk %}" class="btn-ghost course-rail-action" aria-label="Ver curso: {{ course.nombre }}">Ver curso</a>
+          {% endif %}
+        </div>
+      </article>
     </li>
     {% endwith %}
     {% endfor %}
-  </ol>
+  </ul>
   {% else %}
   <p class="course-rail-empty">{% if course_recommendations.no_catalog %}Todavía no hay cursos activos en el catálogo.{% else %}No encontramos cursos del catálogo relacionados con estos requisitos.{% endif %}</p>
   {% endif %}
@@ -54,6 +63,6 @@ curso es el más específico (lo ordena course_recommendations) y se destaca.
   </details>
   {% endif %}
 
-  <a href="{% url 'cursos:listado' %}" class="course-rail-catalog">Ver el catálogo completo de cursos</a>
+  <a href="{% url 'cursos:listado' %}" class="ien-text-link course-rail-catalog">Ver todos los cursos <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
 </aside>
 {% endif %}
