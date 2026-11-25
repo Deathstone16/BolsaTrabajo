@@ -12,6 +12,7 @@
   <h1>Detalles del match</h1>
 
   {% if match.estado == 'completed' %}
+  <div class="match-layout{% if course_recommendations.has_gaps %} has-course-rail{% endif %}">
   <div class="match-overview">
     <div class="panel match-score">
       <h2>Compatibilidad con la oferta</h2>
@@ -29,6 +30,9 @@
     </div>
   </div>
 
+  {% include 'matching/_cursos_recomendados.html' %}
+
+  <div class="match-body">
   <section class="match-section" aria-labelledby="match-dimensions-title">
     <h2 id="match-dimensions-title">Compatibilidad por área</h2>
     <p>El resultado de cada área y su peso en la configuración de esta evaluación.</p>
@@ -65,48 +69,13 @@
   </section>
   {% endfor %}
 
-  {% if course_recommendations.has_gaps %}
-  <section id="course-recommendations" class="match-section" aria-labelledby="course-recommendations-title">
-    <h2 id="course-recommendations-title">Cursos para reforzar tu perfil</h2>
-    <p>Opciones del catálogo para los requisitos que podés reforzar en esta evaluación. Para cada requisito se priorizan los cursos más específicos.</p>
-    {% if course_recommendations.courses %}
-    <div class="match-courses">
-      {% for recommendation in course_recommendations.courses %}
-      <article class="panel course-recommendation" data-course-id="{{ recommendation.course.pk }}">
-        <span class="match-course-context">{% if recommendation.match_type == 'related' %}Opción general del área{% else %}Relacionado con el requisito{% endif %}</span>
-        <h3>{{ recommendation.course.nombre }}</h3>
-        <p>{{ recommendation.reason }}</p>
-        <ul>
-          {% for gap in recommendation.gaps %}
-          <li><strong>{{ gap.name }}</strong><span>{% if gap.status == 'unknown' %}Sin información suficiente en el CV{% elif gap.status == 'partial' %}Coincidencia parcial{% else %}Requisito por reforzar{% endif %}</span></li>
-          {% endfor %}
-        </ul>
-        <dl class="match-course-facts">
-          <div><dt>Categoría</dt><dd>{{ recommendation.course.categoria.nombre }}</dd></div>
-          <div><dt>Modalidad</dt><dd>{{ recommendation.course.get_tipo_display }}</dd></div>
-          {% if recommendation.course.duracion %}<div><dt>Duración</dt><dd>{{ recommendation.course.duracion }}</dd></div>{% endif %}
-        </dl>
-        <a href="{% url 'cursos:detalle' recommendation.course.pk %}" class="btn-ien" aria-label="Ver curso: {{ recommendation.course.nombre }}">Ver curso <span aria-hidden="true">→</span></a>
-      </article>
-      {% endfor %}
-    </div>
-    {% else %}
-    <div class="panel match-summary">
-      {% if course_recommendations.no_catalog %}<p>Todavía no hay cursos activos en el catálogo.</p>{% else %}<p>No encontramos cursos del catálogo relacionados con estos requisitos.</p>{% endif %}
-      <a href="{% url 'cursos:listado' %}" class="btn-ghost mt-4">Explorar cursos</a>
-    </div>
-    {% endif %}
-    {% for gap in course_recommendations.gaps %}
-      {% if not gap.courses %}<p class="match-empty">{{ gap.name }}: sin un curso relacionado disponible por el momento.</p>{% endif %}
-    {% endfor %}
-  </section>
-  {% endif %}
-
   <aside class="panel match-footnote">
     <strong>Cómo interpretar este resultado</strong><br>
     La evaluación usa las versiones de tu perfil y de la oferta guardadas al solicitar el match. Un requisito obligatorio se evalúa como tal independientemente de su peso.
     {% if match.confidence_percentage != None %}<br>Confianza estimada de la evaluación: {{ match.confidence_percentage|floatformat:0 }}%.{% else %}<br>Esta evaluación no incluye una estimación de confianza cuantificada.{% endif %}
   </aside>
+  </div>
+  </div>
   {% else %}
   <div class="panel match-summary" role="status">
     {% if match.estado == 'cancelled' %}<h2>Cancelaste este match</h2><p>Podés volver a calcular tu compatibilidad desde la oferta.</p>{% elif match.estado == 'error' %}<h2>No se pudo completar el match</h2><p>{{ match.error }}</p>{% else %}<h2>El resultado todavía no está listo</h2><p>Volvé a la oferta para consultar el estado del cálculo.</p>{% endif %}
