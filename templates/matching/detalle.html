@@ -12,7 +12,6 @@
   <h1>Detalles del match</h1>
 
   {% if match.estado == 'completed' %}
-  <div class="match-layout{% if course_recommendations.has_gaps %} has-course-rail{% endif %}">
   <div class="match-overview">
     <div class="panel match-score">
       <h2>Compatibilidad con la oferta</h2>
@@ -32,7 +31,6 @@
 
   {% include 'matching/_cursos_recomendados.html' %}
 
-  <div class="match-body">
   <section class="match-section" aria-labelledby="match-dimensions-title">
     <h2 id="match-dimensions-title">Compatibilidad por área</h2>
     <p>El resultado de cada área y su peso en la configuración de esta evaluación.</p>
@@ -74,8 +72,6 @@
     La evaluación usa las versiones de tu perfil y de la oferta guardadas al solicitar el match. Un requisito obligatorio se evalúa como tal independientemente de su peso.
     {% if match.confidence_percentage != None %}<br>Confianza estimada de la evaluación: {{ match.confidence_percentage|floatformat:0 }}%.{% else %}<br>Esta evaluación no incluye una estimación de confianza cuantificada.{% endif %}
   </aside>
-  </div>
-  </div>
   {% else %}
   <div class="panel match-summary" role="status">
     {% if match.estado == 'cancelled' %}<h2>Cancelaste este match</h2><p>Podés volver a calcular tu compatibilidad desde la oferta.</p>{% elif match.estado == 'error' %}<h2>No se pudo completar el match</h2><p>{{ match.error }}</p>{% else %}<h2>El resultado todavía no está listo</h2><p>Volvé a la oferta para consultar el estado del cálculo.</p>{% endif %}
