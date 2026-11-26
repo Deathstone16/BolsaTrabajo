@@ -12,6 +12,14 @@ class TechnicalAdminAuthenticationForm(AdminAuthenticationForm):
 
 
 class TechnicalAdminSite(AdminSite):
+    def get_urls(self):
+        from django.urls import path
+        from ia.token_monitor import monitor_data, monitor_page
+        return [
+            path('ia-tokens/', self.admin_view(lambda request: monitor_page(self, request)), name='ia_tokens'),
+            path('ia-tokens/datos/', self.admin_view(monitor_data), name='ia_tokens_data'),
+        ] + super().get_urls()
+
     site_header = 'Administración técnica de IEN Trabajo'
     site_title = 'Administración técnica'
     login_form = TechnicalAdminAuthenticationForm

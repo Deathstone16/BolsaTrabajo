@@ -1,5 +1,5 @@
 {% extends "admin/index.html" %}
 {% block content %}
-<div class="module"><h2>Monitoreo de IA</h2><p style="padding:12px"><a href="{% url 'admin:ia_trabajoextraccion_changelist' %}">Abrir cola de CV →</a></p></div>
+<div class="module"><h2>Monitoreo de IA</h2><p style="padding:12px"><a href="{% url 'admin:ia_trabajoextraccion_changelist' %}">Abrir cola de CV →</a> · <a href="{% url 'admin:ia_tokens' %}">Ver consumo de tokens →</a></p></div>
 {{ block.super }}
 {% endblock %}

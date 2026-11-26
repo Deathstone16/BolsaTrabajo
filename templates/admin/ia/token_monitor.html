@@ -1,0 +1,21 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin-token-monitor.css' %}">{% endblock %}
+{% block extrahead %}{{ block.super }}<script src="{% static 'js/admin-token-monitor.js' %}" defer></script>{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="{% url 'admin:index' %}">Inicio</a> › Consumo de tokens</div>{% endblock %}
+{% block content %}
+<div id="token-monitor" data-url="{% url 'admin:ia_tokens_data' %}">
+<div class="token-toolbar"><p>Consumo registrado por esta API · 24 bloques horarios recientes</p><button id="token-refresh" type="button">Actualizar</button></div>
+<p id="token-state" role="status">Consultando consumo…</p>
+<div class="token-cards">
+<div><span>Total informado</span><strong id="tokens-total">—</strong><small>Tokens del proveedor, incluidos sus reintentos</small></div>
+<div><span>Entrada</span><strong id="tokens-input">—</strong><small>Tokens de entrada informados</small></div>
+<div><span>Salida</span><strong id="tokens-output">—</strong><small>Puede excluir razonamiento según el proveedor</small></div>
+<div><span>Llamadas / errores</span><strong id="tokens-requests">—</strong><small id="tokens-coverage">Sin datos todavía</small></div>
+</div>
+<div class="module token-section"><h2>Consumo por hora</h2><div id="token-chart" class="token-chart" aria-label="Tokens informados por hora"></div><p class="token-note">Los horarios se muestran en la zona horaria de tu navegador. Entrada, salida y total pueden diferir por razonamiento o caché.</p></div>
+<div class="module token-section"><h2>Proveedores y modelos</h2><div class="token-scroll"><table><thead><tr><th>Proveedor / modelo</th><th>Entrada</th><th>Salida</th><th>Total informado</th><th>Llamadas</th><th>Errores</th><th>Respuestas con uso</th></tr></thead><tbody id="token-models"></tbody></table></div></div>
+<div class="module token-section"><h2>Cuotas y pausas actuales</h2><p class="token-note">Gemini: reservas locales; la entrada puede ser estimada. Groq: último remanente informado, mientras siga vigente. Las claves pueden compartir límites de cuenta; no se suman como capacidad independiente.</p><div class="token-scroll"><table><thead><tr><th>Ruta</th><th>Solicitudes / minuto</th><th>Entrada / minuto</th><th>Solicitudes / 24 h</th><th>Remanente informado</th><th>Pausa</th></tr></thead><tbody id="token-routes"></tbody></table></div></div>
+<p class="token-note" id="token-started"></p><p class="token-note">No incluye tráfico externo ni consumo anterior a la activación del registro. Una respuesta sin datos de uso no se considera consumo cero. Esta vista no consulta saldos ni facturación.</p>
+</div>
+{% endblock %}
