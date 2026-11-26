@@ -27,10 +27,10 @@
 .match-unused ul { display: grid; gap: .75rem; margin-top: 1rem; }
 .match-unused li { display: flex; flex-wrap: wrap; align-items: baseline; gap: .35rem 1rem; color: #756a84; font-size: .8125rem; }
 .match-unused li strong { color: #514761; font-weight: 500; }
-.match-requirements, .match-courses { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1rem; }
-.match-requirement, .course-recommendation { padding: 1.5rem; }
+.match-requirements { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1rem; }
+.match-requirement { padding: 1.5rem; }
 .match-requirement header { display: flex; flex-direction: column; align-items: flex-start; gap: .5rem; }
-.match-requirement h3, .course-recommendation h3 { color: #251a43; font-size: 1rem; font-weight: 600; line-height: 1.5; }
+.match-requirement h3 { color: #251a43; font-size: 1rem; font-weight: 600; line-height: 1.5; }
 .match-requirement p { margin-top: .875rem; color: #595367; font-size: .875rem; line-height: 1.8; }
 .match-requirement p strong { color: #756a84; font-size: .8125rem; font-weight: 500; }
 .match-status { padding-left: .6rem; border-left: 2px solid currentColor; font-size: .75rem; line-height: 1.5; color: #756a84; }
@@ -38,23 +38,42 @@
 .match-status.partial { color: #946d19; }
 .match-status.not_met { color: #a54255; }
 .match-status.unknown { color: #756a84; }
-.course-recommendation { display: flex; flex-direction: column; align-items: flex-start; gap: 1rem; }
-.match-course-context { color: #756a84; font-size: .75rem; }
-.course-recommendation p, .course-recommendation li { color: #595367; font-size: .8125rem; line-height: 1.7; }
-.course-recommendation ul { width: 100%; display: grid; gap: .75rem; }
-.course-recommendation li { display: grid; gap: .2rem; padding-left: .75rem; border-left: 2px solid #ded2ec; }
-.course-recommendation li strong { color: #514761; font-weight: 500; }
-.match-course-facts { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; padding-top: 1rem; border-top: 1px solid #e5ddec; width: 100%; }
-.match-course-facts dt { margin-bottom: .25rem; color: #756a84; font-size: .75rem; }
-.match-course-facts dd { color: #514761; font-size: .8125rem; font-weight: 500; }
-.course-recommendation .btn-ien { margin-top: auto; font-size: .875rem; }
 .match-footnote { margin-top: 2rem; padding: 1.25rem 1.5rem; color: #756a84; font-size: .8125rem; line-height: 1.8; }
 .match-footnote strong { display: inline-block; margin-bottom: .3rem; color: #514761; font-weight: 600; }
 .match-page > [role="status"] { margin-top: 1.5rem; }
 @media (max-width: 959px) { .match-dimensions { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 767px) {
   .match-page { padding: 1.5rem 1rem 3rem; }
-  .match-overview, .match-requirements, .match-courses { grid-template-columns: minmax(0, 1fr); }
-  .match-score, .match-summary, .match-requirement, .course-recommendation { padding: 1.25rem; }
+  .match-overview, .match-requirements { grid-template-columns: minmax(0, 1fr); }
+  .match-score, .match-summary, .match-requirement { padding: 1.25rem; }
 }
 @media (max-width: 399px) { .match-dimensions { grid-template-columns: minmax(0, 1fr); } }
+
+/* ==========================================================================
+   Cursos recomendados: sección entre el porcentaje y las áreas.
+   Mismo estilo minimalista que las tarjetas de requisitos.
+   ========================================================================== */
+.match-courses { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-top: 1rem; }
+.match-course-heading { display: flex; align-items: center; gap: .75rem; }
+.match-course-icon { display: inline-grid; place-items: center; width: 2.5rem; height: 2.5rem; flex: none; border-radius: 9999px; background: var(--primary); color: #fff; }
+.match-course { display: flex; flex-direction: column; align-items: flex-start; padding: 1.5rem; }
+/* Se distinguen de las tarjetas de requisitos: franja y borde violeta, fondo lila suave. */
+.ien-app-page .ien-page-content .match-course { border-color: rgba(81, 45, 168, .32); border-top: 4px solid var(--primary); background: #f8f4fd; }
+.match-course h3 { color: #251a43; font-size: 1rem; font-weight: 600; line-height: 1.5; }
+.match-course-meta { margin-top: .25rem; color: #756a84; font-size: .8125rem; line-height: 1.6; }
+.match-course-gaps { display: grid; gap: .625rem; width: 100%; margin-top: 1rem; }
+.match-course-gaps li { display: grid; gap: .25rem; }
+.match-course-gaps strong { color: #514761; font-size: .875rem; font-weight: 500; line-height: 1.5; }
+.match-course-note { margin-top: .75rem; color: #756a84; font-size: .75rem; line-height: 1.6; }
+.match-course-action { margin-top: auto; }
+.match-course .match-course-action { margin-top: auto; padding: .55rem 1.1rem; font-size: .875rem; }
+.match-course-gaps { margin-bottom: 1.25rem; }
+.match-course-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1.5rem; margin-top: 1rem; }
+.match-course-missing { color: #756a84; font-size: .8125rem; }
+.match-course-missing summary { cursor: pointer; }
+.match-course-missing ul { display: grid; gap: .25rem; margin-top: .5rem; padding-left: 1rem; list-style: disc; }
+@media (max-width: 959px) { .match-courses { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 767px) {
+  .match-courses { grid-template-columns: minmax(0, 1fr); }
+  .match-course { padding: 1.25rem; }
+}

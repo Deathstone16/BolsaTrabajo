@@ -68,10 +68,12 @@ def detalle_compatibilidad(request, request_id):
     mandatory_labels = {'all_met': 'Se cumplen los requisitos obligatorios',
                         'not_met': 'Hay requisitos obligatorios que no se cumplen',
                         'unknown': 'Falta información para confirmar los requisitos obligatorios'}
+    course_recommendations = recommend_courses_for_match(match)
     return render(request, 'matching/detalle.html', {
         'vista_activa': 'buscar', 'match': match, 'result': result,
         'groups': groups, 'breakdown': breakdown,
         'unused_dimensions': [dimension for dimension in breakdown if not dimension['applicable']],
-        'course_recommendations': recommend_courses_for_match(match),
+        'course_recommendations': course_recommendations,
+        'gaps_without_course': [gap for gap in course_recommendations['gaps'] if not gap['courses']],
         'mandatory_label': mandatory_labels.get(result.get('mandatory_status'), 'Sin requisitos obligatorios'),
     })
