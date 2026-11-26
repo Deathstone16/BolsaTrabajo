@@ -39,3 +39,35 @@ class AuthFlowRegressionTests(TestCase):
         response=self.client.get(reverse('login'))
         self.assertRedirects(response,reverse('home'),fetch_redirect_response=False)
         self.assertIn('no-store',response['Cache-Control'])
+
+    def test_repeated_same_form_returns_confirmation_instead_of_duplicate_error(self):
+        page=self.client.get(reverse('registro')+'?tipo=oferente')
+        data={**self.company_data(), 'registration_attempt':page.context['registration_attempt']}
+        first=self.client.post(reverse('registro')+'?tipo=oferente',data)
+        second=self.client.post(reverse('registro')+'?tipo=oferente',data)
+        self.assertEqual(first.status_code,302)
+        self.assertEqual(second.status_code,302)
+        self.assertEqual(first.url,second.url)
+        self.assertEqual(Usuario.objects.filter(email=data['email']).count(),1)
+        another_page=self.client.get(reverse('registro')+'?tipo=oferente')
+        different={**data,'registration_attempt':another_page.context['registration_attempt']}
+        response=self.client.post(reverse('registro')+'?tipo=oferente',different)
+        self.assertEqual(response.status_code,200)
+        self.assertContains(response,'Este correo ya tiene una cuenta.')
+
+    def test_retry_cannot_claim_success_with_different_password(self):
+        page=self.client.get(reverse('registro')+'?tipo=oferente')
+        data={**self.company_data(),'registration_attempt':page.context['registration_attempt']}
+        self.client.post(reverse('registro')+'?tipo=oferente',data)
+        response=self.client.post(reverse('registro')+'?tipo=oferente',{**data,'password1':'Another-strong-93!','password2':'Another-strong-93!'})
+        self.assertEqual(response.status_code,200)
+        self.assertContains(response,'Este correo ya tiene una cuenta.')
+
+    def test_retry_cache_failure_does_not_break_successful_registration(self):
+        from unittest.mock import patch
+        page=self.client.get(reverse('registro')+'?tipo=oferente')
+        data={**self.company_data(),'registration_attempt':page.context['registration_attempt']}
+        with patch('usuarios.registration_attempts.cache.set',side_effect=RuntimeError('cache unavailable')):
+            response=self.client.post(reverse('registro')+'?tipo=oferente',data)
+        self.assertEqual(response.status_code,302)
+        self.assertTrue(Usuario.objects.filter(email=data['email']).exists())

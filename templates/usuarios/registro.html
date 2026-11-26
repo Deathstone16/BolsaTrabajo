@@ -35,6 +35,7 @@
 
       <form method="POST" action="{% url 'registro' %}?tipo={{ tipo }}" data-auth-form data-submit-label="Creando cuenta…" class="mt-6 space-y-4">
         {% csrf_token %}
+        <input type="hidden" name="registration_attempt" value="{{ registration_attempt }}">
 
         <div class="grid grid-cols-2 gap-4">
           {% include 'usuarios/_form_fields.html' %}

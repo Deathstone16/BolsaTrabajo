@@ -21,6 +21,7 @@ from .forms import (
 from .decorators import postulante_required, oferente_required
 from .models import Oferente
 from . import services
+from .registration_attempts import completed_retry, form_token, remember_success
 from .uploads import cv_enabled_formats
 from django.views.decorators.http import require_POST
 
@@ -29,13 +30,15 @@ from django.views.decorators.http import require_POST
 @never_cache
 def registro(request):
     """Registra postulantes u oferentes según el rol elegido."""
-    tipo = request.GET.get('tipo', 'postulante')
+    tipo = 'oferente' if request.GET.get('tipo') == 'oferente' else 'postulante'
     FormClass = RegistroOferenteForm if tipo == 'oferente' else RegistroPostulanteForm
     if request.method == 'POST':
+        if completed_retry(request, tipo):
+            return redirect(reverse('registro_exitoso') + ('?tipo=oferente' if tipo == 'oferente' else ''))
         form = FormClass(request.POST)
         if form.is_valid():
             if tipo == 'oferente':
-                services.registrar_oferente(
+                user = services.registrar_oferente(
                     email=form.cleaned_data['email'],
                     password=form.cleaned_data['password1'],
                     nombre_empresa=form.cleaned_data['nombre_empresa'],
@@ -45,18 +48,19 @@ def registro(request):
                     correo_publico=form.cleaned_data['correo_publico'],
                 )
             else:
-                services.registrar_postulante(
+                user = services.registrar_postulante(
                     email=form.cleaned_data['email'],
                     password=form.cleaned_data['password1'],
                     first_name=form.cleaned_data['first_name'],
                     last_name=form.cleaned_data['last_name'],
                 )
+            remember_success(request, tipo, user)
             if tipo == 'oferente':
                 return redirect(reverse('registro_exitoso') + '?tipo=oferente')
             return redirect('registro_exitoso')
     else:
         form = FormClass()
-    return render(request, 'usuarios/registro.html', {'form': form, 'tipo': tipo})
+    return render(request, 'usuarios/registro.html', {'form': form, 'tipo': tipo, 'registration_attempt': form_token(request, tipo)})
     
     
     
