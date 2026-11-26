@@ -13,6 +13,8 @@ from django.utils import timezone
 from ien_contracts.models import CandidateProfile, JobOffer
 from ien_contracts.utils import content_hash
 
+from .cv_outbox import ensure_cv_dispatch_event
+
 from .models import (
     AnalisisCV,
     CVVersion,
@@ -113,13 +115,7 @@ def request_cv_extraction(postulante) -> tuple[AnalisisCV, TrabajoExtraccion, bo
     if job_created:
         with version.archivo.open('rb') as cv_file:
             job.cv_snapshot.save(f'{version.sha256}.{version.formato}', File(cv_file), save=True)
-    EventoSalida.objects.get_or_create(
-        clave_idempotencia=f"outbox:{key}",
-        defaults={
-            "tipo": EventoSalida.Tipo.EXTRAER_CV,
-            "payload": {"job_id": job.pk},
-        },
-    )
+    ensure_cv_dispatch_event(job)
     profile, _ = PerfilCV.objects.get_or_create(postulante=postulante, defaults={"estado": EstadoPerfil.PENDIENTE})
     if analysis.estado != AnalisisCV.Estado.COMPLETADO and profile.estado != EstadoPerfil.PROCESANDO:
         profile.estado = EstadoPerfil.PENDIENTE
