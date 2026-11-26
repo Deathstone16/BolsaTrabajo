@@ -5,7 +5,10 @@ minimalista que las de requisitos (.panel + .match-status).
 {% endcomment %}
 {% if course_recommendations.has_gaps %}
 <section id="course-recommendations" class="match-section" aria-labelledby="course-recommendations-title">
-  <h2 id="course-recommendations-title">Cursos para reforzar tu perfil</h2>
+  <div class="match-course-heading">
+    <span class="match-course-icon" aria-hidden="true"><span data-icon="graduation-cap" class="h-5 w-5"></span></span>
+    <h2 id="course-recommendations-title">Cursos para reforzar tu perfil</h2>
+  </div>
   {% with total=course_recommendations.courses|length gaps=course_recommendations.gaps|length %}
   <p>{% if total %}{{ total }} curso{{ total|pluralize }} del IEN para {{ gaps }} requisito{{ gaps|pluralize }} que podés reforzar en esta oferta.{% elif course_recommendations.no_catalog %}Todavía no hay cursos activos en el catálogo.{% else %}No encontramos cursos del catálogo relacionados con estos requisitos.{% endif %}</p>
   {% endwith %}
@@ -23,7 +26,7 @@ minimalista que las de requisitos (.panel + .match-status).
         {% endfor %}
       </ul>
       {% if recommendation.match_type == 'related' %}<p class="match-course-note">Opción general del área: revisá si el temario lo cubre.</p>{% endif %}
-      <a href="{% url 'cursos:detalle' course.pk %}" class="ien-text-link match-course-action" aria-label="Ver curso: {{ course.nombre }}">Ver curso <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
+      <a href="{% url 'cursos:detalle' course.pk %}" class="btn-ien match-course-action" aria-label="Ver curso: {{ course.nombre }}">Ver curso <span data-icon="arrow-right" class="h-4 w-4" aria-hidden="true"></span></a>
     </article>
     {% endwith %}
     {% endfor %}
