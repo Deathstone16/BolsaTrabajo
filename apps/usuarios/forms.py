@@ -45,6 +45,7 @@ class RegistroBaseForm(UserCreationForm):
     class Meta:
         model = Usuario
         fields = ['email', 'password1', 'password2']
+        error_messages = {'email': {'unique': 'Este correo ya tiene una cuenta. Iniciá sesión o recuperá tu contraseña.'}}
 
 
 class RegistroPostulanteForm(RegistroBaseForm):
@@ -95,6 +96,7 @@ class LoginForm(forms.Form):
     email = forms.EmailField(label='Email')
     password = forms.CharField(
         label='Contraseña',
+        strip=False,
         widget=forms.PasswordInput()
     )
     

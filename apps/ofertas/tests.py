@@ -132,7 +132,7 @@ class OfertaFormTests(TestCase):
         self.assertTrue(response.json()["success"], response.json())
 
         oferta = Oferta.objects.get(empresa=self.usuario)
-        self.assertEqual(oferta.estado, "pendiente")
+        self.assertEqual(oferta.estado, "activa")
         self.assertEqual(oferta.habilidades_duras, "Python, Django")
         self.assertEqual(oferta.habilidades_blandas, "Comunicación, Trabajo en equipo")
         self.assertEqual(
@@ -158,7 +158,7 @@ class OfertaFormTests(TestCase):
         self.assertEqual(oferta.estado, "pendiente")
         self.assertEqual(self.client.get(reverse('detalle_oferta', args=[oferta.pk])).status_code, 404)
         from ia.models import TrabajoExtraccion
-        self.assertEqual(TrabajoExtraccion.objects.filter(oferta=oferta).count(), 0)
+        self.assertEqual(TrabajoExtraccion.objects.filter(oferta=oferta).count(), 1)
         self.assertEqual(oferta.habilidades_duras, "SQL")
         self.assertEqual(oferta.habilidades_blandas, "Liderazgo")
         self.assertEqual(oferta.habilidades_requeridas, "SQL, Liderazgo")

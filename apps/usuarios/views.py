@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.urls import reverse
 from django.views.decorators.http import require_POST
+from django.views.decorators.cache import never_cache
 from ia.profile_skills import split_profile_skills
 
 from .forms import (
@@ -25,6 +26,7 @@ from django.views.decorators.http import require_POST
 
 
 #vistas
+@never_cache
 def registro(request):
     """Registra postulantes u oferentes según el rol elegido."""
     tipo = request.GET.get('tipo', 'postulante')
@@ -61,6 +63,7 @@ def registro(request):
     
 
 
+@never_cache
 def registro_exitoso(request):
     """Confirma el alta y explica la revisión pendiente de las empresas."""
     if request.GET.get('tipo') == 'oferente':
@@ -80,8 +83,11 @@ def registro_exitoso(request):
     })
 
 
+@never_cache
 def login_view(request):
     """Autentica al usuario y redirige hacia su pantalla correspondiente."""
+    if request.method == 'GET' and request.user.is_authenticated:
+        return redirect('dashboard_empresa' if services.es_oferente(request.user) else 'home')
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():

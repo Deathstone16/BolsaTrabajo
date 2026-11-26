@@ -33,7 +33,7 @@
         </section>
       {% endif %}
 
-      <form method="POST" class="mt-6 space-y-4">
+      <form method="POST" action="{% url 'registro' %}?tipo={{ tipo }}" data-auth-form data-submit-label="Creando cuenta…" class="mt-6 space-y-4">
         {% csrf_token %}
 
         <div class="grid grid-cols-2 gap-4">
